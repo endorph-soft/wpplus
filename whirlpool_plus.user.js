@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.4
+// @version			4.5.5
 // @include			http://forums.whirlpool.net.au/*
 // @include			https://forums.whirlpool.net.au/*
 // @include			http://bc.whirlpool.net.au/*
@@ -80,16 +80,17 @@
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.4',
+	version : '4.5.5',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 12,
+	storageVersion : 13,
 	
 	//Script changelog
 	_changelog : {
+		'4.5.5' : '<ul><li>Fixed image embedding bug</li></ul>',
 		'4.5.4' : '<ul><li>Yet More bugfixes</li></ul>',
 		'4.5.3' : '<ul><li>More bugfixes</li><li>Script resources included inline</li></ul>',
 		'4.5.2' : '<ul><li>Fixed jQuery issue</li></ul>',
@@ -107,7 +108,7 @@ var WhirlpoolPlus = {
 	},
 	
 	//Feature spotlight for this version (can be left blank)
-	_spotlight : '', //'<p>Did you know that Whirlpool Plus includes a sidebar chatbox? If you\'re interested, it can be enabled in WP+ Settings &gt; Forum Display &gt; Sidebar Chatbox.</p>',
+	_spotlight : '<p>Here are some more useful Whirlpool userscripts: <a href="http://whrl.pl/RdzH8d">http://whrl.pl/RdzH8d</a>, <a href="http://whrl.pl/RdAoQZ">http://whrl.pl/RdAoQZ</a> </p>',
 	
 	//Current page url
 	url : document.location.href,
@@ -376,209 +377,7 @@ var WhirlpoolPlus = {
 			case false:
 				//New install, or upgrade version 4.4.x to 4.5.0
 				
-				//Functions to access old settings
-				
-				function getOldSetting(key, defaultVal){
-					if(typeof $.browser['mozilla'] == 'undefined'){
-						var value = unsafeWindow.localStorage.getItem(key);
-						if(value == null){
-							value = defaultVal;
-						}
-						return value;
-					}else{		
-						return GM_getValue(key, defaultVal);
-					}
-				}
-				
-				function getListOfOldSettings(){
-					if(typeof $.browser['mozilla'] == 'undefined'){
-						var settingsArray = [];
-						
-						for(i = 0; i < unsafeWindow.localStorage.length; i++){
-							settingsArray.push(unsafeWindow.localStorage.key(i));
-						}
-						
-						return settingsArray;
-						
-					}else{		
-						return GM_listValues();
-					} 
-				}
-				
-				if(getOldSetting('installedScriptVersion',false) !== false){
-					//Upgrade
-				
-					// Value: customWPTheme
-					if(getOldSetting('customWPTheme',false) !== false){
-						var oldTheme = getOldSetting('customWPTheme').toLowerCase();
-						if(oldTheme.indexOf('wpblue') >= 0){
-							this.set('display_theme','blue');
-						}else if(oldTheme.indexOf('wpclassic') >= 0){
-							this.set('display_theme','classic');
-						}else if(oldTheme.indexOf('teal') >= 0){
-							this.set('display_theme','teal');
-						}else if(oldTheme.indexOf('black') >= 0){
-							this.set('display_theme','black');
-						}else if(oldTheme.indexOf('green') >= 0){
-							this.set('display_theme','green');
-						}else if(oldTheme.indexOf('wood') >= 0){
-							this.set('display_theme','wood');
-						}else if(oldTheme.indexOf('purple') >= 0){
-							this.set('display_theme','purple');
-						}else{
-							this.set('display_theme','default');
-						}
-					}
-					
-					// Value: hiddenUsersArr
-					if(getOldSetting('hiddenUsersArr',false) !== false){
-						var theUsers = getOldSetting('hiddenUsersArr');
-						
-						if(theUsers.length == 0){
-							this.set('hiddenUsers',[]);
-						}else{
-							var hiddenUsersString = theUsers.split('#');
-							var hiddenUsersNum = [];
-							
-							for(i = 0; i < hiddenUsersString.length; i++){
-								hiddenUsersNum.push(parseInt(hiddenUsersString[i]))
-							}
-							
-							this.set('hiddenUsers',hiddenUsersNum);
-						}
-					}
-					
-					// Value: userNotesArr
-					if(getOldSetting('userNotesArr',false) !== false){
-						
-						if(typeof $.browser['mozilla'] != 'undefined'){
-							var oldUserNotes = eval('(' + getOldSetting('userNotesArr') + ')');
-							
-							var newUserNotes = {};
-							var newKey;
-							
-							for(var key in oldUserNotes){
-								//make sure the key is numerical
-								newKey = parseInt(key);
-								
-								if(typeof newUserNotes[newKey] == 'undefined'){
-									newUserNotes[newKey] = '';
-								}
-								
-								newUserNotes[newKey] += oldUserNotes[key];
-								
-							}
-							
-							this.set('userNotes',newUserNotes);
-						}
-					}
-					
-					// Value: sync_times
-					if(getOldSetting('sync_times',false) !== false){
-						this.set('sync_times',JSON.parse(getOldSetting('sync_times')));
-					}
-					
-					// sync_ values
-					var allData = getListOfOldSettings();
-					
-					for(var i = 0; i < allData.length; i++){
-						if(allData[i].indexOf('sync_') == 0){
-							WhirlpoolPlus.set(allData[i],JSON.parse(getOldSetting(allData[i])));
-						}
-					}
-					
-					// URI encoded values
-					// oldName : newName
-					var encodedImports = {
-						syncEncKey : 'sync_encryptionKey',
-						syncUser : 'sync_user',
-						syncKey : 'sync_key',
-						sync_scriptId : 'sync_scriptId',
-						recentActivityOverlayDays : 'recentActivityOverlay_days',
-						whirlpoolAPIKey : 'whirlpoolAPIKey',
-						dynamicMenuSystem : 'spinnerMenu',
-						dynamicMenuSystem_settingsLink : 'spinnerMenu_settingsLocation',
-						recentActivityDays : 'defaultRecentActivityDays',
-						textareraSave : 'compose_quickReply_backup',
-						watchedThreadsAlert : 'watchedThreadsAlert',
-						whirlpoolSidemenuFont : 'display_sidebarFont',
-						whirlpoolBreadcrumbFont : 'display_breadcrumbFont',
-						sync_mostUpToDate : 'sync_mostUpToDate',
-						sync_lastSync : 'sync_lastSync',
-						hideForumIDs : 'display_hideTheseForums',
-						oembed_types : 'embed_oembedTypes',
-						CSStextBox : 'display_customCSS',
-						trackerPostBackgroundColour : 'wlr_display_unreadPostColour',
-						newPostBackgroundColour : 'wlr_display_unreadThreadColour',
-						noNewPostBackgroundColour : 'wlr_display_readThreadColour',
-						syncServer : 'sync_server',
-					};
-					
-					for(key in encodedImports){
-						if(getOldSetting(key,false) !== false){
-							this.set(encodedImports[key],decodeURIComponent(getOldSetting(key)));
-						}
-					}
-					
-					// Import all the old 'true'/'false' values into actual booleans
-					// oldName : newName
-					var booleanImports = {
-						hideDRThreads : 'display_hideDeletedThreads',
-						hideMVThreads : 'display_hideMovedThreads',
-						hideDelPosts : 'display_hideDeletedPosts',
-						hide_closed_profile : 'display_hideClosedThreadsOnProfile',
-						noTextShadow : 'display_noTextShadow',
-						floatSidebar : 'display_floatSidebar',
-						syntaxHighlight : 'display_syntaxHighlight',
-						emoticons : 'display_emoticons_enabled',
-						emoticonsBlue : 'display_emoticons_blue',
-						whimAlertNotice : 'display_whimAlert',
-						smartUpdater : 'autoUpdate_enabled',
-						staticAvatars : 'avatar_static',
-						animatedAvatars : 'avatar_animated',
-						postsPerDay : 'stats_postsPerDay',
-						chatbox : 'chatbox',
-						oembed : 'embed_oembed',
-						inlineImages : 'embed_images',
-						recentActivityOverlay : 'recentActivityOverlay',
-						ignoreUser : 'hiddenUsers_enabled',
-						removeIgnoredUsers : 'hiddenUsers_remove',
-						noGluteusMaximus : 'removeLinkToLastPage',
-						threadArchiveView : 'links_archive',
-						longThreadView : 'links_longThread',
-						opOnlyView : 'links_originalPoster',
-						moderatorPostView : 'links_mod',
-						representativePostView : 'links_rep',
-						reset_aura_vote : 'resetAuraVote',
-						showWhirlpoolFooterLinks : 'display_showFooter',
-						enableWideWhirlpool : 'display_widescreen',
-						penaltyBoxBackground : 'display_penaltyBox',
-						autoSubscribe : 'autoSubscribeToNewThread',
-						unanswered_threads : 'links_unanswered',
-						whim_archive_sort : 'whimArchiveSort',
-						editInPlace : 'quickEdit',
-						styleFlip : 'wlr_display_flipStyles',
-						tempDisableTracker : 'wlr_tempDisable',
-						lastReadTracker : 'wlr_enabled',
-						dontTrackStickyThreads : 'wlr_noTrackSticky',
-						onlyEndSquare : 'wlr_display_onlyEndSquare',
-						quickReplybox : 'compose_quickReply',
-						autoPreview : 'compose_quickReply_preview',
-						lastPost : 'compose_quickReply_goToEndAfterPost',
-						quickReplyboxSmilies : 'compose_quickReply_emoticons',
-						whirlcodeinWikiWhimNewThread : 'compose_enhancedEditor',
-						userNotes : 'userNotes_enabled',
-						userpageInfoToggle : 'display_userPageInfoToggle',
-						syncActivated : 'sync_enabled',
-					};
-					
-					for(key in booleanImports){
-						if(getOldSetting(key,false) !== false){
-							this.set(booleanImports[key],getOldSetting(key) == 'true' ? true : false);
-						}
-					}
-				}
-			
+				//Upgrade code removed in v4.5.5 (4 months)
 			
 			case 4:
 				//Upgrade from storageVersion:4 requires the clearing of values from localstorage
@@ -1629,8 +1428,8 @@ var features = {
 	
 		//Image embedding setup
 		if(imageEnabled){
-			var imageMatchRegex = /bmp|gif|jpg|png/;
-			var imgurRegex = /http:\/\/imgur\.com\/(.+)/
+			var imageMatchRegex = /bmp|gif|jpg|png/i;
+			var imgurRegex = /http:\/\/imgur\.com\/(.+)/i;
 			WhirlpoolPlus.css('.wpx_img { max-width: ' + maxContentWidth + 'px; }');
 		}
 		
