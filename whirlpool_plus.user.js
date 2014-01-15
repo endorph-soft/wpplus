@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.4
+// @version       4.4.5
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -10,14 +10,23 @@
 // @require       http://wpplus.endorph.net/resources/js/jqdnr.pjs?version=419
 // @require       http://wpplus.endorph.net/resources/js/tea.js
 // @include       http://forums.whirlpool.net.au/*
+// @include       https://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
+// @include       https://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
+// @include       https://whirlpool.net.au/*
 // @exclude       http://forums.whirlpool.net.au/whim-send*
+// @exclude       https://forums.whirlpool.net.au/whim-send*
 // @exclude       http://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
+// @exclude       https://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
 // @exclude       http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
+// @exclude       https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
 // @exclude       http://forums.whirlpool.net.au/forum-replies-print.cfm*
+// @exclude       https://forums.whirlpool.net.au/forum-replies-print.cfm*
 // @exclude       http://forums.whirlpool.net.au/forum-replies-archive.cfm*
+// @exclude       https://forums.whirlpool.net.au/forum-replies-archive.cfm*
 // @exclude       http://whirlpool.net.au/blog/*
+// @exclude       https://whirlpool.net.au/blog/*
 // @resource	  emoticon_angry	http://wpplus.endorph.net/resources/png/angry.png
 // @resource	  emoticon_blushing	http://wpplus.endorph.net/resources/png/blushing.png
 // @resource	  emoticon_confused	http://wpplus.endorph.net/resources/png/confused.png
@@ -83,6 +92,7 @@
  changes - 4.4.2 - More jquery related bugs, new location for WP Black Theme
  changes - 4.4.3 - Fix FF3.6 issue
  changes - 4.4.4 - Aura statistics, readded penalty box highlight
+ changes - 4.4.5 - Fix for Chrome (thanks Yansky), include on https pages
  ***************/
 // ==/Changes==
 
@@ -94,7 +104,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.4';
+	var version = '4.4.5';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -3395,6 +3405,10 @@ try {
 				}
 
 				docs.q[0].focus();
+				
+				if(docs.q[0].setSelectionRange){
+					docs.q[0].setSelectionRange(docs.q.val().length,docs.q.val().length);					
+				}
 
 				Whirlpool.set('textareraSave', docs.q.val());
 
