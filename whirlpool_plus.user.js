@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.2
+// @version       4.3.3
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -154,6 +154,7 @@
  changes - 4.3.0 - Chrome Compatability (with TamperMonkey), made avatars links again
  changes - 4.3.1 - Fixed bugs with quick edit and removing the &p=-1&#bottom options
  changes - 4.3.2 - Added Whirlcode buttons on Wiki Preview pages
+ changes - 4.3.3 - New Chatbox (thanks Erwin, Chris)
  ***************/
 // ==/Changes==
 
@@ -165,7 +166,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.2';
+	var version = '4.3.3';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -497,7 +498,7 @@ try {
 	 @runson		ALL
 	 */
 	if (Whirlpool.get("chatbox") == "true") {
-		$('.userinfo').after('<div id="chatbox"><iframe name="cboxmain" src="http://chat.onlinelife.com/box/?boxid=2818612&boxtag=1700&sec=main" id="cboxmain"></iframe><iframe name="cboxform" src="http://chat.onlinelife.com/box/?boxid=2818612&boxtag=1700&sec=form" id="cboxform"></iframe></div>');
+		$('.userinfo').after('<div id="chatbox"><iframe name="cboxmain" src="http://www3.cbox.ws/box/?boxid=2818612&amp;boxtag=1700&amp;sec=main" id="cboxmain"></iframe><iframe name="cboxform" src="http://www3.cbox.ws/box/?boxid=2818612&amp;boxtag=1700&amp;sec=form" id="cboxform"></iframe></div>');
 		$('#chatbox iframe').css({
 			'border': 'none',
 			'margin-left': '10px',
