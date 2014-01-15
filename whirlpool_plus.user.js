@@ -2,12 +2,13 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.10
-// @require       http://wpplus.endorph.net/resources/js/jquery-gm.js
+// @version       4.4.0
+// @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
 // @require       http://wpplus.endorph.net/resources/js/lang-sql.js
-// @require	  	  http://wpplus.endorph.net/resources/js/jqdnr.pjs
+// @require       http://wpplus.endorph.net/resources/js/jqdnr.pjs?version=419
+// @require       http://wpplus.endorph.net/resources/js/tea.js
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -48,109 +49,11 @@
 // @resource	  old_blue_sad2		http://wpplus.endorph.net/resources/gif/sad-2.gif
 // @resource	  old_blue_smirk	http://wpplus.endorph.net/resources/gif/smirk.gif
 // @resource	  old_blue_tongue	http://wpplus.endorph.net/resources/gif/tongue.gif
+// @resource	  loader			http://wpplus.endorph.net/resources/gif/loader.gif
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
 // ==Changes==
 /***************
- changes - 3.0.4 - fixed bug where clicking the "i" link next to a users name multiple times opened multiple boxes. Fixed a bug with the auto update.
- changes - 3.0.5 - fixed an issue with the userpage/no of days feature.
- changes - 3.0.6 - fixed an issue with the userpage/no of days feature (2nd go). Fixed an issue with 'mark as read' feature. Added avatars to whims.
- changes - 3.0.7 - fixed tracking issue (i think). Fixed animated avatars issue (i think). Added smileys. Fixed Rep, Mod, Print View, Thread Archive links. 
- Fixed too many Your Links problem (overflow scroll). Fixed glitch when your own post is deleted. Fixed a glitch when the last post was deleted. Fixed a problem with the auto-update.
- changes - 3.0.8 - Fixed problem with settings box and small resolution. Added small resolution toggle feature to user page. Added whirlcode buttons to reply page.
- changes - 3.0.9 - Fixed user ignore.
- changes - 3.1.0 - Full size inline images are now shown on the same page when clicked. Spinner menu positioned just to the right of the left page menu.
- changes - 3.1.1 - Fixed a problem with external links.
- changes - 3.1.2 - Tweaked full size inline images feature. Fixed glitch with spinner menu.
- changes - 3.1.3 - Fixed spinner (2nd go).
- changes - 3.1.4 - Fixed avatars in whims.
- changes - 3.1.5 - Fixed problem with too many links in Your Links section (i think).
- changes - 3.1.6 - Fixed spinner (3rd go).
- changes - 3.1.7 - Post align option. Chatbox rules link. Mark as read fixed (i think)
- changes - 3.1.8 - Fixed userpage days glitch.
- changes - 3.1.9 - Update for Simon's changes http://forums.whirlpool.net.au/forum-replies.cfm?t=530906&p=37#r733.
- changes - 3.2.0 - Update 2 for Simon's changes http://forums.whirlpool.net.au/forum-replies.cfm?t=530906&p=37#r733.
- changes - 3.2.1 - Fixed edit in place second edit error. Made user notes text box larger and added different icon if usernote available for user. 
- Added a debug mode. Added static iced whirlcode. Fixed default userdays number. Added focused thread reminder.
- changes - 3.2.2 - Fixed Your Links glitch.
- changes - 3.2.3 - Removed some mark as read code that was causing problems.
- changes - 3.2.4 - Added an option to import user notes from older script (pre 3.0).
- changes - 3.2.5 - Fixed userpage back button issue.
- changes - 3.2.6 - Fixed mark as read feature.
- changes - 3.2.7 - Fixed users online page glitch.
- changes - 3.2.8 - Removed the shock smiley.
- changes - 3.2.9 - Focused thread opacity thingo.
- changes - 3.3.0 - Updated for Simon's url changes.
- changes - 3.4.0 - Now maintained by Troberto, Chatbox removed
- changes - 3.4.1 - Chatbox setting removed
- changes - 3.4.2 - Fixed smilies, hosted images, Spelling
- changes - 3.4.3 - Fixed Your Votes page & Dynamic Menu links.
- changes - 3.5.0 - New Features: Floating Sidebar, Sidebar Notes, Numerous bug fixes
- changes - 3.5.1 - Wide Whirlpool support w/ floating sidebar
- changes - 3.5.2 - WP Green (by Polish Dude) added, Typo fixed
- changes - 3.5.3 - Whim Whirlcode removed, Whim preview removed
- changes - 3.5.4 - Completely removed Your Links (which is now dead)
- changes - 3.5.5 - Update for Somon's (minor) URL change.  Enhanced deletedThreadCacheLink()
- changes - 3.5.6 - OK, let's try that again. Rewrote deletedThreadCacheLink() function.
- changes - 3.6.0 - Fixed overflow bug with wide whirlpool & images, fixed cursor, fixed flickR links, fixed Wikipedia links, fixed image links, enhanced Vimeo links (minor), added Long Thread link
- changes - 3.6.1 - Improved IRC links, Fixed themes, Enhanced updater
- changes - 3.6.5 - Added average posts per day. Added Watched Thread redirect. Added No Text Shadow.
- changes - 3.6.6 - Added Hide Deleted Posts. Added purple theme (by polish dude). Fixed bug with editInPlace (not rewritten).
- changes - 3.6.7 - Enhanced code prettifier (improved language support).  Improved Posts per day.
- changes - 3.6.8 - Fixed posts per day.
- changes - 3.7.0 - Added chatbox.
- changes - 3.7.1 - Added setting for the chatbox.
- changes - 3.7.2 - Fixed the lockups (due to syntax highlighting).
- changes - 3.8.0 - Added My Links. Added another option for avatars.  Improved updater.
- changes - 3.8.5 - Patched rep posts bug, Fixed Watched Threads redirect, Added notifications.
- changes - 3.8.6 - Fixed My Links
- changes - 3.8.7 - Made My Links go under chatbox (if enabled).
- changes - 3.8.8 - Fixed errors.
- changes - 3.8.9 - Fixed floating sidebar.
- changes - 3.9.0 - Increased performance, rewrote updater, fixed typos, fixed floating sidebar bugs, new emoticons, added Whim Archive sorter (by Yansky), fixed poll bug, fixed video bug, fixed avatar bug, fixed wikipedia bug, added inline pages, added simple backup.
- changes - 3.9.1 - Emoticons show on reply pages, syntax highlighting works on reply pages (improved aswell), improved emoticons (not showing in lists,etc), added Unanswered threads, added OP Only View.
- changes - 3.9.2 - Added second avatar server, removed Sidebar Notes and My Links, cleaned up settings HTML, minor code cleanups.
- changes - 3.9.3 - Added wrppaers for easier porting in the future, fixed avatar bug (thanks Micah), fixed bug with page titles (thanks Yansky), added warning regarding sidebar (thanks Nukkels).
- changes - 3.9.4 - Rewrote some code for better performance, fixed floating sidebar bug, improved posts per day
- changes - 3.9.5 - Fixed major bug with emoticons, floating sidebar, posts per day and more. Fixed floating sidebar and non-widescreen, improved settings.
- changes - 3.9.6 - Updated some settings text, fixed URLs
- changes - 3.9.7 - Fixed Whirlcode buttons, moved to jQuery 1.4.1, fixed anchors.
- changes - 3.9.8 - Changed servers, added ability to change servers, moved to jQuery 1.4.2
- changes - 3.9.9 - Fixed anchors while using widescreen mode (thanks tjetch), settings automatically reload
- changes - 4.0.0 - Fixed unread threads, improved inline images and video, rewrote edit in place
- changes - 4.0.1 - Fixed watched threads redirect (thanks tjetch), improved inline images
- changes - 4.0.2 - Fixed inline images, fixed edit in place
- changes - 4.0.3 - Fixed emoticons in usernames (when quoting), possibly fixed quick edit (thanks tjetch).
- changes - 4.0.4 - Added cancel button to quick edit, fixed quick edit after using quick reply (thanks tjetch), added blue smilies
- changes - 4.0.5 - Fixed blue smilies, fixed inline images.
- changes - 4.0.6 - Added ability to hide deleted threads in user profile (thanks Yansky).
- changes - 4.0.7 - Added ability to hide forums from the main page.
- changes - 4.0.8 - Added open watched threads in section in tabs (thanks, Yansky)
- changes - 4.0.9 - Added a quick fix for anchors, thanks tbwd.
- changes - 4.0.10- Replaced Polish Dude's green theme, w/ Chris's, removed Polish Dude's other themes
- changes - 4.0.11- Updated WP Green, added WP Wood and WP Purple (thanks Chris)
- changes - 4.0.12- tbwd's fixes (thanks)
- changes - 4.0.13- Moved to tbwd's Userscript (#85217).
- changes - 4.1.0 - Rewrote Last Read Tracker, Some changes to Whirlpool object
- changes - 4.1.1 - Forgot to allow WLR to turn off, fixed
- changes - 4.1.2 - Readded "Only color end square" option
- changes - 4.1.3 - Zapped FF4 + GM 0.9.0 bugs (thanks to jaromir for debugging help)
- changes - 4.1.4 - Added some parseInt calls to hopefully fix tracking, added "mark as read", changed tracker to always replace link on tracked threads.
- changes - 4.1.5 - Don't highlight deleted/moved threads, move the S and M links further apart, remove user notes until a replacement for eval can be found
- changes - 4.1.6 - Add mark as read link for those using "Only colour end square"
- changes - 4.1.7 - Readded user notes (Please update to Greasemonkey 0.9.1 if you are running 0.9.0). Changed position of M and S links
- changes - 4.1.8 - Fixed issue with FF4b11, Added a "reset vote" aura option
- changes - 4.1.9 - Fixed an issue with the tracker that caused threads to not track correctly
- changes - 4.2.0 - Readded popular colouring options to WLR tracker, fixed another tracker bug
- changes - 4.2.1 - Added an option to unhide a post by a hidden user
- changes - 4.2.2 - Fixed thread tracking on search pages
- changes - 4.2.3 - Fixed gap under logo with floating sidebar
- changes - 4.2.4 - Removes the troublesome (3 smiley
- changes - 4.2.5 - Fixes auto preview
- changes - 4.2.6 - New Avatar Server
- changes - 4.2.7 - Fixed auto updater, changed smilies, change recent activity days, tidied up settings box
- changes - 4.2.8 - Only load inline images once per page, tweaks to smilies code, removed redundant code, identify WP+ alerts better to end user
- changes - 4.2.9 - Fixes for AJAX quick reply, reduced avatar css size, scroll to anchor on WLR page load, fixed bug with ignore user
  changes - 4.3.0 - Chrome Compatability (with TamperMonkey), made avatars links again
  changes - 4.3.1 - Fixed bugs with quick edit and removing the &p=-1&#bottom options
  changes - 4.3.2 - Added Whirlcode buttons on Wiki Preview pages
@@ -162,6 +65,7 @@
  changes - 4.3.8 - Added Recent Activity Dropdown (preview)
  changes - 4.3.9 - Recent Activity Dropdown - correct location for reload image, indication of unread threads
  changes - 4.3.10 - Move all resources to endorph.net (tristanroberts.name is 404ing right now)
+ changes - 4.4.0 - Added Synchronisation of WLR data, Updated jQuery (1.4.2 => 1.7.1), changed "attr" methods to "prop". Lots of small bug fixes. Incorportated Yansky's Thread Search Date Order script. Code cleanup. New settings dialog
  ***************/
 // ==/Changes==
 
@@ -173,7 +77,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.10';
+	var version = '4.4.0';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -214,6 +118,13 @@ try {
 				unsafeWindow.localStorage.setItem(name, value);
 			}else{
 				GM_setValue(name, value);
+			}
+		},
+		'remove': function (name) {
+			if(notFirefox){
+				unsafeWindow.localStorage.removeItem(name);
+			}else{
+				GM_deleteValue(name);
 			}
 		},
 		/**
@@ -285,9 +196,9 @@ try {
 				background = 'black';
 				opacity = '0.9';
 			}
-			if (!Wp._notified) {
-				$('head').append('<style type="text/css">.wpplus_notify{ width: 85%; height: 20px; background-color: ' + background + '; opacity: ' + opacity + '; position: fixed; top: 25px; left: 7.5%; z-index: 500; -moz-border-radius: 10px; padding-top: 7px; text-align: center; color: ' + color + '} .wpplus_notify:hover{ cursor: pointer; }</style>');
-				Wp._notified = true;
+			if (!Whirlpool._notified) {
+				$('head').append('<style type="text/css">.wpplus_notify{ width: 85%; height: 20px; background-color: ' + background + '; opacity: ' + opacity + '; position: fixed; top: 25px; left: 7.5%; z-index: 9999; -moz-border-radius: 10px; padding-top: 7px; text-align: center; color: ' + color + '} .wpplus_notify:hover{ cursor: pointer; }</style>');
+				Whirlpool._notified = true;
 			}
 			$('body').prepend('<div class="wpplus_notify">' + message + ' (close)</div>');
 			$('.wpplus_notify').click(function (e) {
@@ -309,8 +220,257 @@ try {
 		user.name = $('.userinfo dt:first').text();
 		user.id = $('.userinfo dd:first').text().split('#')[1];
 	}
-
-	var Wp = Whirlpool;
+	
+	var SyncStorage = {
+	
+		server : decodeURIComponent(Whirlpool.get('syncServer')),
+		
+		user : Whirlpool.get('syncUser'),
+		
+		key : Whirlpool.get('syncKey'),
+		
+		scriptId : Whirlpool.get('sync_scriptId'),
+		
+		encKey : Whirlpool.get('syncEncKey'),
+		
+		get : function(name){
+			if(typeof Whirlpool.get('sync_' + name) != 'undefined'){
+				return JSON.parse(Whirlpool.get('sync_' + name));
+			}
+		},
+		
+		getTime : function(name){
+			return JSON.parse(Whirlpool.get('sync_times'))[name];
+		},
+		
+		getTimes : function(){
+			return JSON.parse(Whirlpool.get('sync_times'));
+		},
+		
+		set : function(name,value){
+			this.setWithTime(name,value,Math.round(new Date().getTime() / 1000));
+		},
+		
+		setWithTime : function(name,value,timestamp){
+			timestamp = parseInt(timestamp);
+					
+			var times = JSON.parse(Whirlpool.get('sync_times'));
+			
+			times[name] = timestamp;
+			
+			Whirlpool.set('sync_times',JSON.stringify(times));
+			
+			if(timestamp > Whirlpool.get('sync_mostUpToDate')){
+				Whirlpool.set('sync_mostUpToDate',timestamp);
+			}
+			
+			Whirlpool.set('sync_' + name,JSON.stringify(value));
+		},
+		
+		remove : function(name){
+			if(this.get(name) !== false){
+				this.set(name,null);
+			}
+		},
+		
+		_delete : function(name){
+			var times = JSON.parse(Whirlpool.get('sync_times'));
+			
+			delete times[name];
+			
+			Whirlpool.set('sync_times',JSON.stringify(times));
+			Whirlpool.remove('sync_' + name);
+			
+		},
+		
+		_sendRequest : function(request,callback){
+			Whirlpool.ajax({
+				headers: {"Content-Type": "application/x-www-form-urlencoded"},
+				method : 'POST',
+				url : this.server,
+				data : 'u=' + this.user + '&k=' + this.key + '&r=' + JSON.stringify(request),
+				onload : callback,
+				onerror : function(response){
+					SyncStorage._error(response.status);
+				}
+			});
+		},
+		
+		_error : function(status){
+			var message;
+			switch(status){
+				case null:
+				case 404:
+					message = 'Could not find sync server (404)';
+				break;
+				
+				case 403:
+					message = 'Incorrect user id/access key (403)';
+				break;
+				
+				case 400:
+					message = 'Bad Request (400)';
+				break;
+				
+				case 500:
+					message = 'Server Error (500)';
+				break;
+				
+				default:
+					message = 'Unknown Error (' + status + ')';
+				break;
+			}
+			
+			Whirlpool.notify('WP+ Sync Failed: ' + message,false,10*1000);
+			$('#syncing').fadeOut();
+		},
+		
+		_encrypt : function(data){
+			return encodeURIComponent(Tea.encrypt(JSON.stringify(data),this.encKey));
+		},
+		
+		_decrypt : function(data){
+			return JSON.parse(Tea.decrypt(data,this.encKey));
+		},
+		
+		sync : function(){
+			if(Whirlpool.get('syncActivated') != 'true'){
+				return;
+			}
+		
+			$('#syncing').fadeIn();
+			var request = {
+				a : 'nu',
+				id : this.scriptId,
+				t : Whirlpool.get('sync_mostUpToDate'),
+				ls : Whirlpool.get('sync_lastSync')
+			};
+						
+			this._sendRequest(request,function(response){
+				if(response.status != 200){
+					SyncStorage._error(response.status);
+				}else{
+					var serverResponse = JSON.parse(response.responseText);
+										
+					var currentSyncTime = Math.round(new Date().getTime() / 1000);
+					
+					if(serverResponse.nu){
+						var times = SyncStorage.getTimes();
+						
+						var dataForServer = {};
+						
+						for(var key in times){
+							if(times[key] >= serverResponse.since){
+								dataForServer[SyncStorage._encrypt(key)] = {
+									t : times[key],
+									d : (SyncStorage.get(key) === null) ? SyncStorage.get(key) : SyncStorage._encrypt(SyncStorage.get(key))
+								};
+							}
+						}
+						
+						//server wants an update
+						request = {
+							a : 's',
+							id : SyncStorage.scriptId,
+							ls : Whirlpool.get('sync_lastSync'),
+							ct : currentSyncTime,
+							d : dataForServer
+						};
+																								
+						SyncStorage._sendRequest(request,function(syncResponse){
+							if(syncResponse.status != 200){
+								SyncStorage._error(response.status);
+								return;
+							}
+							
+							syncResponse = JSON.parse(syncResponse.responseText);
+							
+							if(syncResponse.s){
+								//data to sync
+								
+								var reload = false;
+								
+								if(typeof syncResponse.d != 'undefined'){								
+									for(var key in syncResponse.d){
+										decodedKey = SyncStorage._decrypt(key);										
+										syncResponse.d[key]['d'] = SyncStorage._decrypt(syncResponse.d[key]['d']);
+										
+										if(SyncStorage.get(decodedKey) !== false){
+											if(SyncStorage.getTime(decodedKey) <= syncResponse.d[key]['t']){
+												SyncStorage.setWithTime(decodedKey,syncResponse.d[key]['d'],syncResponse.d[key]['t']);
+											}
+										}else{
+											SyncStorage.setWithTime(decodedKey,syncResponse.d[key]['d'],syncResponse.d[key]['t']);
+										}
+										reload = true;
+									}
+								}
+								
+								if(typeof syncResponse.r != 'undefined'){
+									for(var key in syncResponse.r){
+										decodedKey = SyncStorage._decrypt(key);
+										if(SyncStorage.get(decodedKey) !== false){
+											if(SyncStorage.get(decodedKey) !== null){
+												reload = true;
+											}
+											if(SyncStorage.getTime(decodedKey) <= syncResponse.r[key]['t']){
+												SyncStorage._delete(decodedKey);
+											}
+										}
+									}
+								}
+								
+								if(reload && (Whirlpool.url.match('/forum/') || Whirlpool.url.match('/user/'))){
+									window.location.reload();
+								}
+								
+							}
+							
+							Whirlpool.set('sync_lastSync',currentSyncTime);
+							$('#syncing').fadeOut();
+							
+						});
+					}else{
+						$('#syncing').fadeOut();
+					}
+				}
+			});
+			
+		}
+	}
+	
+	if(!Whirlpool.get('syncStorageInstalled')){
+		Whirlpool.set('sync_lastSync',0);
+		Whirlpool.set('sync_mostUpToDate',0);
+		Whirlpool.set('sync_times',JSON.stringify({}));
+		Whirlpool.set('sync_scriptId',Math.floor(Math.random()*100000001));
+		Whirlpool.set('syncStorageInstalled',true);
+	}
+	
+	if(Whirlpool.get('syncActivated') == 'true'){
+		Whirlpool.css('#syncing { display: none; position: fixed; bottom: 0px; right: 0px; background-color: #3D3327; z-index: 10; padding: 6px 2px 2px 6px; border-top-left-radius: 15px; } #syncing img { height: 30px; width: 30px; }');
+		$('body').append('<div id="syncing"><img src="' + Whirlpool.image('loader') + '" /></div>');
+	
+		SyncStorage.sync();
+	}
+			
+	/* This code deletes all sync data
+	
+	var listOfValues = Whirlpool.list();
+	
+	for(key in listOfValues){
+		var nameOfSetting = listOfValues[key];
+		
+		
+		if(nameOfSetting.indexOf('sync_') != -1){
+			if(nameOfSetting != 'sync_lastSync' && nameOfSetting != 'sync_mostUpToDate' && nameOfSetting != 'sync_scriptId' && nameOfSetting != 'sync_times'){
+				Whirlpool.remove(nameOfSetting);
+			}
+		}
+	}
+	
+	Whirlpool.set('sync_times',JSON.stringify({}));*/
+	
 
 	/*! Posts Per Day */
 	/**
@@ -356,6 +516,7 @@ try {
 		$('tr:contains("Post"):first').after('<tr><td align="right"><b>Posts per Day:</b></td><td>' + (Math.round($('td:contains("Post count")').next('td').text() / days * 100) / 100) + '</td></tr>');
 
 	}
+
 
 	/*! Floating Sidebar */
 	/**
@@ -407,16 +568,16 @@ try {
 	if (Whirlpool.get("inlinePages") == "true" && Whirlpool.url.match("forum-replies.cfm")) {
 		$('.external').after('<sup style="cursor:pointer;" class="quick">(preview)</sup>');
 		$('.quick').live('click', function (e) {
-			var previewClass = ($(this).attr('id') !== '') ? $(this).attr('id') : 'quick' + Math.floor(Math.random() * 101);
+			var previewClass = ($(this).prop('id') !== '') ? $(this).prop('id') : 'quick' + Math.floor(Math.random() * 101);
 			if ($('.' + previewClass).hasClass(previewClass)) {
 				$(this).text('(preview)');
 				$('.' + previewClass).parent().parent().remove();
 			} else {
 				$(this).text('(hide)');
-				$(this).attr('id', previewClass);
+				$(this).prop('id', previewClass);
 				var link = $(this).prev('a');
 				var post = $(this).closest('tr');
-				$(post).after('<tr><td colspan="3" style="padding:0;height:400px;" class="tr' + previewClass + '"><iframe src="' + link.attr('href') + '" style="margin:0;display:block;border:none;width: 100%;height: 100%;" class="' + previewClass + '"></iframe><div class="handle" style="width: 100px;float:right;cursor:s-resize;">Resize</div></td></tr>');
+				$(post).after('<tr><td colspan="3" style="padding:0;height:400px;" class="tr' + previewClass + '"><iframe src="' + link.prop('href') + '" style="margin:0;display:block;border:none;width: 100%;height: 100%;" class="' + previewClass + '"></iframe><div class="handle" style="width: 100px;float:right;cursor:s-resize;">Resize</div></td></tr>');
 				$('.tr' + previewClass).jqResize('.handle');
 			}
 
@@ -428,7 +589,7 @@ try {
 		var ids = " " + decodeURI(__ids.toString()) + " ";
 		
 		$("#index tr").each( function( ) {
-			var url = $(this).children(".title").children(".title").children("a").attr("href").replace(/\/forum\//, "");
+			var url = $(this).children(".title").children(".title").children("a").prop("href").replace(/\/forum\//, "");
 			if (ids.indexOf(" " + url + " ") > -1) {
 				$(this).remove();
 			}
@@ -578,7 +739,7 @@ try {
 			$('#breadcrumb li:last').html('<a href="' + old_url + '">' + $('#breadcrumb li:last').text() + '</a>');
 		} else {
 			var new_url = Whirlpool.url + (Whirlpool.url.indexOf('?') > -1 ? '&nr=1' : '?&nr=1');
-			$('#breadcrumb li:last').append(' <a href="' + new_url + '">(unread)</a> ');
+			$('#breadcrumb li:last').append(' <a href="' + new_url + '">(show unanswered only)</a> ');
 		}
 	}
 
@@ -755,7 +916,7 @@ try {
 	 @version	3.9.4
 	 @runson		Post Reply, Edit, Whims
 	 */
-	if (Whirlpool.get("simple_backup") == "true" && $('#body').attr('id') == 'body') {
+	if (Whirlpool.get("simple_backup") == "true" && $('#body').prop('id') == 'body') {
 		var existing_data = Whirlpool.get('simple_backup_data');
 		$('#body').before('<span style="cursor:pointer;" id="revert_data">Revert</span><br>');
 		$('#revert_data').live('click', function (e) {
@@ -785,7 +946,7 @@ try {
 		var displayed = {};
 		
 		$( ".bodytext a" ).each( function( ) {
-			var link = $(this).attr('href').toString( );
+			var link = $(this).prop('href').toString( );
 			
 			if ( Whirlpool.get( "inlineImages" ) == "true" ) {
 				for ( key in extensions ) {
@@ -798,7 +959,10 @@ try {
 			
 			if ( Whirlpool.get( "inlineVideos" ) == "true" ) {
 				if ( link.indexOf( "youtube.com/watch" ) > -1 && displayed[link] != true ) {
-					var id = link.split("v=")[1].split("&")[0];
+					var id = link.split("v=")[1];
+					if(typeof id != 'undefined'){
+						id = id.split("&")[0];
+					}
 					var code = '<embed src="http://www.youtube.com/v/' + id + '&hl=en_US&fs=1&rel=0" type="application/x-shockwave-flash" allowfullscreen="true" width="436" height="350"></embed>';
 					$(this).before(code);
 					displayed[link] = true;
@@ -823,14 +987,14 @@ try {
 	// @todo	Document	
 
 	if ( Whirlpool.url.match( "forum-replies" ) && Whirlpool.get( "editInPlace" ) == "true" ) {
-		$( ".bodypost a[href^=/forum/index.cfm?action=edit]" ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
+		$( '.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
 		$( ".wpp-edit" ).css("cursor", "pointer" );
 		
 		$( ".wpp-edit" ).live( "click", function( e ) {
 			$(this).hide( );
 			$(this).after( "<a class='wpp-c-edit'>(cancel)</a>" );
 			$( ".wpp-c-edit" ).css("cursor", "pointer" );
-			var edit_url = $(this).prev( ).prev().attr( "href" ).toString();
+			var edit_url = $(this).prev( ).prev().prop( "href" ).toString();
 			var reply_id = edit_url.split( "e=" )[1];
 			var reply_html = $( "#r" + reply_id + " .bodytext" );
 			var original = reply_html.html( ).toString( );
@@ -856,7 +1020,7 @@ try {
 				$("input").click( function(e) {
 					$( "input[name=post2]" ).val("post");
 					var data = $("#fm").serialize( );
-					$.post( $("#fm").attr("action"), data, function( text ) {
+					$.post( $("#fm").prop("action"), data, function( text ) {
 						if( text.indexOf( "Edited. Returning" ) > -1 ) {
 							document.location.reload();
 						} else {
@@ -867,15 +1031,15 @@ try {
 				} );
 			} );
 		} );
-	}
-
-	
-/*************************************** TBWD's code *******************************************/
-   
+	}   
    
    
 	if($('.copyright').length == 1){
 		$('.copyright').append('<dt><img src="http://i54.tinypic.com/6okb5i.png" alt="Whirlpool Plus" /></dt><dd>Extra Awesomeness added  <br /> with <a href="http://whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + version + '</a></dd>');
+	}
+	
+	if(Whirlpool.url.match('action=yourvotes')){
+		$('#breadcrumb').after('<p>Number of Votes: ' + $('#content table tr[bgcolor="white"]').length + '</p>');
 	}
 
 	//Set default userpage days
@@ -883,17 +1047,17 @@ try {
 		//have to do this twice, because there are two different ways to link to user pages used
 		$('a[href*="forums.whirlpool.net.au/user/"]:not([href*="?"])').each(function(){
 			var link = $(this);
-			link.attr('href',link.attr('href') + '?days=' + Whirlpool.get('recentActivityDays'));
+			link.prop('href',link.prop('href') + '?days=' + Whirlpool.get('recentActivityDays'));
 		});
 		$('a[href^="/user/"]:not([href*="?"])').each(function(){
 			var link = $(this);
-			link.attr('href',link.attr('href') + '?days=' + Whirlpool.get('recentActivityDays'));
+			link.prop('href',link.prop('href') + '?days=' + Whirlpool.get('recentActivityDays'));
 		});
 	}
    
    //Return the user who made a post. Accepts the table row that represents each post
    function getUserNumber(tr){
-      return parseInt(tr.find('a[href*="/user/"]').attr('href').split('/user/')[1]);
+      return parseInt(tr.find('a[href*="/user/"]').prop('href').split('/user/')[1]);
    }
    
    /*! Ignore User */
@@ -962,7 +1126,7 @@ try {
          //display the deleted message
          var userName = trParent.find('.bu_name').text();
          var postDate = trParent.find('.date').not('.edited').text().replace('posted ', '');
-         var rowId = trParent.attr('id');
+         var rowId = trParent.prop('id');
 			
 			trParent.hide();
 			var row = $('<tr>');
@@ -1006,92 +1170,70 @@ try {
 			}
 			
 			Whirlpool.css('.wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;}');
+		},
+		
+		'getUserAvatar' : function(id,callback){
+			Whirlpool.ajax({
+				method : 'GET',
+				url : 'http://wpplus.endorph.net/avatars/getAvatar.php?id=' + id,
+				onload : callback
+			});
+		},
+		
+		'updateAvatar' : function(apiKey,url,callback){
+			var action;
+			
+			if(url == ''){
+				action = 'remove';
+			}else{
+				action = 'update';
+			}
+			
+			Whirlpool.ajax({
+				method : 'POST',
+				headers: {"Content-Type": "application/x-www-form-urlencoded"},
+				data : 'apiKey=' + apiKey + '&action=' + action + '&url=' + url,
+				url : 'http://wpplus.endorph.net/avatars/remote.php',
+				onload : callback
+			});
+			
 		}
    }
 	
 	//end avatars lite
-	
-	
+		
 	var whirlpoolLastRead = {
-	
-		//Data stored in 'trackerData' variable, set by loadData function
-		
-		'init' : function(){
-			this.loadData();
-		},		
-		
-		'loadData' : function(){
-			var rawData = Whirlpool.get('whirlpoolLastReadData');
-            
-            if(rawData){
-                this.trackerData = JSON.parse(rawData);
-            }else{
-                this.trackerData = {};
-            }			
-		},
-		
-		'saveData' : function(){
-			Whirlpool.set('whirlpoolLastReadData',JSON.stringify(this.trackerData));
-		},
-		
 		'saveThreadData' : function(threadNumber,threadReplyNumber,overallReplyNumber){
-			this.loadData();
-			this.trackerData[threadNumber] = {
-				'threadReplyNumber' : threadReplyNumber,
-				'overallReplyNumber' : overallReplyNumber
-			};
-			this.saveData();
+			SyncStorage.set(threadNumber,{t : threadReplyNumber, o : overallReplyNumber});
 		},
 		
 		'loadThreadData' : function(threadNumber){
-			this.loadData();
-			
-			if(this.trackerData && threadNumber in this.trackerData){
-                return this.trackerData[threadNumber];
-            }else{
-                return false;
-            }
+			var raw = SyncStorage.get(threadNumber);
+			if(raw !== null){
+				return raw;
+			}else{
+				return false;
+			}
 		},
 		
-		'importOldData' : function(){
-			//run-once method to get all the old data
-			var oldData = Whirlpool.get('lastRead0');
-			
-			if(oldData == false){
-				//no data
-				return;
-			}
-			
-			var dataParts = oldData.split(',');
-			
-			for(partIndex in dataParts){
-				var part = dataParts[partIndex];
-				if(part.match('t=undefined') || part == ''){
-					continue;
+		'importToSync' : function(){
+			//imports data to the new sync storage
+			var rawData = Whirlpool.get('whirlpoolLastReadData');
+            
+            if(rawData){
+                var trackerData = JSON.parse(rawData);
+				
+				for(var key in trackerData){
+					
+					if(typeof trackerData[key]['pageNumber'] != 'undefined'){
+						SyncStorage.setWithTime(key,{t : trackerData[key]['threadReplyNumber'], p : trackerData[key]['pageNumber']},1);
+					}else{
+						SyncStorage.setWithTime(key,{t : trackerData[key]['threadReplyNumber'], o : trackerData[key]['overallReplyNumber']},1);
+					}
+					
 				}
-			
-				var threadReplyNumber = part.split('#r')[1];
 				
-				if(part.match('&p=')){
-					var pageNumber = part.split('#r')[0].split('&p=')[1];
-				}else{
-					var pageNumber = '1';
-				}
-			
-				var threadNumber = part.split('t=')[1].split('&')[0].split('#')[0];
-				
-				//write this data into the variable
-				this.trackerData[threadNumber] = {
-					'threadReplyNumber' : threadReplyNumber,
-					'pageNumber' : pageNumber
-				};
-				
-				
-				
-			}
-			
-			whirlpoolLastRead.saveData();
-			
+            }
 		},
 		
 		
@@ -1107,10 +1249,10 @@ try {
 				Whirlpool.css('#replies table tr.whirlpoolLastRead_unreadReply td.bodypost { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
 			}
 		
-			var lastReadReplyNumber = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber)['threadReplyNumber'];
+			var lastReadReplyNumber = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber)['t'];
 			$('div#replies > table > tbody > tr').not(':hidden').each(function(){
 				var reply = $(this);
-				var replyNumber = $(reply.find('td:first-child > a')[0]).attr('name').split('r')[1];
+				var replyNumber = $(reply.find('td:first-child > a')[0]).prop('name').split('r')[1];
 				if(parseInt(replyNumber) <= parseInt(lastReadReplyNumber)){
 					reply.addClass('whirlpoolLastRead_readReply');
 				}else{
@@ -1152,12 +1294,12 @@ try {
 					if(replyNumberLinks.length < 2){
 						alert('WP+: Sorry, something went wrong with thread tracking. If you see this message a lot, the tracker is probably broken');
 					}else{
-						var threadReplyNumber = parseInt($(replyNumberLinks[0]).attr('name').split('r')[1]);
-						var overallReplyNumber = $(replyNumberLinks[1]).attr('name').split('r')[1];
+						var threadReplyNumber = parseInt($(replyNumberLinks[0]).prop('name').split('r')[1]);
+						var overallReplyNumber = $(replyNumberLinks[1]).prop('name').split('r')[1];
 						
 						var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
 						
-						if(currentData == false || parseInt(currentData['threadReplyNumber']) <= threadReplyNumber){
+						if(currentData == false || parseInt(currentData['t']) <= threadReplyNumber){
 							whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
 						}
 					}
@@ -1171,7 +1313,12 @@ try {
 			
 			threads.each(function(){
 				var thread = $(this);
-				var threadNumber = parseInt(thread.find('a.title').attr('href').split('t=')[1]);
+				
+				try{
+					var threadNumber = parseInt(thread.find('a.title').prop('href').split('t=')[1]);
+				}catch(e){
+					return;
+				}
 				
 				if(thread.is('.deleted') || thread.is('.pointer')){
 					//ignore this one
@@ -1193,21 +1340,21 @@ try {
 						var link;
 						
 						//do we have the new reply method?
-						if(threadData['overallReplyNumber']){
-							link = '/forum-replies.cfm?r=' +  threadData['overallReplyNumber'] + '#r' + threadData['overallReplyNumber']; //used by Simon's jumpToReplyId method, so preferred
+						if(threadData['o']){
+							link = '/forum-replies.cfm?r=' +  threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
 						}else{
 							//use the old page number method
-							link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['pageNumber'] + '#r' + threadData['threadReplyNumber'];
+							link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
 						}
 						
 						
 						//change the link
-						thread.find('.goend > a').attr('href',link).attr('title','Jump to last read post');
+						thread.find('.goend > a').prop('href',link).prop('title','Jump to last read post');
 						
 						//add the controls
 						thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
 						
-						if(threadData['threadReplyNumber'] < numberOfReplies){
+						if(threadData['t'] < numberOfReplies){
 							//there are unread posts
 
 							//we need to apply the unread class
@@ -1262,8 +1409,8 @@ try {
 		},
 		
 		'stopTracking' : function(threadNumber){
-			delete this.trackerData[threadNumber];
-			this.saveData();
+			SyncStorage.remove(threadNumber);
+			SyncStorage.sync();
 		},
 		
 		
@@ -1291,17 +1438,13 @@ try {
 			var numberOfReplies = parseInt(threadLink.closest('tr').find('.reps').text().split('S')[0]) + 1; //need to add one, as original post is not counted as a reply here
 			
 			//write data
-			this.loadData();
-			this.trackerData[threadNumber] = {
-					'threadReplyNumber' : numberOfReplies,
-					'pageNumber' : pageNumber
-			};
-			this.saveData();
+			SyncStorage.set(threadNumber,{t : numberOfReplies, p : pageNumber })
 			
 			//change the link
 			var link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;
-			threadLink.closest('tr').find('.goend > a').attr('href',link);
+			threadLink.closest('tr').find('.goend > a').prop('href',link);
 			
+			SyncStorage.sync();
 			
 			return false;
 			
@@ -1311,15 +1454,15 @@ try {
 		
 		
 	};
-	
+		
 	
 	if(Whirlpool.get('lastReadTracker') == 'true'){
-		whirlpoolLastRead.init();
 		
-		//check to see if we need to import data from the old tracker
-		if(Whirlpool.get('whirlpoolLastReadOldImported') == false){
-			whirlpoolLastRead.importOldData();
-			Whirlpool.set('whirlpoolLastReadOldImported',true)
+		if(Whirlpool.get('whirlpoolLastReadSyncImported') == false){
+			alert('WP+: Converting WLR Data. Please be patient, this might take some time. If the browser asks to stop the script, please allow it to continue.');
+			whirlpoolLastRead.importToSync();
+			Whirlpool.set('whirlpoolLastReadSyncImported',true);
+			alert('Data import complete. WLR Synchronisation between computers is now available.');
 		}
 		
 		if(Whirlpool.url.match('forum-replies')){
@@ -1350,8 +1493,8 @@ try {
 	if(Whirlpool.get('reset_aura_vote') == 'true' && Whirlpool.url.match('forum-replies')){
 		$('.voteblock').each(function(){
 			var block = $(this);
-			var resetUser = block.attr('title');
-			var replyId = $(block.closest('td.bodyuser').find('a')[1]).attr('name').split('r')[1];
+			var resetUser = block.prop('title');
+			var replyId = $(block.closest('td.bodyuser').find('a')[1]).prop('name').split('r')[1];
 			var clickFunction = 'userVote(' + replyId + ',' + resetUser + ',0,' + user.id + ');';
 			block.children('span[id$="sn1"]').after(' <span class="voteitem" id="vote' + replyId + 's0" title="reset vote" onclick="' + clickFunction + '">?</span> ');
 		});
@@ -1416,14 +1559,14 @@ try {
 						if(threadData == false){
 							link = '/forum-replies.cfm?t=' + threads[i].ID;
 						}else{
-							if(threads[i].REPLIES + 1 > threadData['threadReplyNumber']){
+							if(threads[i].REPLIES + 1 > threadData['t']){
 								unread = true;
 							}
 							
-							if(threadData['overallReplyNumber']){
-								link = '/forum-replies.cfm?r=' +  threadData['overallReplyNumber'] + '#r' + threadData['overallReplyNumber']; //used by Simon's jumpToReplyId method, so preferred
+							if(threadData['o']){
+								link = '/forum-replies.cfm?r=' +  threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
 							}else{
-								link = '/forum-replies.cfm?t=' + threads[i].ID + '&p=' + threadData['pageNumber'] + '#r' + threadData['threadReplyNumber'];
+								link = '/forum-replies.cfm?t=' + threads[i].ID + '&p=' + threadData['p'] + '#r' + threadData['t'];
 							}
 						}
 					}else{
@@ -1450,8 +1593,8 @@ try {
 			},
 			
 			'displayOverlay' : function(){
-				$(document.body).append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="http://i56.tinypic.com/6gfl75.png" /></div><div id="recentActivityHandle">Recent Activity <img src="' + Whirlpool.image('emoticon_star') + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
-				Whirlpool.css('#recentActivityDropdownContainer { position: fixed; z-index: 9999; top: 0px; left: 50%; width: 20%; margin-left: -10%; color: #fff; }' +
+				$('body.notIE').append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="http://i56.tinypic.com/6gfl75.png" /></div><div id="recentActivityHandle">Recent Activity <img src="' + Whirlpool.image('emoticon_star') + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
+				Whirlpool.css('#recentActivityDropdownContainer { position: fixed; z-index: 999; top: 0px; left: 50%; width: 20%; margin-left: -10%; color: #fff; }' +
 				'#recentActivityHandle { background-color: #3A437B; text-align: center; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; padding-top: 5px; box-shadow: 2px; 0 8px rgba(255, 255, 255, 0.5); width: 150px; margin: 0 auto; cursor: pointer; font-family: Georgia,Cambria,Charter,\'Century Schoolbook\',serif;  height: 25px; font-weight: bold; }' +
 				'#recentActivity { overflow: hidden; color: #333; max-height: 600px; display: none; background-color: #e5e5e5; text-align: center; border: solid 2px #3A437B; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; border-top: none; padding-top: 5px; }' +
 				'#recentActivity a { color: #333; }' + 
@@ -1515,6 +1658,155 @@ try {
 		
 	}
 	
+	//Sort search results by date (Thanks, Yanksy, http://userscripts.org/scripts/show/92400)
+	if(Whirlpool.url.match('action=threads_search')){
+		var fPA = $('<a href="#" style="color:white;" />');
+
+		fPA.toggle(function() {
+			GM_orderSearch('.oldest','down');
+			return false;
+		}, function() {
+			GM_orderSearch('.oldest','up');
+			return false;
+		});
+
+		$('td.oldest:first b').wrap(fPA);
+
+
+		var fPA2 = $('<a href="#" style="color:white;" />');
+
+		fPA2.toggle(function() {
+			GM_orderSearch('.newest','down');
+			return false;
+		}, function() {
+			GM_orderSearch('.newest','up');
+			return false;
+		});
+
+		$('td.newest:first b').wrap(fPA2);
+
+		function GM_orderSearch(firstOrLast,upOrDown){
+
+			$('#threads td.group:first').html('<b>Forum</b>').prop('style','background-color: #937F69;color: white;font-size: 11px;padding: 4px;text-align: center;');
+
+			var getTrs = $('#content #threads tbody tr');
+			var titleTxt=true;
+			var plainArr = [];
+			var daysArr=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+			var daysArrStore=[];	
+			
+			getTrs.each(function(i){
+			
+					var hasC = $(this).hasClass('section');
+					if(hasC){
+						if($(this).css('display')!='none'){	//if it has already been run once
+							titleTxt=$(this).find('a:first');
+							$(this).css('display','none');
+						}
+						else{
+							titleTxt=false;
+						}
+					}    
+					else{
+						if(titleTxt){	//if it has already been run once
+							$(this).children('.group').empty().append(titleTxt.clone());
+						}
+						var dS, dS2, ds2Num, tymeHTML=$(this).children(firstOrLast).html().split('<br>')[1];
+						
+						var newDate = new Date();
+						var todaysDate = newDate.getDate();
+						var todaysDay = newDate.getDay();
+						var currHour = newDate.getHours(); 
+						var currMinute = newDate.getMinutes();
+						var currMonth = newDate.getMonth();
+						var currYear = newDate.getFullYear();	
+						
+						if(!tymeHTML.match('m')){
+							newDate="Thu, 01 Jan 1970 00:00:00 GMT";
+						}
+						else if(tymeHTML.match('minutes ago')){		//32 minutes ago
+							dS=Number(tymeHTML.split('minutes ago')[0]);
+							newDate.setMinutes(currMinute-dS);		//cause it's "minutes ago"
+						}
+						else if(tymeHTML.match('Today at ')){		//Today at 1:23 am
+							dS=tymeHTML.split('Today at ')[1].split(' ')[0];
+							dS2=dS.split(':');
+							newDate.setMinutes(Number(dS2[1]));
+							ds2Num=Number(dS2[0]);
+							if(tymeHTML.match('pm') && ds2Num!=12){
+								ds2Num+=12;
+							}
+							newDate.setHours(ds2Num);
+						}
+						else if(tymeHTML.match('Yesterday at ')){		//Yesterday at 2:11 pm
+							newDate.setDate((todaysDate-1));
+							dS=tymeHTML.split('Yesterday at ')[1].split(' ')[0];
+							dS2=dS.split(':');
+							newDate.setMinutes(Number(dS2[1]));
+							ds2Num=Number(dS2[0]);
+							if(tymeHTML.match('pm') && ds2Num!=12){
+								ds2Num+=12;
+							}
+							newDate.setHours(ds2Num);				
+						}
+						else if(tymeHTML.match(/Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday/)){		//Wednesday at 5:02 pm
+
+							dS=tymeHTML.split(' at ');
+							dS2=dS[1].split(' ')[0].split(':');
+
+							var daysArrSl=daysArr.slice(0,todaysDay);
+							var daysArrS2=daysArr.slice(todaysDay);
+							daysArrStore =daysArrS2.concat(daysArrSl);						
+
+							daysArrStore.reverse();
+							var theHolyIndex=null;
+							for(var i=0;i<daysArrStore.length;i++){
+								if(dS[0] == daysArrStore[i]){
+									theHolyIndex=i+1;
+									break;
+								}
+							}
+							
+							ds2Num=Number(dS2[0]);
+							if(tymeHTML.match('pm') && ds2Num!=12){
+								ds2Num+=12;
+							}
+							
+							newDate.setDate((todaysDate-theHolyIndex));
+							newDate.setHours(ds2Num);
+							newDate.setMinutes(Number(dS2[1]));
+						}
+						else{		//2010-Jan-4, 3:24 pm
+							dS= tymeHTML.split(',');
+							dS2=dS[0].split('-');
+							newDate=dS2[2]+" "+dS2[1]+" "+dS2[0]+dS[1];
+						}
+						var tyme = {
+							ele: this,
+							t:Date.parse(newDate.toString())
+						};
+						plainArr.push(tyme);
+					}
+
+				
+			});
+
+			plainArr.sort(function(a,b) { 
+				if(upOrDown=='up'){
+					return a.t < b.t ? -1 : 1; 
+				}
+				else{
+					return a.t > b.t ? -1 : 1; 
+				}
+			});
+
+			var tTB=document.querySelector('#threads tbody');
+			for(var j=0;j<plainArr.length;j++){
+				tTB.appendChild(plainArr[j].ele);
+			}
+		}
+	}
+	
 
 	// ! Glug (Legacy JS)
 	/******************************************************* GLUG ***************************************************************************************************/
@@ -1522,7 +1814,7 @@ try {
 
 	var gmDefaults, docs = {
 		d: document,
-		dUrl: document.URL,
+		//dUrl: document.URL,
 		dTitle: document.title,
 		win: window,
 		bt: null,
@@ -1534,8 +1826,8 @@ try {
 		menuForum: $('#menu_forum ul'),
 		uinfo: $('#left .userinfo'),
 		checkIfSignedIn: $('#left #sign_in')[0],
-		futer: $('#footer'),
-		threadNumber: null
+		//futer: $('#footer'),
+		//threadNumber: null
 	};
 
 	function setGM() {
@@ -1584,7 +1876,7 @@ try {
 			'textareraSave': '',
 			'lastReadTracker': 'true',
 			'trackerPostBackgroundColour': '#CFCBBC',
-			'readTheRulesYet': 'false',
+			//'readTheRulesYet': 'false',
 			'newPostBackgroundColour': '#95b0cb',
 			'noNewPostBackgroundColour': '#cbc095',
 			'onlyEndSquare': 'false',
@@ -1595,9 +1887,9 @@ try {
 			'WLRfirstRun': 'true',
 			'whimAlertNotice': 'false',
 			'userpageInfoToggle': 'false',
-			'postAlign': 'middle',
+			//'postAlign': 'middle',
 			'floatSidebar': 'false',
-			'superBar': 'false',
+			//'superBar': 'false',
 			//'ssHtml': 'Enter your notes here, even try dragging images and widgets!',
 			'watchedThreadsAlert': 'default',
 			'postsPerDay': 'true',
@@ -1605,8 +1897,8 @@ try {
 			'hideDelPosts': 'false',
 			'syntaxHighlight': 'true',
 			'chatbox': 'false',
-			'my_links': 'false',
-			'my_links_password': '',
+			//'my_links': 'false',
+			//'my_links_password': '',
 			'emoticons': 'true',
 			'inlinePages': 'true',
 			'simple_backup': 'true',
@@ -1621,7 +1913,12 @@ try {
 			'recentActivityHtml' : '',
 			'recentActivityOverlay' : 'false',
 			'whirlpoolAPIKey' : '',
-			'recentActivityOverlayDays' : '7'
+			'recentActivityOverlayDays' : '7',
+			'syncServer' : 'http://s.endorph.net/',
+			'syncUser' : 'UID',
+			'syncKey' : 'KEY',
+			'syncActivated' : 'false',
+			'syncEncKey' : ''
 		};
 
 		for (var k in gmDefaults) {
@@ -1688,7 +1985,7 @@ try {
 
 				previewWait = true;
 				previewTimer = setTimeout(function () {
-
+								
 					docs.pTd3.html(unsafeWindow.whirlcode2(docs.q.val(), docs.eh));
 
 					previewWait = false;
@@ -1787,7 +2084,7 @@ try {
 			$('.' + c).bind('mouseup', function (evt) {
 
 				//id of the button selected. eg wc_whirlBold etc
-				var qqbuttonID = $(this).attr('id'); 
+				var qqbuttonID = $(this).prop('id'); 
 				//focus on the quick reply text area
 				tAr.focus(function () {}); //I don't understand it either, but tAr.focus(); without an anonymous function produces a weird error.
 				//get current value to quick reply text area
@@ -1884,22 +2181,22 @@ try {
 
 	}
 	var wlrSettings = {
+	
+		settingsHTML : '',
+	
 		set: function () {
 
-			var l = $('<li>');
-			var la = $('<a id="wPPSettingsLink" href="#">WP+ Settings</a>');
-			l.append(la);
-			var settingmenu = '<li id="menu_wpplus" class="even "><a class="xx" href="#" id="wpsettingslink"><span>WP+ Settings</span></a><span class="shim1"></span></li>';
+			var settingmenu = '<li id="menu_wpplus" class="even "><a class="xx" href="#"><span id="wpsettingslink">WP+ Settings</span></a><span class="shim1"></span></li>';
 			$('#menu_industry').after(settingmenu);
 
-			if (docs.futer.text().match('The Pool Room')) {
+			if ($('#footer').text().match('The Pool Room')) {
 				var uinfoName = docs.uinfo.children('dt:first').text();
 				var newDDforA = $('<DD>');
 				var aforDD = $('<a href="irc://au.austnet.org/tpr" target="_blank">TPR IRC Chat</a> <span style="font-size:0.7em;">(<a href="http://widget.mibbit.com/?settings=6c09163b5ce1890c08a31a91cb300b34&server=au.austnet.org&channel=%23tpr&nick=' + uinfoName + '" target="_blank">mibbit</a>)</span>');
 				newDDforA.append(aforDD);
 				docs.uinfo.append(newDDforA);
 			}
-			if (docs.futer.text().match('Lifestyle')) {
+			if ($('#footer').text().match('Lifestyle')) {
 				var uinfoName = docs.uinfo.children('dt:first').text();
 				var newDDforA = $('<DD>');
 				var aforDD = $('<a href="irc://au.austnet.org/whirlpool" target="_blank">Whirlpool IRC</a> <span style="font-size:0.7em;">(<a href="http://widget.mibbit.com/?settings=6c09163b5ce1890c08a31a91cb300b34&server=au.austnet.org&channel=%23whirlpool&nick=' + uinfoName + '" target="_blank">mibbit</a>)</span>');
@@ -1907,440 +2204,566 @@ try {
 				docs.uinfo.append(newDDforA);
 			}
 
-			if (docs.CSStextBox !== ' ') {
-				Whirlpool.css(decodeURIComponent(docs.CSStextBox));
+			if (Whirlpool.get('CSStextBox') !== ' ') {
+				Whirlpool.css(decodeURIComponent(Whirlpool.get('CSStextBox')));
 			}
-
-
-			var infoIcon = server + 'png/info.png';
-			var arrowDown = server + 'png/down.png';
-			var arrowUp = server + 'png/up.png';
-
-			Whirlpool.css('#wlrSettingsDiv {' + 'background-color:#D3DAED;' + 'height:400px;' + 'left:50px;' + 'overflow-x:scroll;' + 'overflow-y:scroll;' + 'position:absolute;' + 'top:20px;' + 'width:500px;' + 'z-index:50;' + '}' + '#wlrSettingsDiv ul#wlrtabmenu li{' + 'border:3px solid #777;' + 'border-width:3px 3px 1px;' + 'float:left;' + 'height:20px;' + 'margin-right:10px;' + 'padding:5px;' + 'width:140px;' + 'text-align:center;' + '	color:white;' + '}' + '#wlrSettingsDiv #wlrtabmenu li.active{' + '	background-color:orange;' + '	border:3px solid #555;' + '	border-width:3px 3px 1px;' + '}' + '#wlrSettingsDiv #wlrtabmenu li:hover{' + 'cursor:pointer;' + 'border:3px solid #555;' + 'border-width:3px 3px 1px;' + '}' + '#wlrSettingsDiv .wlrsetbutDown{' + 'background:transparent url("' + arrowDown + '") no-repeat;' + 'height:21px;' + 'padding:0;' + 'width:21px;	' + 'position:relative;' + 'top:-5px;' + 'left:4px;' + '}' + '#wlrSettingsDiv .wlrsetbutUp{' + 'background:transparent url("' + arrowUp + '") no-repeat;' + 'height:21px;' + 'padding:0;' + 'width:21px;	' + 'position:relative;' + 'top:-5px;' + 'left:4px;' + '}' + '#wlrSettingsDiv p{' + '	border-bottom:1px dashed grey;' + '	margin-left:15px;' + '	padding-bottom:15px;' + '}' + '#prevContainer>*{' + //just chucking these here so can save an extra Whirlpool.css()
-			'margin-left:10px;' + 'margin-right:12px;}' + '.maximumWidthImage{' + 'max-width:999999999999px !important;' + '}#wlrSettingsDiv label:hover{cursor:pointer;}');
-
+			
 			var wlrSettingsDivTop;
 			(window.innerHeight > 560) ? wlrSettingsDivTop = '6%' : wlrSettingsDivTop = '0';
+			
+			Whirlpool.css('#wlrSettingsDiv { background-color:#999; border:1px solid #000; color:#333; height:400px; left:50%; margin-left:-400px; overflow-x:scroll; overflow-y:scroll; position:fixed; top:' + wlrSettingsDivTop + '; width:800px; overflow:hidden; height:540px; max-height:100% !important; display:block; z-index:3000; padding:0 12px; }' + 
+			'#wlrSettingsDiv ul#wlrtabmenu li{ border:3px solid #777; border-width:3px 3px 1px; float:left; height:20px; margin-right:10px; padding:5px; width:140px; text-align:center; color:white; }' + 
+			'#wlrSettingsDiv #wlrtabmenu li.active{ background-color:orange; border:3px solid #555; border-width:3px 3px 1px; }' + 
+			'#wlrSettingsDiv #wlrtabmenu li:hover{ cursor:pointer; border:3px solid #555; border-width:3px 3px 1px; }' + 
+			'#wlrSettingsDiv .wlrsetbutDown{ background:transparent url("' + server + 'png/down.png") no-repeat; height:21px; padding:0; width:21px; position:relative; top:-5px; left:4px; }' + 
+			'#wlrSettingsDiv .wlrsetbutUp{ background:transparent url("' + server + 'png/up.png") no-repeat; height:21px; padding:0; width:21px; position:relative; top:-5px; left:4px; }' +
+			'#wlrSettingsDiv p{ border-bottom:1px dashed grey; margin-left:15px; margin-right:15px; padding-bottom:15px; }' + 
+			'#wlrSettingsDiv p:last-child { border-bottom: none; }' + 
+			'#wlrSettingsDiv p.description { border-bottom: none; margin-left:15px; padding-bottom:5px; }' + 
+			'#wlrSettingsDiv .settingDesc { font-style: italic; float: right; padding-right: 5px; }' + 
+			'#wlrSettingsDiv .subSettings_heading { cursor: pointer; margin: 5px 8px; text-align:center; }' + 
+			'#wlrSettingsDiv .subSettings_content { display: none; }' + 
+			'#wlrSettingsDiv .subSettings { border:1px solid #777; border-radius:5px; background-color: #bbb; margin: 5px; }' + 
+			'#wlrSettingsDiv .wlrtabmenuDivs { width: 794px; height:440px;  overflow-y:scroll; float:left;border:3px solid #333;background-color:#EEEEEE;margin-bottom:5px; }' + 
+			'#wlrSettingsDiv .tabDescription { text-align: center; font-style: italic; }' + 
+			'#currentUserAvatar { background-image: url("http://i44.tinypic.com/238bo7.png"); height: 80px; width: 80px; margin: 0 auto; }' + 
+			'#prevContainer>*{margin-left:10px; margin-right:12px;} #wlrSettingsDiv label:hover{cursor:pointer;}');
+
+
 			// ! Settings HTML
 			
-			var settingsHTML = '<div id="wlrSettingsDiv" style="background-color:#999999;border:1px solid black;color:#333333;display:none;left:50%;margin-left:-400px;padding:0 12px;position:fixed;top:' + wlrSettingsDivTop + ';width:800px;overflow:hidden;height:540px;max-height:100% !important;display:block;z-index:3000;">' +
+			this.settingsHTML = '<div id="wlrSettingsDiv">' +
 				'<ul id="wlrtabmenu" style="list-style:none;float:left;margin:14px 0px 0px 32px">' +
-					'<li class="active wlrtabmenuTabs">General Settings</li>' +
-					'<li class="wlrtabmenuTabs">Custom CSS</li>' +
-					'<li class="wlrtabmenuTabs">Hidden Users</li>' +
+					'<li class="active wlrtabmenuTabs">Forums</li>' +
+					'<li class="wlrtabmenuTabs">Threads</li>' +
+					'<li class="wlrtabmenuTabs">Posts</li>' +
+					'<li class="wlrtabmenuTabs">Help</li>' +
 				'</ul>' +
 
-				'<div id="setContainer" class="wlrtabmenuDivs" style="float:left;border:3px solid #555;background-color:#EEEEEE;height:440px;margin-bottom:5px;overflow-x:hidden;overflow-y:scroll;">' +
-					'<button id="resetWLR" style="margin: 10px 10px 5px 250px;">Reset All Settings To Default Values</button>' +
+				'<div class="wlrtabmenuDivs">' +
 					
-					'<div style="margin: 10px 10px 5px 290px;opacity:0.4;">' +
-						'Installed Script Version: ' + docs.installedScriptVersion +
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Script Configuration</b></p>' +
+						'<div class="subSettings_content">' +
+						
+						'<p id="debugMode">' +
+							'<input type="checkbox" name="enabledebugmode" id="enabledebugmode">' +
+							' <label for="enabledebugmode">Debug Mode</label>' +
+							' <span class="settingDesc">Place the script in debug mode. All errors will be reported.</span>'+
+						'</p>' +
+
+						'<p id="smartUpdater">' +
+							'<input type="checkbox" name="updater" id="updater">' +
+							' <label for="updater">Automatic updater</label>' +
+							' <a href="http://userscripts.org/scripts/source/85217.user.js" id="force_update">Force Update</a>' +
+							' <span class="settingDesc">Automatically update the script to the newest version</span>'+
+						'</p>' +
+						
+						'<p id="whirlpoolAPIKey">' +
+							'<input type="text" name="whirlpoolAPIKey_text" id="whirlpoolAPIKey_id">' +
+							' <label for="whirlpoolAPIKey_id">Whirlpool API Key</label>' +
+							' <span class="settingDesc">Used for features like the Recent Activity Overlay</span>'+
+						'</p>' +
+							
+						'</div>' +
+						
 					'</div>' +
 					
-					'<hr />' +
-					
-					'<span style="float:right;margin-right:10px;font-size:12px;font-weight:900;">Scroll down for more settings.</span>' +
-					
-					'<p id="debugMode">' +
-						'<input type="checkbox" name="enabledebugmode" id="enabledebugmode">' +
-						'<label for="enabledebugmode">Enable Debug Mode</label>' +
-					'</p>' +
-
-					'<p id="smartUpdater">' +
-						'<input type="checkbox" name="updater" id="updater">' +
-						'<label for="updater">Enable automatic updater.</label>' +
-						' <a href="http://userscripts.org/scripts/source/85217.user.js" id="force_update">Force Update</a>' +
-					'</p>' +
-					
-					'<p id="dynamicMenuSystem">' +
-						'<select name="dynamicMen" id="dynamicMen">' +
-							'<option value="none">none</option>' +
-							'<option value="rightClick">Right click</option>' +
-							'<option value="spinner">Spinner</option>' +
-						'</select>' +
-						'<label for="dynamicMen">Dynamic Menu System</label>' +
-					'</p>' +
-					
-					'<p id="quickReplybox">' +
-						'<input type="checkbox" name="quickRepb" id="quickRepb">' +
-						'<label for="quickRepb">Enable a Quick Reply Box at the bottom of threads and Quick Quote links next to posts.</label>' +
-					'</p>' +
-
-					'<p id="quickReplyboxCols">' +
-						'<input type="text" readonly="readonly" name="quickReplyboxC" id="quickReplyboxC">' +
-						'<button class="wlrsetbutDown" type="button"></button>' +
-						'<button class="wlrsetbutUp" type="button"></button>' +
-						'<label for="quickReplyboxC">Change the number of cols(width) of the Quick Reply Box.</label>' +
-					'</p> ' +
-					
-					'<p id="quickReplyboxRows">' +
-						'<input type="text" readonly="readonly" name="quickReplyboxR" id="quickReplyboxR">' +
-						'<button class="wlrsetbutDown" type="button"></button>' +
-						'<button class="wlrsetbutUp" type="button"></button>' +
-						'<label for="quickReplyboxR">Change the number of rows(height) of the Quick Reply Box.</label>' +
-					'</p>' +
-
-					'<p id="autoPreview">' +
-						'<input type="checkbox" name="autoPr" id="autoPr">' +
-						'<label for="autoPr">Show a preview of what you are typing in the quick quote box</label>' +
-					'</p>' +
-					
-					'<p id="hide_closed_profile">' +
-						'<input type="checkbox" name="hcp" id="hcp">' +
-						'<label for="hcp">Hide closed threads on user profiles.</label>' +
-					'</p>' +
-					
-					'<p id="unanswered_threads">' +
-						'<input type="checkbox" name="unansweredThreads" id="unansweredThreads">' +
-						'<label for="unansweredThreads">Provides a link to unanswered threads (threads with no replies).</label>' +
-					'</p>' +
-					
-					'<p id="opOnlyView">' +
-						'<input type="checkbox" name="onlyOp" id="onlyOp">' +
-						'<label for="onlyOp">Show only OP posts view link at top of thread.</label>' +
-					'</p>' +
-					
-					'<p id="threadArchiveView">' +
-						'<input type="checkbox" name="threadArchiveV" id="threadArchiveV">' +
-						'<label for="threadArchiveV">Show all posts in Thread Archive View Link at top of thread.</label>' +
-					'</p>' +
-					
-					'<p id="longThreadView">' +
-						'<input type="checkbox" name="longThreadV" id="longThreadV">' +
-						'<label for="longThreadV">Show all Posts in Long Thread View Link at top of thread.</label>' +
-					'</p>' +
-					
-					'<p id="moderatorPostView">' +
-						'<input type="checkbox" name="moderatorPostV" id="moderatorPostV">' +
-						'<label for="moderatorPostV">Show a link to view only moderator posts.</label>' +
-					'</p>' +
-					
-					'<p id="representativePostView">' +
-						'<input type="checkbox" name="representativePostV" id="representativePostV">' +
-						'<label for="representativePostV">Show a link to view only representative posts.</label>' +
-					'</p>' +
-					
-					'<p id="autoSubscribe">' +
-						'<input type="checkbox" name="autoSubs" id="autoSubs">' +
-						'<label for="autoSubs">Automatically subscribe to a thread when you make a post.</label>' +
-					'</p>' +
-
-					'<p id="staticAvatars">' +
-						'<input type="checkbox" name="staticAv" id="staticAv">' +
-						'<label for="staticAv">Display static avatars (non-animated).</label>' +
-					'</p>' +
-					
-					'<p id="animatedAvatars">' +
-						'<input type="checkbox" name="animatedAv" id="animatedAv">' +
-						'<label for="animatedAv">Display animated avatars.</label>' +
-					'</p>' +
-					
-					'<p id="hideForumIDs">' +
-						'<input type="text" name="hfids" id="hfids">' +
-						'<label for="hfids">The IDs of forums to hide (eg. "35 92 137")</label>' +
-					'</p> ' +
-					
-					'<p id="editInPlace">' +
-						'<input type="checkbox" name="editInP" id="editInP">' +
-						'<label for="editInP">Turn on ability to edit post in thread using Ajax.</label>' +
-					'</p>' +
-					
-					'<p id="simple_backup">' +
-						'<input type="checkbox" name="simple_backup" id="simple_backup">' +
-						'<label for="simple_backup">Stores a backup of whatever you write in a reply/whim and allows for quickly reverting back to the last version.</label>' +
-					'</p>' +
-					
-					'<p id="whirlcodeinWikiWhimNewThread">' +
-						'<input type="checkbox" name="whirlcodeinWikiWhimNewT" id="whirlcodeinWikiWhimNewT">' +
-						'<label for="whirlcodeinWikiWhimNewT">Turn this on to use Whirlcode in Wiki and New Page Thread.</label>' +
-					'</p>' +
-					
-					'<p id="whim_archive_sort">' +
-						'<input type="checkbox" name="archive_sor" id="archive_sor">' +
-						'<label for="archive_sor">Sorts the Whim Archive page into alphabetical order.</label>' +
-					'</p>' +
-
-					'<p id="noGluteusMaximus">' +
-						'<input type="checkbox" name="noGluteusM" id="noGluteusM">' +
-						'<label for="noGluteusM">Removes the &p=-1&#bottom from thread links on the main index page on Whirlpool</label>' +
-					'</p>   ' +
-					
-					'<p id="chatbox">' +
-						'<input type="checkbox" name="cBox" id="cBox">' +
-						'<label for="cBox">Turn on the Whirlpool Plus chatbox.  To use, you MUST agree with the <a href="http://whirlpool.net.au/wiki/?tag=wpplus_chatbox_rules" target="_blank">rules</a> of the chatbox.</label>' +
-					'</p> ' +
-					
-					'<p id="syntaxHighlight">' +
-						'<input type="checkbox" name="syntaxHighlight" id="syntaxHighlight">' +
-						'<label for="syntaxHighlight">Turn on code syntax highlighting (supports most languages).</label>' +
-					'</p> ' +
-
-					'<p id="recentActivityDays">' +
-						'<select name="recentActivityD" id="recentActivityD">' +
-							'<option value="1">1</option>' +
-							'<option value="3">3</option>' +
-							'<option value="7">7</option>' +
-							'<option value="14">14</option>' +
-							'<option value="30">30</option>' +
-							'<option value="60">60</option>' +
-							'<option value="120">120</option>' +
-						'</select>' +
-						'<label for="recentActivityD">Set your default Recent Activity Days on your user page. Default is 7 - set it to 7 to disable this custom function.</label>' +
-					'</p>' +
-					
-					'<p id="whIMMessageTextAreaCols">' +
-						'<input type="text" readonly="readonly" name="whIMMessageTextAreaC" id="whIMMessageTextAreaC">' +
-						'<button class="wlrsetbutDown" type="button"></button> ' +
-						'<button class="wlrsetbutUp" type="button"></button> ' +
-						'<label for="whIMMessageTextAreaC">Increase/Decrease the number of columns (width) of the WhIM Message Area.</label>' +
-					'</p> ' +
-					
-					'<p id="whIMMessageTextAreaRows">' +
-						'<input type="text" readonly="readonly" name="whIMMessageTextAreaR" id="whIMMessageTextAreaR">' +
-						'<button class="wlrsetbutDown" type="button"></button> ' +
-						'<button class="wlrsetbutUp" type="button"></button> ' +
-						'<label for="whIMMessageTextAreaR">Increase/Decrease the number of rows (height) of the WhIM Message Area.</label>' +
-					'</p> ' +
-			 
-					'<p id="emoticons">' +
-						'<input type="checkbox" name="smile" id="smile">' +
-						'<label for="smile">With smilies on, script will automatically change text emoticons (eg. :D) into their respective images.</label>' +
-					'</p>' +
-					
-					'<p id="emoticonsBlue">' +
-						'<input type="checkbox" name="smileb" id="smileb">' +
-						'<label for="smileb">Use the original blue smilies instead of the yellow ones.</label>' +
-					'</p>  ' +
-					
-					'<p id="inlineImages">' +
-						'<input type="checkbox" name="inlineI" id="inlineI">' +
-						'<label for="inlineI">Turns image links into images.</label>' +
-					'</p>' +
-					
-					'<p id="inlineVideos">' +
-						'<input type="checkbox" name="inlineV" id="inlineV">' +
-						'<label for="inlineV">Turn on ability to change YouTube and Google video links to embedded videos with title.</label>' +
-					'</p>  ' +
-					
-					'<p id="inlinePages">' +
-						'<input type="checkbox" name="inlinePages" id="inlinePages">' +
-						'<label for="inlinePages">Adds the ability to see links inline of WP.</label>' +
-					'</p> ' +
-					   
-					'<p id="ignoreUser">' +
-						'<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' +
-						'<label for="ignoreUserB">Adds a button next to each user\'s aura vote smilies, which when activated will prevent you from ' +
-						'seeing that user (you will see a post hidden message, similar to a post removed by a moderator). <strong>WARNING: Ignoring a user will cause ALL of their posts not to appear for you any more. If you want to remove someone from ' +
-						'being ignored, click on the "Hidden Users" tab above.</strong></label>' +
-					'</p>' +
-					 
-					'<p id="removeIgnoredUsers">' +
-						'<input type="checkbox" name="removeIgnoredUsersB" id="removeIgnoredUsersB">' +
-						'<label for="removeIgnoredUsersB">Completely hide all indication of removed users (the hidden post bar will not be displayed). <strong>WARNING: You will see no indication that a user has been removed.</strong></label>' +
-					'</p>' +     
-					
-					'<p id="reset_aura_vote">' +
-						'<input type="checkbox" name="reset_aura_vote" id="reset_aura_vote_checkbox">' +
-						'<label for="reset_aura_vote_checkbox">Add a reset aura smiley</label>' +
-					'</p> ';
-					
-					if(!notFirefox){
-						settingsHTML = settingsHTML + '<p id="userNotes">' +
-							'<input type="checkbox" name="userNotesBox" id="userNotesBox">' +
-							'<label for="userNotesBox">User Notes</label>' +
-						'</p> ';
-					}
-					
-					settingsHTML = settingsHTML + '<p id="watchedThreadsAlert">' +
-						'<select name="s_threadalert" id="s_threadAlert">' +
-							'<option value="default">None</option>' +
-							'<option value="watched">Go to watched threads</option>' +
-							'<option value="thread">Return to the thread</option>' +
-						'</select>' +
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
+						'<div class="subSettings_content">' +
 						
-						'<label for="s_threadAlert">Choose what action to do on the "watching thread" alert.</label>' +
-					'</p> ' +
+							'<p class="description">Script data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="http://s.endorph.net/account/">http://s.endorph.net/account/</a></p>' +
+						
+							'<p id="syncActivated">' +
+								'<input type="checkbox" name="syncActivated_check" id="syncActivated_id">' +
+								'<label for="syncActivated_id">Activate Synchronisation</label>' +
+							'</p>' +
+							
+							'<p id="syncServer">' +
+								'<input type="text" name="syncServer_text" id="syncServer_id" class="syncSetting"> ' +
+								'<label for="syncServer_id">Server Address</label>' +
+							'</p>' +
+							
+							'<p id="syncUser">' +
+								'<input type="text" name="syncUser_text" id="syncUser_id" class="syncSetting"> ' +
+								'<label for="syncUser_id">Whirlpool User ID</label>' +
+							'</p>' +
+							
+							'<p id="syncKey">' +
+								'<input type="text" name="syncKey_text" id="syncKey_id" class="syncSetting"> ' +
+								'<label for="syncKey_id">Access Key</label>' +
+							'</p>' +
+							
+							'<p id="syncEncKey">' +
+								'<input type="password" name="syncEncKey_text" id="syncEncKey_id" class="syncSetting"> ' +
+								'<button type="button" id="showEncKey" onclick="$(\'#syncEncKey_id\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button> ' +
+								'<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#syncEncKey_id\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
+								'<label for="syncEncKey_id">Encryption Password</label>' +
+								' <span class="settingDesc">Must be the same for all of your WP+ installs</span>'+
+							'</p>' +
+							
+						'</div>' +
+						
+					'</div>' +
+						
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description">' +
+							'<b>Forum Display</b>'+
+							'<br /><i>Themes, Custom CSS, Other Formatting Options</i>'+
+							'<br /><i>Chatbox, Recent Activity Overlay, Whim Notification, Dynamic Menu</i>'+
+							'</p>' +
+						'<div class="subSettings_content">' +
+						
+							'<p id="enableWideWhirlpool">' +
+								'<input type="checkbox" name="enableWideWh" id="enableWideWh">' +
+								'<label for="enableWideWh">Widescreen Display</label>' +
+								' <span class="settingDesc">Stretch the website to fit the entire screen</span>'+
+							'</p>' +
+							
+							'<p id="floatSidebar">' +
+								'<input type="checkbox" name="enablefloatBar" id="enablefloatBar">' +
+								'<label for="enablefloatBar">Float the sidebar</label>' +
+							'</p>' +
+							
+							'<p id="customWPTheme">' +
+								'<select name="s_customtheme" id="s_customtheme">' +
+									'<option value="">Default (by Simon Wright)</option>' +
+									'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
+									'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' +
+									'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
+									'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
+									'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
+									'<option value="http://phyco.name/wpplus/wpclassic2011/css/core.css">WP Classic (by Phyco)</option>' +
+								'</select>' +
+								' <label for="s_cutomtheme">Custom Theme</label>' +
+							'</p>' +
+							
+							'<p id="showWhirlpoolFooterLinks">' +
+								'<input type="checkbox" name="showWhirlpoolFooterL" id="showWhirlpoolFooterL">' +
+								' <label for="showWhirlpoolFooterL">Show the forum footer</label>' +
+							'</p>' +
+							
+							'<p id="noTextShadow">' +
+								'<input type="checkbox" name="textShadow" id="textShadow">' +
+								' <label for="textShadow">Remove Text Shadows</label>' +
+							'</p>' +
+							
+							'<p id="whirlpoolBreadcrumbFont">' +
+								'<select name="whirlpoolBreadcrumbF" id="whirlpoolBreadcrumbF">' +
+									'<option value="default font">default</option>' +
+									'<option value="Verdana">Verdana</option>' +
+									'<option value="Arial">Arial</option>' +
+									'<option value="Georgia">Georgia</option>' +
+									'<option value="Tahoma">Tahoma</option>' +
+									'<option value="Trebuchet MS">Trebuchet MS</option>' +
+								'</select>' +
+								' <label for="whirlpoolBreadcrumbF">Choose Breadcrumb Font</label>' +
+							'</p>' +
+							
+							'<p id="whirlpoolSidemenuFont">' +
+								'<select name="whirlpoolSidemenuF" id="whirlpoolSidemenuF">' +
+									'<option value="default font">default</option>' +
+									'<option value="Verdana">Verdana</option>' +
+									'<option value="Arial">Arial</option>' +
+									'<option value="Georgia">Georgia</option>' +
+									'<option value="Tahoma">Tahoma</option>' +
+									'<option value="Trebuchet MS">Trebuchet MS</option>' +
+									'</select>' +
+								' <label for="whirlpoolSidemenuF">Choose Sidebar Font</label>' +
+							'</p>' + 
+						
+							'<p id="chatbox">' +
+								'<input type="checkbox" name="cBox" id="cBox">' +
+								' <label for="cBox">Sidebar Chatbox</label>' +
+								' <span class="settingDesc">You must agree to abide by the <a href="http://whirlpool.net.au/wiki/?tag=wpplus_chatbox_rules" target="_blank">chatbox rules</a></span>'+
+							'</p> ' +
+							
+							'<p id="recentActivityOverlay">' +
+								'<input type="checkbox" name="recentActivityOverlay_check" id="recentActivityOverlay_id">' +
+								'<label for="recentActivityOverlay_id">Recent Activity Overlay</label>' +
+								' <span class="settingDesc">Make sure you enter your API Key in the Script Configuration</span>'+
+							'</p>' +
+							
+							
+							'<p id="recentActivityOverlayDays">' +
+								'<select name="recentActivityOverlayDays_select" id="recentActivityOverlayDays_id">' +
+									'<option value="1">1 Day</option>' +
+									'<option value="3">3 Days</option>' +
+									'<option value="7">7 Days</option>' +
+									'<option value="14">14 Days</option>' +
+									'<option value="30">30 Days</option>' +
+									'<option value="60">60 Days</option>' +
+									'<option value="120">120 Days</option>' +
+								'</select>' +
+								' <label for="recentActivityOverlayDays_id">Recent Activity Duration</label>' +
+								' <span class="settingDesc">How much of your recent activity to use for the overlay</span>'+
+							'</p>' +
+							
+							'<p id="whimAlertNotice">' +
+								'<input type="checkbox" name="wAlertNotice" id="wAlertNotice">' +
+								'<label for="wAlertNotice">Whim Notification</label>' +
+								' <span class="settingDesc">Display a notification when you receive a new WHIM</span>'+
+							'</p> ' +
+							
+							'<p id="dynamicMenuSystem">' +
+								'<select name="dynamicMen" id="dynamicMen">' +
+									'<option value="none">none</option>' +
+									'<option value="rightClick">Right Click</option>' +
+									'<option value="spinner">Spinner</option>' +
+								'</select>' +
+								' <label for="dynamicMen">Dynamic Menu System (select type)</label>' +
+								' <span class="settingDesc">Display a dropdown navigation menu for the site</span>'+
+							'</p>' +
+							
+							'<p id="customCSS">' +
+								'<span>Custom CSS</span>' +
+								' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
+								'<br /><textarea id="cusCSS" style="width: 500px; height: 300px; margin:0 auto;"></textarea>' +
+							'</p>' + 
+							
+						'</div>' +
+						
+					'</div>' +
 					
-					'<p id="customWPTheme">' +
-						'<select name="s_customtheme" id="s_customtheme">' +
-							'<option value="">Default (by Simon Wright)</option>' +
-							'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
-							'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' +
-							'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
-							'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
-							'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
-							'<option value="http://phyco.name/wpplus/wpclassic2011/css/core.css">WP Classic (by Phyco)</option>' +
-						'</select>' +
-						'<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
-					'</p>' +
-					
-					'<p id="noTextShadow">' +
-						'<input type="checkbox" name="textShadow" id="textShadow">' +
-						'<label for="textShadow">Disable all <tt>text-shadow</tt> CSS attributes (FF 3.5+ only).</label>' +
-					'</p>' +
-					
-					'<p id="whirlpoolBreadcrumbFont">' +
-						'<select name="whirlpoolBreadcrumbF" id="whirlpoolBreadcrumbF">' +
-							'<option value="default font">default font</option>' +
-							'<option value="Verdana">Verdana</option>' +
-							'<option value="Arial">Arial</option>' +
-							'<option value="Georgia">Georgia</option>' +
-							'<option value="Tahoma">Tahoma</option>' +
-							'<option value="Trebuchet MS">Trebuchet MS</option>' +
-						'</select>' +
-						'<label for="whirlpoolBreadcrumbF">Change the Breadcrumb Font.</label>' +
-					'</p>' +
-					
-					'<p id="whirlpoolSidemenuFont">' +
-						'<select name="whirlpoolSidemenuF" id="whirlpoolSidemenuF">' +
-							'<option value="default font">default font</option>' +
-							'<option value="Verdana">Verdana</option>' +
-							'<option value="Arial">Arial</option>' +
-							'<option value="Georgia">Georgia</option>' +
-							'<option value="Tahoma">Tahoma</option>' +
-							'<option value="Trebuchet MS">Trebuchet MS</option>' +
-							'</select>' +
-						'<label for="whirlpoolSidemenuF">Change the Sidemenu Font.</label>' +
-					'</p>' +
-					
-					'<p id="showWhirlpoolFooterLinks">' +
-						'<input type="checkbox" name="showWhirlpoolFooterL" id="showWhirlpoolFooterL">' +
-						'<label for="showWhirlpoolFooterL">Show Whirlpool Footer Links.</label>' +
-					'</p>' +
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Users</b></p>' +
+						'<div class="subSettings_content">' +
+						
+							'<p id="hide_closed_profile">' +
+								'<input type="checkbox" name="hcp" id="hcp">' +
+								' <label for="hcp">Hide closed threads on user profiles</label>' +
+							'</p>' +
+							
+							'<p id="postsPerDay">' +
+								'<input type="checkbox" name="postsPerDay_text" id="postsPerDay_id">' +
+								' <label for="postsPerDay_id">Enable "Posts per day" statistic</label>' +
+							'</p>' +
+							
+							'<p id="userpageInfoToggle">' +
+								'<input type="checkbox" name="upageInfoToggle" id="upageInfoToggle">' +
+								'<label for="upageInfoToggle">Hide/Toggle user info</label>' +
+							'</p> ' +
+							
+							'<p id="recentActivityDays">' +
+								'<select name="recentActivityD" id="recentActivityD">' +
+									'<option value="1">1 Day</option>' +
+									'<option value="3">3 Days</option>' +
+									'<option value="7">7 Days</option>' +
+									'<option value="14">14 Days</option>' +
+									'<option value="30">30 Days</option>' +
+									'<option value="60">60 Days</option>' +
+									'<option value="120">120 Days</option>' +
+								'</select>' +
+								' <label for="recentActivityD">Default amount of recent activity to display on a user page</label>' +
+							'</p>';
+							
+							if(!notFirefox){
+								this.settingsHTML = this.settingsHTML + '<p id="userNotes">' +
+									'<input type="checkbox" name="userNotesBox" id="userNotesBox">' +
+									' <label for="userNotesBox">User Notes</label>' +
+								'</p> ';
+							}
+						
+							this.settingsHTML = this.settingsHTML + '<p id="reset_aura_vote">' +
+								'<input type="checkbox" name="reset_aura_vote" id="reset_aura_vote_checkbox">' +
+								' <label for="reset_aura_vote_checkbox">Add an Aura Reset smiley (?)</label>' +
+							'</p> ' +
+							
+							'<p id="whim_archive_sort">' +
+								'<input type="checkbox" name="archive_sor" id="archive_sor">' +
+								'<label for="archive_sor">Sort Whim archives in alphabetical order</label>' +
+							'</p>' +
+							
+						 '</div>' +
+					'</div>' +
+						
 
-					'<p id="enableWideWhirlpool">' +
-						'<input type="checkbox" name="enableWideWh" id="enableWideWh">' +
-						'<label for="enableWideWh">Make Whirlpool Forums Wide to fit widescreen.</label>' +
-					'</p>' +
+				'</div>' +
 
-					'<p id="penaltyBoxBackground">' +
-						'<input type="checkbox" name="penaltyBoxB" id="penaltyBoxB">' +
-						'<label for="penaltyBoxB">Highlight when a user is in the penalty box.</label>' +
-					'</p> ' +
-
-					'<p id="whimAlertNotice">' +
-						'<input type="checkbox" name="wAlertNotice" id="wAlertNotice">' +
-						'<label for="wAlertNotice">Show an alert notice at the top of the page when you have received a new WHIM</label>' +
-					'</p> ' +
-
-					'<p id="userpageInfoToggle">' +
-						'<input type="checkbox" name="upageInfoToggle" id="upageInfoToggle">' +
-						'<label for="upageInfoToggle">Hide/Toggle user info on user pages.</label>' +
-					'</p> ' +
-					
-					'<p id="hideDRThreads">' +
-						'<input type="checkbox" name="hideDRT" id="hideDRT">' +
-						'<label for="hideDRT">Hide Deleted/Removed Threads in forum view</label>' +
-					'</p>  ' +
-					
-					'<p id="hideMVThreads">' +
-						'<input type="checkbox" name="hideMVT" id="hideMVT">' +
-						'<label for="hideMVT">Hide Moved Threads in forum view</label>' +
-					'</p> ' +
-					
-					'<p id="hideDelPosts">' +
-						'<input type="checkbox" name="hideDelPost" id="hideDelPost">' +
-						'<label for="hideDelPost">Hide deleted posts in threads.</label>' +
-					'</p>  ' +
-					
-					'<p id="floatSidebar">' +
-						'<input type="checkbox" name="enablefloatBar" id="enablefloatBar">' +
-						'<label for="enablefloatBar">Floats the sidebar as you scroll. <em>Note: May not work correctly with some screen resolutions without using Widescreen Mode.</em></label>' +
-					'</p>    ' +
-					
-					'<p id="superBar">' +
-						'<input type="checkbox" name="enablesuperBar" id="enablesuperBar">' +
-						'<label for="enablesuperBar">Adds a Sticky notes section to the sidebar (may be buggy).</label>' +
-					'</p>    ' +
-					
-					'<p id="postsPerDay">' +
-						'<input type="checkbox" name="enablesuperBar" id="enablesuperBar">' +
-						'<label for="enablesuperBar">Enable "Posts per day" statistic on user pages.</label>' +
-					'</p>  ' +
-					
-					'<p id="postAlign">' +
-						'<select name="postAl" id="postAl">' +
-							'<option value="middle">middle</option>' +
-							'<option value="top">top</option>' +
-						'</select>     ' +
-						'<label for="postAl">Aligns the text in a post to the top or middle.</label>' +
-					'</p>' +
-					
-					'<p id="lastReadTracker">' +
-						'<input type="checkbox" name="lastReadT" id="lastReadT">' +
-						'<label for="lastReadT">Turns WLR Last Read Tracker on or off.</label>' +
-					'</p>     ' +
-					
-					'<p id="trackerPostBackgroundColour">' +
-						'<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' +
-						'<label for="trackerPostBackgroundC">Highlighted Posts Colour</label>' +
-					'</p> ' +
-
-					'<p id="newPostBackgroundColour">' +
-						'<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' +
-						'<label for="newPostBackgroundC">New Posts Thread Colour</label>' +
-					'</p>  ' +
-					
-					'<p id="noNewPostBackgroundColour">' +
-						'<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' +
-						'<label for="noNewPostBackgroundC">No New Posts Thread Colour</label>' +
-					'</p>       ' +
+				'<div style="display:none;" class="wlrtabmenuDivs">' +
 				
-					'<p id="onlyEndSquare">' +
-						'<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' +
-						'<label for="onlyEndSq">Only colour end square </label>' +
-					'</p> ' +
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
+						'<div class="subSettings_content">' +
+							'<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts</p>' +
+						
+							'<p id="lastReadTracker">' +
+								'<input type="checkbox" name="lastReadT" id="lastReadT">' +
+								' <label for="lastReadT">Activate tracker</label>' +
+							'</p>     ' +
+							
+							'<p id="newPostBackgroundColour">' +
+								'<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' +
+								' <label for="newPostBackgroundC">Unread Posts colour</label>' +
+								' <span class="settingDesc">Used to highlight threads containing posts you haven\'t read</span>'+
+							'</p>  ' +
+							
+							'<p id="noNewPostBackgroundColour">' +
+								'<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' +
+								' <label for="noNewPostBackgroundC">No Unread Posts colour</label>' +
+								' <span class="settingDesc">Used to highlight threads containing no unread posts</span>'+
+							'</p>       ' +
+						
+							'<p id="onlyEndSquare">' +
+								'<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' +
+								' <label for="onlyEndSq">Colour end square </label>' +
+								' <span class="settingDesc">Just highlight the end square of tracked threads</span>'+
+							'</p> ' +
+							
+							'<p id="dontTrackStickyThreads">' +
+								'<input type="checkbox" name="dontTrackStickyT" id="dontTrackStickyT">' +
+								' <label for="dontTrackStickyT">Don\'t highlight sticky threads</label>' +
+							'</p>' +
+							
+							'<p id="trackerPostBackgroundColour">' +
+								'<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' +
+								' <label for="trackerPostBackgroundC">Post Highlight Color (Posts Pages)</label>' +
+								' <span class="settingDesc">Used to highlight posts (right most column) on posts pages</span>'+
+							'</p> ' +
+							
+							'<p id="styleFlip">' +
+								'<input type="checkbox" name="styleFl" id="styleFl">' +
+								' <label for="styleFl">Highlight unread posts instead of read posts (Posts Pages)</label>' +
+							'</p>    ' +
+							
 
-					'<p id="styleFlip">' +
-						'<input type="checkbox" name="styleFl" id="styleFl">' +
-						'<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
-					'</p>    ' +
+						'</div>' +
+						
+					'</div>' +
 					
-					'<p id="dontTrackStickyThreads">' +
-						'<input type="checkbox" name="dontTrackStickyT" id="dontTrackStickyT">' +
-						'<label for="dontTrackStickyT">Don\'t track sticky threads</label>' +
-					'</p>' +
-					
-					'<p id="lastPost">' +
-						'<input type="checkbox" name="lastPos" id="lastPos">' +
-						'<label for="lastPos">Go to the last post in the thread after posting</label>' +
-					'</p>' +
-					
-					'<p id="recentActivityOverlay">' +
-						'<input type="checkbox" name="recentActivityOverlay_check" id="recentActivityOverlay_id">' +
-						'<label for="recentActivityOverlay_id">Activate the Recent Activity Overlay</label>' +
-					'</p>' +
-					
-					'<p id="whirlpoolAPIKey">' +
-						'<input type="text" name="whirlpoolAPIKey_text" id="whirlpoolAPIKey_id">' +
-						'<label for="whirlpoolAPIKey_id">Your Whirlpool API Key (needed for Recent Activity Overlay)</label>' +
-					'</p>' +
-					
-					'<p id="recentActivityOverlayDays">' +
-						'<select name="recentActivityOverlayDays_select" id="recentActivityOverlayDays_id">' +
-							'<option value="1">1</option>' +
-							'<option value="3">3</option>' +
-							'<option value="7">7</option>' +
-							'<option value="14">14</option>' +
-							'<option value="30">30</option>' +
-							'<option value="60">60</option>' +
-							'<option value="120">120</option>' +
-						'</select>' +
-						'<label for="recentActivityOverlayDays_id">How much of your recent activity to display (in days)</label>' +
-					'</p>' +
-					
-					'<br/>' +
-				'</div>' +
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Thread Settings</b></p>' +
+						'<div class="subSettings_content">' +
+						
+							'<p id="hideForumIDs">' +
+								'<input type="text" name="hfids" id="hfids">' +
+								' <label for="hfids">Forums to hide (on front page) </label>' +
+								' <span class="settingDesc">Enter the ID\'s of the forums you want to hide (eg. "35 92 137")</span>'+
+							'</p> ' +
 
-				'<div id="customCSSTab" style="display:none;float:left;border:3px solid #333;background-color:#EEEEEE;height:440px;width:795px;margin-bottom:5px;overflow:hidden;" class="wlrtabmenuDivs">' +
-					'<p id="customCSS" style="width:100%;height:100%;float:left;overflow-x:hidden;overflow-y:scroll;">' +
-						'<textarea id="cusCSS" style="width:760px;height:408px;float:left;"></textarea>' +
-					'</p>' +   
+							'<p id="hideDRThreads">' +
+								'<input type="checkbox" name="hideDRT" id="hideDRT">' +
+								'<label for="hideDRT">Hide Deleted Threads in forums</label>' +
+							'</p>  ' +
+							
+							'<p id="hideMVThreads">' +
+								'<input type="checkbox" name="hideMVT" id="hideMVT">' +
+								'<label for="hideMVT">Hide Moved Threads in forums</label>' +
+							'</p> ' +
+						
+							'<p id="unanswered_threads">' +
+								'<input type="checkbox" name="unansweredThreads" id="unansweredThreads">' +
+								' <label for="unansweredThreads">Link to Unanswered Threads</label>' +
+								' <span class="settingDesc">Adds a link to only display unanswered threads after the forum name</span>'+
+							'</p>' +
+							
+							'<p id="noGluteusMaximus">' +
+								'<input type="checkbox" name="noGluteusM" id="noGluteusM">' +
+								'<label for="noGluteusM">Make the links on the main page of Whirlpool go to the start of the thread</label>' +
+							'</p>' +
+							
+							'<p class="description tabDescription">These settings add links to display only posts from certain users</p>' +
+							
+							'<p id="opOnlyView">' +
+								'<input type="checkbox" name="onlyOp" id="onlyOp">' +
+								' <label for="onlyOp">OP posts</label>' +
+							'</p>' +
+							
+							'<p id="moderatorPostView">' +
+								'<input type="checkbox" name="moderatorPostV" id="moderatorPostV">' +
+								' <label for="moderatorPostV">Moderator posts</label>' +
+							'</p>' +
+							
+							'<p id="representativePostView">' +
+								'<input type="checkbox" name="representativePostV" id="representativePostV">' +
+								' <label for="representativePostV">Rep posts</label>' +
+							'</p>' +
+							
+							'<p id="threadArchiveView">' +
+								'<input type="checkbox" name="threadArchiveV" id="threadArchiveV">' +
+								' <label for="threadArchiveV">Thread Archive View</label>' +
+							'</p>' +
+							
+							'<p id="longThreadView">' +
+								'<input type="checkbox" name="longThreadV" id="longThreadV">' +
+								' <label for="longThreadV">Long Thread View</label>' +
+							'</p>' +
+						
+						'</div>' +
+					'</div>' +
+					
 				'</div>' +
 				
-				'<div id="hiddenUsersTab" style="display:none;float:left;border:3px solid #333;background-color:#EEEEEE;height:440px;width:795px;margin-bottom:5px;overflow-x:hidden;overflow-y:scroll;" class="wlrtabmenuDivs">' +
+				'<div style="display:none;" class="wlrtabmenuDivs">' +
+					
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Quick Reply and Inline Edit</b></p>' +
+						'<div class="subSettings_content">' +
+						
+							'<p id="quickReplybox">' +
+								'<input type="checkbox" name="quickRepb" id="quickRepb">' +
+								' <label for="quickRepb">Quick Reply</label>' +
+								' <span class="settingDesc">Adds a Quick Reply box to the bottom of each page</span>'+
+							'</p>' +
+							
+							'<p id="autoPreview">' +
+								'<input type="checkbox" name="autoPr" id="autoPr">' +
+								' <label for="autoPr">Auto Preview</label>' +
+								' <span class="settingDesc">Automatically preview what you are typing in the quick reply box</span>'+
+							'</p>' +
+							
+							'<p id="lastPost">' +
+								'<input type="checkbox" name="lastPos" id="lastPos">' +
+								'<label for="lastPos">Go to the last post in the thread after posting</label>' +
+							'</p>' +
+							
+							'<p id="autoSubscribe">' +
+								'<input type="checkbox" name="autoSubs" id="autoSubs">' +
+								' <label for="autoSubs">Automatically subscribe to a thread after posting</label>' +
+							'</p>' +
+							
+							'<p id="simple_backup">' +
+								'<input type="checkbox" name="simple_backup" id="simple_backup">' +
+								' <label for="simple_backup">Reply backup</label>' +
+								' <span class="settingDesc">Store a backup of the reply you are typing</span>'+
+							'</p>' +
+							
+							'<p id="editInPlace">' +
+								'<input type="checkbox" name="editInP" id="editInP">' +
+								' <label for="editInP">Inline Edit</label>' +
+								' <span class="settingDesc">Places (quick edit) links next to your posts in threads</span>'+
+							'</p>' +
+						
+						'</div>' +
+					'</div>' +
+					
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Display and Formatting Options</b></p>' +
+						'<div class="subSettings_content">' +
+						
+							'<p id="emoticons">' +
+								'<input type="checkbox" name="smile" id="smile">' +
+								' <label for="smile">Display Image Emoticons (Smilies)</label>' +
+							'</p>' +
+							
+							'<p id="emoticonsBlue">' +
+								'<input type="checkbox" name="smileb" id="smileb">' +
+								' <label for="smileb">Use blue smilies</label>' +
+							'</p>' +
+							
+							'<p id="inlineImages">' +
+								'<input type="checkbox" name="inlineI" id="inlineI">' +
+								' <label for="inlineI">Inline Images</label>' +
+								' <span class="settingDesc">Converts image links into images</span>'+
+							'</p>' +
+							
+							'<p id="inlineVideos">' +
+								'<input type="checkbox" name="inlineV" id="inlineV">' +
+								' <label for="inlineV">Inline Videos</label>' +
+								' <span class="settingDesc">Converts Youtube links into videos</span>'+
+							'</p>  ' +
+							
+							'<p id="inlinePages">' +
+								'<input type="checkbox" name="inlinePages" id="inlinePages">' +
+								' <label for="inlinePages">Inline Links</label>' +
+								' <span class="settingDesc">Adds an option to view a link inside the page</span>'+
+							'</p> ' +
+							
+							'<p id="syntaxHighlight">' +
+								'<input type="checkbox" name="syntaxHighlight" id="syntaxHighlight">' +
+								' <label for="syntaxHighlight">Syntax Highlighting for code blocks</label>' +
+							'</p> ' +
+						
+							'<p id="whirlcodeinWikiWhimNewThread">' +
+								'<input type="checkbox" name="whirlcodeinWikiWhimNewT" id="whirlcodeinWikiWhimNewT">' +
+								' <label for="whirlcodeinWikiWhimNewT">Add Whirlcode buttons when creating a new thread (also in wiki)</label>' +
+							'</p>' +
+							
+							'<p id="hideDelPosts">' +
+								'<input type="checkbox" name="hideDelPost" id="hideDelPost">' +
+								' <label for="hideDelPost">Hide deleted posts</label>' +
+							'</p>  ' +
+									
+							'<p id="watchedThreadsAlert">' +
+								'<select name="s_threadalert" id="s_threadAlert">' +
+									'<option value="default">None</option>' +
+									'<option value="watched">Go to watched threads</option>' +
+									'<option value="thread">Return to the thread</option>' +
+								'</select>' +
+								
+								' <label for="s_threadAlert">Action to perform when watching a thread</label>' +
+							'</p> ' +
+						'</div>' +
+					'</div>' +
+					
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Avatars</b></p>' +
+						'<div class="subSettings_content">' +
+						
+							'<p class="tabDescription">To add an avatar, upload it to <a href="http://tinypic.com">tinypic.com</a>, and put the direct url in the field below.<br />To remove your avatar, set the field to blank</p>' +
+							
+							'<div id="currentUserAvatar"></div>' +
+							
+							'<p style="text-align: center; border: none;"><input style="width: 300px;" id="currentUserAvatar_url" /></p>' +
+														
+							'<p id="staticAvatars" style="border:none; padding:0;">' +
+								'<input type="checkbox" name="staticAv" id="staticAv">' +
+								' <label for="staticAv">Display Static avatars</label>' +
+							'</p>' +
+
+							'<p id="animatedAvatars" style="border:none; padding:0;">' +
+								'<input type="checkbox" name="animatedAv" id="animatedAv">' +
+								' <label for="animatedAv">Display Animated avatars</label>' +
+							'</p>' +
+								
+							'</table>' + 
+						'</div>' +
+					'</div>' +
+					
+					'<div class="subSettings">' +
+						'<p class="subSettings_heading description"><b>Hide Users</b></p>' +
+						'<div class="subSettings_content">' +
+						
+							'<p id="ignoreUser">' +
+								'<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' +
+								'<label for="ignoreUserB">Adds an option to hide posts from users (next to aura)</label>' +
+							'</p>' +
+							 
+							'<p id="removeIgnoredUsers">' +
+								'<input type="checkbox" name="removeIgnoredUsersB" id="removeIgnoredUsersB">' +
+								'<label for="removeIgnoredUsersB">Remove any indication of ignored users</label>' +
+							'</p>' + 
+
+							'<p class="description">Currently Hidden Users: </p>' +
+							'<p id="hiddenUsersTab"></p>' +
+							
+						'</div>' +
+					'</div>' +
+					
 				'</div>' +
 
+				'<div style="display:none;overflow:hidden;" class="wlrtabmenuDivs">' +
+				
+					'<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
+					'<p class="description">The best way to get help is to post in the <a href="http://forums.whirlpool.net.au/forum/?action=threads_search&q=WP%2B+Script&f=35">latest Whirlpool Plus thread</a> in Feedback. This is also a good place to request new features. </p>' +
+					'<p class="description">Another good source of information is the <a href="http://whirlpool.net.au/wiki/whirlpool_plus">wiki article<a>.</p>' +
+					'<p class="description">The script is maintained by <a href="http://forums.whirlpool.net.au/user/272563">tbwd</a>, so you can also whim him.</p>' +
+				
+					'<p class="description"><b>Privacy</b></p>' +
+					'<p class="description">As stated in the wiki article, a user script like Whirlpool Plus could possibly be used to steal user information.  To our knowledge, there is no such code in this script. </p>' +
+					'<p class="description">The script relies on an external server to run the avatars and synchronisation. This server (endorph.net) is operated by <a href="http://forums.whirlpool.net.au/user/272563">tbwd</a>. Both these services use your API key to validate your identity, but do not store this key.</p>' +
+
+				
+					'<p class="description"><b>About Whirlpool Plus</b></p>' +
+					'<p class="description">Whirlpool Plus was created by various members of the Whirlpool community to add extra features to the Whirlpool Forums. Many people have contributed to the script- see the wiki article for credits.</p>' +
+				
+				'</div>' +
+				
+				'<button id="resetWLR" style="float: left; margin-top:6px; ">Reset Settings</button>'+
+				
+				'<div style="margin: 6px 10px 5px 197px; float: left; color: #fff;">Installed Script Version: ' + version +	'</div>' +
+				
 				'<button id="saveWLR" style="float:right;margin-top:6px;">Save</button>' +
 
 				'<button href="#" id="closeWlrSettingsModal" style="float:right;margin-top:6px;" title="close">Cancel</button>' +
@@ -2348,153 +2771,201 @@ try {
 				'<br />' +
 				
 			'</div>';
-
 			
-			$('#wpsettingslink').click(function () {
+			$('#wpsettingslink').click(function(){ wlrSettings.dialog(); return false; });
 
-				$('body').append('<div id="wlrsettingsoverlay" style="height: 100%; width: 100%; position: fixed; left: 0pt; top: 0pt; z-index: 2999; opacity: 0.5; background-color:#000000;"/>').append(settingsHTML);
+		},
+		
+		userAvatar : '',
+		
+		dialog : function() {
+			$('body').append('<div id="wlrsettingsoverlay" style="height: 100%; width: 100%; position: fixed; left: 0pt; top: 0pt; z-index: 2999; opacity: 0.5; background-color:#000000;"/>').append(this.settingsHTML);
 
-				var custCSS = $('#cusCSS');
-				var newP = $('<p id="hiddenUsersArr">');
-				var newUl = $('<ul>');
-				newP.append(newUl);
-				$('#hiddenUsersTab').append(newP);
+			$('#syncActivated_id').change(function(){
+				if(this.checked){
+					$('.syncSetting').prop('disabled','');
+				}else{
+					$('.syncSetting').prop('disabled','disabled');
+				}
+			});
+			
+			$('.subSettings_heading').click(function(){
+				$(this).parent().children('.subSettings_content').toggle();
+			});
+			
+			var custCSS = $('#cusCSS');
+			var newP = $('<p id="hiddenUsersArr">');
+			var newUl = $('<ul>');
+			newP.append(newUl);
+			$('#hiddenUsersTab').append(newP);
 
-				$('#wlrWikiLink').mouseup(function () {
-					GM_openInTab('http://whirlpool.net.au/wiki/?tag=whirlpool_plus');
-				});
+			var wmT = $('.wlrtabmenuTabs');
+			var wmD = $('.wlrtabmenuDivs');
+			wmT.click(function () {
 
-				var wmT = $('.wlrtabmenuTabs');
-				var wmD = $('.wlrtabmenuDivs');
-				wmT.click(function () {
+				wmT.removeClass('active');
+				$(this).addClass('active');
+				wmD.hide();
+				wmD.eq(wmT.index(this)).show();
+				return false;
 
-					wmT.removeClass('active');
-					$(this).addClass('active');
-					wmD.hide();
-					wmD.eq(wmT.index(this)).show();
-					return false;
-
-				});
+			});
 
 
-				$('#closeWlrSettingsModal').mouseup(function () {
-					$('#wlrSettingsDiv, #wlrsettingsoverlay').remove();
-				});
-				$('.wlrInfo').click(function () { //info ...
-					return false;
-				});
+			$('#closeWlrSettingsModal').mouseup(function () {
+				$('#wlrSettingsDiv, #wlrsettingsoverlay').remove();
+			});
+			
+			avatar.getUserAvatar(user.id,function(r){
+				var url = r.responseText;
 				
+				if(url != ''){
+					$('#currentUserAvatar').css('background-image','url("' + url + '")');
+					$('#currentUserAvatar_url').val(url);
+					
+					wlrSettings.userAvatar = url;
+					
+				}
+			});
+			
+			
+			
 
-				function iterOverSettings(getOrSet) {
+			function iterOverSettings(getOrSet) {
 
-					$('#wlrSettingsDiv p').each(function (i) {
+				$('#wlrSettingsDiv p').not('.description').each(function (i) {
 
-						var spaThis = $(this);
+					var spaThis = $(this);
 
-						var inp = spaThis.children().eq(0);
-						var spID = spaThis.attr('id');
-						var getG = Whirlpool.get(spID);
-						
-						if(typeof inp[0] != 'undefined'){
-							if (inp[0].nodeName === "INPUT") {
+					var inp = spaThis.children().eq(0);
+					var spID = spaThis.prop('id');
+					var getG = Whirlpool.get(spID);
+					
+					if(typeof inp[0] != 'undefined'){
+						if (inp[0].nodeName === "INPUT") {
 
-								if (inp[0].type === "checkbox") {
+							if (inp[0].type === "checkbox") {
 
-									if (getOrSet === 'get') {
-										if (getG === 'true') {
+								if (getOrSet === 'get') {
+									if (getG === 'true') {
 
-											inp.attr('checked', 'checked');
-
-										}
-									} else {
-
-										if (inp.attr('checked')) {
-											docs[spID] = 'true';
-										} else {
-											docs[spID] = 'false';
-										}
-										Whirlpool.set(spID, docs[spID]);
+										inp.prop('checked', 'checked');
 
 									}
+								} else {
 
-								} else if (inp[0].type === "password" || inp[0].type === "text") {
-
-									if (getOrSet === 'get') {
-										inp.val(decodeURIComponent(getG));
+									if (inp.prop('checked')) {
+										docs[spID] = 'true';
 									} else {
-
-										docs[spID] = encodeURIComponent(inp.val());
-										Whirlpool.set(spID, docs[spID]);
+										docs[spID] = 'false';
 									}
+									Whirlpool.set(spID, docs[spID]);
 
 								}
 
-							} else if (inp[0].nodeName === "SELECT") {
-								inp.children('option').each(function () {
-									var optThis = $(this);
+							} else if (inp[0].type === "password" || inp[0].type === "text") {
 
-									if (getOrSet === 'get') {
-										if (getG === optThis.attr('value')) {
+								if (getOrSet === 'get') {
+									inp.val(decodeURIComponent(getG));
+								} else {
 
-											optThis.attr('selected', 'selected');
-										} else if (optThis.attr('selected')) {
-											optThis.removeAttr('selected');
-										}
-									} else {
-										if (optThis.attr('selected')) {
-											docs[spID] = optThis.attr('value');
+									docs[spID] = encodeURIComponent(inp.val());
+									
+									if(spID == 'syncServer' && encodeURIComponent(inp.val()) != Whirlpool.get('syncServer')){
+										Whirlpool.set('sync_lastSync',0);
+									}
+									
+									if(spID == 'syncEncKey' && encodeURIComponent(inp.val()) != Whirlpool.get('syncEncKey')){
+										if(confirm('It appears you have changed your sync encryption password. Note that you must have deleted and recreated your sync account for this to work. For more information, see the wiki article.')){
 											Whirlpool.set(spID, docs[spID]);
+										}else{
+											alert('Encryption Password reverted');
 										}
+									}else{
+										Whirlpool.set(spID, docs[spID]);
 									}
-								});
+									
+									
+								}
 
-							} else if (inp[0].nodeName === "UL") {
+							}
 
-								if (docs.hiddenUsersArr.length) {
-									var hiddUsersArr1 = docs.hiddenUsersArr.split('#');
-									hiddUsersArr1.shift();
-									if (getOrSet === 'get') {
-										$(hiddUsersArr1).each(function () {
-											inp.append('<li>User: <a href="http://forums.whirlpool.net.au/user/' + this + '">#' + this + '</a>\'s posts are currently hidden.&nbsp;&nbsp;<input type="checkbox" ' + 'uNumNoHide="' + this + '" name="noHide" class="noHide" value="noHide">&nbsp;&nbsp; - ' + 'Unhide User</li>');
+						} else if (inp[0].nodeName === "SELECT") {
+							inp.children('option').each(function () {
+								var optThis = $(this);
 
-										});
-									} else {
+								if (getOrSet === 'get') {
+									if (getG === optThis.val()) {
 
-										inp.find("input:checked").each(function () {
-											var toReplace = '#' + $(this).attr('uNumNoHide');
-											docs.hiddenUsersArr = docs.hiddenUsersArr.replace(toReplace, '');
-											Whirlpool.set('hiddenUsersArr', docs.hiddenUsersArr);
-
-										});
+										optThis.prop('selected', 'selected');
+									} else if (optThis.prop('selected')) {
+										optThis.removeAttr('selected');
 									}
+								} else {
+									if (optThis.prop('selected')) {
+										docs[spID] = optThis.val();
+										Whirlpool.set(spID, docs[spID]);
+									}
+								}
+							});
+
+						} else if (inp[0].nodeName === "UL") {
+							
+							
+							
+							if (docs.hiddenUsersArr.length) {
+								var hiddUsersArr1 = docs.hiddenUsersArr.split('#');
+								hiddUsersArr1.shift();
+								if (getOrSet === 'get') {
+									$(hiddUsersArr1).each(function () {
+										inp.append('<li>User: <a href="http://forums.whirlpool.net.au/user/' + this + '">#' + this + '</a>\'s posts are currently hidden.&nbsp;&nbsp;<input type="checkbox" ' + 'uNumNoHide="' + this + '" name="noHide" class="noHide" value="noHide">&nbsp;&nbsp; - ' + 'Unhide User</li>');
+
+									});
+								} else {
+
+									inp.find("input:checked").each(function () {
+										var toReplace = '#' + $(this).attr('uNumNoHide');
+										docs.hiddenUsersArr = docs.hiddenUsersArr.replace(toReplace, '');
+										Whirlpool.set('hiddenUsersArr', docs.hiddenUsersArr);
+
+									});
 								}
 							}
-						
 						}
-
-					});
-					if (getOrSet === 'get') {
-						custCSS.val(decodeURIComponent(docs.CSStextBox));
-					} else {
-						docs.CSStextBox = encodeURIComponent(custCSS.val());
-						Whirlpool.set('CSStextBox', docs.CSStextBox);
-						$('#wlrSettingsDiv, #wlrsettingsoverlay').remove();
+					
 					}
+
+				});
+				if (getOrSet === 'get') {
+					custCSS.val(decodeURIComponent(docs.CSStextBox));
+				} else {
+					docs.CSStextBox = encodeURIComponent(custCSS.val());
+					Whirlpool.set('CSStextBox', docs.CSStextBox);
+					$('#wlrSettingsDiv, #wlrsettingsoverlay').remove();
 				}
-				iterOverSettings('get');
-				$('.wlrsetbutUp').mouseup(function () {
-					var tBox1 = $(this).prev().prev();
-					tBox1.val((Number(tBox1.val()) + 1).toString());
-				});
-				$('.wlrsetbutDown').mouseup(function () {
-					var tBox2 = $(this).prev();
-					var currentVal = Number(tBox2.val());
-					if (currentVal > 0) {
-						tBox2.val((currentVal - 1).toString());
-					}
-				});
-				$('#resetWLR').mouseup(function () {
+			}
+			iterOverSettings('get');
+			
+			if($('#syncActivated_id').is(':checked')){
+				$('.syncSetting').prop('disabled','');
+			}else{
+				$('.syncSetting').prop('disabled','disabled');
+			}
+			
+			$('.wlrsetbutUp').mouseup(function () {
+				var tBox1 = $(this).prev().prev();
+				tBox1.val((Number(tBox1.val()) + 1).toString());
+			});
+			$('.wlrsetbutDown').mouseup(function () {
+				var tBox2 = $(this).prev();
+				var currentVal = Number(tBox2.val());
+				if (currentVal > 0) {
+					tBox2.val((currentVal - 1).toString());
+				}
+			});
+			$('#resetWLR').mouseup(function () {
 
+				if(confirm('Do you really want to reset everything? Data will be lost forever!')){
 					for (var l in gmDefaults) {
 
 						Whirlpool.set(l, gmDefaults[l]);
@@ -2503,27 +2974,53 @@ try {
 
 					}
 					iterOverSettings('get');
-
-				});
-				
-				
-				$('#saveWLR').mouseup(function () {
-					iterOverSettings('set');
-					location.reload( true );
-
-				});
-				return false;
+				}
 
 			});
+			
+			
+			$('#saveWLR').mouseup(function () {
+				
+				
+				var avatarUrl = $('#currentUserAvatar_url').val();
+				if(avatarUrl != wlrSettings.userAvatar){
+					var apiKey = $('#whirlpoolAPIKey_id').val();
+					if(apiKey == ''){
+						apiKey = prompt('As you haven\'t entered an API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
+					}
+					
+					Whirlpool.notify('Updating avatar.... Please wait',true,10000)
+					
+					avatar.updateAvatar(apiKey,avatarUrl,function(r){
+						if(r.status == 200 && (r.responseText == 'Avatar created/updated' || r.responseText == 'Avatar Removed')){
+							alert(r.responseText);
+						}else{
+							alert('Avatar Update Failed: ' + r.responseText)
+						}
+						
+						iterOverSettings('set');
+				
+						location.reload( true );
+					});
+					
+				}else{
+					iterOverSettings('set');
+					location.reload( true );
+				}
+				
 
+
+			});
+			
+			return false;
 
 		},
+		
 		firstRun: function () {
 
 			var ohHaiHTML = '<div id="ohHaiDiv" style="background-color:#EEEEEE;border:1px solid black;color:#333333;display:none;' + 'left:50%;margin-left:-300px;padding:12px;position:fixed;top:17%;width:600px;overflow:hidden;height:430px;' + 'display:block;z-index:3000;">' + '<a href="#" id="closeohHaiModal" style="float:right;font-weight:bold;font-size:2em;clear:both;color:black;">X</a><br /><br/>' + '<img src="' + server + 'png/welcome.png" alt="default.aspx2.jpg" />' + '</div>';
 			$('body').append('<div id="ohHaioverlay" style="height: 100%; width: 100%; position: fixed; left: 0pt; top: 0pt; z-index: 2999; opacity: 0.5; background-color:#000000;"/>').append(ohHaiHTML);
 
-			docs.WLRfirstRun = 'false';
 			Whirlpool.set('WLRfirstRun', 'false');
 
 			$('#closeohHaiModal').click(function () {
@@ -2588,7 +3085,7 @@ try {
 					
 						Whirlpool.set('textareraSave', '');
 						
-						if ($('#lastPost').attr('checked') && (docs.dUrl.indexOf("&p=-1#bottom") < 0) && (docs.dUrl.indexOf("&p=-1&#bottom") < 0)){
+						if ($('#lastPost').prop('checked') && (Whirlpool.url.indexOf("&p=-1#bottom") < 0) && (Whirlpool.url.indexOf("&p=-1&#bottom") < 0)){
 
 							docs.d.location = "http://forums.whirlpool.net.au/forum-replies.cfm?t=" + Whirlpool.threadNumber + "&p=-1&#bottom";
 
@@ -2607,7 +3104,7 @@ try {
 									var removeS = data.slice(data.lastIndexOf('<tr id="'));
 									$('#previewTR').remove();
 									var newTR = $(removeS.split('</tr>')[0] + '</tr>')
-									newTR.find(".bodypost a[href^=/forum/index.cfm?action=edit]" ).after( "<br><a class='wpp-edit'>(quick edit)</a>" ).css( "cursor", "pointer" );
+									newTR.find('.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" ).css( "cursor", "pointer" );
 									$('#replies tr[id^="r"]:last').after(newTR);
 									
 								}
@@ -2648,7 +3145,7 @@ try {
 
 				var opThis = $(this);
 
-				if (opThis.attr('checked')) {
+				if (opThis.prop('checked')) {
 
 					settingStr += '' + opThis.attr('wc2');
 
@@ -2694,30 +3191,26 @@ try {
 		});
 
 		docs.eh = getOptions('preview');
-		if (docs.autoPreview === 'true') {
+		if (Whirlpool.get('autoPreview') === 'true') {
 
-			$('#autoPreview').attr('checked', 'checked');
-
-		}
-		if (docs.lastPost === 'true') {
-
-			$('#lastPost').attr('checked', 'checked');
+			$('#autoPreview').prop('checked', 'checked');
 
 		}
-		if (docs.autoSubscribe === 'true') {
-
-			$('#autoSubscribe').attr('checked', 'checked');
-
+		if (Whirlpool.get('lastPost') === 'true') {
+			$('#lastPost').prop('checked', 'checked');
+		}
+		if (Whirlpool.get('autoSubscribe') === 'true') {
+			$('#autoSubscribe').prop('checked', 'checked');
 		}
 		oInpArr.click(function () {
 
 			var oIthis = $(this);
 			docs.eh = getOptions('preview');
-			var w, oIid = oIthis.attr("id");
+			var w, oIid = oIthis.prop("id");
 
 			if (oIid === 'autoPreview') {
 
-				if (oIthis.attr('checked')) {
+				if (oIthis.prop('checked')) {
 
 					Whirlpool.set('autoPreview', 'true');
 					docs.autoPreview = 'true';
@@ -2734,7 +3227,7 @@ try {
 
 			} else if (oIid === 'lastPost' || oIid === 'autoSubscribe') {
 
-				($(this).attr('checked')) ? w = 'true' : w = 'false';
+				($(this).prop('checked')) ? w = 'true' : w = 'false';
 
 				Whirlpool.set(oIid, w);
 				docs[oIid] = w;
@@ -2771,12 +3264,12 @@ try {
 				}
 
 				var qqtrParent = docs.repliesTR.eq(i);
-				var qqpre = qqtrParent.attr('id').split('r')[1];
+				var qqpre = qqtrParent.prop('id').split('r')[1];
 				var qquNam;
 
 				qqtrParent.find('span').each(function () {
 
-					if ($(this).attr('class') == 'bu_name') {
+					if ($(this).prop('class') == 'bu_name') {
 
 						qquNam = $(this).text();
 
@@ -2876,7 +3369,7 @@ try {
 
 			docs.q = $('#body');
 			docs.q.parent().before(wcWikiWhimNewThread.wwcButtons);
-			$('#wc_whirlurl, #wc_whirllink, #wc_siSearch').attr('disabled', 'disabled');
+			$('#wc_whirlurl, #wc_whirllink, #wc_siSearch').prop('disabled', 'disabled');
 			whirlC.buttonEvents("qqwcodeButtons", docs.q, whirlC.code());
 			docs.eh = 'pflwae';
 			docs.q.bind("focus keyup", function () {
@@ -2884,7 +3377,7 @@ try {
 				wcPrev.showPreview();
 
 			});
-			if (docs.dUrl.indexOf('rt=') > -1) {
+			if (Whirlpool.url.indexOf('rt=') > -1) {
 
 				var whimQuoteLink = document.createElement('a');
 				whimQuoteLink.innerHTML = 'Quote Whim';
@@ -2906,7 +3399,7 @@ try {
 		whimReply: function () {
 
 			docs.pTd3 = $('blockquote~div');
-			docs.pTd3.attr('style', 'background:#EEEEEE url(/img/forum/reply-eeeeee.gif) repeat-x scroll center bottom;' + 'border-bottom:1px solid #BBBBBB;' + 'border-top:2px solid #F2F2F2;' + 'padding:8px 12px 10px;' + 'vertical-align:middle;');
+			docs.pTd3.prop('style', 'background:#EEEEEE url(/img/forum/reply-eeeeee.gif) repeat-x scroll center bottom;' + 'border-bottom:1px solid #BBBBBB;' + 'border-top:2px solid #F2F2F2;' + 'padding:8px 12px 10px;' + 'vertical-align:middle;');
 			wcWikiWhimNewThread.sendShitToPreview();
 
 		},
@@ -2951,8 +3444,10 @@ try {
 			var uNumber = docs.uinfo.find('a')[0].href.split('/user/')[1];
 			var newUL2, unLi = $('<ul id="pmenu">');
 
-			unLi.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="http://forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+			unLi.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="http://forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="http://forums.whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
 
+			
+			
 			$('.forumlist').each(function () {
 
 				$(this).children().each(function () {
@@ -2975,7 +3470,7 @@ try {
 			});
 			unLi.find('*').addClass('notarget');
 			wlrMenu.unLi = unLi;
-
+			
 		},
 		rightClickMen: function () {
 
@@ -2987,6 +3482,7 @@ try {
 
 					wlrMenu.unLi.remove();
 					$('body').prepend(wlrMenu.unLi);
+					$('#settingsSpinnerLink').click(function(){ wlrSettings.dialog(); return false; })
 					$('#menuSpinner').remove();
 					wlrMenu.unLi[0].style.position = 'absolute';
 					wlrMenu.unLi[0].style.left = '' + e.pageX - 250 + 'px';
@@ -3009,6 +3505,7 @@ try {
 			wlrMenu.generateMenu();
 
 			$('body').prepend(wlrMenu.unLi);
+			$('#settingsSpinnerLink').click(function(){ wlrSettings.dialog(); return false; })
 			wlrMenu.unLi.css('margin', '25px 0 50px 5px');
 
 		}
@@ -3035,10 +3532,10 @@ try {
 		}
 
 
-		$('<img src="' + usrNtsPic + '"/>').attr({
+		$('<img src="' + usrNtsPic + '"/>').prop({
 			uNum: uNum,
 			title: 'User Note',
-			parentNum: 'parentNum' + trParent.attr('id')
+			parentNum: 'parentNum' + trParent.prop('id')
 		}).css({
 			'padding': '0 5px',
 			'cursor': 'pointer'
@@ -3048,7 +3545,7 @@ try {
 				var modalBackground = $('<div id="wlrsettingsoverlay" style="height: 100%; width: 100%; position: fixed; left: 0pt; top: 0pt; z-index: 2999; opacity: 0.5; background-color:#000000;"/>');
 				$('body').append(modalBackground);
 				var key, uNJ, ithis = $(this),
-					unThis = ithis.attr("uNum"),
+					unThis = ithis.prop("uNum"),
 					uN = Whirlpool.get('userNotesArr');
 
 				if (uN !== '{}') {
@@ -3068,7 +3565,7 @@ try {
 				closer.innerHTML = ' X ';
 
 				var diag = docs.d.createElement('div');
-				diag.setAttribute("clickerID", ithis.attr('parentNum'));
+				diag.setAttribute("clickerID", ithis.prop('parentNum'));
 				diag.setAttribute('title', 'User Note');
 				diag.setAttribute('style', 'background-color:#FFD27D;position:absolute;top:' + e.pageY + 'px;left:' + e.pageX + 'px;width: 250px; height: 150px;z-index: 3000;');
 
@@ -3095,14 +3592,14 @@ try {
 
 						delete uNJ[unThis];
 						Whirlpool.set('userNotesArr', uNJ.toSource().toString());
-						$('').attr('src', server + 'png/greennote.png');
+						$('').prop('src', server + 'png/greennote.png');
 
 
 					} else if (texValar !== '') {
 
 						uNJ[unThis] = texValar;
 						Whirlpool.set('userNotesArr', uNJ.toSource().toString());
-						$('').attr('src', server + 'png/greennote.png');
+						$('').prop('src', server + 'png/greennote.png');
 
 					}
 
@@ -3136,29 +3633,29 @@ try {
 		var futSub = $('.foot_subs:first');
 		var repl = $('#replies');
 		if (docs.threadArchiveView == 'true') {
-			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/archive/' + docs.threadNumber + '">Thread Archive</a>');
-			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/archive/' + docs.threadNumber + '">Thread Archive</a>');
+			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/archive/' + Whirlpool.threadNumber + '">Thread Archive</a>');
+			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/archive/' + Whirlpool.threadNumber + '">Thread Archive</a>');
 			if (repl[0].style.marginTop !== '10px') {
-				repl.attr('style', 'margin-Top:10px');
+				repl.prop('style', 'margin-Top:10px');
 			}
 
 		}
 		if (docs.longThreadView == 'true') {
-			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + docs.threadNumber + '&p=-2">Long Thread View</a>');
-			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + docs.threadNumber + '&p=-2">Long Thread View</a>');
+			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + Whirlpool.threadNumber + '&p=-2">Long Thread View</a>');
+			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + Whirlpool.threadNumber + '&p=-2">Long Thread View</a>');
 			if (repl[0].style.marginTop !== '10px') {
-				repl.attr('style', 'margin-Top:10px');
+				repl.prop('style', 'margin-Top:10px');
 			}
 
 		}
 		if (docs.opOnlyView == 'true') {
 			try {
 				var oppost = $('.op:first').parent().parent();
-				var opid = oppost.find('.bu_name').parent().attr('href').toString().replace('/user/', '');
-				wBP.append('<a class="bwatch oponly" href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + docs.threadNumber + '&ux=' + opid + '">OP Only</a>');
-				futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + docs.threadNumber + '&ux=' + opid + '">OP Only</a>');
+				var opid = oppost.find('.bu_name').parent().prop('href').toString().replace('/user/', '');
+				wBP.append('<a class="bwatch oponly" href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + Whirlpool.threadNumber + '&ux=' + opid + '">OP Only</a>');
+				futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?t=' + Whirlpool.threadNumber + '&ux=' + opid + '">OP Only</a>');
 				if (repl[0].style.marginTop !== '10px') {
-					repl.attr('style', 'margin-Top:10px');
+					repl.prop('style', 'margin-Top:10px');
 				}
 			} catch(e) {
 
@@ -3166,17 +3663,17 @@ try {
 
 		}
 		if (docs.moderatorPostView == 'true') {
-			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + docs.threadNumber + '">Mod Posts</a>');
-			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + docs.threadNumber + '">View moderator posts</a>');
+			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + Whirlpool.threadNumber + '">Mod Posts</a>');
+			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + Whirlpool.threadNumber + '">View moderator posts</a>');
 			if (repl[0].style.marginTop !== '10px') {
-				repl.attr('style', 'margin-Top:10px');
+				repl.prop('style', 'margin-Top:10px');
 			}
 		}
 		if (docs.representativePostView == 'true') {
-			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + docs.threadNumber + '">Rep Posts</a>');
-			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + docs.threadNumber + '">View representative posts</a>');
+			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + Whirlpool.threadNumber + '">Rep Posts</a>');
+			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + Whirlpool.threadNumber + '">View representative posts</a>');
 			if (repl[0].style.marginTop !== '10px') {
-				repl.attr('style', 'margin-Top:10px');
+				repl.prop('style', 'margin-Top:10px');
 			}
 		}
 
@@ -3187,7 +3684,7 @@ try {
 		if (!docs.q) {
 			docs.q = $('#body');
 		}
-		docs.q.css('width', 'auto').attr('rows', docs.whIMMessageTextAreaRows).attr('cols', docs.whIMMessageTextAreaCols);
+		docs.q.css('width', 'auto').prop('rows', docs.whIMMessageTextAreaRows).prop('cols', docs.whIMMessageTextAreaCols);
 
 	}
 
@@ -3205,7 +3702,7 @@ try {
 	function whimAlertNotice() {
 
 		if ($('#menu_whim').text()) {
-			Wp.notify('You have an unread <a href="http://whirlpool.net.au/whim/">whim</a>.', true, 15000);
+			Whirlpool.notify('You have an unread <a href="http://whirlpool.net.au/whim/">whim</a>.', true, 15000);
 		}
 
 	}
@@ -3233,7 +3730,7 @@ try {
 	}
 
 	function deletedThreadsCacheLink() {
-		var deletedThreadNumber = docs.dUrl.split('t=')[1].split('&')[0];
+		var deletedThreadNumber = Whirlpool.url.split('t=')[1].split('&')[0];
 		$('h2:last').append(' <a href="http://google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)');
 	}
 
@@ -3258,7 +3755,7 @@ try {
 
 	setGM();
 
-	if (docs.dUrl.indexOf('?a=subs-') > -1) {
+	if (Whirlpool.url.indexOf('?a=subs-') > -1) {
 		if (docs.watchedThreadsAlert == 'watched' ||
 document.referrer.indexOf('?action=watched') > -1) {
 			docs.d.location = 'http://forums.whirlpool.net.au/forum/?action=watched';
@@ -3268,60 +3765,62 @@ document.referrer.indexOf('?action=watched') == -1) {
 			history.go(-1);
 		}
 	}
-	if (docs.dUrl.indexOf('?a=priv-deleted') > -1) {
+	if (Whirlpool.url.indexOf('?a=priv-deleted') > -1) {
 		deletedThreadsCacheLink();
-	} else if (!docs.dUrl.match('alert')) {
+	} else if (!Whirlpool.url.match('alert')) {
 		wlrSettings.set();
 		loadTheme();
-		if (docs.WLRfirstRun === 'true') {
+		if (Whirlpool.get('WLRfirstRun') === 'true') {
 			wlrSettings.firstRun();
 		}
-		if (docs.whirlpoolSidemenuFont !== "default font") {
-			$('#menu').css('font-family', docs.whirlpoolSidemenuFont + ' !important');
+		if (Whirlpool.get('whirlpoolSidemenuFont') !== "default font") {
+			$('#menu').css('font-family', Whirlpool.get('whirlpoolSidemenuFont') + ' !important');
 		}
-		if (docs.whirlpoolBreadcrumbFont !== "default font") {
-			$('#breadcrumb').css('font-family', docs.whirlpoolBreadcrumbFont + ' !important');
+		if (Whirlpool.get('whirlpoolBreadcrumbFont') !== "default font") {
+			$('#breadcrumb').css('font-family', Whirlpool.get('whirlpoolBreadcrumbFont') + ' !important');
 		}
-		if (docs.dynamicMenuSystem == 'spinner') {
+		if (Whirlpool.get('dynamicMenuSystem') == 'spinner') {
 			wlrMenu.spinnerMen();
-		} else if (docs.dynamicMenuSystem == 'rightClick') {
+		} else if (Whirlpool.get('dynamicMenuSystem') == 'rightClick') {
 			wlrMenu.rightClickMen();
 		}
-		if (docs.showWhirlpoolFooterLinks === "false") {
+		if (Whirlpool.get('showWhirlpoolFooterLinks') === "false") {
 			$('#footer').hide();
 		}
 
-		if (docs.enableWideWhirlpool === "true") {
+		if (Whirlpool.get('enableWideWhirlpool') === "true") {
 			Whirlpool.css('#root, #footer {width: 99.5% !important;max-width: none !important;}' + '#content > span.shim2 {display: none !important;}body,html,#root{margin:0;padding:0;border:0;}');
 		}
-		if (docs.penaltyBoxBackground === "true") {
+		if (Whirlpool.get('penaltyBoxBackground') === "true") {
 			Whirlpool.css('tr.In_the_penalty_box > td.bodyuser {background-image:url(' + server + 'png/lightgradient.png)!important;background-repeat:repeat !important;');
 		}
 
-		if (docs.whimAlertNotice === "true") {
+		if (Whirlpool.get('whimAlertNotice') === "true") {
 			whimAlertNotice();
 		}
 	}
-	var fSecText = docs.dUrl.match('whirlpool.net.au/forum/');
+	var fSecText = Whirlpool.url.match('whirlpool.net.au/forum/');
 
-	if (docs.dUrl == 'http://forums.whirlpool.net.au/' || docs.dUrl == 'http://forums.whirlpool.net.au/index.cfm' || docs.dUrl == 'http://forums.whirlpool.net.au/forum/') {
+	if (Whirlpool.url == 'http://forums.whirlpool.net.au/' || Whirlpool.url == 'http://forums.whirlpool.net.au/index.cfm' || Whirlpool.url == 'http://forums.whirlpool.net.au/forum/') {
 		if (docs.noGluteusMaximus === 'true') {
 			noBottom();
 		}
 	}
-	if (docs.dUrl.match('forum-replies')) {
+	
+	if(Whirlpool.url.match('action=newthread')){
+		if (Whirlpool.get('autoSubscribe') === 'true') {
+			$('#modesu').prop('checked', 'checked');
+		}
+	}
+	
+	if (Whirlpool.url.match('forum-replies')) {
 		docs.repliesTR = $('#replies tr[id^="r"]:not([id^="review"])');
 		docs.repliesA = docs.repliesTR.find('a[title="a link to this specific post"]');
       
-		if (docs.dUrl.match('t=')) {
-			docs.threadNumber = docs.dUrl.split('t=')[1].split('&')[0].split('#')[0];
-		} else {
-			docs.threadNumber = docs.repliesA[0].href.split('t=')[1].split('&')[0].split('#')[0];
-		}
-		if (docs.quickReplybox === 'true') {
+		if (Whirlpool.get('quickReplybox') === 'true') {
 			quickQuote();
 		}
-		if (docs.hideDelPosts === 'true') {
+		if (Whirlpool.get('hideDelPosts') === 'true') {
 			hideDelPosts();
 		}
 		
@@ -3344,45 +3843,45 @@ document.referrer.indexOf('?action=watched') == -1) {
  
 		extraThreadLinks();
 
-	} else if (fSecText && docs.dUrl.split(fSecText[0])[1].length) {
-		if (docs.hideDRThreads === 'true') {
+	} else if (fSecText && Whirlpool.url.split(fSecText[0])[1].length) {
+		if (Whirlpool.get('hideDRThreads') === 'true') {
 			hideDelMov.delRem();
 		}
-		if (docs.hideMVThreads === 'true') {
+		if (Whirlpool.get('hideMVThreads') === 'true') {
 			hideDelMov.mv();
 		}
-	} else if (docs.dUrl.indexOf('/user/') > -1) {
+	} else if (Whirlpool.url.indexOf('/user/') > -1) {
 		whimSize();
 		if (docs.userpageInfoToggle === 'true') {
 			userpageInfoToggle();
 		}
 	}
 	
-	if (docs.dUrl.indexOf('whirlpool.net.au/whim/?action=read') > -1) {
+	if (Whirlpool.url.indexOf('whirlpool.net.au/whim/?action=read') > -1) {
 	
 		avatar.css();
 		
-		if (docs.staticAvatars === 'true') {
+		if (Whirlpool.get('staticAvatars') === 'true') {
 			avatar.avatariseRow($('tr:first'));
 		}
 		
 	}
 
 
-	if (docs.whirlcodeinWikiWhimNewThread === 'true') {
-		if (docs.dUrl.indexOf('/wiki/?action=edit&tag=') > -1 || docs.dUrl.indexOf('/wiki/index.cfm') > -1) {
+	if (Whirlpool.get('whirlcodeinWikiWhimNewThread') === 'true') {
+		if (Whirlpool.url.indexOf('/wiki/?action=edit&tag=') > -1 || Whirlpool.url.indexOf('/wiki/index.cfm') > -1) {
 			if($('#f_body').length == 1){
 				wcWikiWhimNewThread.wikiNewThread('#f_body');
 			}
-		} else if (docs.dUrl.indexOf('/forum/index.cfm?action=newthread') > -1) {
+		} else if (Whirlpool.url.indexOf('/forum/index.cfm?action=newthread') > -1) {
 			wcWikiWhimNewThread.wikiNewThread('#body');
-		} else if (docs.dUrl.indexOf('/forum/index.cfm?action=reply') > -1) {
+		} else if (Whirlpool.url.indexOf('/forum/index.cfm?action=reply') > -1) {
 			wcWikiWhimNewThread.wikiNewThread('#body');
-		} else if (docs.dUrl.indexOf('/forum/index.cfm?action=edit') > -1) {
+		} else if (Whirlpool.url.indexOf('/forum/index.cfm?action=edit') > -1) {
 			wcWikiWhimNewThread.wikiNewThread('#body');
 		}
 	}
-	if (docs.dUrl === 'http://forums.whirlpool.net.au/forum/?action=watched') {
+	if (Whirlpool.url === 'http://forums.whirlpool.net.au/forum/?action=watched') {
 		openwatchedThreadsInTabs();
 	}
 	
