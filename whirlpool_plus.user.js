@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.5
-// @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
-// @require       http://wpplus.tristanroberts.name/js/prettify.js
-// @require       http://wpplus.tristanroberts.name/js/lang-css.js
-// @require       http://wpplus.tristanroberts.name/js/lang-sql.js
-// @require	  	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=419
+// @version       4.3.6
+// @require       http://tristanroberts.name/projects/wp-plus/js/jquery-gm.js
+// @require       http://tristanroberts.name/projects/wp-plus/js/prettify.js
+// @require       http://tristanroberts.name/projects/wp-plus/js/lang-css.js
+// @require       http://tristanroberts.name/projects/wp-plus/js/lang-sql.js
+// @require	  	  http://tristanroberts.name/projects/wp-plus/js/jqdnr.pjs?version=419
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -16,38 +16,38 @@
 // @exclude       http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
 // @exclude       http://forums.whirlpool.net.au/forum-replies-print.cfm*
 // @exclude       http://forums.whirlpool.net.au/forum-replies-archive.cfm*
-// @resource	  emoticon_angry	http://wpplus.tristanroberts.name/png/angry.png
-// @resource	  emoticon_blushing	http://wpplus.tristanroberts.name/png/blushing.png
-// @resource	  emoticon_confused	http://wpplus.tristanroberts.name/png/confused.png
-// @resource	  emoticon_cool		http://wpplus.tristanroberts.name/png/cool.png
-// @resource	  emoticon_cry		http://wpplus.tristanroberts.name/png/crying.png
-// @resource	  emoticon_frown	http://wpplus.tristanroberts.name/png/frown.png
-// @resource	  emoticon_gasp		http://wpplus.tristanroberts.name/png/gasp.png
-// @resource	  emoticon_grin		http://wpplus.tristanroberts.name/png/grin.png
-// @resource	  emoticon_kiss		http://wpplus.tristanroberts.name/png/kiss.png
-// @resource	  emoticon_lips		http://wpplus.tristanroberts.name/png/lips.png
-// @resource	  emoticon_shout	http://wpplus.tristanroberts.name/png/shouting.png
-// @resource	  emoticon_sleep	http://wpplus.tristanroberts.name/png/sleeping.png
-// @resource	  emoticon_smile	http://wpplus.tristanroberts.name/png/smile.png
-// @resource	  emoticon_smirk	http://wpplus.tristanroberts.name/png/smirk.png
-// @resource	  emoticon_straight	http://wpplus.tristanroberts.name/png/straight.png
-// @resource	  emoticon_tongue	http://wpplus.tristanroberts.name/png/tongue.png
-// @resource	  emoticon_wink		http://wpplus.tristanroberts.name/png/wink.png
-// @resource	  emoticon_star		http://wpplus.tristanroberts.name/png/star.png
-// @resource	  old_blue_anxious	http://wpplus.tristanroberts.name/gif/anxious.gif
-// @resource	  old_blue_clown	http://wpplus.tristanroberts.name/gif/clown.gif
-// @resource	  old_blue_cool		http://wpplus.tristanroberts.name/gif/cool.gif
-// @resource	  old_blue_crazy	http://wpplus.tristanroberts.name/gif/crazy.gif
-// @resource	  old_blue_eyes		http://wpplus.tristanroberts.name/gif/eyes.gif
-// @resource	  old_blue_grin		http://wpplus.tristanroberts.name/gif/grin.gif
-// @resource	  old_blue_happy	http://wpplus.tristanroberts.name/gif/happy.gif
-// @resource	  old_blue_happy2	http://wpplus.tristanroberts.name/gif/happy-2.gif
-// @resource	  old_blue_neutral	http://wpplus.tristanroberts.name/gif/neutral.gif
-// @resource	  old_blue_ninja	http://wpplus.tristanroberts.name/gif/ninja.gif
-// @resource	  old_blue_sad		http://wpplus.tristanroberts.name/gif/sad.gif
-// @resource	  old_blue_sad2		http://wpplus.tristanroberts.name/gif/sad-2.gif
-// @resource	  old_blue_smirk	http://wpplus.tristanroberts.name/gif/smirk.gif
-// @resource	  old_blue_tongue	http://wpplus.tristanroberts.name/gif/tongue.gif
+// @resource	  emoticon_angry	http://tristanroberts.name/projects/wp-plus/png/angry.png
+// @resource	  emoticon_blushing	http://tristanroberts.name/projects/wp-plus/png/blushing.png
+// @resource	  emoticon_confused	http://tristanroberts.name/projects/wp-plus/png/confused.png
+// @resource	  emoticon_cool		http://tristanroberts.name/projects/wp-plus/png/cool.png
+// @resource	  emoticon_cry		http://tristanroberts.name/projects/wp-plus/png/crying.png
+// @resource	  emoticon_frown	http://tristanroberts.name/projects/wp-plus/png/frown.png
+// @resource	  emoticon_gasp		http://tristanroberts.name/projects/wp-plus/png/gasp.png
+// @resource	  emoticon_grin		http://tristanroberts.name/projects/wp-plus/png/grin.png
+// @resource	  emoticon_kiss		http://tristanroberts.name/projects/wp-plus/png/kiss.png
+// @resource	  emoticon_lips		http://tristanroberts.name/projects/wp-plus/png/lips.png
+// @resource	  emoticon_shout	http://tristanroberts.name/projects/wp-plus/png/shouting.png
+// @resource	  emoticon_sleep	http://tristanroberts.name/projects/wp-plus/png/sleeping.png
+// @resource	  emoticon_smile	http://tristanroberts.name/projects/wp-plus/png/smile.png
+// @resource	  emoticon_smirk	http://tristanroberts.name/projects/wp-plus/png/smirk.png
+// @resource	  emoticon_straight	http://tristanroberts.name/projects/wp-plus/png/straight.png
+// @resource	  emoticon_tongue	http://tristanroberts.name/projects/wp-plus/png/tongue.png
+// @resource	  emoticon_wink		http://tristanroberts.name/projects/wp-plus/png/wink.png
+// @resource	  emoticon_star		http://tristanroberts.name/projects/wp-plus/png/star.png
+// @resource	  old_blue_anxious	http://tristanroberts.name/projects/wp-plus/gif/anxious.gif
+// @resource	  old_blue_clown	http://tristanroberts.name/projects/wp-plus/gif/clown.gif
+// @resource	  old_blue_cool		http://tristanroberts.name/projects/wp-plus/gif/cool.gif
+// @resource	  old_blue_crazy	http://tristanroberts.name/projects/wp-plus/gif/crazy.gif
+// @resource	  old_blue_eyes		http://tristanroberts.name/projects/wp-plus/gif/eyes.gif
+// @resource	  old_blue_grin		http://tristanroberts.name/projects/wp-plus/gif/grin.gif
+// @resource	  old_blue_happy	http://tristanroberts.name/projects/wp-plus/gif/happy.gif
+// @resource	  old_blue_happy2	http://tristanroberts.name/projects/wp-plus/gif/happy-2.gif
+// @resource	  old_blue_neutral	http://tristanroberts.name/projects/wp-plus/gif/neutral.gif
+// @resource	  old_blue_ninja	http://tristanroberts.name/projects/wp-plus/gif/ninja.gif
+// @resource	  old_blue_sad		http://tristanroberts.name/projects/wp-plus/gif/sad.gif
+// @resource	  old_blue_sad2		http://tristanroberts.name/projects/wp-plus/gif/sad-2.gif
+// @resource	  old_blue_smirk	http://tristanroberts.name/projects/wp-plus/gif/smirk.gif
+// @resource	  old_blue_tongue	http://tristanroberts.name/projects/wp-plus/gif/tongue.gif
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
 // ==Changes==
@@ -157,6 +157,7 @@
  changes - 4.3.3 - New Chatbox (thanks Erwin, Chris)
  changes - 4.3.4 - Moved auto-updater to userscripts.org, Fix to recent activity days code
  changes - 4.3.5 - More quick-edit bug squashing, Remove old themes, updater tweaks
+ changes - 4.3.6 - Changed resource addresses, tweaks to sidebar code
  ***************/
 // ==/Changes==
 
@@ -168,7 +169,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.5';
+	var version = '4.3.6';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -355,40 +356,39 @@ try {
 	/*! Floating Sidebar */
 	/**
 	 Floats the sidebar as you scroll.
-	 @author		Troberto
+	 @author		Troberto, rewrite by tbwd
 	 @date		2009-12-23
 	 @version	3.9.4
 	 @runson		ALL
 	 */
-	if (Whirlpool.get("floatSidebar") == "true" && !Whirlpool.url.match("/alert/") ) {
-		var body = $('body').css('width').toString().replace('px', '');
-		var root = $('#root').css('width').toString().replace('px', '');
-
-		var left = (Whirlpool.get("enableWideWhirlpool") == "true" ? 0 : ((body - root) / 2));
-
-		$('#left').css({
-			'position': 'fixed',
-			'left': left + 'px'
-		});
-
-		$('#logo').css({
-			'position': 'absolute',
-			'left': '0'
-		});
+	if(Whirlpool.get('floatSidebar') == 'true' && !Whirlpool.url.match("/alert/")){
+		var floating = true;
+		var sidebarContent = $('div#left');
+		sidebarContent.css('left','inherit');
+		
+		$(window).scroll(function(){
+			if(floating){
+				if(window.pageYOffset > 190){
+					sidebarContent.css('position', 'fixed');
+					sidebarContent.css('top','0px');
+					
+				}else{
+					sidebarContent.css('position', '');
+					sidebarContent.css('top', '190px');
+				}
+			}
+		}).scroll();
+		
 		$('.selected ul[style~="dashed"]').append('<li id="wpplus_undock"><a href="javascript:;"> Unfloat Sidebar (temp)</a></li>');
+
 		$('#wpplus_undock a').click(function () {
-			$('#left').css({
-				'position': 'absolute',
-				'left': '0'
+			floating = false;
+			sidebarContent.css({
+				'position': '',
+				'top': '190px'
 			});
 		});
-		$(window).scroll(function () {
-			$('#left').css('top', ((190 - window.scrollY) >= 1 ? 190 - window.scrollY : 0) + 'px');
-		});
-		$(window).load(function () {
-			$('#left').css('top', ((190 - window.scrollY) >= 1 ? 190 - window.scrollY : 0) + 'px');
-		});
-
+		
 	}
 
 	/*! Inline Pages */
@@ -869,6 +869,10 @@ try {
 /*************************************** TBWD's code *******************************************/
    
    
+   
+	if($('.copyright').length == 1){
+		$('.copyright').append('<dt><img src="http://i54.tinypic.com/6okb5i.png" alt="Whirlpool Plus" /></dt><dd>Extra Awesomeness added  <br /> with <a href="http://whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + version + '</a></dd>');
+	}
 
 	//Set default userpage days
 	if (Whirlpool.get('recentActivityDays') != '7') {
@@ -2389,7 +2393,9 @@ try {
 						docs.q.css('background', '#E5E5E5 none no-repeat scroll 50% 50%');
 
 					} else {
-
+					
+						Whirlpool.set('textareraSave', '');
+						
 						if ($('#lastPost').attr('checked') && (docs.dUrl.indexOf("&p=-1#bottom") < 0) && (docs.dUrl.indexOf("&p=-1&#bottom") < 0)){
 
 							docs.d.location = "http://forums.whirlpool.net.au/forum-replies.cfm?t=" + Whirlpool.threadNumber + "&p=-1&#bottom";
@@ -2412,7 +2418,6 @@ try {
 									newTR.find(".bodypost a[href^=/forum/index.cfm?action=edit]" ).after( "<br><a class='wpp-edit'>(quick edit)</a>" ).css( "cursor", "pointer" );
 									$('#replies tr[id^="r"]:last').after(newTR);
 									
-									Whirlpool.set('textareraSave', '');
 								}
 							);
 						}
