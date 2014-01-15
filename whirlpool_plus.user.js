@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.7
+// @version       4.3.8
 // @require       http://tristanroberts.name/projects/wp-plus/js/jquery-gm.js
 // @require       http://tristanroberts.name/projects/wp-plus/js/prettify.js
 // @require       http://tristanroberts.name/projects/wp-plus/js/lang-css.js
@@ -159,6 +159,7 @@
  changes - 4.3.5 - More quick-edit bug squashing, Remove old themes, updater tweaks
  changes - 4.3.6 - Changed resource addresses, tweaks to sidebar code
  changes - 4.3.7 - Readded the WP Classic Themes (thanks, Phyco)
+ changes - 4.3.8 - Added Recent Activity Dropdown (preview)
  ***************/
 // ==/Changes==
 
@@ -170,7 +171,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.7';
+	var version = '4.3.8';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -1354,6 +1355,148 @@ try {
 		});
 	}
 	
+	/*
+	 * Recent Activity overlay
+	 */
+	
+	if(Whirlpool.get('recentActivityOverlay') == 'true'){
+	
+		var recentActivityOverlay = {
+		
+			'getData' : function(callback){
+				Whirlpool.ajax({
+					method : 'GET',
+					url : 'http://whirlpool.net.au/api/?key=' + Whirlpool.get('whirlpoolAPIKey') + '&output=json&get=recent&recentdays=' + Whirlpool.get('recentActivityOverlayDays'),
+					onload : function(response){
+										
+						if(response.status == 200){
+							var threads = JSON.parse(response.responseText).RECENT;
+							
+							Whirlpool.set('recentActivityData',JSON.stringify(threads));
+							
+							if(typeof callback == 'function'){
+								callback();
+							}
+						}else{
+							alert('WP+ Recent Activity Overlay \n Whirlpool API Error: ' + response.responseText);
+						}
+						
+					},
+					onerror : function(response){
+						alert('WP+ Recent Activity Overlay \n Whirlpool API Error: ' + response.responseText);
+					}
+				});
+			},
+			
+			'formatData' : function(){
+				var threads = JSON.parse(Whirlpool.get('recentActivityData'));
+				
+				var unreadHtml = '';
+				var readHtml = '';
+				var link = '';
+				var unread = false;
+				
+				var is_wlr = Whirlpool.get('lastReadTracker') == 'true';		
+					
+				for(i in threads){
+					unread = false;
+					
+					if(is_wlr){
+						threadData = whirlpoolLastRead.loadThreadData(threads[i].ID);
+						
+						if(threadData == false){
+							link = '/forum-replies.cfm?t=' + threads[i].ID;
+						}else{
+							if(threads[i].REPLIES + 1 > threadData['threadReplyNumber']){
+								unread = true;
+							}
+							
+							if(threadData['overallReplyNumber']){
+								link = '/forum-replies.cfm?r=' +  threadData['overallReplyNumber'] + '#r' + threadData['overallReplyNumber']; //used by Simon's jumpToReplyId method, so preferred
+							}else{
+								link = '/forum-replies.cfm?t=' + threads[i].ID + '&p=' + threadData['pageNumber'] + '#r' + threadData['threadReplyNumber'];
+							}
+						}
+					}else{
+						link = '/forum-replies.cfm?t=' + threads[i].ID;
+					}
+					
+					if(unread){
+						unreadHtml += '<p class="recentActivityOverlayUnread"><a href="' + link + '">' + threads[i].TITLE + '</a></p>';
+					}else{
+						readHtml += '<p><a href="' + link + '">' + threads[i].TITLE + '</a></p>';
+					}
+				
+				}
+				
+				Whirlpool.set('recentActivityHtml',unreadHtml + readHtml);
+			},
+			
+			'displayOverlay' : function(){
+				$(document.body).append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="http://localhost/reload.png" /></div><div id="recentActivityHandle">Recent Activity</div></div>');
+				Whirlpool.css('#recentActivityDropdownContainer { position: fixed; z-index: 9999; top: 0px; left: 50%; width: 20%; margin-left: -10%; color: #fff; }');
+				Whirlpool.css('#recentActivityHandle { background-color: #3A437B; text-align: center; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; padding-top: 5px; box-shadow: 2px; 0 8px rgba(255, 255, 255, 0.5); width: 150px; margin: 0 auto; cursor: pointer; font-family: Georgia,Cambria,Charter,\'Century Schoolbook\',serif;  height: 25px; font-weight: bold; }');
+				Whirlpool.css('#recentActivity { overflow: hidden; color: #333; max-height: 600px; display: none; background-color: #e5e5e5; text-align: center; border: solid 2px #3A437B; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; border-top: none; padding-top: 5px; }');
+				Whirlpool.css('#recentActivity a { color: #333; }');
+				Whirlpool.css('.recentActivityOverlayUnread { font-weight: 900; }');
+				Whirlpool.css('#recentActivityReload { width: 20px; height: 20px; float: right; margin-top: -30px; margin-right: 30px; cursor: pointer; }');
+				Whirlpool.css('#recentActivityContent { overflow-y: scroll; height: 200px;  margin-top: -4px; }');
+				
+				var activityOpen = false;
+				var activityArea = $('#recentActivity');
+				$('#recentActivityHandle').click(function(){
+					if(activityOpen){
+						activityArea.hide();
+						activityOpen = false;
+					}else{
+						activityArea.show();
+						activityOpen = true;
+					}
+				});
+				
+				$('#recentActivityReload').click(function(){
+					$('#recentActivityContent').html('Loading...');
+					recentActivityOverlay.updateData(function(){
+						recentActivityOverlay.formatData();
+						recentActivityOverlay.loadDataIntoOverlay();
+					},true);
+				});
+			},
+			
+			'updateData' : function(callback,forceUpdate){
+				var updateInterval = Whirlpool.get('recentActivityUpdateInterval');
+				var lastUpdate = parseInt(Whirlpool.get('recentActivityLastUpdate'));
+				var currentTime = (new Date).getTime();
+				
+				if(forceUpdate || updateInterval * 60 * 1000 + lastUpdate < currentTime){
+					this.getData(callback);
+					Whirlpool.set('recentActivityLastUpdate',currentTime + '');
+				}else{
+					if(typeof callback == 'function'){
+						callback();
+					}
+				}
+				
+			},
+			
+			'loadDataIntoOverlay' : function(){
+				$('#recentActivityContent').html(Whirlpool.get('recentActivityHtml'));
+			},
+			
+			'run' : function(){
+				this.displayOverlay();
+				this.updateData(function(){
+					recentActivityOverlay.formatData();
+					recentActivityOverlay.loadDataIntoOverlay();
+				},false);
+			}
+			
+		}
+		
+		recentActivityOverlay.run();
+		
+	}
+	
 
 	// ! Glug (Legacy JS)
 	/******************************************************* GLUG ***************************************************************************************************/
@@ -1437,7 +1580,7 @@ try {
 			'postAlign': 'middle',
 			'floatSidebar': 'true',
 			'superBar': 'false',
-			'ssHtml': 'Enter your notes here, even try dragging images and widgets!',
+			//'ssHtml': 'Enter your notes here, even try dragging images and widgets!',
 			'watchedThreadsAlert': 'default',
 			'postsPerDay': 'true',
 			'noTextShadow': 'false',
@@ -1454,7 +1597,13 @@ try {
 			'hide_closed_profile':'false',
 			'hideForumIDs':'',
 			'whim_archive_sort': true,
-			'reset_aura_vote': 'false'
+			'reset_aura_vote': 'false',
+			'recentActivityUpdateInterval' : 15, //in minutes
+			'recentActivityLastUpdate' : 0, //in milliseconds
+			'recentActivityHtml' : '',
+			'recentActivityOverlay' : 'false',
+			'whirlpoolAPIKey' : '',
+			'recentActivityOverlayDays' : '7'
 		};
 
 		for (var k in gmDefaults) {
@@ -2002,7 +2151,7 @@ try {
 							'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
 							'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
 							'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
-							'<option value="http://phyco.name/wpplus/wpclassic2011/css/core.css">WP Classic (by Phyco and okidoki)</option>' +
+							'<option value="http://phyco.name/wpplus/wpclassic2011/css/core.css">WP Classic (by Phyco)</option>' +
 						'</select>' +
 						'<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
 					'</p>' +
@@ -2137,6 +2286,29 @@ try {
 					'<p id="lastPost">' +
 						'<input type="checkbox" name="lastPos" id="lastPos">' +
 						'<label for="lastPos">Go to the last post in the thread after posting</label>' +
+					'</p>' +
+					
+					'<p id="recentActivityOverlay">' +
+						'<input type="checkbox" name="recentActivityOverlay_check" id="recentActivityOverlay_id">' +
+						'<label for="recentActivityOverlay_id">Activate the Recent Activity Overlay</label>' +
+					'</p>' +
+					
+					'<p id="whirlpoolAPIKey">' +
+						'<input type="text" name="whirlpoolAPIKey_text" id="whirlpoolAPIKey_id">' +
+						'<label for="whirlpoolAPIKey_id">Your Whirlpool API Key (needed for Recent Activity Overlay)</label>' +
+					'</p>' +
+					
+					'<p id="recentActivityOverlayDays">' +
+						'<select name="recentActivityOverlayDays_select" id="recentActivityOverlayDays_id">' +
+							'<option value="1">1</option>' +
+							'<option value="3">3</option>' +
+							'<option value="7">7</option>' +
+							'<option value="14">14</option>' +
+							'<option value="30">30</option>' +
+							'<option value="60">60</option>' +
+							'<option value="120">120</option>' +
+						'</select>' +
+						'<label for="recentActivityOverlayDays_id">How much of your recent activity to display (in days)</label>' +
 					'</p>' +
 					
 					'<br/>' +
