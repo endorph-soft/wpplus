@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.2
+// @version       4.1.3
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
 // @require       http://wpplus.tristanroberts.name/js/lang-sql.js
-// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=412
+// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=413
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -135,12 +135,13 @@
  changes - 4.1.0 - Rewrote Last Read Tracker, Some changes to Whirlpool object
  changes - 4.1.1 - Forgot to allow WLR to turn off, fixed
  changes - 4.1.2 - Readded "Only color end square" option
+ changes - 4.1.3 - Zapped FF4 + GM 0.9.0 bugs (thanks to jaromir for debugging help)
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.1.2';
+	var version = '4.1.3';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -889,16 +890,16 @@ try {
 		},
 		
 		'saveThreadData' : function(threadNumber,threadReplyNumber,overallReplyNumber){
+			this.loadData();
 			this.trackerData[threadNumber] = {
 				'threadReplyNumber' : threadReplyNumber,
 				'overallReplyNumber' : overallReplyNumber
 			};
-			
-			
 			this.saveData();
 		},
 		
 		'loadThreadData' : function(threadNumber){
+			this.loadData();
 			if(this.trackerData[threadNumber]){
 				return this.trackerData[threadNumber];
 			}else{
@@ -909,6 +910,11 @@ try {
 		'importOldData' : function(){
 			//run-once method to get all the old data
 			var oldData = Whirlpool.get('lastRead0');
+			
+			if(oldData == false){
+				//no data
+				return;
+			}
 			
 			var dataParts = oldData.split(',');
 			
@@ -970,7 +976,7 @@ try {
 			
 			$(window).unload(function(){
 				//need to find the last read reply
-				var replies = $('div#replies > table > tbody > tr');
+				var replies = $('div#replies > table > tbody > tr').not('#previewTR');
 				
 				var lastReadReply;
 				
@@ -990,13 +996,17 @@ try {
 				}else{
 					//record information for last read reply
 					var replyNumberLinks = lastReadReply.find('td:first-child > a');
-					var threadReplyNumber = $(replyNumberLinks[0]).attr('name').split('r')[1];
-					var overallReplyNumber = $(replyNumberLinks[1]).attr('name').split('r')[1];
-					
-					var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
-					
-					if(currentData == false || currentData['threadReplyNumber'] <= threadReplyNumber){
-						whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
+					if(replyNumberLinks.length < 2){
+						alert('Sorry, something went wrong with thread tracking. If you see this message a lot, the tracker is probably broken');
+					}else{
+						var threadReplyNumber = $(replyNumberLinks[0]).attr('name').split('r')[1];
+						var overallReplyNumber = $(replyNumberLinks[1]).attr('name').split('r')[1];
+						
+						var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
+						
+						if(currentData == false || currentData['threadReplyNumber'] <= threadReplyNumber){
+							whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
+						}
 					}
 				}
 				
@@ -1037,8 +1047,6 @@ try {
 							//change the link
 							thread.find('.goend > a').attr('href',link);
 							
-							unsafeWindow.console.log(thread.find('td'));
-							
 							//now, we need to apply the unread class
 							if(Whirlpool.get('onlyEndSquare') == 'true'){
 								thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
@@ -1060,7 +1068,7 @@ try {
 						
 						thread.find('.whirlpoolLastRead_stopTracking').click(function(){
 							whirlpoolLastRead.stopTracking(threadNumber);
-							thread.removeClass('whirlpoolLastRead_unreadPosts whirlpoolLastRead_noUnreadPosts');
+							thread.children().removeClass('whirlpoolLastRead_unreadPosts whirlpoolLastRead_noUnreadPosts');
 							thread.find('.whirlpoolLastRead_controls').remove();
 							return false;
 						});
@@ -1673,6 +1681,7 @@ try {
 				$('.wlrInfo').click(function () { //info ...
 					return false;
 				});
+				
 
 				function iterOverSettings(getOrSet) {
 
@@ -1683,79 +1692,82 @@ try {
 						var inp = spaThis.children().eq(0);
 						var spID = spaThis.attr('id');
 						var getG = Whirlpool.get(spID);
+						
+						if(typeof inp[0] != 'undefined'){
+							if (inp[0].nodeName === "INPUT") {
 
-						if (inp[0].nodeName === "INPUT") {
+								if (inp[0].type === "checkbox") {
 
-							if (inp[0].type === "checkbox") {
+									if (getOrSet === 'get') {
+										if (getG === 'true') {
 
-								if (getOrSet === 'get') {
-									if (getG === 'true') {
+											inp.attr('checked', 'checked');
 
-										inp.attr('checked', 'checked');
-
-									}
-								} else {
-
-									if (inp.attr('checked')) {
-										docs[spID] = 'true';
+										}
 									} else {
-										docs[spID] = 'false';
+
+										if (inp.attr('checked')) {
+											docs[spID] = 'true';
+										} else {
+											docs[spID] = 'false';
+										}
+										Whirlpool.set(spID, docs[spID]);
+
 									}
-									Whirlpool.set(spID, docs[spID]);
 
-								}
+								} else if (inp[0].type === "password" || inp[0].type === "text") {
 
-							} else if (inp[0].type === "password" || inp[0].type === "text") {
+									if (getOrSet === 'get') {
+										inp.val(decodeURIComponent(getG));
+									} else {
 
-								if (getOrSet === 'get') {
-									inp.val(decodeURIComponent(getG));
-								} else {
-
-									docs[spID] = encodeURIComponent(inp.val());
-									Whirlpool.set(spID, docs[spID]);
-								}
-
-							}
-
-						} else if (inp[0].nodeName === "SELECT") {
-							inp.children('option').each(function () {
-								var optThis = $(this);
-
-								if (getOrSet === 'get') {
-									if (getG === optThis.attr('value')) {
-
-										optThis.attr('selected', 'selected');
-									} else if (optThis.attr('selected')) {
-										optThis.removeAttr('selected');
-									}
-								} else {
-									if (optThis.attr('selected')) {
-										docs[spID] = optThis.attr('value');
+										docs[spID] = encodeURIComponent(inp.val());
 										Whirlpool.set(spID, docs[spID]);
 									}
+
 								}
-							});
 
-						} else if (inp[0].nodeName === "UL") {
+							} else if (inp[0].nodeName === "SELECT") {
+								inp.children('option').each(function () {
+									var optThis = $(this);
 
-							if (docs.hiddenUsersArr.length) {
-								var hiddUsersArr1 = docs.hiddenUsersArr.split('#');
-								hiddUsersArr1.shift();
-								if (getOrSet === 'get') {
-									$(hiddUsersArr1).each(function () {
-										inp.append('<li>User: <a href="http://forums.whirlpool.net.au/user/' + this + '">#' + this + '</a>\'s posts are currently hidden.&nbsp;&nbsp;<input type="checkbox" ' + 'uNumNoHide="' + this + '" name="noHide" class="noHide" value="noHide">&nbsp;&nbsp; - ' + 'Unhide User</li>');
+									if (getOrSet === 'get') {
+										if (getG === optThis.attr('value')) {
 
-									});
-								} else {
+											optThis.attr('selected', 'selected');
+										} else if (optThis.attr('selected')) {
+											optThis.removeAttr('selected');
+										}
+									} else {
+										if (optThis.attr('selected')) {
+											docs[spID] = optThis.attr('value');
+											Whirlpool.set(spID, docs[spID]);
+										}
+									}
+								});
 
-									inp.find("input:checked").each(function () {
-										var toReplace = '#' + $(this).attr('uNumNoHide');
-										docs.hiddenUsersArr = docs.hiddenUsersArr.replace(toReplace, '');
-										Whirlpool.set('hiddenUsersArr', docs.hiddenUsersArr);
+							} else if (inp[0].nodeName === "UL") {
 
-									});
+								if (docs.hiddenUsersArr.length) {
+									var hiddUsersArr1 = docs.hiddenUsersArr.split('#');
+									hiddUsersArr1.shift();
+									if (getOrSet === 'get') {
+										$(hiddUsersArr1).each(function () {
+											inp.append('<li>User: <a href="http://forums.whirlpool.net.au/user/' + this + '">#' + this + '</a>\'s posts are currently hidden.&nbsp;&nbsp;<input type="checkbox" ' + 'uNumNoHide="' + this + '" name="noHide" class="noHide" value="noHide">&nbsp;&nbsp; - ' + 'Unhide User</li>');
+
+										});
+									} else {
+
+										inp.find("input:checked").each(function () {
+											var toReplace = '#' + $(this).attr('uNumNoHide');
+											docs.hiddenUsersArr = docs.hiddenUsersArr.replace(toReplace, '');
+											Whirlpool.set('hiddenUsersArr', docs.hiddenUsersArr);
+
+										});
+									}
 								}
 							}
+						
 						}
 
 					});
@@ -1794,7 +1806,8 @@ try {
 					iterOverSettings('get');
 
 				});
-
+				
+				
 				$('#saveWLR').mouseup(function () {
 					iterOverSettings('set');
 					location.reload( true );
@@ -1822,6 +1835,7 @@ try {
 			});
 		}
 	}
+	
 	var scriptIdUrl = '85217'; //First change by Troberto :)
 	var autoUpdate = {
 
@@ -1944,9 +1958,9 @@ try {
 
 					} else {
 
-						if ($('#lastPost').attr('checked') && docs.dUrl.indexOf("&p=-1#bottom") < 0) {
+						if ($('#lastPost').attr('checked') && (docs.dUrl.indexOf("&p=-1#bottom") < 0) && (docs.dUrl.indexOf("&p=-1&#bottom") < 0)){
 
-							docs.d.location = "http://forums.whirlpool.net.au/forum-replies.cfm?t=" + docs.dUrl.split('t=')[1].split('&')[0] + "&p=-1#bottom";
+							docs.d.location = "http://forums.whirlpool.net.au/forum-replies.cfm?t=" + Whirlpool.threadNumber + "&p=-1#bottom";
 
 						} else {
 
@@ -2788,10 +2802,11 @@ document.referrer.indexOf('?action=watched') == -1) {
 		Wp.notify('Found a bug? Report it using the <a href="http://code.google.com/p/whirlpool-plus/issues/list">issue tracker</a> as well as posting it.', false, 9000);
 	}
 
+	
 	// ! Basic fix for anchors
 	if (Whirlpool.url.match("#")) {
 		var anchor = "#" + Whirlpool.url.split("#")[1];
-		if ($(anchor)) {
+		if (anchor != '#' && $(anchor)) {
 			$(anchor).focus();
 		}
 	}
