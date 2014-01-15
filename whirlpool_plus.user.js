@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.12
+// @version       4.4.13
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -100,6 +100,7 @@
  changes - 4.4.10 - Penalty Box highlight, WLR fixes, other fixes for the new design
  changes - 4.4.11 - Spinner menu changes, Theme fixes
  changes - 4.4.12 - New Teal theme, smiley fix
+ changes - 4.4.13 - HIde forums fix, Auto load WLR colours on theme change, typo correction
  ***************/
 // ==/Changes==
 
@@ -111,7 +112,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.12';
+	var version = '4.4.13';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -627,8 +628,8 @@ try {
 		var ids = " " + decodeURI(__ids.toString()) + " ";
 		
 		$("#index tr").each( function( ) {
-			var url = $(this).children(".title").children(".title").children("a").prop("href").replace(/\/forum\//, "");
-			if (ids.indexOf(" " + url + " ") > -1) {
+			var url = $(this).children(".title").children(".title").children("a").prop("href").split('/forum/')[1];
+			if (ids.indexOf(url) > -1) {
 				$(this).remove();
 			}
 		} );
@@ -2426,7 +2427,7 @@ try {
 							
 							'<p id="customWPTheme">' +
 								'<select name="s_customtheme" id="s_customtheme">' +
-									'<option value="">Default (by Simon Wright)</option>' +
+									'<option value="default">Default (by Simon Wright)</option>' +
 									'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/teal/wp-teal.css">WP Teal (by =CHRIS=)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/WP-BLACK.css">WP Black (by =CHRIS=)</option>' +
@@ -2603,13 +2604,13 @@ try {
 							
 							'<p id="newPostBackgroundColour">' +
 								'<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' +
-								' <label for="newPostBackgroundC">Unread Posts colour</label>' +
+								' <label for="newPostBackgroundC">Unread Posts Colour</label>' +
 								' <span class="settingDesc">Used to highlight threads containing posts you haven\'t read</span>'+
 							'</p>  ' +
 							
 							'<p id="noNewPostBackgroundColour">' +
 								'<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' +
-								' <label for="noNewPostBackgroundC">No Unread Posts colour</label>' +
+								' <label for="noNewPostBackgroundC">No Unread Posts Colour</label>' +
 								' <span class="settingDesc">Used to highlight threads containing no unread posts</span>'+
 							'</p>       ' +
 						
@@ -2626,7 +2627,7 @@ try {
 							
 							'<p id="trackerPostBackgroundColour">' +
 								'<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' +
-								' <label for="trackerPostBackgroundC">Post Highlight Color (Posts Pages)</label>' +
+								' <label for="trackerPostBackgroundC">Post Highlight Colour (Posts Pages)</label>' +
 								' <span class="settingDesc">Used to highlight posts (right most column) on posts pages</span>'+
 							'</p> ' +
 							
@@ -3024,7 +3025,71 @@ try {
 										optThis.removeAttr('selected');
 									}
 								} else {
+								
 									if (optThis.prop('selected')) {
+									
+										if(spID == 'customWPTheme' && optThis.val() != Whirlpool.get('customWPTheme')){
+											// Theme has changed
+											if(confirm('You appear to have changed your WP+ theme. Would you like to load the suggested WLR highlight colours?')){
+												var newPostColour, noNewPostColour, postBackgroundColour;
+												
+												switch(optThis.val()){
+													case 'default':
+														newPostColour = '#95B0CB';
+														noNewPostColour = '#CBC095';
+														postBackgroundColour = '#CFCBBC';
+													break;
+													
+													case '@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);':
+														newPostColour = '#79A1FC';
+														noNewPostColour = '#BEDBFA';
+														postBackgroundColour = '#DEE6FA';
+													break;
+
+													case 'http://www.members.optusnet.com.au/kev.nat/teal/wp-teal.css':
+														newPostColour = '#B2F8F8';
+														noNewPostColour = '#99C5CB';
+														postBackgroundColour = '#D2E5E2';
+													break;
+													
+													case 'http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/WP-BLACK.css':
+														newPostColour = '#FFFFFF';
+														noNewPostColour = '#555555';
+														postBackgroundColour = '#A1A1A1';
+													break;		
+													
+													case 'http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css':
+														newPostColour = '#4DA255';
+														noNewPostColour = '#B9E3BD';
+														postBackgroundColour = '#B6FCBC';
+													break;		
+													
+													case 'http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css':
+														// no suggestions yet...
+														newPostColour = '#95B0CB';
+														noNewPostColour = '#CBC095';
+														postBackgroundColour = '#CFCBBC';
+													break;	
+													
+													case 'http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css':
+														newPostColour = '#B580F3';
+														noNewPostColour = '#E6D1FF';
+														postBackgroundColour = '#E6D1FF';
+													break;		
+													
+													case 'http://phyco.name/wpplus/wpclassic2011/css/core.css':
+														newPostColour = '#79A1FC';
+														noNewPostColour = '#EAA53F';
+														postBackgroundColour = '#DEE6FA';
+													break;
+												}
+												
+												$('#newPostBackgroundC').val(newPostColour);
+												$('#noNewPostBackgroundC').val(noNewPostColour);
+												$('#trackerPostBackgroundC').val(postBackgroundColour);
+											}
+										}
+										
 										docs[spID] = optThis.val();
 										Whirlpool.set(spID, docs[spID]);
 									}
