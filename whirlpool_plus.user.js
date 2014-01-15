@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.17
+// @version       4.4.18
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -110,6 +110,7 @@
  changes - 4.4.15 - Changed Youtube embed to more general oEmbed support
  changes - 4.4.16 - oEmbed max width, Firefox 3.6 fixes, auto resizing quick reply box
  changes - 4.4.17 - Fixed oEmbed max width, Image max width
+ changes - 4.4.17 - Changed themes location
  ***************/
 // ==/Changes==
 
@@ -121,7 +122,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.17';
+	var version = '4.4.18';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -2041,6 +2042,28 @@ try {
 		}
 	}
 	
+	
+	//Import theme
+	if(Whirlpool.get('customWPTheme') != 'default'){
+		switch(Whirlpool.get('customWPTheme')){
+			case 'http://www.members.optusnet.com.au/kev.nat/teal/wp-teal.css':
+				Whirlpool.set('customWPTheme','http://www.users.on.net/~chrispotter/Teal/wp-teal.css')
+			break;
+			case 'http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/WP-BLACK.css':
+				Whirlpool.set('customWPTheme','http://www.users.on.net/~chrispotter/Black/wp-black.css')
+			break;
+			case 'http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css':
+				Whirlpool.set('customWPTheme','http://www.users.on.net/~chrispotter/Green/wp-green.css')
+			break;
+			case 'http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css':
+				Whirlpool.set('customWPTheme','http://www.users.on.net/~chrispotter/Wood/wp-wood.css')
+			break;
+			case 'http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css':
+				Whirlpool.set('customWPTheme','http://www.users.on.net/~chrispotter/Purple/wp-purple.css')
+			break;
+		}
+	}
+	
 
 	// ! Glug (Legacy JS)
 	/******************************************************* GLUG ***************************************************************************************************/
@@ -2584,12 +2607,12 @@ try {
 								'<select name="s_customtheme" id="s_customtheme">' +
 									'<option value="default">Default (by Simon Wright)</option>' +
 									'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
-									'<option value="http://www.members.optusnet.com.au/kev.nat/teal/wp-teal.css">WP Teal (by =CHRIS=)</option>' +
-									'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/WP-BLACK.css">WP Black (by =CHRIS=)</option>' +
-									'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
-									'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
-									'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
 									'<option value="http://phyco.name/wpplus/wpclassic2011/css/core.css">WP Classic (by Phyco)</option>' +
+									'<option value="http://www.users.on.net/~chrispotter/Teal/wp-teal.css">WP Teal (by =CHRIS=)</option>' +
+									'<option value="http://www.users.on.net/~chrispotter/Black/wp-black.css">WP Black (by =CHRIS=)</option>' +
+									'<option value="http://www.users.on.net/~chrispotter/Green/wp-green.css">WP Green (by =CHRIS=)</option>' +
+									'<option value="http://www.users.on.net/~chrispotter/Wood/wp-wood.css">WP Wood (by =CHRIS=)</option>' +
+									'<option value="http://www.users.on.net/~chrispotter/Purple/wp-purple.css">WP Purple (by =CHRIS=)</option>' +
 								'</select>' +
 								' <label for="s_cutomtheme">Custom Theme</label>' +
 							'</p>' +
@@ -3237,32 +3260,32 @@ try {
 														postBackgroundColour = '#DEE6FA';
 													break;
 
-													case 'http://www.members.optusnet.com.au/kev.nat/teal/wp-teal.css':
+													case 'http://www.users.on.net/~chrispotter/Teal/wp-teal.css':
 														newPostColour = '#B2F8F8';
 														noNewPostColour = '#99C5CB';
 														postBackgroundColour = '#D2E5E2';
 													break;
 													
-													case 'http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/WP-BLACK.css':
+													case 'http://www.users.on.net/~chrispotter/Black/wp-black.css':
 														newPostColour = '#FFFFFF';
 														noNewPostColour = '#555555';
 														postBackgroundColour = '#A1A1A1';
 													break;		
 													
-													case 'http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css':
+													case 'http://www.users.on.net/~chrispotter/Green/wp-green.css':
 														newPostColour = '#4DA255';
 														noNewPostColour = '#B9E3BD';
 														postBackgroundColour = '#B6FCBC';
 													break;		
 													
-													case 'http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css':
+													case 'http://www.users.on.net/~chrispotter/Wood/wp-wood.css':
 														// no suggestions yet...
 														newPostColour = '#95B0CB';
 														noNewPostColour = '#CBC095';
 														postBackgroundColour = '#CFCBBC';
 													break;	
 													
-													case 'http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css':
+													case 'http://www.users.on.net/~chrispotter/Purple/wp-purple.css':
 														newPostColour = '#B580F3';
 														noNewPostColour = '#E6D1FF';
 														postBackgroundColour = '#E6D1FF';
