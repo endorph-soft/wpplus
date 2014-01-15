@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.9
+// @version       4.4.10
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -97,6 +97,7 @@
  changes - 4.4.7 - Quick quote now correctly attributes quotes regardless of the selected button, bugfix for quick edit, spinner doesn't disappear on mouseout
  changes - 4.4.8 - Some fixes for new design. Temp release- there are still many issues
  changes - 4.4.9 - More fixes for new design
+ changes - 4.4.10 - Penalty Box highlight, WLR fixes, other fixes for the new design
  ***************/
 // ==/Changes==
 
@@ -108,7 +109,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.9';
+	var version = '4.4.10';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -977,7 +978,7 @@ try {
 	
 	if (Whirlpool.url.match("forum-replies.cfm")) {
 		var extensions = "bmp|gif|jpg|png".split("|");
-		var width = $(".bodytext").css("width").toString( );
+		var width = '100%'; //$(".bodytext").css("width").toString( );
 		
 		var displayed = {};
 		
@@ -1332,7 +1333,7 @@ try {
 		
 			//css rules
 			if(Whirlpool.get('styleFlip') == 'false'){
-				Whirlpool.css('#replies #replylist .whirlpoolLastRead_readReply .replytools { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
+				Whirlpool.css('#replies #replylist .whirlpoolLastRead_readReply .replytools { margin-top: -2px; background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
 			}else{
 				Whirlpool.css('#replies #replylist .whirlpoolLastRead_unreadReply .replytools { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
 			}
@@ -1340,7 +1341,7 @@ try {
 			var lastReadReplyNumber = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber)['t'];
 			$('div#replies .reply').not(':hidden').each(function(){
 				var reply = $(this);
-				var replyNumber = $(reply.prevAll('a[name!="bottom"]')[1]).prop('name').split('r')[1];
+				var replyNumber = $(reply.prevAll('a[name!="bottom"]')[1]).prop('name').slice(1);
 				
 				if(parseInt(replyNumber) <= parseInt(lastReadReplyNumber)){
 					reply.addClass('whirlpoolLastRead_readReply');
@@ -1367,7 +1368,7 @@ try {
 			
 			$(window).bind(unloadEvent,function(){
 				//need to find the last read reply
-				var replies = $('div#replies .reply').not('#previewTR').not(':hidden');
+				var replies = $('div#replies .reply, div#replies .notice').not('#previewTR');
 				
 				var lastReadReply;
 				
@@ -1388,21 +1389,15 @@ try {
 					//record information for last read reply
 					var replyNumberLinks = lastReadReply.prevAll('a[name!="bottom"]');
 					
-					if(replyNumberLinks.length < 2){
-						alert('WP+: Sorry, something went wrong with thread tracking. If you see this message a lot, the tracker is probably broken');
-					}else{
-						var threadReplyNumber = parseInt($(replyNumberLinks[1]).prop('name').split('r')[1]);
-						var overallReplyNumber = $(replyNumberLinks[0]).prop('name').split('r')[1];
-						
-						var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
-												
-						if(currentData == false || parseInt(currentData['t']) <= threadReplyNumber){
-							whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
-						}
-						
-						
-						
+					var threadReplyNumber = parseInt($(replyNumberLinks[1]).prop('name').slice(1));
+					var overallReplyNumber = $(replyNumberLinks[0]).prop('name').slice(1);
+					
+					var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
+											
+					if(currentData == false || parseInt(currentData['t']) <= threadReplyNumber){
+						whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
 					}
+					
 				}				
 			});
 		},
@@ -1692,7 +1687,7 @@ try {
 			},
 			
 			'displayOverlay' : function(){
-				$('body.notIE').append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="' + Whirlpool.image('reload') + '" /></div><div id="recentActivityHandle">Recent Activity <img src="' + Whirlpool.image('emoticon_star') + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
+				$('body.not_IE').append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="' + Whirlpool.image('reload') + '" /></div><div id="recentActivityHandle">Recent Activity <img src="' + Whirlpool.image('emoticon_star') + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
 				Whirlpool.css('#recentActivityDropdownContainer { position: fixed; z-index: 999; top: 0px; left: 50%; width: 20%; margin-left: -10%; color: #fff; }' +
 				'#recentActivityHandle { background-color: #3A437B; text-align: center; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; padding-top: 5px; box-shadow: 2px; 0 8px rgba(255, 255, 255, 0.5); width: 150px; margin: 0 auto; cursor: pointer; font-family: Georgia,Cambria,Charter,\'Century Schoolbook\',serif;  height: 25px; font-weight: bold; }' +
 				'#recentActivity { overflow: hidden; color: #333; max-height: 600px; display: none; background-color: #e5e5e5; text-align: center; border: solid 2px #3A437B; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; border-top: none; padding-top: 5px; }' +
@@ -2043,7 +2038,7 @@ try {
 	}
 
 	function hideDelPosts() {
-		$('.bodymore').parent().hide();
+		$('.notice[id^="x"]').hide();
 	}
 
 	function time() {
@@ -3232,10 +3227,13 @@ try {
 									
 									var newPost = $(data).find('#replylist .reply:last');
 									
+									var replyNumberLinks = newPost.prevAll('a[name!="bottom"]');
+									
 									var quickEdit = $("<br><a class='wpp-edit'>(quick edit)</a>").css( "cursor", "pointer" ).on('click', wpp_quickEdit );
 									
 									newPost.find('.actions a[href^="/forum/index.cfm?action=edit"]' ).after(quickEdit);
-									$('#replylist .reply:last').after(newPost);
+									
+									$('#replylist .reply:last').after(newPost).after(replyNumberLinks[0]).after(replyNumberLinks[1]);
 									
 								}
 							);
@@ -3972,9 +3970,9 @@ document.referrer.indexOf('?action=watched') == -1) {
 		if (Whirlpool.get('penaltyBoxBackground') === "true") {
 			Whirlpool.css('.penalty_box {background-image:url(' + Whirlpool.image('light_gradient') + ')!important;background-repeat:repeat !important; background-color: #fff !important; } ');
 			
-			$('div#replies > table > tbody > tr > td.bodyuser > div[style="color:#555"]').each(function(){
-				if($(this).text() == 'In the penalty box'){
-					$(this).parent().addClass('penalty_box');
+			$('#replies .replyuser-inner .usergroup').each(function(){			
+				if($(this).text().indexOf('penalty box') > 0){
+					$(this).parents('.replyuser').addClass('penalty_box');
 				}
 			});
 			
