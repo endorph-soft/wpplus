@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.1
+// @version       4.2.2
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -144,12 +144,13 @@
  changes - 4.1.9 - Fixed an issue with the tracker that caused threads to not track correctly
  changes - 4.2.0 - Readded popular colouring options to WLR tracker, fixed another tracker bug
  changes - 4.2.1 - Added an option to unhide a post by a hidden user
+ changes - 4.2.2 - Fixed thread tracking on search pages
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.1';
+	var version = '4.2.2';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -1053,7 +1054,7 @@ try {
 			
 			threads.each(function(){
 				var thread = $(this);
-				var threadNumber = thread.find('a.title').attr('href').split('t=')[1];
+				var threadNumber = parseInt(thread.find('a.title').attr('href').split('t=')[1]);
 				
 				if(thread.is('.deleted') || thread.is('.pointer')){
 					//ignore this one
