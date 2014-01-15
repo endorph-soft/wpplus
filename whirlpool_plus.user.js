@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.6
+// @version       4.2.7
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -50,7 +50,6 @@
 // @resource	  old_blue_tongue	http://wpplus.tristanroberts.name/gif/tongue.gif
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
-// For information on bugs, see http://code.google.com/p/whirlpool-plus/issues/list
 // ==Changes==
 /***************
  changes - 3.0.4 - fixed bug where clicking the "i" link next to a users name multiple times opened multiple boxes. Fixed a bug with the auto update.
@@ -149,12 +148,13 @@
  changes - 4.2.4 - Removes the troublesome (3 smiley
  changes - 4.2.5 - Fixes auto preview
  changes - 4.2.6 - New Avatar Server
+ changes - 4.2.7 - Fixed auto updater, changed smilies, change recent activity days, tidied up settings box
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.6';
+	var version = '4.2.7';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -421,7 +421,7 @@ try {
 	if (Whirlpool.get("smartUpdater") == "true" && (Whirlpool.url.match("user") || Whirlpool.url.match("/forum/"))) {
 
 		var date = new Date();
-		var time = (date.getTime() - date.getMilliseconds()) / 1000;
+		var currentTime = (date.getTime() - date.getMilliseconds()) / 1000;
 
 		if (Whirlpool.get('updaterInterval') === false) {
 			Whirlpool.set('updaterInterval', 30);
@@ -430,14 +430,14 @@ try {
 		var next = Whirlpool.get('updaterInterval');
 
 		if (Whirlpool.get('updaterChecked') === false) {
-			Whirlpool.set('updaterChecked', time);
+			Whirlpool.set('updaterChecked', currentTime);
 		}
 
 		var last = Whirlpool.get('updaterChecked');
 
 		var next_seconds = next * 60;
 
-		if (time > last + next_seconds) {
+		if (currentTime > last + next_seconds) {
 			var url = server + '/txt/updater.txt';
 			var mine = version.replace(/\./g, '');
 
@@ -447,11 +447,11 @@ try {
 				if (mine < dataText) {
 					Whirlpool.set('updaterInterval', 30);
 					Whirlpool.notify('A new version of WP+ is available.', true, 50000);
-					Whirlpool.set('updaterChecked', time);
-					document.location = 'http://userscripts.org/scripts/source/85217.user.js';
+					Whirlpool.set('updaterChecked', currentTime);
+					GM_openInTab('http://userscripts.org/scripts/source/85217.user.js');
 				} else if (next * 2 < 7690) {
 					Whirlpool.set('updaterInterval', next * 2);
-					Whirlpool.set('updaterChecked', time);
+					Whirlpool.set('updaterChecked', currentTime);
 				}
 
 			});
@@ -591,6 +591,8 @@ try {
 			':ninja:': Whirlpool.image('old_blue_ninja'),
 			':\\\\':Whirlpool.image('old_blue_smirk'),
 			':-\\\\':Whirlpool.image('old_blue_smirk'),
+			';)': Whirlpool.image('old_blue_smirk'),
+			';-)': Whirlpool.image('old_blue_smirk'),
 			':P': Whirlpool.image('old_blue_tongue'),
 			':-P': Whirlpool.image('old_blue_tongue')
 		};
@@ -611,12 +613,14 @@ try {
 			regkey = regkey.replace(/\[/g, "\\[");
 			regkey = regkey.replace(/\]/g, "\\]");
 			regkey = regkey.replace(/\|/g, "\\|");
-
-			var fixkey = icon.replace(/\\/g, '');
-
+			
+			regkey = '(\\s)' + regkey;
+			
 			regex[icon] = new RegExp(regkey, 'g');
 			endLine[icon] = '" align="baseline" />';
 		}
+		
+		
 		textnodes = document.evaluate("//td[@class = 'bodytext']//text()", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 
 		for (var i = 0; i < textnodes.snapshotLength; i++) {
@@ -625,8 +629,9 @@ try {
 			node_value = node_value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 			var smiley = node_value;
 			for (icon in icons) {
-				smiley = smiley.replace(regex[icon], startLine + icons[icon] + endLine[icon]);
+				smiley = smiley.replace(regex[icon], ' ' + startLine + icons[icon] + endLine[icon]);
 			}
+			
 			if (smiley.length > 1 && smiley != node_value) {
 				var span = document.createElement("span");
 				span.innerHTML = smiley;
@@ -804,6 +809,16 @@ try {
 
 	
 /*************************************** TBWD's code *******************************************/
+   
+   
+
+	//Set default userpage days
+	if (Whirlpool.get('recentActivityDays') != '7') {
+		$('a[href*="/user/"]:not([href*="?"])').each(function(){
+			var link = $(this);
+			link.attr('href',link.attr('href') + '?days=' + Whirlpool.get('recentActivityDays'));
+		});
+	}
    
    //Return the user who made a post. Accepts the table row that represents each post
    function getUserNumber(tr){
@@ -1253,15 +1268,13 @@ try {
 		uinfo: $('#left .userinfo'),
 		checkIfSignedIn: $('#left #sign_in')[0],
 		futer: $('#footer'),
-		threadNumber: null,
-		avatarCSS: false
+		threadNumber: null
 	};
 
 	function setGM() {
 
 		gmDefaults = {
 			'debugMode': 'false',
-			'autoUpdateWPplus': '43200000',
 			'smartUpdater': 'true',
 			'installedScriptVersion': version,
 			'lastScriptVersionCheck': '1232062510821',
@@ -1289,7 +1302,7 @@ try {
 			'inlineVideos': 'true',
 			'emoticonsBlue': 'true',
 			'ignoreUser': 'false',
-         'removeIgnoredUsers' : 'false',
+			'removeIgnoredUsers' : 'false',
 			'customWPTheme': 'default',
 			'whirlpoolBreadcrumbFont': 'default font',
 			'whirlpoolSidemenuFont': 'default font',
@@ -1303,19 +1316,13 @@ try {
 			'hideMVThreads': 'false',
 			'textareraSave': '',
 			'lastReadTracker': 'true',
-			//'numThreads2Track': '1000',
 			'trackerPostBackgroundColour': '#CFCBBC',
-			//'disableTrackerPostBackgroundColour': 'false',
 			'readTheRulesYet': 'false',
 			'newPostBackgroundColour': '#95b0cb',
-			//'disableNewPostBackgroundColour': 'false',
 			'noNewPostBackgroundColour': '#cbc095',
-			//'disableNoNewPostBackgroundColour': 'false',
 			'onlyEndSquare': 'false',
 			'styleFlip': 'false',
 			'dontTrackStickyThreads': 'false',
-			//'noColourEndSquare': 'false',
-			//'wlrSettingsScrollTo': 'false',
 			'lastPost': 'false',
 			'CSStextBox': ' ',
 			'WLRfirstRun': 'true',
@@ -1366,15 +1373,27 @@ try {
 	}
 
 	function avatars() {
+		
+		var isAvatars = false;
+		
 		if (docs.staticAvatars == 'true') {
-			$('head').append('<link rel="stylesheet" type="text/css" href="' + server + 'css/avatars.css">');
 			$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/avatar.css">');
+			isAvatars = true;
 		}
 
 		if (docs.animatedAvatars == 'true') {
-			$('head').append('<link rel="stylesheet" type="text/css" href="' + server + 'css/animatedavatars.css">');
 			$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/animatedavatar.css">');
+			isAvatars = true;
 		}
+		
+		if(isAvatars){
+			Whirlpool.css('td.bodyuser > div:first-child > a:first-child { margin:0 auto; } #replies tr .bodyuser div div:last-child:before { padding:5px 0 0; }');
+			
+			if (docs.penaltyBoxBackground === 'true') {
+					Whirlpool.css('tr.In_the_penalty_box > td.bodyuser {background-image:url(' + server + 'png/tinygradient.png)!important;background-repeat:repeat !important;');
+			}
+		}
+		
 	}
 
 	function hideDelPosts() {
@@ -1633,145 +1652,422 @@ try {
 				Whirlpool.css(decodeURIComponent(docs.CSStextBox));
 			}
 
-			var updateGearsCheck = 'block';
-
-			if (window.google) {
-				updateGearsCheck = 'none';
-			}
 
 			var infoIcon = server + 'png/info.png';
 			var arrowDown = server + 'png/down.png';
 			var arrowUp = server + 'png/up.png';
 
-			Whirlpool.css('#wlrSettingsDiv {' + 'background-color:#D3DAED;' + 'height:400px;' + 'left:50px;' + 'overflow-x:scroll;' + 'overflow-y:scroll;' + 'position:absolute;' + 'top:20px;' + 'width:500px;' + 'z-index:50;' + '}' + '#autoUpdateWPplus{' + '	display:' + updateGearsCheck + ';' + '}' + '#wlrSettingsDiv ul#wlrtabmenu li{' + 'border:3px solid #777;' + 'border-width:3px 3px 1px;' + 'float:left;' + 'height:20px;' + 'margin-right:10px;' + 'padding:5px;' + 'width:140px;' + 'text-align:center;' + '	color:white;' + '}' + '#wlrSettingsDiv #wlrtabmenu li.active{' + '	background-color:orange;' + '	border:3px solid #555;' + '	border-width:3px 3px 1px;' + '}' + '#wlrSettingsDiv #wlrtabmenu li:hover{' + 'cursor:pointer;' + 'border:3px solid #555;' + 'border-width:3px 3px 1px;' + '}' + '#wlrSettingsDiv .wlrsetbutDown{' + 'background:transparent url("' + arrowDown + '") no-repeat;' + 'height:21px;' + 'padding:0;' + 'width:21px;	' + 'position:relative;' + 'top:-5px;' + 'left:4px;' + '}' + '#wlrSettingsDiv .wlrsetbutUp{' + 'background:transparent url("' + arrowUp + '") no-repeat;' + 'height:21px;' + 'padding:0;' + 'width:21px;	' + 'position:relative;' + 'top:-5px;' + 'left:4px;' + '}' + '#wlrSettingsDiv p{' + '	border-bottom:1px dashed grey;' + '	margin-left:15px;' + '	padding-bottom:15px;' + '}' + '#prevContainer>*{' + //just chucking these here so can save an extra Whirlpool.css()
+			Whirlpool.css('#wlrSettingsDiv {' + 'background-color:#D3DAED;' + 'height:400px;' + 'left:50px;' + 'overflow-x:scroll;' + 'overflow-y:scroll;' + 'position:absolute;' + 'top:20px;' + 'width:500px;' + 'z-index:50;' + '}' + '#wlrSettingsDiv ul#wlrtabmenu li{' + 'border:3px solid #777;' + 'border-width:3px 3px 1px;' + 'float:left;' + 'height:20px;' + 'margin-right:10px;' + 'padding:5px;' + 'width:140px;' + 'text-align:center;' + '	color:white;' + '}' + '#wlrSettingsDiv #wlrtabmenu li.active{' + '	background-color:orange;' + '	border:3px solid #555;' + '	border-width:3px 3px 1px;' + '}' + '#wlrSettingsDiv #wlrtabmenu li:hover{' + 'cursor:pointer;' + 'border:3px solid #555;' + 'border-width:3px 3px 1px;' + '}' + '#wlrSettingsDiv .wlrsetbutDown{' + 'background:transparent url("' + arrowDown + '") no-repeat;' + 'height:21px;' + 'padding:0;' + 'width:21px;	' + 'position:relative;' + 'top:-5px;' + 'left:4px;' + '}' + '#wlrSettingsDiv .wlrsetbutUp{' + 'background:transparent url("' + arrowUp + '") no-repeat;' + 'height:21px;' + 'padding:0;' + 'width:21px;	' + 'position:relative;' + 'top:-5px;' + 'left:4px;' + '}' + '#wlrSettingsDiv p{' + '	border-bottom:1px dashed grey;' + '	margin-left:15px;' + '	padding-bottom:15px;' + '}' + '#prevContainer>*{' + //just chucking these here so can save an extra Whirlpool.css()
 			'margin-left:10px;' + 'margin-right:12px;}' + '.maximumWidthImage{' + 'max-width:999999999999px !important;' + '}#wlrSettingsDiv label:hover{cursor:pointer;}');
 
 			var wlrSettingsDivTop;
 			(window.innerHeight > 560) ? wlrSettingsDivTop = '6%' : wlrSettingsDivTop = '0';
 			// ! Settings HTML
-			var settingsHTML = '<div id="wlrSettingsDiv" style="background-color:#999999;border:1px solid black;color:#333333;display:none;' + 'left:50%;margin-left:-400px;padding:0 12px;position:fixed;top:' + wlrSettingsDivTop + ';width:800px;overflow:hidden;height:540px;max-height:100% !important;' + 'display:block;z-index:3000;">' + '<ul id="wlrtabmenu" style="list-style:none;float:left;margin:14px 0px 0px 32px">' + '<li class="active wlrtabmenuTabs">General Settings</li>' + '<li class="wlrtabmenuTabs">Custom CSS</li>' + '<li class="wlrtabmenuTabs">Hidden Users</li>' + '</ul>		' + '<div id="setContainer" class="wlrtabmenuDivs" style="float:left;border:3px solid #555;background-color:#EEEEEE;height:440px;margin-bottom:5px;overflow-x:hidden;overflow-y:scroll;">' + '<button id="resetWLR" style="margin: 10px 10px 5px 250px;">Reset All Settings To Default Values</button>' + '<div style="margin: 10px 10px 5px 290px;opacity:0.4;">Installed Script Version: ' + docs.installedScriptVersion + '</div>' + '<hr />' + '<span style="float:right;margin-right:10px;font-size:12px;font-weight:900;">Scroll down for more settings.</span>' + '<p id="debugMode">' + '<input type="checkbox" name="enabledebugmode" id="enabledebugmode">' + '<label for="enabledebugmode">Enable Debug Mode</label>' +
-
-			'</p>    ' + '<p id="smartUpdater">' + '<input type="checkbox" name="updater" id="updater">' + '<label for="updater">Enable automatic updater.</label>' +
-
-			'<a href="http://userscripts.org/scripts/source/85217.user.js" id="force_update">Force Update</a> ' + '<label for="force_update">Automatically updates to the latest version</label>' +
-
-			'</p>' + '<p id="dynamicMenuSystem">' + '<select name="dynamicMen" id="dynamicMen">' + '<option value="none">none</option>' + '<option value="rightClick">Right click</option>' + '<option value="spinner">Spinner</option>' + '</select>     ' + '<label for="dynamicMen">Dynamic Menu System</label>' + '</p>    ' + '<p id="quickReplybox">' + '<input type="checkbox" name="quickRepb" id="quickRepb">' + '<label for="quickRepb">Enable a Quick Reply Box at the bottom of threads and Quick Quote links next to posts.</label>' +
-
-			'</p>     ' + '<p id="quickReplyboxCols">' + '<input type="text" readonly="readonly" name="quickReplyboxC" id="quickReplyboxC">' + '<button class="wlrsetbutDown" type="button"></button> ' + '<button class="wlrsetbutUp" type="button"></button> ' + '<label for="quickReplyboxC">Change the number of cols(width) of the Quick Reply Box.</label>' +
-
-			'</p>     ' + '<p id="quickReplyboxRows">' + '<input type="text" readonly="readonly" name="quickReplyboxR" id="quickReplyboxR">' + '<button class="wlrsetbutDown" type="button"></button> ' + '<button class="wlrsetbutUp" type="button"></button> ' + '<label for="quickReplyboxR">Change the number of rows(height) of the Quick Reply Box.</label>' +
-
-			'</p> ' + '<p id="autoPreview">' + '<input type="checkbox" name="autoPr" id="autoPr">' + '<label for="autoPr">Show a preview of what you are typing in the quick quote box</label>' +
-			'</p> ' + '<p id="hide_closed_profile">' + '<input type="checkbox" name="hcp" id="hcp">' + '<label for="hcp">Hide closed threads on user profiles.</label>' +
-
-			'</p>     ' + '<p id="unanswered_threads">' + '<input type="checkbox" name="unansweredThreads" id="unansweredThreads">' + '<label for="unansweredThreads">Provides a link to unanswered threads (threads with no replies).</label>' +
-
-			'</p> ' + '<p id="opOnlyView">' + '<input type="checkbox" name="onlyOp" id="onlyOp">' + '<label for="onlyOp">Show only OP posts view link at top of thread.</label>' +
-
-			'</p>       ' + '<p id="threadArchiveView">' + '<input type="checkbox" name="threadArchiveV" id="threadArchiveV">' + '<label for="threadArchiveV">Show all posts in Thread Archive View Link at top of thread.</label>' +
-
-			'</p> ' + '<p id="longThreadView">' + '<input type="checkbox" name="longThreadV" id="longThreadV">' + '<label for="longThreadV">Show all Posts in Long Thread View Link at top of thread.</label>' +
-
-			'</p>       ' + '</p>     ' + '<p id="moderatorPostView">' + '<input type="checkbox" name="moderatorPostV" id="moderatorPostV">' + '<label for="moderatorPostV">Show a link to view only moderator posts.</label>' +
-
-			'</p> ' + '</p>  ' + '<p id="representativePostView">' + '<input type="checkbox" name="representativePostV" id="representativePostV">' + '<label for="representativePostV">Show a link to view only representative posts.</label>' +
-
-			'</p>       ' + '</p>     ' + '<p id="autoSubscribe">' + '<input type="checkbox" name="autoSubs" id="autoSubs">' + '<label for="autoSubs">Automatically subscribe to a thread when you make a post.</label>' +
-
-			'</p>' + '</p>     ' + '<p id="staticAvatars">' + '<input type="checkbox" name="staticAv" id="staticAv">' + '<label for="staticAv">Display static avatars (non-animatied).</label>' +
-
-			'</p>     ' + '</p>     ' + '<p id="animatedAvatars">' + '<input type="checkbox" name="animatedAv" id="animatedAv">' + '<label for="animatedAv">Display animated avatars.</label>' +
 			
-			'</p>     ' + '</p>     ' + '<p id="hideForumIDs">' + '<input type="text" name="hfids" id="hfids">' + '<label for="hfids">The IDs of forums to hide (eg. "35 92 137")</label>' +
+			var settingsHTML = '<div id="wlrSettingsDiv" style="background-color:#999999;border:1px solid black;color:#333333;display:none;left:50%;margin-left:-400px;padding:0 12px;position:fixed;top:' + wlrSettingsDivTop + ';width:800px;overflow:hidden;height:540px;max-height:100% !important;display:block;z-index:3000;">' +
+				'<ul id="wlrtabmenu" style="list-style:none;float:left;margin:14px 0px 0px 32px">' +
+					'<li class="active wlrtabmenuTabs">General Settings</li>' +
+					'<li class="wlrtabmenuTabs">Custom CSS</li>' +
+					'<li class="wlrtabmenuTabs">Hidden Users</li>' +
+				'</ul>' +
 
-			'</p> ' + '<p id="editInPlace">' + '<input type="checkbox" name="editInP" id="editInP">' + '<label for="editInP">Turn on ability to edit post in thread using Ajax.</label>' +
+				'<div id="setContainer" class="wlrtabmenuDivs" style="float:left;border:3px solid #555;background-color:#EEEEEE;height:440px;margin-bottom:5px;overflow-x:hidden;overflow-y:scroll;">' +
+					'<button id="resetWLR" style="margin: 10px 10px 5px 250px;">Reset All Settings To Default Values</button>' +
+					
+					'<div style="margin: 10px 10px 5px 290px;opacity:0.4;">' +
+						'Installed Script Version: ' + docs.installedScriptVersion +
+					'</div>' +
+					
+					'<hr />' +
+					
+					'<span style="float:right;margin-right:10px;font-size:12px;font-weight:900;">Scroll down for more settings.</span>' +
+					
+					'<p id="debugMode">' +
+						'<input type="checkbox" name="enabledebugmode" id="enabledebugmode">' +
+						'<label for="enabledebugmode">Enable Debug Mode</label>' +
+					'</p>' +
 
-			'</p>       ' + '</p>     ' + '<p id="simple_backup">' + '<input type="checkbox" name="simple_backup" id="simple_backup">' + '<label for="simple_backup">Stores a backup of whatever you write in a reply/whim and allows for quickly reverting back to the last version.</label>' +
+					'<p id="smartUpdater">' +
+						'<input type="checkbox" name="updater" id="updater">' +
+						'<label for="updater">Enable automatic updater.</label>' +
+						' <a href="http://userscripts.org/scripts/source/85217.user.js" id="force_update">Force Update</a>' +
+					'</p>' +
+					
+					'<p id="dynamicMenuSystem">' +
+						'<select name="dynamicMen" id="dynamicMen">' +
+							'<option value="none">none</option>' +
+							'<option value="rightClick">Right click</option>' +
+							'<option value="spinner">Spinner</option>' +
+						'</select>' +
+						'<label for="dynamicMen">Dynamic Menu System</label>' +
+					'</p>' +
+					
+					'<p id="quickReplybox">' +
+						'<input type="checkbox" name="quickRepb" id="quickRepb">' +
+						'<label for="quickRepb">Enable a Quick Reply Box at the bottom of threads and Quick Quote links next to posts.</label>' +
+					'</p>' +
 
-			'</p> ' + '<p id="whirlcodeinWikiWhimNewThread">' + '<input type="checkbox" name="whirlcodeinWikiWhimNewT" id="whirlcodeinWikiWhimNewT">' + '<label for="whirlcodeinWikiWhimNewT">Turn this on to use Whirlcode in Wiki and New Page Thread.</label>' +
+					'<p id="quickReplyboxCols">' +
+						'<input type="text" readonly="readonly" name="quickReplyboxC" id="quickReplyboxC">' +
+						'<button class="wlrsetbutDown" type="button"></button>' +
+						'<button class="wlrsetbutUp" type="button"></button>' +
+						'<label for="quickReplyboxC">Change the number of cols(width) of the Quick Reply Box.</label>' +
+					'</p> ' +
+					
+					'<p id="quickReplyboxRows">' +
+						'<input type="text" readonly="readonly" name="quickReplyboxR" id="quickReplyboxR">' +
+						'<button class="wlrsetbutDown" type="button"></button>' +
+						'<button class="wlrsetbutUp" type="button"></button>' +
+						'<label for="quickReplyboxR">Change the number of rows(height) of the Quick Reply Box.</label>' +
+					'</p>' +
 
-			'</p> ' + '<p id="whim_archive_sort">' + '<input type="checkbox" name="archive_sor" id="archive_sor">' + '<label for="archive_sor">Sorts the Whim Archive page into alphabetical order.</label>' + '</p> ' + '</p>       ' + '<p id="noGluteusMaximus">' + '<input type="checkbox" name="noGluteusM" id="noGluteusM">' + '<label for="noGluteusM">Removes the &p=-1#bottom from thread links on the main index page on Whirlpool</label>' +
+					'<p id="autoPreview">' +
+						'<input type="checkbox" name="autoPr" id="autoPr">' +
+						'<label for="autoPr">Show a preview of what you are typing in the quick quote box</label>' +
+					'</p>' +
+					
+					'<p id="hide_closed_profile">' +
+						'<input type="checkbox" name="hcp" id="hcp">' +
+						'<label for="hcp">Hide closed threads on user profiles.</label>' +
+					'</p>' +
+					
+					'<p id="unanswered_threads">' +
+						'<input type="checkbox" name="unansweredThreads" id="unansweredThreads">' +
+						'<label for="unansweredThreads">Provides a link to unanswered threads (threads with no replies).</label>' +
+					'</p>' +
+					
+					'<p id="opOnlyView">' +
+						'<input type="checkbox" name="onlyOp" id="onlyOp">' +
+						'<label for="onlyOp">Show only OP posts view link at top of thread.</label>' +
+					'</p>' +
+					
+					'<p id="threadArchiveView">' +
+						'<input type="checkbox" name="threadArchiveV" id="threadArchiveV">' +
+						'<label for="threadArchiveV">Show all posts in Thread Archive View Link at top of thread.</label>' +
+					'</p>' +
+					
+					'<p id="longThreadView">' +
+						'<input type="checkbox" name="longThreadV" id="longThreadV">' +
+						'<label for="longThreadV">Show all Posts in Long Thread View Link at top of thread.</label>' +
+					'</p>' +
+					
+					'<p id="moderatorPostView">' +
+						'<input type="checkbox" name="moderatorPostV" id="moderatorPostV">' +
+						'<label for="moderatorPostV">Show a link to view only moderator posts.</label>' +
+					'</p>' +
+					
+					'<p id="representativePostView">' +
+						'<input type="checkbox" name="representativePostV" id="representativePostV">' +
+						'<label for="representativePostV">Show a link to view only representative posts.</label>' +
+					'</p>' +
+					
+					'<p id="autoSubscribe">' +
+						'<input type="checkbox" name="autoSubs" id="autoSubs">' +
+						'<label for="autoSubs">Automatically subscribe to a thread when you make a post.</label>' +
+					'</p>' +
 
-			'</p> ' + '</p>       ' + '<p id="chatbox">' + '<input type="checkbox" name="cBox" id="cBox">' + '<label for="cBox">Turn on the Whirlpool Plus chatbox.  To use, you MUST agree with the <a href="http://whirlpool.net.au/wiki/?tag=wpplus_chatbox_rules" target="_blank">rules</a> of the chatbox.</label>' + '</p> ' + '<p id="syntaxHighlight">' + '<input type="checkbox" name="syntaxHighlight" id="syntaxHighlight">' + '<label for="syntaxHighlight">Turn on code syntax highlighting (supports most languages).</label>' + '</p> ' + '</p>       ' + '<p id="recentActivityDays">' + '<select name="recentActivityD" id="recentActivityD">' + '<option value="1">1</option>' + '<option value="3">3</option>' + '<option value="7">7</option>' + '<option value="14">14</option>' + '<option value="30">30</option>' + '<option value="60">60</option>' + '<option value="120">120</option>' + '</select>     ' + '<label for="recentActivityD">Set your default Recent Activity Days on your user page. Default is 7 - set it to 7 to disable this custom function.</label>' +
+					'<p id="staticAvatars">' +
+						'<input type="checkbox" name="staticAv" id="staticAv">' +
+						'<label for="staticAv">Display static avatars (non-animated).</label>' +
+					'</p>' +
+					
+					'<p id="animatedAvatars">' +
+						'<input type="checkbox" name="animatedAv" id="animatedAv">' +
+						'<label for="animatedAv">Display animated avatars.</label>' +
+					'</p>' +
+					
+					'<p id="hideForumIDs">' +
+						'<input type="text" name="hfids" id="hfids">' +
+						'<label for="hfids">The IDs of forums to hide (eg. "35 92 137")</label>' +
+					'</p> ' +
+					
+					'<p id="editInPlace">' +
+						'<input type="checkbox" name="editInP" id="editInP">' +
+						'<label for="editInP">Turn on ability to edit post in thread using Ajax.</label>' +
+					'</p>' +
+					
+					'<p id="simple_backup">' +
+						'<input type="checkbox" name="simple_backup" id="simple_backup">' +
+						'<label for="simple_backup">Stores a backup of whatever you write in a reply/whim and allows for quickly reverting back to the last version.</label>' +
+					'</p>' +
+					
+					'<p id="whirlcodeinWikiWhimNewThread">' +
+						'<input type="checkbox" name="whirlcodeinWikiWhimNewT" id="whirlcodeinWikiWhimNewT">' +
+						'<label for="whirlcodeinWikiWhimNewT">Turn this on to use Whirlcode in Wiki and New Page Thread.</label>' +
+					'</p>' +
+					
+					'<p id="whim_archive_sort">' +
+						'<input type="checkbox" name="archive_sor" id="archive_sor">' +
+						'<label for="archive_sor">Sorts the Whim Archive page into alphabetical order.</label>' +
+					'</p>' +
 
-			'</p> ' + '</p>       ' + '<p id="whIMMessageTextAreaCols">' + '<input type="text" readonly="readonly" name="whIMMessageTextAreaC" id="whIMMessageTextAreaC">' + '<button class="wlrsetbutDown" type="button"></button> ' + '<button class="wlrsetbutUp" type="button"></button> ' + '<label for="whIMMessageTextAreaC">Increase/Decrease the number of columns (width) of the WhIM Message Area.</label>' +
+					'<p id="noGluteusMaximus">' +
+						'<input type="checkbox" name="noGluteusM" id="noGluteusM">' +
+						'<label for="noGluteusM">Removes the &p=-1#bottom from thread links on the main index page on Whirlpool</label>' +
+					'</p>   ' +
+					
+					'<p id="chatbox">' +
+						'<input type="checkbox" name="cBox" id="cBox">' +
+						'<label for="cBox">Turn on the Whirlpool Plus chatbox.  To use, you MUST agree with the <a href="http://whirlpool.net.au/wiki/?tag=wpplus_chatbox_rules" target="_blank">rules</a> of the chatbox.</label>' +
+					'</p> ' +
+					
+					'<p id="syntaxHighlight">' +
+						'<input type="checkbox" name="syntaxHighlight" id="syntaxHighlight">' +
+						'<label for="syntaxHighlight">Turn on code syntax highlighting (supports most languages).</label>' +
+					'</p> ' +
 
-			'</p> ' + '<p id="whIMMessageTextAreaRows">' + '<input type="text" readonly="readonly" name="whIMMessageTextAreaR" id="whIMMessageTextAreaR">' + '<button class="wlrsetbutDown" type="button"></button> ' + '<button class="wlrsetbutUp" type="button"></button> ' + '<label for="whIMMessageTextAreaR">Increase/Decrease the number of rows (height) of the WhIM Message Area.</label>' +
+					'<p id="recentActivityDays">' +
+						'<select name="recentActivityD" id="recentActivityD">' +
+							'<option value="1">1</option>' +
+							'<option value="3">3</option>' +
+							'<option value="7">7</option>' +
+							'<option value="14">14</option>' +
+							'<option value="30">30</option>' +
+							'<option value="60">60</option>' +
+							'<option value="120">120</option>' +
+						'</select>' +
+						'<label for="recentActivityD">Set your default Recent Activity Days on your user page. Default is 7 - set it to 7 to disable this custom function.</label>' +
+					'</p>' +
+					
+					'<p id="whIMMessageTextAreaCols">' +
+						'<input type="text" readonly="readonly" name="whIMMessageTextAreaC" id="whIMMessageTextAreaC">' +
+						'<button class="wlrsetbutDown" type="button"></button> ' +
+						'<button class="wlrsetbutUp" type="button"></button> ' +
+						'<label for="whIMMessageTextAreaC">Increase/Decrease the number of columns (width) of the WhIM Message Area.</label>' +
+					'</p> ' +
+					
+					'<p id="whIMMessageTextAreaRows">' +
+						'<input type="text" readonly="readonly" name="whIMMessageTextAreaR" id="whIMMessageTextAreaR">' +
+						'<button class="wlrsetbutDown" type="button"></button> ' +
+						'<button class="wlrsetbutUp" type="button"></button> ' +
+						'<label for="whIMMessageTextAreaR">Increase/Decrease the number of rows (height) of the WhIM Message Area.</label>' +
+					'</p> ' +
+			 
+					'<p id="emoticons">' +
+						'<input type="checkbox" name="smile" id="smile">' +
+						'<label for="smile">With smilies on, script will automatically change text emoticons (eg. :D) into their respective images.</label>' +
+					'</p>' +
+					
+					'<p id="emoticonsBlue">' +
+						'<input type="checkbox" name="smileb" id="smileb">' +
+						'<label for="smileb">Use the original blue smilies instead of the yellow ones.</label>' +
+					'</p>  ' +
+					
+					'<p id="inlineImages">' +
+						'<input type="checkbox" name="inlineI" id="inlineI">' +
+						'<label for="inlineI">Turns image links into images.</label>' +
+					'</p>' +
+					
+					'<p id="inlineVideos">' +
+						'<input type="checkbox" name="inlineV" id="inlineV">' +
+						'<label for="inlineV">Turn on ability to change YouTube and Google video links to embedded videos with title.</label>' +
+					'</p>  ' +
+					
+					'<p id="inlinePages">' +
+						'<input type="checkbox" name="inlinePages" id="inlinePages">' +
+						'<label for="inlinePages">Adds the ability to see links inline of WP.</label>' +
+					'</p> ' +
+					   
+					'<p id="ignoreUser">' +
+						'<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' +
+						'<label for="ignoreUserB">Adds a button next to each user\'s aura vote smilies, which when activated will prevent you from ' +
+						'seeing that user (you will see a post hidden message, similar to a post removed by a moderator). <strong>WARNING: Ignoring a user will cause ALL of their posts not to appear for you any more. If you want to remove someone from ' +
+						'being ignored, click on the "Hidden Users" tab above.</strong></label>' +
+					'</p>' +
+					 
+					'<p id="removeIgnoredUsers">' +
+						'<input type="checkbox" name="removeIgnoredUsersB" id="removeIgnoredUsersB">' +
+						'<label for="removeIgnoredUsersB">Completely hide all indication of removed users (the hidden post bar will not be displayed). <strong>WARNING: You will see no indication that a user has been removed.</strong></label>' +
+					'</p>' +     
+					
+					'<p id="reset_aura_vote">' +
+						'<input type="checkbox" name="reset_aura_vote" id="reset_aura_vote_checkbox">' +
+						'<label for="reset_aura_vote_checkbox">Add a reset aura smiley</label>' +
+					'</p> ' +
+					
+					'<p id="userNotes">' +
+						'<input type="checkbox" name="userNotesBox" id="userNotesBox">' +
+						'<label for="userNotesBox">User Notes</label>' +
+					'</p> ' +
+					
+					'<p id="watchedThreadsAlert">' +
+						'<select name="s_threadalert" id="s_threadAlert">' +
+							'<option value="default">None</option>' +
+							'<option value="watched">Go to watched threads</option>' +
+							'<option value="thread">Return to the thread</option>' +
+						'</select>' +
+						
+						'<label for="s_threadAlert">Choose what action to do on the "watching thread" alert.</label>' +
+					'</p> ' +
+					
+					'<p id="customWPTheme">' +
+						'<select name="s_customtheme" id="s_customtheme">' +
+							'<option value="">Default (by Simon Wright)</option>' +
+							'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' +
+							'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
+							'<option value="@import url(http://members.optusnet.com.au/whirlpoolian/classic/css/core.css);">WP Classic</option>' +
+							'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
+							'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
+							'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
+							'<option value="@import url(http://members.optusnet.com.au/whirlpoolian/greyscale/css/core.css);" selected="selected">WP Grey</option>' +
+							'<option value="@import url(http://members.optusnet.com.au/whirlpoolian/steelyellow/css/core.css);">WP Steel Yellow</option>' +
+						'</select>' +
+						'<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
+					'</p>' +
+					
+					'<p id="noTextShadow">' +
+						'<input type="checkbox" name="textShadow" id="textShadow">' +
+						'<label for="textShadow">Disable all <tt>text-shadow</tt> CSS attributes (FF 3.5+ only).</label>' +
+					'</p>' +
+					
+					'<p id="whirlpoolBreadcrumbFont">' +
+						'<select name="whirlpoolBreadcrumbF" id="whirlpoolBreadcrumbF">' +
+							'<option value="default font">default font</option>' +
+							'<option value="Verdana">Verdana</option>' +
+							'<option value="Arial">Arial</option>' +
+							'<option value="Georgia">Georgia</option>' +
+							'<option value="Tahoma">Tahoma</option>' +
+							'<option value="Trebuchet MS">Trebuchet MS</option>' +
+						'</select>' +
+						'<label for="whirlpoolBreadcrumbF">Change the Breadcrumb Font.</label>' +
+					'</p>' +
+					
+					'<p id="whirlpoolSidemenuFont">' +
+						'<select name="whirlpoolSidemenuF" id="whirlpoolSidemenuF">' +
+							'<option value="default font">default font</option>' +
+							'<option value="Verdana">Verdana</option>' +
+							'<option value="Arial">Arial</option>' +
+							'<option value="Georgia">Georgia</option>' +
+							'<option value="Tahoma">Tahoma</option>' +
+							'<option value="Trebuchet MS">Trebuchet MS</option>' +
+							'</select>' +
+						'<label for="whirlpoolSidemenuF">Change the Sidemenu Font.</label>' +
+					'</p>' +
+					
+					'<p id="showWhirlpoolFooterLinks">' +
+						'<input type="checkbox" name="showWhirlpoolFooterL" id="showWhirlpoolFooterL">' +
+						'<label for="showWhirlpoolFooterL">Show Whirlpool Footer Links.</label>' +
+					'</p>' +
 
-			'</p> ' + '</p>       ' + '<p id="emoticons">' + '<input type="checkbox" name="smile" id="smile">' + '<label for="smile">With smilies on, script will automatically change text emoticons (eg. :D) into their respective images.</label></p>' + '<p id="emoticonsBlue">' + '<input type="checkbox" name="smileb" id="smileb">' + '<label for="smileb">Use the original blue smilies instead of the yellow ones.</label>' +
+					'<p id="enableWideWhirlpool">' +
+						'<input type="checkbox" name="enableWideWh" id="enableWideWh">' +
+						'<label for="enableWideWh">Make Whirlpool Forums Wide to fit widescreen.</label>' +
+					'</p>' +
 
-			'</p>       ' + '<p id="inlineImages">' + '<input type="checkbox" name="inlineI" id="inlineI">' + '<label for="inlineI">Turns image links into images.</label>' +
+					'<p id="penaltyBoxBackground">' +
+						'<input type="checkbox" name="penaltyBoxB" id="penaltyBoxB">' +
+						'<label for="penaltyBoxB">Highlight when a user is in the penalty box.</label>' +
+					'</p> ' +
 
-			'</p>             ' + '<p id="inlineVideos">' + '<input type="checkbox" name="inlineV" id="inlineV">' + '<label for="inlineV">Turn on ability to change YouTube and google video links to embedded videos with title.</label>' +
+					'<p id="whimAlertNotice">' +
+						'<input type="checkbox" name="wAlertNotice" id="wAlertNotice">' +
+						'<label for="wAlertNotice">Show an alert notice at the top of the page when you have received a new WHIM</label>' +
+					'</p> ' +
 
-			'</p>  ' + '<p id="inlinePages">' + '<input type="checkbox" name="inlinePages" id="inlinePages">' + '<label for="inlinePages">Adds the ability to see links inline of WP.</label>' +
+					'<p id="userpageInfoToggle">' +
+						'<input type="checkbox" name="upageInfoToggle" id="upageInfoToggle">' +
+						'<label for="upageInfoToggle">Hide/Toggle user info on user pages.</label>' +
+					'</p> ' +
+					
+					'<p id="hideDRThreads">' +
+						'<input type="checkbox" name="hideDRT" id="hideDRT">' +
+						'<label for="hideDRT">Hide Deleted/Removed Threads in forum view</label>' +
+					'</p>  ' +
+					
+					'<p id="hideMVThreads">' +
+						'<input type="checkbox" name="hideMVT" id="hideMVT">' +
+						'<label for="hideMVT">Hide Moved Threads in forum view</label>' +
+					'</p> ' +
+					
+					'<p id="hideDelPosts">' +
+						'<input type="checkbox" name="hideDelPost" id="hideDelPost">' +
+						'<label for="hideDelPost">Hide deleted posts in threads.</label>' +
+					'</p>  ' +
+					
+					'<p id="floatSidebar">' +
+						'<input type="checkbox" name="enablefloatBar" id="enablefloatBar">' +
+						'<label for="enablefloatBar">Floats the sidebar as you scroll. <em>Note: May not work correctly with some screen resolutions without using Widescreen Mode.</em></label>' +
+					'</p>    ' +
+					
+					'<p id="superBar">' +
+						'<input type="checkbox" name="enablesuperBar" id="enablesuperBar">' +
+						'<label for="enablesuperBar">Adds a Sticky notes section to the sidebar (may be buggy).</label>' +
+					'</p>    ' +
+					
+					'<p id="postsPerDay">' +
+						'<input type="checkbox" name="enablesuperBar" id="enablesuperBar">' +
+						'<label for="enablesuperBar">Enable "Posts per day" statistic on user pages.</label>' +
+					'</p>  ' +
+					
+					'<p id="postAlign">' +
+						'<select name="postAl" id="postAl">' +
+							'<option value="middle">middle</option>' +
+							'<option value="top">top</option>' +
+						'</select>     ' +
+						'<label for="postAl">Aligns the text in a post to the top or middle.</label>' +
+					'</p>' +
+					
+					'<p id="lastReadTracker">' +
+						'<input type="checkbox" name="lastReadT" id="lastReadT">' +
+						'<label for="lastReadT">Turns WLR Last Read Tracker on or off.</label>' +
+					'</p>     ' +
+					
+					'<p id="trackerPostBackgroundColour">' +
+						'<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' +
+						'<label for="trackerPostBackgroundC">Highlighted Posts Colour</label>' +
+					'</p> ' +
 
-			'</p> ' + '</p>             ' + '<p id="ignoreUser">' + '<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' + '<label for="ignoreUserB">Adds a button next to each user\'s aura vote smilies, which when activated will prevent you from ' + 'seeing that user (you will see a post hidden message, similar to a post removed by a moderator). <strong>WARNING: Ignoring a user will cause ALL of their posts not to appear for you any more. If you want to remove someone from ' + 'being ignored, click on the "Hidden Users" tab above.</strong></label>' +
-         
-			'</p> ' + '</p>             ' + '<p id="removeIgnoredUsers">' + '<input type="checkbox" name="removeIgnoredUsersB" id="removeIgnoredUsersB">' + '<label for="removeIgnoredUsersB">Completely hide all indication of removed users (the hidden post bar will not be displayed). <strong>WARNING: You will see no indication that a user has been removed.</strong></label>' +
+					'<p id="newPostBackgroundColour">' +
+						'<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' +
+						'<label for="newPostBackgroundC">New Posts Thread Colour</label>' +
+					'</p>  ' +
+					
+					'<p id="noNewPostBackgroundColour">' +
+						'<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' +
+						'<label for="noNewPostBackgroundC">No New Posts Thread Colour</label>' +
+					'</p>       ' +
+				
+					'<p id="onlyEndSquare">' +
+						'<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' +
+						'<label for="onlyEndSq">Only colour end square </label>' +
+					'</p> ' +
+
+					'<p id="styleFlip">' +
+						'<input type="checkbox" name="styleFl" id="styleFl">' +
+						'<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
+					'</p>    ' +
+					
+					'<p id="dontTrackStickyThreads">' +
+						'<input type="checkbox" name="dontTrackStickyT" id="dontTrackStickyT">' +
+						'<label for="dontTrackStickyT">Don\'t track sticky threads</label>' +
+					'</p>' +
+					
+					'<p id="lastPost">' +
+						'<input type="checkbox" name="lastPos" id="lastPos">' +
+						'<label for="lastPos">Go to the last post in the thread after posting</label>' +
+					'</p>' +
+					
+					'<br/>' +
+				'</div>' +
+
+				'<div id="customCSSTab" style="display:none;float:left;border:3px solid #333;background-color:#EEEEEE;height:440px;width:795px;margin-bottom:5px;overflow:hidden;" class="wlrtabmenuDivs">' +
+					'<p id="customCSS" style="width:100%;height:100%;float:left;overflow-x:hidden;overflow-y:scroll;">' +
+						'<textarea id="cusCSS" style="width:760px;height:408px;float:left;"></textarea>' +
+					'</p>' +   
+				'</div>' +
+				
+				'<div id="hiddenUsersTab" style="display:none;float:left;border:3px solid #333;background-color:#EEEEEE;height:440px;width:795px;margin-bottom:5px;overflow-x:hidden;overflow-y:scroll;" class="wlrtabmenuDivs">' +
+				'</div>' +
+
+				'<button id="saveWLR" style="float:right;margin-top:6px;">Save</button>' +
+
+				'<button href="#" id="closeWlrSettingsModal" style="float:right;margin-top:6px;" title="close">Cancel</button>' +
+
+				'<br />' +
+				
+			'</div>';
+
 			
-			'</p> ' + '</p>             ' + '<p id="reset_aura_vote">' + '<input type="checkbox" name="reset_aura_vote" id="reset_aura_vote_checkbox">' + '<label for="reset_aura_vote_checkbox">Add a reset aura smiley</label>' +
-
-			'</p> ' + '</p>             ' + '<p id="userNotes">' + '<input type="checkbox" name="userNotesBox" id="userNotesBox">' + '<label for="userNotesBox">User Notes</label>' +
-
-			'</p> ' + '<p id="watchedThreadsAlert">' + '<select name="s_threadalert" id="s_threadAlert">' + '<option value="default">None</option>' + '<option value="watched">Go to watched threads</option>' + '<option value="thread">Return to the thread</option>' + '</select>     ' + '<label for="s_threadAlert">Choose what action to do on the "watching thread" alert.</label>' +
-
-			'</p> ' + '<p id="customWPTheme">' + '<select name="s_customtheme" id="s_customtheme">' + '<option value="">Default (by Simon Wright)</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' + '<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/classic/css/core.css);">WP Classic</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/greyscale/css/core.css);" selected="selected">WP Grey</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/steelyellow/css/core.css);">WP Steel Yellow</option>' + '</select>     ' + '<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
-
-			'</p> ' + '<p id="noTextShadow">' + '<input type="checkbox" name="textShadow" id="textShadow">' + '<label for="textShadow">Disable all <tt>text-shadow</tt> CSS attributes (FF 3.5+ only).</label>' +
-
-			'</p>' + '<p id="whirlpoolBreadcrumbFont">' + '<select name="whirlpoolBreadcrumbF" id="whirlpoolBreadcrumbF">' + '<option value="default font">default font</option>' + '<option value="Verdana">Verdana</option>' + '<option value="Arial">Arial</option>' + '<option value="Georgia">Georgia</option>' + '<option value="Tahoma">Tahoma</option>' + '<option value="Trebuchet MS">Trebuchet MS</option>' + '</select>     ' + '<label for="whirlpoolBreadcrumbF">Change the Breadcrumb Font.</label>' +
-
-			'</p>' + '<p id="whirlpoolSidemenuFont">' + '<select name="whirlpoolSidemenuF" id="whirlpoolSidemenuF">' + '<option value="default font">default font</option>' + '<option value="Verdana">Verdana</option>' + '<option value="Arial">Arial</option>' + '<option value="Georgia">Georgia</option>' + '<option value="Tahoma">Tahoma</option>' + '<option value="Trebuchet MS">Trebuchet MS</option>' + '</select>     ' + '<label for="whirlpoolSidemenuF">Change the Sidemenu Font.</label>' +
-
-			'</p>' + '<p id="showWhirlpoolFooterLinks">' + '<input type="checkbox" name="showWhirlpoolFooterL" id="showWhirlpoolFooterL">' + '<label for="showWhirlpoolFooterL">Show Whirlpool Footer Links.</label>' +
-
-			'</p>      ' + '</p>' + '<p id="enableWideWhirlpool">' + '<input type="checkbox" name="enableWideWh" id="enableWideWh">' + '<label for="enableWideWh">Make Whirlpool Forums Wide to fit widescreen.</label>' +
-
-			'</p>             ' + '</p>' + '<p id="penaltyBoxBackground">' + '<input type="checkbox" name="penaltyBoxB" id="penaltyBoxB">' + '<label for="penaltyBoxB">Highlight when a user is in the penalty box.</label>' +
-
-			'</p> ' + '</p>' + '<p id="whimAlertNotice">' + '<input type="checkbox" name="wAlertNotice" id="wAlertNotice">' + '<label for="wAlertNotice">Show an alert notice at the top of the page when you have received a new WHIM</label>' +
-
-			'</p> ' + '</p>' + '<p id="userpageInfoToggle">' + '<input type="checkbox" name="upageInfoToggle" id="upageInfoToggle">' + '<label for="upageInfoToggle">Hide/Toggle user info on user pages.</label>' +
-
-			'</p> ' + '<p id="hideDRThreads">' + '<input type="checkbox" name="hideDRT" id="hideDRT">' + '<label for="hideDRT">Hide Deleted/Removed Threads in forum view</label>' +
-
-			'</p>     ' + '<p id="hideMVThreads">' + '<input type="checkbox" name="hideMVT" id="hideMVT">' + '<label for="hideMVT">Hide Moved Threads in forum view</label>' +
-
-			'</p>     ' + '<p id="hideDelPosts">' + '<input type="checkbox" name="hideDelPost" id="hideDelPost">' + '<label for="hideDelPost">Hide deleted posts in threads.</label>' +
-
-			'</p>     ' + '<p id="floatSidebar">' + '<input type="checkbox" name="enablefloatBar" id="enablefloatBar">' + '<label for="enablefloatBar">Floats the sidebar as you scroll. <em>Note: May not work correctly with some screen resolutions without using Widescreen Mode.</em></label>' +
-
-			'</p>    ' + '<p id="superBar">' + '<input type="checkbox" name="enablesuperBar" id="enablesuperBar">' + '<label for="enablesuperBar">Adds a Sticky notes section to the sidebar (may be buggy).</label>' +
-
-			'</p>    ' + '<p id="postsPerDay">' + '<input type="checkbox" name="enablesuperBar" id="enablesuperBar">' + '<label for="enablesuperBar">Enable "Posts per day" statistic on user pages.</label>' +
-
-			'</p>    ' + '<p id="postAlign">' + '<select name="postAl" id="postAl">' + '<option value="middle">middle</option>' + '<option value="top">top</option>' + '</select>     ' + '<label for="postAl">Aligns the text in a post to the top or middle.</label>' +
-
-			'</p>' + '<p id="lastReadTracker">' + '<input type="checkbox" name="lastReadT" id="lastReadT">' + '<label for="lastReadT">Turns WLR Last Read Tracker on or off.</label>' +
-
-//			'</p>       ' + '<p id="numThreads2Track">' + '<select name="s_numThreads2Track" id="s_numThreads2Track">' + '<option value="300">300</option>' + '<option value="500">500</option>' + '<option value="1000">1000</option>' + '<option value="2000">2000</option>' + '<option value="5000">5000</option>' + '</select>     ' + '<label for="s_numThreads2Track">Number Of Threads To Track:</label>' +
-
-			'</p>     ' + '<p id="trackerPostBackgroundColour" class="needCpicker">' + '<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' + '<label for="trackerPostBackgroundC">Highlighted Posts Colour</label>' + '</p>     ' + //'<p id="disableTrackerPostBackgroundColour">' + '<input type="checkbox" name="disableTrackerPostBackgroundC" id="disableTrackerPostBackgroundC">' + '<label for="disableTrackerPostBackgroundC">Disable Highlighted Posts colouring</label>' +
-
-			'</p>     ' + '<p id="newPostBackgroundColour" class="needCpicker">' + '<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' + '<label for="newPostBackgroundC">New Posts Thread Colour</label>' + '</p>     ' + //'<p id="disableNewPostBackgroundColour">' + '<input type="checkbox" name="disableNewPostBackgroundC" id="disableNewPostBackgroundC">' + '<label for="disableNewPostBackgroundC">Disable New Posts Thread colouring</label>' +
-
-			'</p> ' + '<p id="noNewPostBackgroundColour" class="needCpicker">' + '<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' + '<label for="noNewPostBackgroundC">No New Posts Thread Colour</label>' + '</p>       ' + //'<p id="disableNoNewPostBackgroundColour">' + '<input type="checkbox" name="disableNoNewPostBackgroundC" id="disableNoNewPostBackgroundC">' + '<label for="disableNoNewPostBackgroundC">Disable No New Posts Thread colouring</label>' +
-
-			'</p>      ' + '<p id="onlyEndSquare">' + '<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' + '<label for="onlyEndSq">Only colour end square </label>' +
-
-			'</p> ' + '<p id="styleFlip">' + '<input type="checkbox" name="styleFl" id="styleFl">' + '<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
-
-			'</p>       ' + '<p id="dontTrackStickyThreads">' + '<input type="checkbox" name="dontTrackStickyT" id="dontTrackStickyT">' + '<label for="dontTrackStickyT">Don\'t track sticky threads</label>' +
-
-//			'</p>       ' + '<p id="noColourEndSquare">' + '<input type="checkbox" name="noColourEndSq" id="noColourEndSq">' + '<label for="noColourEndSq">Don\'t colour end square</label>' +
-
-//			'</p> ' + '<p id="wlrSettingsScrollTo">' + '<input type="checkbox" name="wlrSettingsScroll2" id="wlrSettingsScroll2">' + '<label for="wlrSettingsScroll2">Scroll to anchor after page load</label>' +
-
-			'</p>   ' + '<p id="lastPost">' + '<input type="checkbox" name="lastPos" id="lastPos">' + '<label for="lastPos">Go to the last post in the thread after posting</label>' +
-
-			'</p>   ' + '<br/>' + '</div>' + '<div id="customCSSTab" style="display:none;float:left;border:3px solid #333;background-color:#EEEEEE;height:440px;width:795px;margin-bottom:5px;overflow:hidden;" class="wlrtabmenuDivs">' + '<p id="customCSS" style="width:100%;height:100%;float:left;overflow-x:hidden;overflow-y:scroll;">' + '<textarea id="cusCSS" style="width:760px;height:408px;float:left;"></textarea>' + '</p>   ' + '</div>' + '<div id="hiddenUsersTab" style="display:none;float:left;border:3px solid #333;background-color:#EEEEEE;height:440px;width:795px;margin-bottom:5px;overflow-x:hidden;overflow-y:scroll;" class="wlrtabmenuDivs">' + '</div>' + '<button id="saveWLR" style="float:right;margin-top:6px;">Save</button>' + '<button href="#" id="closeWlrSettingsModal" style="float:right;margin-top:6px;" title="close">Cancel</button>' + '<br />' + '</div>';
-
 			$('#wpsettingslink').click(function () {
 
 				$('body').append('<div id="wlrsettingsoverlay" style="height: 100%; width: 100%; position: fixed; left: 0pt; top: 0pt; z-index: 2999; opacity: 0.5; background-color:#000000;"/>').append(settingsHTML);
@@ -1904,9 +2200,6 @@ try {
 					}
 				}
 				iterOverSettings('get');
-				$('#forceUpdate').mouseup(function () {
-					autoUpdate.xhrCheck('force');
-				});
 				$('.wlrsetbutUp').mouseup(function () {
 					var tBox1 = $(this).prev().prev();
 					tBox1.val((Number(tBox1.val()) + 1).toString());
@@ -1959,80 +2252,6 @@ try {
 			});
 		}
 	}
-	
-	var scriptIdUrl = '85217'; //First change by Troberto :)
-	var autoUpdate = {
-
-		aUpRegular: function (rdt, currentVersion, getChanges) {
-
-			if (Number(currentVersion.replace('.', '')) < Number(rdt.replace('.', ''))) {
-
-				var upDate = confirm('The latest version of Whirlpool Plus is version ' + rdt + ' - you have version ' + currentVersion + ' installed. Changes:' + '\r\n\r\n' + getChanges + '\r\n\r\n Do you want to update now?');
-				if (upDate) {
-					Whirlpool.set('installedScriptVersion', rdt);
-					window.location.href = "http://userscripts.org/scripts/source/" + scriptIdUrl + ".user.js";
-				} else {
-					var tym = '~';
-					if (docs.autoUpdateWPplus === "3600000") {
-						tym = '1 hour';
-					} else if (docs.autoUpdateWPplus === "21600000") {
-						tym = '6 hours';
-					} else if (docs.autoUpdateWPplus === "43200000") {
-						tym = '12 hours';
-					} else if (docs.autoUpdateWPplus === "86400000") {
-						tym = '24 hours';
-					}
-					Wp.notify('You will not received this notification again until ' + tym + ' later.', false, 5000);
-				}
-
-			}
-
-
-		},
-		aUpForce: function (rdt, currentVersion, getChanges) {
-
-			var upDate = confirm('The latest version of Whirlpool Plus is version ' + rdt + ' - you have version ' + currentVersion + ' installed. ' + '\r\n\r\n changes - ' + getChanges + '\r\n\r\n Do you want to update now?');
-			if (upDate) {
-				Whirlpool.set('installedScriptVersion', rdt);
-				window.location.href = "http://userscripts.org/scripts/source/" + scriptIdUrl + ".user.js";
-			}
-
-		},
-		xhrCheck: function (regOrForce) {
-
-			Whirlpool.ajax({
-				method: 'GET',
-				url: 'http://userscripts.org/scripts/review/' + scriptIdUrl,
-				headers: {
-					'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-					'Accept': 'text/plain'
-				},
-				onload: function (responseDetails) {
-					var getSNum = $.trim(responseDetails.responseText.split('==UserScript==')[1].split('// @require')[0].split('@version')[1].split('//')[0]);
-					var spliterrific = responseDetails.responseText.split('==Changes==')[1].split('// ==/Changes==')[0].split('changes - ');
-					var getChanges = spliterrific[spliterrific.length - 1].replace('***************/', '');
-					var currentVersion = Whirlpool.get('installedScriptVersion');
-					if (regOrForce === 'force') {
-						autoUpdate.aUpForce(getSNum, currentVersion, getChanges);
-					} else {
-						autoUpdate.aUpRegular(getSNum, currentVersion, getChanges);
-					}
-
-				}
-			})
-		},
-		regularUpdateCheck: function () {
-
-			var lastCheck = Number(Whirlpool.get('lastScriptVersionCheck'));
-			var currentTime = Date.now();
-
-			if (currentTime > (lastCheck + Number(docs.autoUpdateWPplus))) {
-				Whirlpool.set('lastScriptVersionCheck', '' + currentTime + '');
-				autoUpdate.xhrCheck('regular');
-			}
-		}
-
-	}
 
 	function quickQuote() {
 
@@ -2041,11 +2260,14 @@ try {
 		whirlC.generalStyle();
 
 		if (pReply[0]) {
+			//we have the post reply link
+			
 			$.get(pReply[0].href, function (data) {
 
 				gottaPee = data.split('name="tinkle" value="')[1].split('">')[0];
 
 			});
+			
 			if (document.title.match(' - Focused - The Pool Room - Whirlpool Forums')) {
 
 				backImg = server + 'png/focusedthread.png';
@@ -2525,19 +2747,10 @@ try {
 
 		var bfirst = dreThis.children('td:first');
 		var cDiv = bfirst.children('div');
-		var uNumClass = cDiv.eq(1).children('a:first').attr('href').split('/user/')[1];
+		var uNumClass = parseInt(cDiv.eq(1).children('a:first').attr('href').split('/user/')[1]);
 		var uClassClass = cDiv.eq(2).text().replace(/ /g, '_');
 		dreThis.addClass("wlr_" + uNumClass + " " + uClassClass);
-		bfirst.prepend('<div><a href="/user/' + uNumClass + '"/></div>');
-
-		if (!docs.avatarCSS) {
-			Whirlpool.css('td.bodyuser > div:first-child > a:first-child { margin:0 auto; } #replies tr .bodyuser div div:last-child:before { padding:5px 0 0; }');
-			if (docs.penaltyBoxBackground === 'true') {
-				Whirlpool.css('tr.In_the_penalty_box > td.bodyuser {background-image:url(' + server + 'png/tinygradient.png)!important;background-repeat:repeat !important;');
-			}
-			docs.avatarCSS = true;
-		}
-
+		bfirst.prepend('<div><a href="/user/' + uNumClass + '" class="wpp_avatar"/></div>');
 	}
 
 	function userNotes(trParent, i) {
@@ -2788,19 +3001,6 @@ try {
 
 	}
 
-	function userpageDays() {
-
-		if (!docs.dUrl.match('days') && !docs.dUrl.match('action') && (!unsafeWindow.sessionStorage.userpageDaysRedirectedWindowHistoryLength || window.history.length != unsafeWindow.sessionStorage.userpageDaysRedirectedWindowHistoryLength)) {
-
-			var userNumber = docs.dUrl.split('/user/')[1].split('?')[0];
-			docs.d.location = 'http://forums.whirlpool.net.au/user/' + userNumber + '?days=' + docs.recentActivityDays;
-
-		} else if (docs.dUrl.indexOf('?days=' + docs.recentActivityDays) > -1) {
-			unsafeWindow.sessionStorage.userpageDaysRedirectedWindowHistoryLength = window.history.length;
-
-		}
-
-	}
 	/********
 	 stuff that runs on every page ('cept for the first 2 if()s - no point running everything below on an alert page )
 	 ********/
@@ -2824,9 +3024,6 @@ document.referrer.indexOf('?action=watched') == -1) {
 		loadTheme();
 		if (docs.WLRfirstRun === 'true') {
 			wlrSettings.firstRun();
-		}
-		if (docs.autoUpdateWPplus !== 'disable' && !window.google) {
-			autoUpdate.regularUpdateCheck();
 		}
 		if (docs.whirlpoolSidemenuFont !== "default font") {
 			$('#menu').css('font-family', docs.whirlpoolSidemenuFont + ' !important');
@@ -2903,9 +3100,6 @@ document.referrer.indexOf('?action=watched') == -1) {
 			hideDelMov.mv();
 		}
 	} else if (docs.dUrl.indexOf('/user/') > -1) {
-		if (docs.recentActivityDays != '7') {
-			userpageDays();
-		}
 		whimSize();
 		if (docs.userpageInfoToggle === 'true') {
 			userpageInfoToggle();
@@ -2933,10 +3127,6 @@ document.referrer.indexOf('?action=watched') == -1) {
 	if (docs.dUrl === 'http://forums.whirlpool.net.au/forum/?action=watched') {
 		openwatchedThreadsInTabs();
 	}
-	if (docs.dUrl.indexOf('/forum/index.cfm?action=reply') > -1 && $('#breadcrumb').text().match('Greasemonkey')) {
-		Wp.notify('Found a bug? Report it using the <a href="http://code.google.com/p/whirlpool-plus/issues/list">issue tracker</a> as well as posting it.', false, 9000);
-	}
-
 	
 	// ! Basic fix for anchors
 	if (Whirlpool.url.match("#")) {
