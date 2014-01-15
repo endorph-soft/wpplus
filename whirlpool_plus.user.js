@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.0.12
+// @version       4.0.13
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
 // @require       http://wpplus.tristanroberts.name/js/lang-sql.js
-// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=4012
+// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=4013
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -131,11 +131,12 @@
  changes - 4.0.10- Replaced Polish Dude's green theme, w/ Chris's, removed Polish Dude's other themes
  changes - 4.0.11- Updated WP Green, added WP Wood and WP Purple (thanks Chris)
  changes - 4.0.12- tbwd's fixes (thanks)
+ changes - 4.0.13- Moved to tbwd's Userscript (#85217).
  ***************/
 // ==/Changes==
 try {
 
-	var version = '4.0.12';
+	var version = '4.0.13';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -422,7 +423,7 @@ try {
 					Whirlpool.set('updaterInterval', 30);
 					Whirlpool.notify('A new version of WP+ is available.', true, 50000);
 					Whirlpool.set('updaterChecked', time);
-					document.location = 'http://userscripts.org/scripts/source/50796.user.js';
+					document.location = 'http://userscripts.org/scripts/source/85217.user.js';
 				} else if (next * 2 < 7690) {
 					Whirlpool.set('updaterInterval', next * 2);
 					Whirlpool.set('updaterChecked', time);
@@ -1196,7 +1197,7 @@ try {
 
 			'</p>    ' + '<p id="smartUpdater">' + '<input type="checkbox" name="updater" id="updater">' + '<label for="updater">Enable automatic updater.</label>' +
 
-			'<a href="http://userscripts.org/scripts/source/50796.user.js" id="force_update">Force Update</a> ' + '<label for="force_update">Automatically updates to the latest version</label>' +
+			'<a href="http://userscripts.org/scripts/source/85217.user.js" id="force_update">Force Update</a> ' + '<label for="force_update">Automatically updates to the latest version</label>' +
 
 			'</p>' + '<p id="dynamicMenuSystem">' + '<select name="dynamicMen" id="dynamicMen">' + '<option value="none">none</option>' + '<option value="rightClick">Right click</option>' + '<option value="spinner">Spinner</option>' + '</select>     ' + '<label for="dynamicMen">Dynamic Menu System</label>' + '</p>    ' + '<p id="quickReplybox">' + '<input type="checkbox" name="quickRepb" id="quickRepb">' + '<label for="quickRepb">Enable a Quick Reply Box at the bottom of threads and Quick Quote links next to posts.</label>' +
 
@@ -1495,7 +1496,7 @@ try {
 			});
 		}
 	}
-	var scriptIdUrl = '50796'; //First change by Troberto :)
+	var scriptIdUrl = '85217'; //First change by Troberto :)
 	var autoUpdate = {
 
 		aUpRegular: function (rdt, currentVersion, getChanges) {
