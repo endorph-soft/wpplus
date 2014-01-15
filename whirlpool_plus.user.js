@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.13
+// @version       4.4.14
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -72,6 +72,8 @@
 // @resource	  light_gradient	http://wpplus.endorph.net/resources/png/lightgradient.png
 // @resource	  green_note		http://wpplus.endorph.net/resources/png/greennote.png
 // @resource	  red_note			http://wpplus.endorph.net/resources/png/rednote.png
+// @resource	  check				http://wpplus.endorph.net/resources/png/check.png
+// @resource	  cross				http://wpplus.endorph.net/resources/png/cross.png
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
 // ==Changes==
@@ -100,7 +102,8 @@
  changes - 4.4.10 - Penalty Box highlight, WLR fixes, other fixes for the new design
  changes - 4.4.11 - Spinner menu changes, Theme fixes
  changes - 4.4.12 - New Teal theme, smiley fix
- changes - 4.4.13 - HIde forums fix, Auto load WLR colours on theme change, typo correction
+ changes - 4.4.13 - Hide forums fix, Auto load WLR colours on theme change, typo correction
+ changes - 4.4.14 - Temp disable tracker, rework emoticons, add emoticon buttons to quick reply (and preview), fix avatars in whims
  ***************/
 // ==/Changes==
 
@@ -112,7 +115,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.13';
+	var version = '4.4.14';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -792,111 +795,168 @@ try {
 	 @runson		Forum Replies and Edit pages
 	 */
 
-	if (Whirlpool.get("emoticons") == "true" && Whirlpool.url.match("forum-repl")) {
-		$( ".reference a" ).each( function( ) {
-			var text = $(this).text( ).toString( ).replace( /\:/, "<span>:</span>" );
-			$(this).html( text );
-		} );
-
-		var icons = {
+	var emoticons = {
+		prep : function(){
+			$( ".reference a" ).each( function( ) {
+				var text = $(this).text( ).toString( ).replace( /\:/, "<span>:</span>" );
+				$(this).html( text );
+			} );
+		},
+		
+		icons : {
 			':angry:': Whirlpool.image('emoticon_angry'),
 			':glad:': Whirlpool.image('emoticon_blushing'),
 			':confused:': Whirlpool.image('emoticon_confused'),
 			':cool:': Whirlpool.image('emoticon_cool'),
 			':cry:': Whirlpool.image('emoticon_cry'),
 			':(': Whirlpool.image('emoticon_frown'),
-			':-(': Whirlpool.image('emoticon_frown'),
 			':gasp:': Whirlpool.image('emoticon_gasp'),
 			':D': Whirlpool.image('emoticon_grin'),
-			':-D': Whirlpool.image('emoticon_grin'),
 			'<3':Whirlpool.image('emoticon_kiss'),
 			':X': Whirlpool.image('emoticon_lips'),
-			':-X': Whirlpool.image('emoticon_lips'),
 			':shout:': Whirlpool.image('emoticon_shout'),
 			':snore:': Whirlpool.image('emoticon_sleep'),
 			':)': Whirlpool.image('emoticon_smile'),
-			':-)': Whirlpool.image('emoticon_smile'),
 			':\\\\': Whirlpool.image('emoticon_smirk'),
 			':|': Whirlpool.image('emoticon_straight'),
-			':-|': Whirlpool.image('emoticon_straight'),
 			':P': Whirlpool.image('emoticon_tongue'),
-			':-P': Whirlpool.image('emoticon_tongue'),
 			';)': Whirlpool.image('emoticon_wink'),
+			':star:': Whirlpool.image('emoticon_star')
+		},
+		
+		duplicates : {
+			':-(': Whirlpool.image('emoticon_frown'),
+			':-D': Whirlpool.image('emoticon_grin'),
+			':X': Whirlpool.image('emoticon_lips'),
+			'=)': Whirlpool.image('emoticon_smile'),
+			':-)': Whirlpool.image('emoticon_smile'),
+			':-|': Whirlpool.image('emoticon_straight'),
+			':-P': Whirlpool.image('emoticon_tongue'),
+			'=P': Whirlpool.image('emoticon_tongue'),
 			';-)': Whirlpool.image('emoticon_wink'),
 			':;': Whirlpool.image('emoticon_wink'),
 			':-;': Whirlpool.image('emoticon_wink'),
-			':star:': Whirlpool.image('emoticon_star')
-		};
+			':-\\\\': Whirlpool.image('emoticon_smirk'),
+			'=\\\\': Whirlpool.image('emoticon_smirk'),
+		},
 		
-		var blue_icons = {
+		blue_icons : {
 			':~': Whirlpool.image('old_blue_anxious'),
-			//'(3': Whirlpool.image('old_blue_clown'),
-			//'(-3': Whirlpool.image('old_blue_clown'),
+			//'(3': Whirlpool.image('old_blue_clown'), //confusing
+			//'(-3': Whirlpool.image('old_blue_clown'), //confusing
 			'(:': Whirlpool.image('old_blue_cool'),
-			'(:-': Whirlpool.image('old_blue_cool'),
-			':crazy:': Whirlpool.image('old_blue_crazy'),
-			'-oo-': Whirlpool.image('old_blue_eyes'),
+			//':crazy:': Whirlpool.image('old_blue_crazy'), //not a blue icon...
 			'-o.o-': Whirlpool.image('old_blue_eyes'),
 			':D': Whirlpool.image('old_blue_grin'),
-			':-D': Whirlpool.image('old_blue_grin'),
 			':|)': Whirlpool.image('old_blue_happy2'),
 			':)': Whirlpool.image('old_blue_happy'),
-			':-)': Whirlpool.image('old_blue_happy'),
 			':|(': Whirlpool.image('old_blue_sad2'),
 			':(': Whirlpool.image('old_blue_sad'),
-			':-(': Whirlpool.image('old_blue_sad'),
 			':|': Whirlpool.image('old_blue_neutral'),
+			':ninja:': Whirlpool.image('old_blue_ninja'),
+			';)': Whirlpool.image('old_blue_smirk'),
+			':P': Whirlpool.image('old_blue_tongue'),
+			':star:': Whirlpool.image('emoticon_star')
+		},
+		
+		blue_duplicates : {
+			'(:': Whirlpool.image('old_blue_cool'),
+			'-oo-': Whirlpool.image('old_blue_eyes'),
+			':-D': Whirlpool.image('old_blue_grin'),
+			':-)': Whirlpool.image('old_blue_happy'),
+			'=)': Whirlpool.image('old_blue_happy'),
+			':-(': Whirlpool.image('old_blue_sad'),
 			':-|': Whirlpool.image('old_blue_neutral'),
 			':ninja:': Whirlpool.image('old_blue_ninja'),
 			':\\\\':Whirlpool.image('old_blue_smirk'),
 			':-\\\\':Whirlpool.image('old_blue_smirk'),
-			';)': Whirlpool.image('old_blue_smirk'),
+			'=\\\\':Whirlpool.image('old_blue_smirk'),
 			';-)': Whirlpool.image('old_blue_smirk'),
-			':P': Whirlpool.image('old_blue_tongue'),
 			':-P': Whirlpool.image('old_blue_tongue'),
-			':star:': Whirlpool.image('emoticon_star')
-		};
+			'=P': Whirlpool.image('old_blue_tongue'),
+		},
 		
-		if( Whirlpool.get("emoticonsBlue") == "true" ) {
-			icons = blue_icons;
-		}
-
-		var regex = {};
-		var endLine = {};
-		var startLine = '<img src ="';
-		for (icon in icons) {
-			var regkey = icon;
-			regkey = regkey.replace(/</g, "&lt;");
-			regkey = regkey.replace(/>/g, "&gt;");
-			regkey = regkey.replace(/\(/g, "\\(");
-			regkey = regkey.replace(/\)/g, "\\)");
-			regkey = regkey.replace(/\[/g, "\\[");
-			regkey = regkey.replace(/\]/g, "\\]");
-			regkey = regkey.replace(/\|/g, "\\|");
+		getIconSet : function(useDuplicates){
 			
-			regkey = '(\\s)' + regkey;
+			mainIcons = {};
+			duplicateIcons = {};
+		
+			if( Whirlpool.get("emoticonsBlue") == "true" ) {
+				$.extend(mainIcons,emoticons.blue_icons);
+				$.extend(duplicateIcons,emoticons.blue_duplicates);
+			}else{
+				$.extend(mainIcons,emoticons.icons);
+				$.extend(duplicateIcons,emoticons.duplicates);
+			}
 			
-			regex[icon] = new RegExp(regkey, 'g');
-			endLine[icon] = '" align="baseline" />';
-		}
+			if(useDuplicates){
+				$.extend(mainIcons,duplicateIcons);
+			}
+			
+			return mainIcons;
+			
+		},
 		
+		regex : {},
+		endLine : {},
+		startLine : '<img src ="',
+		currentIconSet : {},
 		
-		textnodes = $('div.bodytext > p');
+		initialise : function(){
+			emoticons.currentIconSet = emoticons.getIconSet(true);
+			
+			for (icon in emoticons.currentIconSet) {
+				var regkey = icon;
+				regkey = regkey.replace(/</g, "&lt;");
+				regkey = regkey.replace(/>/g, "&gt;");
+				regkey = regkey.replace(/\(/g, "\\(");
+				regkey = regkey.replace(/\)/g, "\\)");
+				regkey = regkey.replace(/\[/g, "\\[");
+				regkey = regkey.replace(/\]/g, "\\]");
+				regkey = regkey.replace(/\|/g, "\\|");
+				
+				regkey = '(\\s)' + regkey;
+				
+				emoticons.regex[icon] = new RegExp(regkey, 'g');
+				emoticons.endLine[icon] = '" align="baseline" />';
+			}
+			
 
-		textnodes.each(function(){
+		},
+		
+		runOnTextNode : function(){
 			node = $(this);
+			
 			var node_value = node.html();
 			
-			var smiley = ' ' + node_value;
-			
-			for (icon in icons) {
-				smiley = smiley.replace(regex[icon], ' ' + startLine + icons[icon] + endLine[icon]);
-			}
+			smiley = emoticons.run(node_value);
 			
 			if (smiley.length > 1 && smiley != node_value) {
 				node.html(smiley);
 			}
-		});
+		},
+		
+		run : function(nodeValue){
+		
+			var smiley = ' ' + nodeValue;
+			
+			for (icon in emoticons.currentIconSet) {
+				smiley = smiley.replace(emoticons.regex[icon], ' ' + emoticons.startLine + emoticons.currentIconSet[icon] + emoticons.endLine[icon]);
+			}
+			
+			return smiley;
+		}
+		
+		
+	};
+	
+
+	if (Whirlpool.get("emoticons") == "true" && Whirlpool.url.match("forum-repl")) {
+
+		emoticons.prep();
+		emoticons.initialise();
+					
+		$('div.bodytext > p').each(emoticons.runOnTextNode);
 
 	}
 	
@@ -1150,7 +1210,9 @@ try {
    
    //Return the user who made a post. Accepts the table row that represents each post
    function getUserNumber(tr){
-      return parseInt(tr.find('a[href*="/user/"]').prop('href').split('/user/')[1]);
+		var num = tr.find('a[href*="/user/"]:not([href*="online"])').prop('href').split('/user/')[1];
+		num = num.split('?');
+		return parseInt(num);
    }
    
    /*! Ignore User */
@@ -1252,6 +1314,15 @@ try {
 			replyTr.addClass('wpp_avatar_reply_' + userNumber);
 		},
 		
+		'avatariseWhim' : function(){
+			replyTr = $(this);
+		
+			var userNumber = getUserNumber(replyTr);
+
+			replyTr.find('.bodyuser').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
+			replyTr.addClass('wpp_avatar_reply_' + userNumber);
+		},
+		
 		'css' : function(){
 			if (Whirlpool.get('staticAvatars') == 'true') {
 				$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/avatar_lite.css">');
@@ -1295,6 +1366,8 @@ try {
 	//end avatars lite
 		
 	var whirlpoolLastRead = {
+		'trackThisThread' : true,
+	
 		'saveThreadData' : function(threadNumber,threadReplyNumber,overallReplyNumber){
 			SyncStorage.set(threadNumber,{t : threadReplyNumber, o : overallReplyNumber});
 		},
@@ -1352,6 +1425,30 @@ try {
 					reply.addClass('whirlpoolLastRead_unreadReply');
 				}
 			});
+			
+			// The "disable tracking" button
+			
+			if(Whirlpool.get('tempDisableTracker') == 'true'){
+				Whirlpool.css('#wlr_disableTracker { height: 40px; width: 40px; position: fixed; top: 0px; right: 0px; border-bottom-left-radius: 30px; background-color: #3A437B; }' +
+				' .wlr_disableTracker_img { width: 25px; position: relative; top: 5px; left: 10px; } ' +
+				' #wlr_disableTracker_disabled { display: none; } ');
+				$('body').append('<div id="wlr_disableTracker">' + 
+				'<img class="wlr_disableTracker_img" id="wlr_disableTracker_enabled" src="' + Whirlpool.image('check') + '" title="WLR Tracker Enabled" />' + 
+				'<img class="wlr_disableTracker_img" id="wlr_disableTracker_disabled" src="' + Whirlpool.image('cross') + '" title="WLR Tracker Disabled" />' + 
+				'</div>');
+				$('#wlr_disableTracker').click(function(){
+					
+					$('.wlr_disableTracker_img').toggle();
+					
+					if(whirlpoolLastRead.trackThisThread == true){
+						whirlpoolLastRead.trackThisThread = false;
+					}else{
+						whirlpoolLastRead.trackThisThread = true;
+					}
+					
+				});
+			}
+			
 		
 			var lowestViewHeight = window.innerHeight + window.pageYOffset;
 			
@@ -1370,6 +1467,10 @@ try {
 			}
 			
 			$(window).bind(unloadEvent,function(){
+				if(whirlpoolLastRead.trackThisThread == false){
+					return;
+				}
+			
 				//need to find the last read reply
 				var replies = $('div#replies .reply, div#replies .notice').not('#previewTR');
 				
@@ -1954,7 +2055,7 @@ try {
 			'recentActivityDays': '7',
 			'whIMMessageTextAreaCols': '45',
 			'whIMMessageTextAreaRows': '10',
-			'smilies': 'true',
+			//'smilies': 'true',
 			'inlineImages': 'true',
 			'inlineVideos': 'true',
 			'emoticonsBlue': 'true',
@@ -2016,7 +2117,9 @@ try {
 			'syncUser' : 'UID',
 			'syncKey' : 'KEY',
 			'syncActivated' : 'false',
-			'syncEncKey' : ''
+			'syncEncKey' : '',
+			'tempDisableTracker' : 'true',
+			'quickReplyboxSmilies' : 'false',
 		};
 
 		for (var k in gmDefaults) {
@@ -2085,7 +2188,7 @@ try {
 				previewTimer = setTimeout(function () {
 								
 					docs.pTd3.html(unsafeWindow.whirlcode2(docs.q.val(), docs.eh));
-
+					$('#previewTR div.bodytext > p').each(emoticons.runOnTextNode);
 					previewWait = false;
 
 				},
@@ -2173,8 +2276,18 @@ try {
 		},
 		buttons: function (id, w, c) {
 
+			var emoticonString = '';
+						
+			if(Whirlpool.get('emoticons') === 'true' && Whirlpool.get('quickReplyboxSmilies') === 'true'){
+				icons = emoticons.getIconSet(false);
+				emoticonString += '<br/>';
+				for (icon in icons) {
+					emoticonString += '<img class="' + c + '" src="' + icons[icon] +  '" id="emoticon_' + icon.replace('\\\\','\\') + '"/>&nbsp;&nbsp;';
+				}
+			}
+		
 			return '<div id="' + id + '" style="text-align:center;padding-bottom:10px;width:' + w + '">' + '<button type="button" class="' + c + '" title="Bold WhirlCode" accesskey="b" id="wc_whirlBold" >Bold</button>' + '<button type="button" class="' + c + '" title="Italic WhirlCode" accesskey="i" id="wc_whirlItalic" >Italic</button>' + '<button type="button" class="' + c + '" title="SingleQuote WhirlCode" accesskey="t" id="wc_whirlSingleQuote" >\'quote\'</button>' + '<button type="button" class="' + c + '" title="DoubleQuote WhirlCode" accesskey="q" id="wc_whirlDoubleQuote" >"quote"</button>' + '<button type="button" class="' + c + '" title="Quote WhirlCode" accesskey="h" id="wc_whirlQuote" >who</button>' + '<button type="button" class="' + c + '" title="Superscript WhirlCode" accesskey="p" id="wc_whirlSuperscript" >Super</button>' + '<button type="button" class="' + c + '" title="Subscript WhirlCode" accesskey="\\" id="wc_whirlSubscript" >Sub</button>' + '<button type="button" class="' + c + '" title="Strike WhirlCode" accesskey="k" id="wc_whirlStrike" >Strike</button>' + '<button type="button" class="' + c + '" title="Courier WhirlCode" accesskey="c" id="wc_whirlCourier" >Courier</button>' + '<button type="button" class="' + c + '" title="Small WhirlCode" accesskey="m" id="wc_whirlSmall" >Small</button>' + '<button type="button" class="' + c + '" title="Grey WhirlCode" accesskey="r" id="wc_whirlGrey" >Grey</button>' + '<button type="button" class="' + c + '" title="Serif WhirlCode" accesskey="s" id="wc_whirlSerif" >Serif</button>' + '<button type="button" class="' + c + '" title="Google WhirlCode" accesskey="g" id="wc_whirlGoogle" >Google</button>' + '<button type="button" class="' + c + '" title="Escape WhirlCode" accesskey="e" id="wc_whirlEscape" >Esc</button>' + '<button type="button" class="' + c + '" title="Wiki WhirlCode" accesskey="w" id="wc_whirlWiki" >Wiki</button>' + '<button type="button" class="' + c + '" title="Spoiler WhirlCode" accesskey="o" id="wc_whirlSpoil" >Spoiler</button>' + '<button type="button" class="' + c + '" title="URL Link" accesskey="u" id="wc_whirlurl" >URL</button>' + '<button type="button" class="' + c + '" title="Link" accesskey="l" id="wc_whirllink" >Link</button>' + 
-			'</div>';
+			emoticonString + '</div>';
 
 		},
 		buttonEvents: function (c, tAr, whirlCode) {
@@ -2215,19 +2328,7 @@ try {
 
 				}
 
-				if (qqtheSelection === "") {
-
-					if (((qqcurrentValue.split(whirlCode[qqbuttonID].encloseLeft).length + qqcurrentValue.split(whirlCode[qqbuttonID].encloseRight).length) % 2) === 0) {
-
-						insertAtCursor(tAr[0], whirlCode[qqbuttonID].encloseLeft);
-
-					} else {
-
-						insertAtCursor(tAr[0], whirlCode[qqbuttonID].encloseRight);
-
-					}
-
-				} else if (qqbuttonID == "wc_whirlurl") {
+				if (qqbuttonID == "wc_whirlurl") {
 
 					var uPrompt = window.prompt("Enter URL:", "http://");
 
@@ -2253,7 +2354,23 @@ try {
 
 					}
 
-				} else {
+				} else if (/emoticon_/.test(qqbuttonID)) {
+					
+					insertAtCursor(tAr[0], qqbuttonID.split('emoticon_')[1]);
+				
+				}else if (qqtheSelection === "") {
+
+					if (((qqcurrentValue.split(whirlCode[qqbuttonID].encloseLeft).length + qqcurrentValue.split(whirlCode[qqbuttonID].encloseRight).length) % 2) === 0) {
+
+						insertAtCursor(tAr[0], whirlCode[qqbuttonID].encloseLeft);
+
+					} else {
+
+						insertAtCursor(tAr[0], whirlCode[qqbuttonID].encloseRight);
+
+					}
+
+				}else {
 
 					if (qqtheSelection.indexOf('\n') > -1 || qqtheSelection.indexOf('\r') > -1) {
 						var tSel = qqtheSelection.replace(/^(.+)$/mg, whirlCode[qqbuttonID].encloseLeft + "$1" + whirlCode[qqbuttonID].encloseRight);
@@ -2634,6 +2751,11 @@ try {
 							'<p id="styleFlip">' +
 								'<input type="checkbox" name="styleFl" id="styleFl">' +
 								' <label for="styleFl">Highlight unread posts instead of read posts (Posts Pages)</label>' +
+							'</p>    ' +	
+							
+							'<p id="tempDisableTracker">' +
+								'<input type="checkbox" name="tempDisableTracker_check" id="tempDisableTracker_check">' +
+								' <label for="tempDisableTracker_check">Add a button to temporarily disable the tracker (top right corner)</label>' +
 							'</p>    ' +
 							
 
@@ -2714,6 +2836,12 @@ try {
 								'<input type="checkbox" name="quickRepb" id="quickRepb">' +
 								' <label for="quickRepb">Quick Reply</label>' +
 								' <span class="settingDesc">Adds a Quick Reply box to the bottom of each page</span>'+
+							'</p>' +
+
+							'<p id="quickReplyboxSmilies">' +
+								'<input type="checkbox" name="quickReplyboxSmilies_check" id="quickReplyboxSmilies_check">' +
+								' <label for="quickReplyboxSmilies_check">Quick Reply Smilies</label>' +
+								' <span class="settingDesc">Display the available smilies under the whirlcode buttons</span>'+
 							'</p>' +
 							
 							'<p id="autoPreview">' +
@@ -4141,8 +4269,8 @@ document.referrer.indexOf('?action=watched') == -1) {
 	
 		avatar.css();
 		
-		if (Whirlpool.get('staticAvatars') === 'true') {
-			avatar.avatariseRow($('div.reply'));
+		if (Whirlpool.get('staticAvatars') === 'true' || Whirlpool.get('animatedAvatars') === 'true' ) {
+			$('#replies table tr').each(avatar.avatariseWhim);
 		}
 		
 	}
