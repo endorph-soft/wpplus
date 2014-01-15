@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.7
+// @version       4.2.8
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -149,12 +149,13 @@
  changes - 4.2.5 - Fixes auto preview
  changes - 4.2.6 - New Avatar Server
  changes - 4.2.7 - Fixed auto updater, changed smilies, change recent activity days, tidied up settings box
+ changes - 4.2.8 - Only load inline images once per page, tweaks to smilies code, removed redundant code, identify WP+ alerts better to end user
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.7';
+	var version = '4.2.8';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -621,23 +622,22 @@ try {
 		}
 		
 		
-		textnodes = document.evaluate("//td[@class = 'bodytext']//text()", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+		textnodes = $('td.bodytext > p');
 
-		for (var i = 0; i < textnodes.snapshotLength; i++) {
-			node = textnodes.snapshotItem(i);
-			var node_value = node.nodeValue;
-			node_value = node_value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-			var smiley = node_value;
+		textnodes.each(function(){
+			node = $(this);
+			var node_value = node.html();
+			
+			var smiley = ' ' + node_value;
+			
 			for (icon in icons) {
 				smiley = smiley.replace(regex[icon], ' ' + startLine + icons[icon] + endLine[icon]);
 			}
 			
 			if (smiley.length > 1 && smiley != node_value) {
-				var span = document.createElement("span");
-				span.innerHTML = smiley;
-				node.parentNode.replaceChild(span, node);
+				node.html(smiley);
 			}
-		}
+		});
 
 	}
 	
@@ -724,22 +724,26 @@ try {
 		var extensions = "bmp|gif|jpg|png".split("|");
 		var width = $(".bodytext").css("width").toString( );
 		
+		var displayed = {};
+		
 		$( ".bodytext a" ).each( function( ) {
 			var link = $(this).attr('href').toString( );
 			
 			if ( Whirlpool.get( "inlineImages" ) == "true" ) {
 				for ( key in extensions ) {
-					if ( link.toLowerCase( ).indexOf( extensions[key] ) > -1 ) {
+					if ( link.toLowerCase( ).indexOf( extensions[key] ) > -1 && displayed[link] != true) {
 						$(this).before('<img src="' + link + '" class="wpx_img">');
+						displayed[link] = true;
 					}
 				}
 			}
 			
 			if ( Whirlpool.get( "inlineVideos" ) == "true" ) {
-				if ( link.indexOf( "youtube.com/watch" ) > -1 ) {
+				if ( link.indexOf( "youtube.com/watch" ) > -1 && displayed[link] != true ) {
 					var id = link.split("v=")[1].split("&")[0];
 					var code = '<embed src="http://www.youtube.com/v/' + id + '&hl=en_US&fs=1&rel=0" type="application/x-shockwave-flash" allowfullscreen="true" width="436" height="350"></embed>';
 					$(this).before(code);
+					displayed[link] = true;
 				}
 			}
 		} );
@@ -798,7 +802,7 @@ try {
 						if( text.indexOf( "Post edited" ) > -1 ) {
 							document.location.reload();
 						} else {
-							alert( "Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Feedback)." );
+							alert( "WP+: Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Feedback)." );
 						}
 					} );
 					return false;
@@ -1052,7 +1056,7 @@ try {
 					//record information for last read reply
 					var replyNumberLinks = lastReadReply.find('td:first-child > a');
 					if(replyNumberLinks.length < 2){
-						alert('Sorry, something went wrong with thread tracking. If you see this message a lot, the tracker is probably broken');
+						alert('WP+: Sorry, something went wrong with thread tracking. If you see this message a lot, the tracker is probably broken');
 					}else{
 						var threadReplyNumber = parseInt($(replyNumberLinks[0]).attr('name').split('r')[1]);
 						var overallReplyNumber = $(replyNumberLinks[1]).attr('name').split('r')[1];
@@ -1536,8 +1540,11 @@ try {
 
 			$('.' + c).bind('mouseup', function (evt) {
 
-				var qqbuttonID = $(this).attr('id');
+				//id of the button selected. eg wc_whirlBold etc
+				var qqbuttonID = $(this).attr('id'); 
+				//focus on the quick reply text area
 				tAr.focus(function () {}); //I don't understand it either, but tAr.focus(); without an anonymous function produces a weird error.
+				//get current value to quick reply text area
 				var qqcurrentValue = tAr.val();
 				var qqtheSelection = tAr.val().substring(tAr[0].selectionStart, tAr[0].selectionEnd);
 
@@ -2336,7 +2343,7 @@ try {
 				},
 				error: function (XMLHttpRequest, textStatus, errorThrown) {
 
-					alert('something broke!  ==>' + XMLHttpRequest + textStatus + errorThrown);
+					alert('WP+: Something broke!  ==>' + XMLHttpRequest + ' ' + textStatus + ' ' + errorThrown);
 					docs.q.val(Whirlpool.get('textareraSave'));
 
 				}
@@ -2527,7 +2534,7 @@ try {
 
 			if (docs.checkIfSignedIn) {
 
-				alert('You Are Not Currently Signed Into Whirlpool');
+				alert('WP+: You Are Not Currently Signed Into Whirlpool');
 
 			} else {
 
@@ -2848,28 +2855,7 @@ try {
 	}
    
 
-   
-	var toggleSections = {
-		links: function () {
-			var ts_sections = document.getElementsByTagName('h3');
-			var ts_i = 0;
-			var ts_id;
-			while (ts_i < ts_sections.length) {
-				ts_id = 'ts_section' + ts_i;
-				ts_sections[ts_i].innerHTML += ' - (<a href="#" id="' + ts_id + '">hide</a>)';
-				document.getElementById(ts_id).addEventListener('click', function (e) {
-					alert(ts_i);
-					var id = ts_i;
-					alert(id);
-					document.getElementsByTagName('table')[id].style.display = 'none';
-				},
-				true);
-
-				ts_i++;
-			}
-		}
-	}
-	var hideDelMov = {
+   	var hideDelMov = {
 		delRem: function () {
 			Whirlpool.css('.threadP0, .threadP1, .threadP2, .threadP3, .deleted{display:none;}');
 		},
