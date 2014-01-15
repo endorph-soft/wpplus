@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.9
+// @version       4.2.0
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -142,12 +142,13 @@
  changes - 4.1.7 - Readded user notes (Please update to Greasemonkey 0.9.1 if you are running 0.9.0). Changed position of M and S links
  changes - 4.1.8 - Fixed issue with FF4b11, Added a "reset vote" aura option
  changes - 4.1.9 - Fixed an issue with the tracker that caused threads to not track correctly
+ changes - 4.2.0 - Readded popular colouring options to WLR tracker, fixed another tracker bug
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.1.9';
+	var version = '4.2.0';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -961,7 +962,11 @@ try {
 		'forumReplies' : function(){
 		
 			//css rules
-			Whirlpool.css('#replies table tr.whirlpoolLastRead_readReply td.bodypost { background-color: #CFCBBC; background-image: none; }');
+			if(Whirlpool.get('styleFlip') == 'false'){
+				Whirlpool.css('#replies table tr.whirlpoolLastRead_readReply td.bodypost { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
+			}else{
+				Whirlpool.css('#replies table tr.whirlpoolLastRead_unreadReply td.bodypost { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
+			}
 		
 			var lastReadReplyNumber = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber)['threadReplyNumber'];
 			$('div#replies > table > tbody > tr').each(function(){
@@ -974,12 +979,12 @@ try {
 				}
 			});
 		
-			var lowsetViewHeight = window.innerHeight + window.pageYOffset;
+			var lowestViewHeight = window.innerHeight + window.pageYOffset;
 			
 			$(window).scroll(function(e){
 				var currentViewHeight = window.innerHeight + window.pageYOffset;
 				if(currentViewHeight > lowestViewHeight){
-					lowsetViewHeight = currentViewHeight;
+					lowestViewHeight = currentViewHeight;
 				}
 			});
 			
@@ -993,7 +998,7 @@ try {
 					reply = $(this);
 				
 					var positionOfBottom = reply.offset().top + reply.height();
-					if(positionOfBottom < lowsetViewHeight){
+					if(positionOfBottom < lowestViewHeight){
 						lastReadReply = reply;
 					}else{
 						return;
@@ -1111,8 +1116,8 @@ try {
 		},
 		
 		'forumPageCss' : function(){
-			Whirlpool.css('.whirlpoolLastRead_unreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #95B0CB !important;  }');
-			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #CBC095 !important;  }');
+			Whirlpool.css('.whirlpoolLastRead_unreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 ' +  decodeURIComponent(Whirlpool.get('newPostBackgroundColour')) + ' !important;  }');
+			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 ' +  decodeURIComponent(Whirlpool.get('noNewPostBackgroundColour')) + ' !important;  }');
 			Whirlpool.css('#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top: -5px; opacity:0.3; border-bottom-width:1px; float: left; }');
 			Whirlpool.css('#content a.whirlpoolLastRead_markAsRead { margin-top: -8px; ');
 		},
@@ -1273,15 +1278,15 @@ try {
 			'textareraSave': '',
 			'lastReadTracker': 'true',
 			//'numThreads2Track': '1000',
-			//'trackerPostBackgroundColour': '#CFCBBC',
+			'trackerPostBackgroundColour': '#CFCBBC',
 			//'disableTrackerPostBackgroundColour': 'false',
 			'readTheRulesYet': 'false',
-			//'newPostBackgroundColour': '#95b0cb',
+			'newPostBackgroundColour': '#95b0cb',
 			//'disableNewPostBackgroundColour': 'false',
-			//'noNewPostBackgroundColour': '#cbc095',
+			'noNewPostBackgroundColour': '#cbc095',
 			//'disableNoNewPostBackgroundColour': 'false',
 			'onlyEndSquare': 'false',
-			//'styleFlip': 'false',
+			'styleFlip': 'false',
 			'dontTrackStickyThreads': 'false',
 			//'noColourEndSquare': 'false',
 			//'wlrSettingsScrollTo': 'false',
@@ -1720,15 +1725,15 @@ try {
 
 //			'</p>       ' + '<p id="numThreads2Track">' + '<select name="s_numThreads2Track" id="s_numThreads2Track">' + '<option value="300">300</option>' + '<option value="500">500</option>' + '<option value="1000">1000</option>' + '<option value="2000">2000</option>' + '<option value="5000">5000</option>' + '</select>     ' + '<label for="s_numThreads2Track">Number Of Threads To Track:</label>' +
 
-//			'</p>     ' + '<p id="trackerPostBackgroundColour" class="needCpicker">' + '<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' + '<label for="trackerPostBackgroundC">Highlighted Posts Colour:</label>' + '</p>     ' + '<p id="disableTrackerPostBackgroundColour">' + '<input type="checkbox" name="disableTrackerPostBackgroundC" id="disableTrackerPostBackgroundC">' + '<label for="disableTrackerPostBackgroundC">Disable Highlighted Posts colouring</label>' +
+			'</p>     ' + '<p id="trackerPostBackgroundColour" class="needCpicker">' + '<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' + '<label for="trackerPostBackgroundC">Highlighted Posts Colour</label>' + '</p>     ' + //'<p id="disableTrackerPostBackgroundColour">' + '<input type="checkbox" name="disableTrackerPostBackgroundC" id="disableTrackerPostBackgroundC">' + '<label for="disableTrackerPostBackgroundC">Disable Highlighted Posts colouring</label>' +
 
-//			'</p>     ' + '<p id="newPostBackgroundColour" class="needCpicker">' + '<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' + '<label for="newPostBackgroundC">New Posts Thread Colour: </label>' + '</p>     ' + '<p id="disableNewPostBackgroundColour">' + '<input type="checkbox" name="disableNewPostBackgroundC" id="disableNewPostBackgroundC">' + '<label for="disableNewPostBackgroundC">Disable New Posts Thread colouring</label>' +
+			'</p>     ' + '<p id="newPostBackgroundColour" class="needCpicker">' + '<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' + '<label for="newPostBackgroundC">New Posts Thread Colour</label>' + '</p>     ' + //'<p id="disableNewPostBackgroundColour">' + '<input type="checkbox" name="disableNewPostBackgroundC" id="disableNewPostBackgroundC">' + '<label for="disableNewPostBackgroundC">Disable New Posts Thread colouring</label>' +
 
-//			'</p> ' + '<p id="noNewPostBackgroundColour" class="needCpicker">' + '<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' + '<label for="noNewPostBackgroundC">No New Posts Thread Colour: </label>' + '</p>       ' + '<p id="disableNoNewPostBackgroundColour">' + '<input type="checkbox" name="disableNoNewPostBackgroundC" id="disableNoNewPostBackgroundC">' + '<label for="disableNoNewPostBackgroundC">Disable No New Posts Thread colouring</label>' +
+			'</p> ' + '<p id="noNewPostBackgroundColour" class="needCpicker">' + '<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' + '<label for="noNewPostBackgroundC">No New Posts Thread Colour</label>' + '</p>       ' + //'<p id="disableNoNewPostBackgroundColour">' + '<input type="checkbox" name="disableNoNewPostBackgroundC" id="disableNoNewPostBackgroundC">' + '<label for="disableNoNewPostBackgroundC">Disable No New Posts Thread colouring</label>' +
 
 			'</p>      ' + '<p id="onlyEndSquare">' + '<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' + '<label for="onlyEndSq">Only colour end square </label>' +
 
-//			'</p> ' + '<p id="styleFlip">' + '<input type="checkbox" name="styleFl" id="styleFl">' + '<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
+			'</p> ' + '<p id="styleFlip">' + '<input type="checkbox" name="styleFl" id="styleFl">' + '<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
 
 			'</p>       ' + '<p id="dontTrackStickyThreads">' + '<input type="checkbox" name="dontTrackStickyT" id="dontTrackStickyT">' + '<label for="dontTrackStickyT">Don\'t track sticky threads</label>' +
 
