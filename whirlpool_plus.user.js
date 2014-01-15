@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.8
+// @version       4.1.9
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
 // @require       http://wpplus.tristanroberts.name/js/lang-sql.js
-// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=413
+// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=419
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -141,12 +141,13 @@
  changes - 4.1.6 - Add mark as read link for those using "Only colour end square"
  changes - 4.1.7 - Readded user notes (Please update to Greasemonkey 0.9.1 if you are running 0.9.0). Changed position of M and S links
  changes - 4.1.8 - Fixed issue with FF4b11, Added a "reset vote" aura option
+ changes - 4.1.9 - Fixed an issue with the tracker that caused threads to not track correctly
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.1.8';
+	var version = '4.1.9';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -234,14 +235,15 @@ try {
 		 @param	duration	(int) The duration, in seconds, to display the message for.  Note:  The user can also click the message to hide it.
 		 */
 		'notify': function (message, important, duration) {
-			if (important == true) {
-				var color = 'black';
-				var background = 'orange';
-				var opacity = '0.9';
+			var color, background, opacity;
+			if (important === true) {
+				color = 'black';
+				background = 'orange';
+				opacity = '0.9';
 			} else {
-				var color = 'white';
-				var background = 'black';
-				var opacity = '0.9';
+				color = 'white';
+				background = 'black';
+				opacity = '0.9';
 			}
 			if (!Wp._notified) {
 				$('head').append('<style type="text/css">.wpplus_notify{ width: 85%; height: 20px; background-color: ' + background + '; opacity: ' + opacity + '; position: fixed; top: 25px; left: 7.5%; z-index: 500; -moz-border-radius: 10px; padding-top: 7px; text-align: center; color: ' + color + '} .wpplus_notify:hover{ cursor: pointer; }</style>');
@@ -331,12 +333,12 @@ try {
 
 		$('#left').css({
 			'position': 'fixed',
-			'left': left + 'px',
+			'left': left + 'px'
 		});
 
 		$('#logo').css({
 			'position': 'absolute',
-			'left': '0',
+			'left': '0'
 		});
 		$('.selected ul[style~="dashed"]').append('<li id="wpplus_undock"><a href="javascript:;"> Unfloat Sidebar (temp)</a></li>');
 		$('#wpplus_undock a').click(function () {
@@ -366,7 +368,7 @@ try {
 	if (Whirlpool.get("inlinePages") == "true" && Whirlpool.url.match("forum-replies.cfm")) {
 		$('.external').after('<sup style="cursor:pointer;" class="quick">(preview)</sup>');
 		$('.quick').live('click', function (e) {
-			var previewClass = ($(this).attr('id') != '') ? $(this).attr('id') : 'quick' + Math.floor(Math.random() * 101);
+			var previewClass = ($(this).attr('id') !== '') ? $(this).attr('id') : 'quick' + Math.floor(Math.random() * 101);
 			if ($('.' + previewClass).hasClass(previewClass)) {
 				$(this).text('(preview)');
 				$('.' + previewClass).parent().parent().remove();
@@ -433,9 +435,9 @@ try {
 			var mine = version.replace(/\./g, '');
 
 			Whirlpool.HttpRequest(url, function (data) {
-				var data = data.responseText;
+				var dataText = data.responseText;
 
-				if (mine < data) {
+				if (mine < dataText) {
 					Whirlpool.set('updaterInterval', 30);
 					Whirlpool.notify('A new version of WP+ is available.', true, 50000);
 					Whirlpool.set('updaterChecked', time);
@@ -505,12 +507,11 @@ try {
 	 @runson		Forum Section Index
 	 */
 	if (Whirlpool.get("unanswered_threads") == "true" && Whirlpool.url.match("/forum/")) {
-		var url = document.location.toString();
-		if (url.match('nr=1')) {
-			var old_url = url.replace('&nr=1', '');
+		if (Whirlpool.url.match('nr=1')) {
+			var old_url = Whirlpool.url.replace('&nr=1', '');
 			$('#breadcrumb li:last').html('<a href="' + old_url + '">' + $('#breadcrumb li:last').text() + '</a>');
 		} else {
-			var new_url = url + (url.indexOf('?') > -1 ? '&nr=1' : '?&nr=1');
+			var new_url = Whirlpool.url + (Whirlpool.url.indexOf('?') > -1 ? '&nr=1' : '?&nr=1');
 			$('#breadcrumb li:last').append(' <a href="' + new_url + '">(unread)</a> ');
 		}
 	}
@@ -558,7 +559,7 @@ try {
 			';-)': Whirlpool.image('emoticon_wink'),
 			':;': Whirlpool.image('emoticon_wink'),
 			':-;': Whirlpool.image('emoticon_wink'),
-			':star:': Whirlpool.image('emoticon_star'),
+			':star:': Whirlpool.image('emoticon_star')
 		};
 		
 		var blue_icons = {
@@ -584,7 +585,7 @@ try {
 			':\\\\':Whirlpool.image('old_blue_smirk'),
 			':-\\\\':Whirlpool.image('old_blue_smirk'),
 			':P': Whirlpool.image('old_blue_tongue'),
-			':-P': Whirlpool.image('old_blue_tongue'),
+			':-P': Whirlpool.image('old_blue_tongue')
 		};
 		
 		if( Whirlpool.get("emoticonsBlue") == "true" ) {
@@ -671,9 +672,9 @@ try {
 			return a.Sort < b.Sort ? -1 : 1;
 		});
 
-		for each(var item in plainArr) {
+		plainArr.forEach(function(item,index,array) {
 			whimTRsParent.appendChild(item.tr);
-		}
+		});
 
 	}
 	/*! Simple Backup */
@@ -785,7 +786,7 @@ try {
 						if( text.indexOf( "Post edited" ) > -1 ) {
 							document.location.reload();
 						} else {
-							alert( "Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Forum Feedback)." );
+							alert( "Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Feedback)." );
 						}
 					} );
 					return false;
@@ -973,10 +974,13 @@ try {
 				}
 			});
 		
-			var currentViewHeight = window.innerHeight + window.pageYOffset;
+			var lowsetViewHeight = window.innerHeight + window.pageYOffset;
 			
 			$(window).scroll(function(e){
-				currentViewHeight = window.innerHeight + window.pageYOffset;
+				var currentViewHeight = window.innerHeight + window.pageYOffset;
+				if(currentViewHeight > lowestViewHeight){
+					lowsetViewHeight = currentViewHeight;
+				}
 			});
 			
 			$(window).unload(function(){
@@ -989,7 +993,7 @@ try {
 					reply = $(this);
 				
 					var positionOfBottom = reply.offset().top + reply.height();
-					if(positionOfBottom < currentViewHeight){
+					if(positionOfBottom < lowsetViewHeight){
 						lastReadReply = reply;
 					}else{
 						return;
@@ -2025,7 +2029,7 @@ try {
 		docs.lmtr = docs.repliesTR.eq(docs.repliesTR.length - 1);
 
 		function postPost(textArtex, textOptions) {
-
+		
 			$.ajax({
 				type: "POST",
 				url: pReply[0].href,
