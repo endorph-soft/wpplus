@@ -2,12 +2,13 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.15
+// @version       4.4.16
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
 // @require       http://wpplus.endorph.net/resources/js/lang-sql.js
 // @require       http://wpplus.endorph.net/resources/js/jqdnr.pjs
+// @require       http://wpplus.endorph.net/resources/js/jquery.autosize.js
 // @require       http://wpplus.endorph.net/resources/js/tea.js
 // @include       http://forums.whirlpool.net.au/*
 // @include       https://forums.whirlpool.net.au/*
@@ -107,6 +108,7 @@
  changes - 4.4.13 - Hide forums fix, Auto load WLR colours on theme change, typo correction
  changes - 4.4.14 - Temp disable tracker, rework emoticons, add emoticon buttons to quick reply (and preview), fix avatars in whims
  changes - 4.4.15 - Changed Youtube embed to more general oEmbed support
+ changes - 4.4.16 - oEmbed max width, Firefox 3.6 fixes, auto resizing quick reply box
  ***************/
 // ==/Changes==
 
@@ -118,7 +120,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.15';
+	var version = '4.4.16';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -208,6 +210,7 @@ try {
 				method: 'GET',
 				url: url,
 				headers: {
+					'User-Agent': 'Mozilla/5.0',
 					'User-Agent': 'Mozilla/5.0',
 					'Accept': 'text/xml'
 				},
@@ -1055,74 +1058,60 @@ try {
 		}
 	}
 	
-	if (Whirlpool.get( "oembed" ) == 'true' && Whirlpool.url.match("forum-replies.cfm")) {
-		Whirlpool.css(GM_getResourceText('oembedcss'));
-
-		//From http://stackoverflow.com/questions/2303147/injecting-js-functions-into-the-page-from-a-greasemonkey-script-on-chrome
-		var injectOEmbed = unsafeWindow.document.createElement('script');
-		injectOEmbed.appendChild(unsafeWindow.document.createTextNode('function injectOEmbed(){ '+ GM_getResourceText('oembedjs') +'}'));
-		unsafeWindow.document.head.appendChild(injectOEmbed);
-		
-		unsafeWindow.injectOEmbed();
-		
-		try{
-			var matchingRegex = new RegExp(decodeURIComponent(Whirlpool.get("oembed_types").replace('.','\.')));
-			
-			unsafeWindow.$('#replies .replytext a').not('.internal').each(function(){
-				var link = unsafeWindow.$(this);
-				
-				if(matchingRegex.test(link.prop('href'))){
-					link.oembed(null,{ });
-				}
-			});
-		}catch(error){
-			Whirlpool.notify('oEmbed content types is invalid! (WP+ Settings > Posts > Display and Formatting Options)',false,10000);
-		}
-		
-	}
 	
 	if (Whirlpool.url.match("forum-replies.cfm")) {
-		var extensions = "bmp|gif|jpg|png".split("|");
-		var width = '100%'; //$(".bodytext").css("width").toString( );
+		var oEmbedEnabled = Whirlpool.get('oembed') == 'true';
+		var imageEnabled = Whirlpool.get('inlineImages') == 'true';
+	
+	
+		//Image embedding setup
+		var imageMatchRegex = /bmp|gif|jpg|png/;
+		
+		//oEmbed setup
+		if (oEmbedEnabled) {
+			Whirlpool.css(GM_getResourceText('oembedcss'));
+
+			//From http://stackoverflow.com/questions/2303147/injecting-js-functions-into-the-page-from-a-greasemonkey-script-on-chrome
+			var injectOEmbed = unsafeWindow.document.createElement('script');
+			injectOEmbed.appendChild(unsafeWindow.document.createTextNode('function injectOEmbed(){ '+ GM_getResourceText('oembedjs') +'}'));
+			
+			//YAY! Firefox 3.6 hacks!
+			//Then again, this whole script is pretty much a hack. So why not?
+			if(!unsafeWindow.document.head) {
+				unsafeWindow.document.head = unsafeWindow.document.getElementsByTagName("head")[0];
+			}
+
+			
+			unsafeWindow.document.head.appendChild(injectOEmbed);
+			
+			unsafeWindow.injectOEmbed();
+			
+			var oEmbedMatchRegex, oEmbedContentWidth;
+			
+			try{
+				oEmbedMatchRegex = new RegExp(decodeURIComponent(Whirlpool.get("oembed_types").replace('.','\.')));
+				oEmbedContentWidth = $('.replytext').width();
+			}catch(error){
+				oEmbedMatchRegex = false;
+				Whirlpool.notify('oEmbed content types is invalid! (WP+ Settings > Posts > Display and Formatting Options)',false,10000);
+			}
+		}
 		
 		var displayed = {};
 		
-		$( ".bodytext a" ).each( function( ) {
-			var link = $(this).prop('href').toString( );
+		//using unsafeWindow to make oEmbed callbacks work
+		unsafeWindow.$('#replies .replytext a').not('.internal').each(function(){
+			var linkObject = unsafeWindow.$(this);
+			var link = linkObject.prop('href');
 			
-			if ( Whirlpool.get( "inlineImages" ) == "true" ) {
-				for ( key in extensions ) {
-					if ( link.toLowerCase( ).indexOf( extensions[key] ) > -1 && displayed[link] != true) {
-						$(this).before('<img src="' + link + '" class="wpx_img">');
-						displayed[link] = true;
-					}
-				}
+			if (imageEnabled && imageMatchRegex.test(link) && displayed[link] != true){
+				linkObject.before('<img src="' + link + '" class="wpx_img">');
+				displayed[link] = true;
+			}else if(oEmbedEnabled && oEmbedMatchRegex.test(link) && displayed[link] != true){
+				linkObject.oembed(null,{ apikeys: {}, maxWidth: oEmbedContentWidth });
+				displayed[link] = true;
 			}
-			
-			/*if ( Whirlpool.get( "inlineVideos" ) == "true" ) {
-				if ( link.indexOf( "youtube.com/watch" ) > -1 && displayed[link] != true ) {
-					var id = link.split("v=")[1];
-					if(typeof id != 'undefined'){
-						id = id.split("&")[0];
-					}
-					var code = '<embed src="http://www.youtube.com/v/' + id + '&hl=en_US&fs=1&rel=0" type="application/x-shockwave-flash" allowfullscreen="true" width="436" height="350"></embed>';
-					$(this).before(code);
-					displayed[link] = true;
-				}
-			}*/
-		} );
-		
-		$(".wpx_img").css("max-width", width );
-		$(".wpx_img").css("cursor", "pointer" );
-		
-		$(".wpx_img").click( function( e ) {
-			if( $(this).css("max-width").toString( ) == width ) {
-				$(this).css("width", "auto");
-				$(this).css("max-width", "none");
-			} else {
-				$(this).css("max-width", width);
-			}
-		} );
+		});
 	}
 
 	// ! Edit In Place
@@ -2246,7 +2235,7 @@ try {
 
 		generalStyle: function () {
 
-			Whirlpool.css('#qQuote{margin-top:20px;} #qqTextArea{background:#E5E5E5 none no-repeat scroll 50% 50%;border:1px solid gray;color:black;}' + '#qqpost{width: 150px; font-family: Arial; font-style: normal; font-variant: normal; font-weight: normal; font-size: 16px; ' + 'line-height: normal; font-size-adjust: none; font-stretch: normal; -x-system-font: none;} ' + '#qqpostclear{width: 150px; font-family: Arial; font-style: normal; font-variant: normal; font-weight: normal; font-size: 16px; ' + 'line-height: normal; font-size-adjust: none; font-stretch: normal; -x-system-font: none;} ' + '#opInputs p{float:left;margin-left:5px;}' + '#qqWCPreview{border:solid 1px grey;cursor:default;float:left;height:18px;margin-right:-80px;padding:2px;width:80px;} ' + '#qqPreview{display:none;text-align:left;padding:5px;background:#EEEEEE url(http://forums.whirlpool.net.au/img/forum/reply-eeeeee.gif) ' + 'repeat-x scroll center bottom;border:2px solid grey;margin-bottom:10px;width:60%;} ' + '#qqTooManyWords{display:none;background-color:#E8B760;height:250px;position:absolute;width:100%;font-weight:bold;z-index:6;} ' + '#aloader{display:none;}.qqwcodeButtons{font-size:0.9em;}');
+			Whirlpool.css('#qQuote{margin-top:20px;} #qqTextAreaContainer {margin: 10px 232px;} #qqTextArea{ width: 100%; height: 150px; background:#E5E5E5 none no-repeat scroll 50% 50%;border:1px solid gray;color:black; }' + '#qqpost{width: 150px; font-family: Arial; font-style: normal; font-variant: normal; font-weight: normal; font-size: 16px; ' + 'line-height: normal; font-size-adjust: none; font-stretch: normal; -x-system-font: none;} ' + '#qqpostclear{width: 150px; font-family: Arial; font-style: normal; font-variant: normal; font-weight: normal; font-size: 16px; ' + 'line-height: normal; font-size-adjust: none; font-stretch: normal; -x-system-font: none;} ' + '#opInputs p{float:left;margin-left:5px;}' + '#qqWCPreview{border:solid 1px grey;cursor:default;float:left;height:18px;margin-right:-80px;padding:2px;width:80px;} ' + '#qqPreview{display:none;text-align:left;padding:5px;background:#EEEEEE url(http://forums.whirlpool.net.au/img/forum/reply-eeeeee.gif) ' + 'repeat-x scroll center bottom;border:2px solid grey;margin-bottom:10px;width:60%;} ' + '#qqTooManyWords{display:none;background-color:#E8B760;height:250px;position:absolute;width:100%;font-weight:bold;z-index:6;} ' + '#aloader{display:none;}.qqwcodeButtons{font-size:0.9em;}');
 
 		},
 		code: function () {
@@ -3522,9 +3511,17 @@ try {
 
 		var wcButtons = whirlC.buttons("qqbuttonsDiv", "auto;", "qqwcodeButtons");
 
-		$('#replies').append('<div id="qQuote" align="center">' + wcButtons + '<div id="qqPreview"></div><div id="qqTooManyWords">' + '<p style="margin:0 auto;margin-top:10px;">ZOMG! You are quoting significantly more words than you have written.<br /><br />' + '<img src="' + Whirlpool.image('kitteh') + '" /></p><button type="button" id="wordsOK">OK</button>' + '</div><textarea id="qqTextArea" cols="' + docs.quickReplyboxCols + '" rows="' + docs.quickReplyboxRows + '"></textarea><br />' + '<button type="button" style="" id="qqpostclear" name="qqpost">Clear</button><button type="button" style="" id="qqpost" name="qqpost">Post Reply</button>' + '<img src="' + Whirlpool.image('waiting') + '" id="aloader" />' + '<div id="opInputs" style="height:30px;width:700px;">' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="w" id="modewc" name="modewc"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewc"> Use WhirlCode</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="b" id="modeht" name="modeht"/>' + '<label style="cursor: pointer;font-size:10px;" for="modeht"> Allow HTML</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" id="modest" wc2="e" name="modest"/>' + '<label style="cursor: pointer;font-size:10px;" for="modest"> Auto entities </label></p>' + '<p><input checked="checked" type="checkbox" style="cursor: pointer;" value="true" id="modewl" wc2="a" name="modewl"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewl"> Make links clickable</label></p>' + '<p>' + '	<input type="checkbox" name="modesu" id="autoSubscribe" wc2="t" value="true" style="cursor: pointer;"/>' + '	<label for="modesu" style="cursor: pointer; font-size: 10px;"> Watch</label>' + '</p>		' + '<p><input type="checkbox" style="cursor: pointer;" id="autoPreview" name="autoPreview"/>' + '<label style="cursor: pointer;font-size:10px;">Auto Preview</label></p>' + '<p><input type="checkbox" style="cursor: pointer;" id="lastPost" name="lastPost"/>' + '<label style="cursor: pointer;font-size:10px;">Go To Last Post</label></p>' + '</div></div>');
+		// cols="' + docs.quickReplyboxCols + '" rows="' + docs.quickReplyboxRows + '"
+		$('#replies').append('<div id="qQuote" align="center">' + wcButtons + '<div id="qqPreview"></div><div id="qqTooManyWords">' + '<p style="margin:0 auto;margin-top:10px;">ZOMG! You are quoting significantly more words than you have written.<br /><br />' + '<img src="' + Whirlpool.image('kitteh') + '" /></p><button type="button" id="wordsOK">OK</button>' + '</div><div id="qqTextAreaContainer"><textarea id="qqTextArea"></textarea></div>' + '<button type="button" style="" id="qqpostclear" name="qqpost">Clear</button><button type="button" style="" id="qqpost" name="qqpost">Post Reply</button>' + '<img src="' + Whirlpool.image('waiting') + '" id="aloader" />' + '<div id="opInputs" style="height:30px;width:700px;">' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="w" id="modewc" name="modewc"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewc"> Use WhirlCode</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="b" id="modeht" name="modeht"/>' + '<label style="cursor: pointer;font-size:10px;" for="modeht"> Allow HTML</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" id="modest" wc2="e" name="modest"/>' + '<label style="cursor: pointer;font-size:10px;" for="modest"> Auto entities </label></p>' + '<p><input checked="checked" type="checkbox" style="cursor: pointer;" value="true" id="modewl" wc2="a" name="modewl"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewl"> Make links clickable</label></p>' + '<p>' + '	<input type="checkbox" name="modesu" id="autoSubscribe" wc2="t" value="true" style="cursor: pointer;"/>' + '	<label for="modesu" style="cursor: pointer; font-size: 10px;"> Watch</label>' + '</p>		' + '<p><input type="checkbox" style="cursor: pointer;" id="autoPreview" name="autoPreview"/>' + '<label style="cursor: pointer;font-size:10px;">Auto Preview</label></p>' + '<p><input type="checkbox" style="cursor: pointer;" id="lastPost" name="lastPost"/>' + '<label style="cursor: pointer;font-size:10px;">Go To Last Post</label></p>' + '</div></div>');
 
 		docs.q = $('#qqTextArea');
+		
+		if (docs.q.val() === '') {
+			docs.q.val(Whirlpool.get('textareraSave'));
+		}
+		
+		docs.q.autosize({ append: '\n' });
+		
 		whirlC.buttonEvents("qqwcodeButtons", docs.q, whirlC.code());
 		var oInpArr = $('#opInputs input');
 
@@ -3759,11 +3756,7 @@ try {
 
 		});
 
-		if (docs.q.val() === '') {
-
-			docs.q.val(Whirlpool.get('textareraSave'));
-
-		}
+		
 
 
 	}
