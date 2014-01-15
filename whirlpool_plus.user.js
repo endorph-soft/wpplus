@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.3
+// @version       4.1.4
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -136,12 +136,13 @@
  changes - 4.1.1 - Forgot to allow WLR to turn off, fixed
  changes - 4.1.2 - Readded "Only color end square" option
  changes - 4.1.3 - Zapped FF4 + GM 0.9.0 bugs (thanks to jaromir for debugging help)
+ changes - 4.1.4 - Added some parseInt calls to hopefully fix tracking, added "mark as read", changed tracker to always replace link on tracked threads.
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.1.3';
+	var version = '4.1.4';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -961,7 +962,7 @@ try {
 			$('div#replies > table > tbody > tr').each(function(){
 				var reply = $(this);
 				var replyNumber = $(reply.find('td:first-child > a')[0]).attr('name').split('r')[1];
-				if(replyNumber <= lastReadReplyNumber){
+				if(parseInt(replyNumber) <= parseInt(lastReadReplyNumber)){
 					reply.addClass('whirlpoolLastRead_readReply');
 				}else{
 					reply.addClass('whirlpoolLastRead_unreadReply');
@@ -999,12 +1000,12 @@ try {
 					if(replyNumberLinks.length < 2){
 						alert('Sorry, something went wrong with thread tracking. If you see this message a lot, the tracker is probably broken');
 					}else{
-						var threadReplyNumber = $(replyNumberLinks[0]).attr('name').split('r')[1];
+						var threadReplyNumber = parseInt($(replyNumberLinks[0]).attr('name').split('r')[1]);
 						var overallReplyNumber = $(replyNumberLinks[1]).attr('name').split('r')[1];
 						
 						var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
 						
-						if(currentData == false || currentData['threadReplyNumber'] <= threadReplyNumber){
+						if(currentData == false || parseInt(currentData['threadReplyNumber']) <= threadReplyNumber){
 							whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
 						}
 					}
@@ -1028,26 +1029,28 @@ try {
 						
 						var numberOfReplies = parseInt(thread.find('td.reps').not(':has(a)').text()) + 1; //need to add one, as original post is not counted as a reply here
 						
+						//change the end link regardless, as there might have been replies since a refresh
+						//build the link
+						var link;
+						
+						//do we have the new reply method?
+						if(threadData['overallReplyNumber']){
+							link = '/forum-replies.cfm?r=' +  threadData['overallReplyNumber'] + '#r' + threadData['overallReplyNumber']; //used by Simon's jumpToReplyId method, so preferred
+						}else{
+							//use the old page number method
+							link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['pageNumber'] + '#r' + threadData['threadReplyNumber'];
+						}
+						
+						
+						//change the link
+						thread.find('.goend > a').attr('href',link).attr('title','Jump to last read post');
+						
+						
 						
 						if(threadData['threadReplyNumber'] < numberOfReplies){
 							//there are unread posts
-								
-							//build the link
-							var link;
-							
-							//do we have the new reply method?
-							if(threadData['overallReplyNumber']){
-								link = '/forum-replies.cfm?r=' +  threadData['overallReplyNumber'] + '#r' + threadData['overallReplyNumber']; //used by Simon's jumpToReplyId method, so preferred
-							}else{
-								//use the old page number method
-								link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['pageNumber'] + '#r' + threadData['threadReplyNumber'];
-							}
-							
-							
-							//change the link
-							thread.find('.goend > a').attr('href',link);
-							
-							//now, we need to apply the unread class
+
+							//we need to apply the unread class
 							if(Whirlpool.get('onlyEndSquare') == 'true'){
 								thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
 							}else{
@@ -1066,10 +1069,21 @@ try {
 						//add the controls
 						thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
 						
+						if(Whirlpool.url.match('/forum/')){
+							thread.find('.whirlpoolLastRead_unreadPosts .whirlpoolLastRead_controls').append('<a href="#" class="whirlpoolLastRead_markAsRead" title="Mark this thread as read">M</a>');
+						}
+						
 						thread.find('.whirlpoolLastRead_stopTracking').click(function(){
 							whirlpoolLastRead.stopTracking(threadNumber);
 							thread.children().removeClass('whirlpoolLastRead_unreadPosts whirlpoolLastRead_noUnreadPosts');
 							thread.find('.whirlpoolLastRead_controls').remove();
+							return false;
+						});
+						
+						thread.find('.whirlpoolLastRead_markAsRead').click(function(){					
+							whirlpoolLastRead.markAsRead(threadNumber);
+							thread.children().removeClass('whirlpoolLastRead_unreadPosts').addClass('whirlpoolLastRead_noUnreadPosts');
+							thread.find('.whirlpoolLastRead_controls .whirlpoolLastRead_markAsRead').remove();
 							return false;
 						});
 						
@@ -1088,6 +1102,48 @@ try {
 		'stopTracking' : function(threadNumber){
 			delete this.trackerData[threadNumber];
 			this.saveData();
+		},
+		
+		
+		'markAsRead' : function(threadNumber){
+			//only operates on forum replies page.
+			//have to use legacy pagenumber method
+			
+			//go get the page number
+			var threadLink = $('a[href="/forum-replies.cfm?t=' + threadNumber + '"]');
+			if(threadLink.length <= 0){
+				//thread not on this page
+				return;
+			}
+			
+			var pageNumber;
+			
+			if(threadLink.parent().find('script').length <= 0){
+				//no page link producing script, so only one page
+				pageNumber = '1';
+			}else{
+				pageNumber = (threadLink.parent().find('script').text().split(',')[1]).split(')')[0];
+			}
+			
+			//now we need to get the number of the last read reply.
+			var numberOfReplies = parseInt(threadLink.closest('tr').find('.reps').text().split('S')[0]) + 1; //need to add one, as original post is not counted as a reply here
+			
+			//write data
+			this.loadData();
+			this.trackerData[threadNumber] = {
+					'threadReplyNumber' : numberOfReplies,
+					'pageNumber' : pageNumber
+			};
+			this.saveData();
+			
+			//change the link
+			var link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;
+			threadLink.closest('tr').find('.goend > a').attr('href',link);
+			
+			
+			return false;
+			
+			
 		}
 		
 		
