@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.4
+// @version       4.3.5
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -156,6 +156,7 @@
  changes - 4.3.2 - Added Whirlcode buttons on Wiki Preview pages
  changes - 4.3.3 - New Chatbox (thanks Erwin, Chris)
  changes - 4.3.4 - Moved auto-updater to userscripts.org, Fix to recent activity days code
+ changes - 4.3.5 - More quick-edit bug squashing, Remove old themes, updater tweaks
  ***************/
 // ==/Changes==
 
@@ -167,7 +168,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.4';
+	var version = '4.3.5';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -494,10 +495,10 @@ try {
 
 					if (newMajorVersion > oldMajorVersion) {
 						update();
-					}else{
+					}else if(newMajorVersion == oldMajorVersion){
 						if(newMiddleVersion > oldMiddleVersion){
 							update();
-						}else{
+						}else if(newMiddleVersion == oldMiddleVersion){
 							if(newMinorVersion > oldMinorVersion){
 								update();
 							}
@@ -1991,14 +1992,11 @@ try {
 					'<p id="customWPTheme">' +
 						'<select name="s_customtheme" id="s_customtheme">' +
 							'<option value="">Default (by Simon Wright)</option>' +
-							'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' +
 							'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
-							'<option value="@import url(http://members.optusnet.com.au/whirlpoolian/classic/css/core.css);">WP Classic</option>' +
+							'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' +
 							'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
 							'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
 							'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
-							'<option value="@import url(http://members.optusnet.com.au/whirlpoolian/greyscale/css/core.css);" selected="selected">WP Grey</option>' +
-							'<option value="@import url(http://members.optusnet.com.au/whirlpoolian/steelyellow/css/core.css);">WP Steel Yellow</option>' +
 						'</select>' +
 						'<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
 					'</p>' +
@@ -2410,14 +2408,15 @@ try {
 								function(data){
 									var removeS = data.slice(data.lastIndexOf('<tr id="'));
 									$('#previewTR').remove();
-									var newTR = $(removeS.split('</tr>')[0] + '</tr>');
+									var newTR = $(removeS.split('</tr>')[0] + '</tr>')
+									newTR.find(".bodypost a[href^=/forum/index.cfm?action=edit]" ).after( "<br><a class='wpp-edit'>(quick edit)</a>" ).css( "cursor", "pointer" );
 									$('#replies tr[id^="r"]:last').after(newTR);
+									
+									Whirlpool.set('textareraSave', '');
 								}
 							);
 						}
-						Whirlpool.set('textareraSave', '');
-						$( ".bodypost a[href^=/forum/index.cfm?action=edit]:last" ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
-						$( ".wpp-edit" ).css( "cursor", "pointer" );
+						
 
 					}
 
