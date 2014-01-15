@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.0
+// @version       4.1.1
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -133,11 +133,15 @@
  changes - 4.0.12- tbwd's fixes (thanks)
  changes - 4.0.13- Moved to tbwd's Userscript (#85217).
  changes - 4.1.0 - Rewrote Last Read Tracker, Some changes to Whirlpool object
+ changes - 4.1.1 - Forgot to allow WLR to turn off, fixed
  ***************/
 // ==/Changes==
+
+var console = unsafeWindow.console;
+
 try {
 
-	var version = '4.1.0';
+	var version = '4.1.1';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -440,7 +444,6 @@ try {
 
 		}
 	}
-
 
 	/*! Chatbox */
 	/**
@@ -1075,24 +1078,22 @@ try {
 	};
 	
 	
-	whirlpoolLastRead.init();
-	
-	//check to see if we need to import data from the old tracker
-	if(Whirlpool.get('whirlpoolLastReadOldImported') == false){
-		whirlpoolLastRead.importOldData();
-		Whirlpool.set('whirlpoolLastReadOldImported',true)
-	}
-	
-	
-
-	
-	
-	if(Whirlpool.url.match('forum-replies')){
-		whirlpoolLastRead.forumReplies();
-	}
-	if(Whirlpool.url.match('/forum/') || Whirlpool.url.match('/user/')){
-		whirlpoolLastRead.forumPageCss()
-		whirlpoolLastRead.forumPage();
+	if(Whirlpool.get('lastReadTracker') == 'true'){
+		whirlpoolLastRead.init();
+		
+		//check to see if we need to import data from the old tracker
+		if(Whirlpool.get('whirlpoolLastReadOldImported') == false){
+			whirlpoolLastRead.importOldData();
+			Whirlpool.set('whirlpoolLastReadOldImported',true)
+		}
+		
+		if(Whirlpool.url.match('forum-replies')){
+			whirlpoolLastRead.forumReplies();
+		}
+		if(Whirlpool.url.match('/forum/') || Whirlpool.url.match('/user/')){
+			whirlpoolLastRead.forumPageCss()
+			whirlpoolLastRead.forumPage();
+		}
 	}
 	
 
