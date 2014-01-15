@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.16
+// @version       4.4.17
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -76,7 +76,7 @@
 // @resource	  check				http://wpplus.endorph.net/resources/png/check.png
 // @resource	  cross				http://wpplus.endorph.net/resources/png/cross.png
 // @resource	  oembedcss			http://wpplus.endorph.net/resources/css/jquery.oembed.css
-// @resource	  oembedjs			http://wpplus.endorph.net/resources/js/jquery.oembed.js
+// @resource	  oembedjs			http://wpplus.endorph.net/resources/js/jquery.oembed.js?v=2
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
 // ==Changes==
@@ -109,6 +109,7 @@
  changes - 4.4.14 - Temp disable tracker, rework emoticons, add emoticon buttons to quick reply (and preview), fix avatars in whims
  changes - 4.4.15 - Changed Youtube embed to more general oEmbed support
  changes - 4.4.16 - oEmbed max width, Firefox 3.6 fixes, auto resizing quick reply box
+ changes - 4.4.17 - Fixed oEmbed max width, Image max width
  ***************/
 // ==/Changes==
 
@@ -120,7 +121,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.16';
+	var version = '4.4.17';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -1062,10 +1063,15 @@ try {
 	if (Whirlpool.url.match("forum-replies.cfm")) {
 		var oEmbedEnabled = Whirlpool.get('oembed') == 'true';
 		var imageEnabled = Whirlpool.get('inlineImages') == 'true';
+		
+		maxContentWidth = $('.replytext').width();
 	
 	
 		//Image embedding setup
-		var imageMatchRegex = /bmp|gif|jpg|png/;
+		if(imageEnabled){
+			var imageMatchRegex = /bmp|gif|jpg|png/;
+			Whirlpool.css('.wpx_img { max-width: ' + maxContentWidth + 'px; }');
+		}
 		
 		//oEmbed setup
 		if (oEmbedEnabled) {
@@ -1086,11 +1092,10 @@ try {
 			
 			unsafeWindow.injectOEmbed();
 			
-			var oEmbedMatchRegex, oEmbedContentWidth;
+			var oEmbedMatchRegex;
 			
 			try{
 				oEmbedMatchRegex = new RegExp(decodeURIComponent(Whirlpool.get("oembed_types").replace('.','\.')));
-				oEmbedContentWidth = $('.replytext').width();
 			}catch(error){
 				oEmbedMatchRegex = false;
 				Whirlpool.notify('oEmbed content types is invalid! (WP+ Settings > Posts > Display and Formatting Options)',false,10000);
@@ -1108,7 +1113,7 @@ try {
 				linkObject.before('<img src="' + link + '" class="wpx_img">');
 				displayed[link] = true;
 			}else if(oEmbedEnabled && oEmbedMatchRegex.test(link) && displayed[link] != true){
-				linkObject.oembed(null,{ apikeys: {}, maxWidth: oEmbedContentWidth });
+				linkObject.oembed(null,{ apikeys: {}, maxWidth: maxContentWidth });
 				displayed[link] = true;
 			}
 		});
