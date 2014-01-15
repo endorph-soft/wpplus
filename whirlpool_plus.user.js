@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.5
+// @version       4.4.6
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -93,6 +93,7 @@
  changes - 4.4.3 - Fix FF3.6 issue
  changes - 4.4.4 - Aura statistics, readded penalty box highlight
  changes - 4.4.5 - Fix for Chrome (thanks Yansky), include on https pages
+ changes - 4.4.6 - Fix FF3 Quick Edit
  ***************/
 // ==/Changes==
 
@@ -104,7 +105,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.5';
+	var version = '4.4.6';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -1020,7 +1021,7 @@ try {
 		$( '.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
 		$( ".wpp-edit" ).css("cursor", "pointer" );
 		
-		$('#replies').on('click','.wpp-edit', function( e ) {
+		$('#replies .wpp-edit').on('click', function( e ) {
 			$(this).hide( );
 			$(this).after( "<a class='wpp-c-edit'>(cancel)</a>" );
 			$( ".wpp-c-edit" ).css("cursor", "pointer" );
@@ -1038,7 +1039,7 @@ try {
 				$("#reply td").css( "padding", "0");
 				$('#body').css("width", width);
 				$('#body').css("height", height);
-				$("#fm input[type=submit]:last").after("<button class='wpp-c-edit'>Cancel</button>");
+				$("#fm input[type=submit]:last").after("<button class='wpp-c-edit' type='button'>Cancel</button>");
 				$(".wpp-c-edit").on( "click", function( e ) {
 					reply_html.html(original);
 					$( ".wpp-edit" ).show( );
@@ -2033,7 +2034,6 @@ try {
 
 	}
 
-
 	function hideDelPosts() {
 		$('.bodymore').parent().hide();
 	}
@@ -2056,6 +2056,7 @@ try {
 		}
 		return escape(gF + "-" + dArr[0] + "-" + dArr[1] + "+" + dArr[2] + ":" + dArr[3] + ":" + dArr[4]);
 	}
+	
 	var wcPrev = {
 
 		showPreview: function () {
@@ -2271,6 +2272,7 @@ try {
 		}
 
 	}
+	
 	var wlrSettings = {
 	
 		settingsHTML : '',
@@ -3480,7 +3482,6 @@ try {
 
 	}
 	
-	
 	var wcWikiWhimNewThread = {
 
 		wwcButtons: whirlC.buttons("qqbuttonsDiv", "auto;", "qqwcodeButtons"),
@@ -3541,6 +3542,7 @@ try {
 		}
 
 	}
+
 	var wlrMenu = {
 
 		generateMenu: function () {
@@ -3744,7 +3746,6 @@ try {
 
 	}
    
-
    	var hideDelMov = {
 		delRem: function () {
 			Whirlpool.css('.threadP0, .threadP1, .threadP2, .threadP3, .deleted{display:none;}');
