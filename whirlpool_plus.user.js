@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.6
+// @version       4.4.7
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -94,6 +94,7 @@
  changes - 4.4.4 - Aura statistics, readded penalty box highlight
  changes - 4.4.5 - Fix for Chrome (thanks Yansky), include on https pages
  changes - 4.4.6 - Fix FF3 Quick Edit
+ changes - 4.4.7 - Quick quote now correctly attributes quotes regardless of the selected button, bugfix for quick edit, spinner doesn't disappear on mouseout
  ***************/
 // ==/Changes==
 
@@ -105,7 +106,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.6';
+	var version = '4.4.7';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -845,7 +846,8 @@ try {
 			';)': Whirlpool.image('old_blue_smirk'),
 			';-)': Whirlpool.image('old_blue_smirk'),
 			':P': Whirlpool.image('old_blue_tongue'),
-			':-P': Whirlpool.image('old_blue_tongue')
+			':-P': Whirlpool.image('old_blue_tongue'),
+			':star:': Whirlpool.image('emoticon_star')
 		};
 		
 		if( Whirlpool.get("emoticonsBlue") == "true" ) {
@@ -1021,7 +1023,7 @@ try {
 		$( '.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
 		$( ".wpp-edit" ).css("cursor", "pointer" );
 		
-		$('#replies .wpp-edit').on('click', function( e ) {
+		function wpp_quickEdit(e){
 			$(this).hide( );
 			$(this).after( "<a class='wpp-c-edit'>(cancel)</a>" );
 			$( ".wpp-c-edit" ).css("cursor", "pointer" );
@@ -1060,7 +1062,9 @@ try {
 					return false;
 				} );
 			} );
-		} );
+		}
+		
+		$('#replies .wpp-edit').on('click', wpp_quickEdit );
 	}   
    
    
@@ -3222,7 +3226,10 @@ try {
 									var removeS = data.slice(data.lastIndexOf('<tr id="'));
 									$('#previewTR').remove();
 									var newTR = $(removeS.split('</tr>')[0] + '</tr>')
-									newTR.find('.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" ).css( "cursor", "pointer" );
+									
+									var quickEdit = $("<br><a class='wpp-edit'>(quick edit)</a>").css( "cursor", "pointer" ).on('click', wpp_quickEdit );
+									
+									newTR.find('.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after(quickEdit);
 									$('#replies tr[id^="r"]:last').after(newTR);
 									
 								}
@@ -3371,7 +3378,7 @@ try {
 			tParent.insertBefore(noJQqqLink, spanBar);
 
 			$(noJQqqLink).bind("click", function () {
-
+			
 				docs.q = $('#qqTextArea');
 				/***gotta fix this***/
 
@@ -3381,7 +3388,17 @@ try {
 
 				}
 
-				var qqtrParent = docs.repliesTR.eq(i);
+				
+				//If possible, get the actual selected post
+				var selectionParent = $(unsafeWindow.getSelection().getRangeAt(0).commonAncestorContainer.parentNode).closest('tr');
+				var qqtrParent;
+				
+				if(selectionParent.length == 1){
+					qqtrParent = selectionParent;
+				}else{
+					qqtrParent = docs.repliesTR.eq(i);
+				}
+				
 				var qqpre = qqtrParent.prop('id').split('r')[1];
 				var qquNam;
 
@@ -3558,8 +3575,8 @@ try {
 				500);
 			}
 
-			Whirlpool.css("#pmenu {padding:0;list-style-type: none; position:fixed;z-index:50;height:19px;overflow:hidden;width:18px;left:" + whereMenu + ";}" + "#pmenu img{margin;0;padding:0;border:none;background:transparent;width:16px;}" + "#pmenu:hover {height:auto;overflow:visible;}" + "#pmenu ul {padding:0; margin:0; list-style-type: none; width:101px;}" + "#pmenu li {position:relative;z-index:51;}" + "#pmenu a{display:block;width:130px;font-weight:bold;font-size:12px; color:#FFFFFF; height:26px; line-height:26px; " + "text-decoration:none; text-indent:5px; background:#616CA3; border:1px solid orange;white-space: nowrap; }" + "#pmenu>li>ul>li>a{background:#EDEDED;color:#000;}" + "#pmenu li:hover > a {background:#dfd7ca; color:#c00;}" + "#pmenu li ul {display: none;} " + "#pmenu li:hover > ul {display:block; position:absolute; top:0; z-index:52;margin-left:130px;}");
-
+			Whirlpool.css("#pmenu {padding:0;list-style-type: none; position:fixed;z-index:50;height:19px;overflow:hidden;width:18px;left:" + whereMenu + ";}" + "#pmenu img{margin;0;padding:0;border:none;background:transparent;width:16px;} #pmenu ul {padding:0; margin:0; list-style-type: none; width:101px;}" + "#pmenu li {position:relative;z-index:51;}" + "#pmenu a{display:block;width:130px;font-weight:bold;font-size:12px; color:#FFFFFF; height:26px; line-height:26px; " + "text-decoration:none; text-indent:5px; background:#616CA3; border:1px solid orange;white-space: nowrap; }" + "#pmenu>li>ul>li>a{background:#EDEDED;color:#000;}" + "#pmenu li:hover > a {background:#dfd7ca; color:#c00;}" + "#pmenu li ul {display: none;} " + "#pmenu li:hover > ul {display:block; position:absolute; top:0; z-index:52;margin-left:130px;}");
+			
 			var spinner = Whirlpool.image('small_whirl_logo');
 
 			var gfx = 'http://forums.whirlpool.net.au/skin/web/img/favicon.gif';
@@ -3599,6 +3616,27 @@ try {
 				unLi.append('<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
 			}
 			unLi.find('*').addClass('notarget');
+			
+			unLi.mouseenter(function(){
+				$(this).css({'height' : 'auto', 'overflow': 'visible'});
+			});
+			
+			unLi.find('a[href!="#"], a#settingsSpinnerLink').click(function(){
+				$(unLi).css({'height' : '19px', 'overflow': 'hidden'});
+				return true;
+			});
+			
+			unLi.find('a[href="#"]').click(function(event){
+				event.stopPropagation();
+				
+				return false;
+			});
+			
+			$('html').click(function(){
+				$(unLi).css({'height' : '19px', 'overflow': 'hidden'});
+				return true;
+			});
+			
 			wlrMenu.unLi = unLi;
 			
 		},
