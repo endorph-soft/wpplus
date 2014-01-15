@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.9
-// @require       http://tristanroberts.name/projects/wp-plus/js/jquery-gm.js
-// @require       http://tristanroberts.name/projects/wp-plus/js/prettify.js
-// @require       http://tristanroberts.name/projects/wp-plus/js/lang-css.js
-// @require       http://tristanroberts.name/projects/wp-plus/js/lang-sql.js
-// @require	  	  http://tristanroberts.name/projects/wp-plus/js/jqdnr.pjs?version=419
+// @version       4.3.10
+// @require       http://wpplus.endorph.net/resources/js/jquery-gm.js
+// @require       http://wpplus.endorph.net/resources/js/prettify.js
+// @require       http://wpplus.endorph.net/resources/js/lang-css.js
+// @require       http://wpplus.endorph.net/resources/js/lang-sql.js
+// @require	  	  http://wpplus.endorph.net/resources/js/jqdnr.pjs
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -16,38 +16,38 @@
 // @exclude       http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
 // @exclude       http://forums.whirlpool.net.au/forum-replies-print.cfm*
 // @exclude       http://forums.whirlpool.net.au/forum-replies-archive.cfm*
-// @resource	  emoticon_angry	http://tristanroberts.name/projects/wp-plus/png/angry.png
-// @resource	  emoticon_blushing	http://tristanroberts.name/projects/wp-plus/png/blushing.png
-// @resource	  emoticon_confused	http://tristanroberts.name/projects/wp-plus/png/confused.png
-// @resource	  emoticon_cool		http://tristanroberts.name/projects/wp-plus/png/cool.png
-// @resource	  emoticon_cry		http://tristanroberts.name/projects/wp-plus/png/crying.png
-// @resource	  emoticon_frown	http://tristanroberts.name/projects/wp-plus/png/frown.png
-// @resource	  emoticon_gasp		http://tristanroberts.name/projects/wp-plus/png/gasp.png
-// @resource	  emoticon_grin		http://tristanroberts.name/projects/wp-plus/png/grin.png
-// @resource	  emoticon_kiss		http://tristanroberts.name/projects/wp-plus/png/kiss.png
-// @resource	  emoticon_lips		http://tristanroberts.name/projects/wp-plus/png/lips.png
-// @resource	  emoticon_shout	http://tristanroberts.name/projects/wp-plus/png/shouting.png
-// @resource	  emoticon_sleep	http://tristanroberts.name/projects/wp-plus/png/sleeping.png
-// @resource	  emoticon_smile	http://tristanroberts.name/projects/wp-plus/png/smile.png
-// @resource	  emoticon_smirk	http://tristanroberts.name/projects/wp-plus/png/smirk.png
-// @resource	  emoticon_straight	http://tristanroberts.name/projects/wp-plus/png/straight.png
-// @resource	  emoticon_tongue	http://tristanroberts.name/projects/wp-plus/png/tongue.png
-// @resource	  emoticon_wink		http://tristanroberts.name/projects/wp-plus/png/wink.png
-// @resource	  emoticon_star		http://tristanroberts.name/projects/wp-plus/png/star.png
-// @resource	  old_blue_anxious	http://tristanroberts.name/projects/wp-plus/gif/anxious.gif
-// @resource	  old_blue_clown	http://tristanroberts.name/projects/wp-plus/gif/clown.gif
-// @resource	  old_blue_cool		http://tristanroberts.name/projects/wp-plus/gif/cool.gif
-// @resource	  old_blue_crazy	http://tristanroberts.name/projects/wp-plus/gif/crazy.gif
-// @resource	  old_blue_eyes		http://tristanroberts.name/projects/wp-plus/gif/eyes.gif
-// @resource	  old_blue_grin		http://tristanroberts.name/projects/wp-plus/gif/grin.gif
-// @resource	  old_blue_happy	http://tristanroberts.name/projects/wp-plus/gif/happy.gif
-// @resource	  old_blue_happy2	http://tristanroberts.name/projects/wp-plus/gif/happy-2.gif
-// @resource	  old_blue_neutral	http://tristanroberts.name/projects/wp-plus/gif/neutral.gif
-// @resource	  old_blue_ninja	http://tristanroberts.name/projects/wp-plus/gif/ninja.gif
-// @resource	  old_blue_sad		http://tristanroberts.name/projects/wp-plus/gif/sad.gif
-// @resource	  old_blue_sad2		http://tristanroberts.name/projects/wp-plus/gif/sad-2.gif
-// @resource	  old_blue_smirk	http://tristanroberts.name/projects/wp-plus/gif/smirk.gif
-// @resource	  old_blue_tongue	http://tristanroberts.name/projects/wp-plus/gif/tongue.gif
+// @resource	  emoticon_angry	http://wpplus.endorph.net/resources/png/angry.png
+// @resource	  emoticon_blushing	http://wpplus.endorph.net/resources/png/blushing.png
+// @resource	  emoticon_confused	http://wpplus.endorph.net/resources/png/confused.png
+// @resource	  emoticon_cool		http://wpplus.endorph.net/resources/png/cool.png
+// @resource	  emoticon_cry		http://wpplus.endorph.net/resources/png/crying.png
+// @resource	  emoticon_frown	http://wpplus.endorph.net/resources/png/frown.png
+// @resource	  emoticon_gasp		http://wpplus.endorph.net/resources/png/gasp.png
+// @resource	  emoticon_grin		http://wpplus.endorph.net/resources/png/grin.png
+// @resource	  emoticon_kiss		http://wpplus.endorph.net/resources/png/kiss.png
+// @resource	  emoticon_lips		http://wpplus.endorph.net/resources/png/lips.png
+// @resource	  emoticon_shout	http://wpplus.endorph.net/resources/png/shouting.png
+// @resource	  emoticon_sleep	http://wpplus.endorph.net/resources/png/sleeping.png
+// @resource	  emoticon_smile	http://wpplus.endorph.net/resources/png/smile.png
+// @resource	  emoticon_smirk	http://wpplus.endorph.net/resources/png/smirk.png
+// @resource	  emoticon_straight	http://wpplus.endorph.net/resources/png/straight.png
+// @resource	  emoticon_tongue	http://wpplus.endorph.net/resources/png/tongue.png
+// @resource	  emoticon_wink		http://wpplus.endorph.net/resources/png/wink.png
+// @resource	  emoticon_star		http://wpplus.endorph.net/resources/png/star.png
+// @resource	  old_blue_anxious	http://wpplus.endorph.net/resources/gif/anxious.gif
+// @resource	  old_blue_clown	http://wpplus.endorph.net/resources/gif/clown.gif
+// @resource	  old_blue_cool		http://wpplus.endorph.net/resources/gif/cool.gif
+// @resource	  old_blue_crazy	http://wpplus.endorph.net/resources/gif/crazy.gif
+// @resource	  old_blue_eyes		http://wpplus.endorph.net/resources/gif/eyes.gif
+// @resource	  old_blue_grin		http://wpplus.endorph.net/resources/gif/grin.gif
+// @resource	  old_blue_happy	http://wpplus.endorph.net/resources/gif/happy.gif
+// @resource	  old_blue_happy2	http://wpplus.endorph.net/resources/gif/happy-2.gif
+// @resource	  old_blue_neutral	http://wpplus.endorph.net/resources/gif/neutral.gif
+// @resource	  old_blue_ninja	http://wpplus.endorph.net/resources/gif/ninja.gif
+// @resource	  old_blue_sad		http://wpplus.endorph.net/resources/gif/sad.gif
+// @resource	  old_blue_sad2		http://wpplus.endorph.net/resources/gif/sad-2.gif
+// @resource	  old_blue_smirk	http://wpplus.endorph.net/resources/gif/smirk.gif
+// @resource	  old_blue_tongue	http://wpplus.endorph.net/resources/gif/tongue.gif
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
 // ==Changes==
@@ -161,6 +161,7 @@
  changes - 4.3.7 - Readded the WP Classic Themes (thanks, Phyco)
  changes - 4.3.8 - Added Recent Activity Dropdown (preview)
  changes - 4.3.9 - Recent Activity Dropdown - correct location for reload image, indication of unread threads
+ changes - 4.3.10 - Move all resources to endorph.net (tristanroberts.name is 404ing right now)
  ***************/
 // ==/Changes==
 
@@ -172,9 +173,9 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.9';
+	var version = '4.3.10';
 
-	var server = "http://tristanroberts.name/projects/wp-plus/";
+	var server = "http://wpplus.endorph.net/resources/";
 
 	var Whirlpool = {
 		/**
@@ -1254,8 +1255,8 @@ try {
 		},
 		
 		'forumPageCss' : function(){
-			Whirlpool.css('.whirlpoolLastRead_unreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 ' +  decodeURIComponent(Whirlpool.get('newPostBackgroundColour')) + ' !important;  }');
-			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 ' +  decodeURIComponent(Whirlpool.get('noNewPostBackgroundColour')) + ' !important;  }');
+			Whirlpool.css('.whirlpoolLastRead_unreadPosts { background: url("http://wpplus.endorph.net/resources/png/gradient.png") repeat scroll 0 0 ' +  decodeURIComponent(Whirlpool.get('newPostBackgroundColour')) + ' !important;  }');
+			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts { background: url("http://wpplus.endorph.net/resources/png/gradient.png") repeat scroll 0 0 ' +  decodeURIComponent(Whirlpool.get('noNewPostBackgroundColour')) + ' !important;  }');
 			Whirlpool.css('#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top: -5px; opacity:0.3; border-bottom-width:1px; float: left; }');
 			Whirlpool.css('#content a.whirlpoolLastRead_markAsRead { margin-top: -8px; ');
 		},
@@ -1595,7 +1596,7 @@ try {
 			'whimAlertNotice': 'false',
 			'userpageInfoToggle': 'false',
 			'postAlign': 'middle',
-			'floatSidebar': 'true',
+			'floatSidebar': 'false',
 			'superBar': 'false',
 			//'ssHtml': 'Enter your notes here, even try dragging images and widgets!',
 			'watchedThreadsAlert': 'default',
@@ -2631,7 +2632,7 @@ try {
 
 		var wcButtons = whirlC.buttons("qqbuttonsDiv", "auto;", "qqwcodeButtons");
 
-		$('#replies').append('<div id="qQuote" align="center">' + wcButtons + '<div id="qqPreview"></div><div id="qqTooManyWords">' + '<p style="margin:0 auto;margin-top:10px;">ZOMG! You are quoting significantly more words than you have written.<br /><br />' + '<img src="http://i27.tinypic.com/142zdi8.jpg" /></p><button type="button" id="wordsOK">OK</button>' + '</div><textarea id="qqTextArea" cols="' + docs.quickReplyboxCols + '" rows="' + docs.quickReplyboxRows + '"></textarea><br />' + '<button type="button" style="" id="qqpostclear" name="qqpost">Clear</button><button type="button" style="" id="qqpost" name="qqpost">Post Reply</button>' + '<img src="http://i28.tinypic.com/jzbn0n.gif" id="aloader" />' + '<div id="opInputs" style="height:30px;width:650px;">' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="w" id="modewc" name="modewc"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewc"> Use WhirlCode</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="b" id="modeht" name="modeht"/>' + '<label style="cursor: pointer;font-size:10px;" for="modeht"> Allow HTML</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" id="modest" wc2="e" name="modest"/>' + '<label style="cursor: pointer;font-size:10px;" for="modest"> Auto entities </label></p>' + '<p><input checked="checked" type="checkbox" style="cursor: pointer;" value="true" id="modewl" wc2="a" name="modewl"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewl"> Make links clickable</label></p>' + '<p>' + '	<input type="checkbox" name="modesu" id="autoSubscribe" wc2="t" value="true" style="cursor: pointer;"/>' + '	<label for="modesu" style="cursor: pointer; font-size: 10px;"> Watch</label>' + '</p>		' + '<p><input type="checkbox" style="cursor: pointer;" id="autoPreview" name="autoPreview"/>' + '<label style="cursor: pointer;font-size:10px;">Auto Preview</label></p>' + '<p><input type="checkbox" style="cursor: pointer;" id="lastPost" name="lastPost"/>' + '<label style="cursor: pointer;font-size:10px;">Go To Last Post</label></p>' + '</div></div>');
+		$('#replies').append('<div id="qQuote" align="center">' + wcButtons + '<div id="qqPreview"></div><div id="qqTooManyWords">' + '<p style="margin:0 auto;margin-top:10px;">ZOMG! You are quoting significantly more words than you have written.<br /><br />' + '<img src="http://i27.tinypic.com/142zdi8.jpg" /></p><button type="button" id="wordsOK">OK</button>' + '</div><textarea id="qqTextArea" cols="' + docs.quickReplyboxCols + '" rows="' + docs.quickReplyboxRows + '"></textarea><br />' + '<button type="button" style="" id="qqpostclear" name="qqpost">Clear</button><button type="button" style="" id="qqpost" name="qqpost">Post Reply</button>' + '<img src="http://i28.tinypic.com/jzbn0n.gif" id="aloader" />' + '<div id="opInputs" style="height:30px;width:700px;">' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="w" id="modewc" name="modewc"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewc"> Use WhirlCode</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" wc2="b" id="modeht" name="modeht"/>' + '<label style="cursor: pointer;font-size:10px;" for="modeht"> Allow HTML</label></p>' + '<p><input type="checkbox" checked="checked" style="cursor: pointer;" value="true" id="modest" wc2="e" name="modest"/>' + '<label style="cursor: pointer;font-size:10px;" for="modest"> Auto entities </label></p>' + '<p><input checked="checked" type="checkbox" style="cursor: pointer;" value="true" id="modewl" wc2="a" name="modewl"/>' + '<label style="cursor: pointer;font-size:10px;" for="modewl"> Make links clickable</label></p>' + '<p>' + '	<input type="checkbox" name="modesu" id="autoSubscribe" wc2="t" value="true" style="cursor: pointer;"/>' + '	<label for="modesu" style="cursor: pointer; font-size: 10px;"> Watch</label>' + '</p>		' + '<p><input type="checkbox" style="cursor: pointer;" id="autoPreview" name="autoPreview"/>' + '<label style="cursor: pointer;font-size:10px;">Auto Preview</label></p>' + '<p><input type="checkbox" style="cursor: pointer;" id="lastPost" name="lastPost"/>' + '<label style="cursor: pointer;font-size:10px;">Go To Last Post</label></p>' + '</div></div>');
 
 		docs.q = $('#qqTextArea');
 		whirlC.buttonEvents("qqwcodeButtons", docs.q, whirlC.code());
