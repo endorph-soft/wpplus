@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.0
+// @version       4.3.1
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -152,6 +152,7 @@
  changes - 4.2.8 - Only load inline images once per page, tweaks to smilies code, removed redundant code, identify WP+ alerts better to end user
  changes - 4.2.9 - Fixes for AJAX quick reply, reduced avatar css size, scroll to anchor on WLR page load, fixed bug with ignore user
  changes - 4.3.0 - Chrome Compatability (with TamperMonkey), made avatars links again
+ changes - 4.3.1 - Fixed bugs with quick edit and removing the &p=-1&#bottom options
  ***************/
 // ==/Changes==
 
@@ -163,7 +164,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.0';
+	var version = '4.3.1';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -825,7 +826,7 @@ try {
 					$( "input[name=post2]" ).val("post");
 					var data = $("#fm").serialize( );
 					$.post( $("#fm").attr("action"), data, function( text ) {
-						if( text.indexOf( "Post edited" ) > -1 ) {
+						if( text.indexOf( "Edited. Returning" ) > -1 ) {
 							document.location.reload();
 						} else {
 							alert( "WP+: Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Feedback)." );
@@ -1857,7 +1858,7 @@ try {
 
 					'<p id="noGluteusMaximus">' +
 						'<input type="checkbox" name="noGluteusM" id="noGluteusM">' +
-						'<label for="noGluteusM">Removes the &p=-1#bottom from thread links on the main index page on Whirlpool</label>' +
+						'<label for="noGluteusM">Removes the &p=-1&#bottom from thread links on the main index page on Whirlpool</label>' +
 					'</p>   ' +
 					
 					'<p id="chatbox">' +
@@ -2362,7 +2363,7 @@ try {
 
 						if ($('#lastPost').attr('checked') && (docs.dUrl.indexOf("&p=-1#bottom") < 0) && (docs.dUrl.indexOf("&p=-1&#bottom") < 0)){
 
-							docs.d.location = "http://forums.whirlpool.net.au/forum-replies.cfm?t=" + Whirlpool.threadNumber + "&p=-1#bottom";
+							docs.d.location = "http://forums.whirlpool.net.au/forum-replies.cfm?t=" + Whirlpool.threadNumber + "&p=-1&#bottom";
 
 						} else {
 						
@@ -2791,7 +2792,7 @@ try {
 
 		$('.threads a').each(function () {
 
-			this.href = this.href.replace("&p=-1#bottom", "");
+			this.href = this.href.replace("&p=-1&#bottom", "");
 
 		});
 
