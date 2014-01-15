@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.4
+// @version       4.1.5
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -137,12 +137,13 @@
  changes - 4.1.2 - Readded "Only color end square" option
  changes - 4.1.3 - Zapped FF4 + GM 0.9.0 bugs (thanks to jaromir for debugging help)
  changes - 4.1.4 - Added some parseInt calls to hopefully fix tracking, added "mark as read", changed tracker to always replace link on tracked threads.
+ changes - 4.1.5 - Don't highlight deleted/moved threads, move the S and M links further apart, remove user notes until a replacement for eval can be found
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.1.4';
+	var version = '4.1.5';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -1020,6 +1021,13 @@ try {
 			threads.each(function(){
 				var thread = $(this);
 				var threadNumber = thread.find('a.title').attr('href').split('t=')[1];
+				
+				if(thread.is('.deleted') || thread.is('.pointer')){
+					//ignore this one
+					//Not deleted from database, as a thread may be undeleted in the future.
+					return true;
+				}
+				
 				var threadData = whirlpoolLastRead.loadThreadData(threadNumber);
 				if((Whirlpool.get('dontTrackStickyThreads') == 'true') && (thread.is('.sticky'))){
 					//leave the stickies alone
@@ -1096,7 +1104,7 @@ try {
 		'forumPageCss' : function(){
 			Whirlpool.css('.whirlpoolLastRead_unreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #95B0CB !important;  }');
 			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #CBC095 !important;  }');
-			Whirlpool.css('#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top:-5px; opacity:0.3; border-bottom-width:1px; float: left; }');
+			Whirlpool.css('#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin: 0 2px; margin-top:-5px; opacity:0.3; border-bottom-width:1px; float: left; }');
 		},
 		
 		'stopTracking' : function(threadNumber){
@@ -1232,7 +1240,7 @@ try {
 			'showWhirlpoolFooterLinks': 'true',
 			'enableWideWhirlpool': 'false',
 			'penaltyBoxBackground': 'false',
-			'userNotes': 'true',
+			'userNotes': 'false',
 			'hiddenUsersArr': '',
 			'userNotesArr': '{}',
 			'hideDRThreads': 'false',
@@ -1644,7 +1652,7 @@ try {
          
 			'</p> ' + '</p>             ' + '<p id="removeIgnoredUsers">' + '<input type="checkbox" name="removeIgnoredUsersB" id="removeIgnoredUsersB">' + '<label for="removeIgnoredUsersB">Completely hide all indication of removed users (the hidden post bar will not be displayed). <strong>WARNING: You will see no indication that a user has been removed.</strong></label>' +
 
-			'</p> ' + '</p>             ' + '<p id="userNotes">' + '<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' + '<label for="ignoreUserB">User Notes</label>' +
+			//'</p> ' + '</p>             ' + '<p id="userNotes">' + '<input type="checkbox" name="userNotesBox" id="userNotesBox">' + '<label for="userNotesBox">User Notes</label>' +
 
 			'</p> ' + '<p id="watchedThreadsAlert">' + '<select name="s_threadalert" id="s_threadAlert">' + '<option value="default">None</option>' + '<option value="watched">Go to watched threads</option>' + '<option value="thread">Return to the thread</option>' + '</select>     ' + '<label for="s_threadAlert">Choose what action to do on the "watching thread" alert.</label>' +
 
@@ -2460,8 +2468,7 @@ try {
 
 	}
 
-	function userNotes(trParent, i) {
-
+	/*function userNotes(trParent, i) {
 		var firstDiv = trParent.children('td:first').children('a:last').next();
 		var uNum = firstDiv.text().split('User ')[1].split(' ')[0];
 		var usrNtsPic = server + 'png/greennote.png';
@@ -2553,7 +2560,7 @@ try {
 			return false;
 		});
 
-	}
+	}*/
    
 
    
@@ -2809,9 +2816,9 @@ document.referrer.indexOf('?action=watched') == -1) {
 			if (docs.ignoreUser === 'true') {
 				userIgnore($(this));
 			}
-			if (docs.userNotes === 'true') {
+			/*if (docs.userNotes === 'true') {
 				userNotes($(this), i);
-			}
+			}*/
 		});
  
 		extraThreadLinks();
