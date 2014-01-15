@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.8
+// @version       4.3.9
 // @require       http://tristanroberts.name/projects/wp-plus/js/jquery-gm.js
 // @require       http://tristanroberts.name/projects/wp-plus/js/prettify.js
 // @require       http://tristanroberts.name/projects/wp-plus/js/lang-css.js
@@ -160,6 +160,7 @@
  changes - 4.3.6 - Changed resource addresses, tweaks to sidebar code
  changes - 4.3.7 - Readded the WP Classic Themes (thanks, Phyco)
  changes - 4.3.8 - Added Recent Activity Dropdown (preview)
+ changes - 4.3.9 - Recent Activity Dropdown - correct location for reload image, indication of unread threads
  ***************/
 // ==/Changes==
 
@@ -171,7 +172,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.8';
+	var version = '4.3.9';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -1364,6 +1365,12 @@ try {
 		var recentActivityOverlay = {
 		
 			'getData' : function(callback){
+				
+				if(Whirlpool.get('whirlpoolAPIKey') == ''){
+					alert('WP+ Recent Activity Overlay\n You don\'t seem to have entered your API key in the setting dialog');
+					return;
+				}
+			
 				Whirlpool.ajax({
 					method : 'GET',
 					url : 'http://whirlpool.net.au/api/?key=' + Whirlpool.get('whirlpoolAPIKey') + '&output=json&get=recent&recentdays=' + Whirlpool.get('recentActivityOverlayDays'),
@@ -1395,6 +1402,7 @@ try {
 				var readHtml = '';
 				var link = '';
 				var unread = false;
+				var anyUnread = false;
 				
 				var is_wlr = Whirlpool.get('lastReadTracker') == 'true';		
 					
@@ -1423,6 +1431,7 @@ try {
 					
 					if(unread){
 						unreadHtml += '<p class="recentActivityOverlayUnread"><a href="' + link + '">' + threads[i].TITLE + '</a></p>';
+						anyUnread = true;
 					}else{
 						readHtml += '<p><a href="' + link + '">' + threads[i].TITLE + '</a></p>';
 					}
@@ -1430,17 +1439,25 @@ try {
 				}
 				
 				Whirlpool.set('recentActivityHtml',unreadHtml + readHtml);
+				
+				if(anyUnread){
+					$('#recentActivityUnreadThreads').show();
+				}else{
+					$('#recentActivityUnreadThreads').hide();
+				}
+				
 			},
 			
 			'displayOverlay' : function(){
-				$(document.body).append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="http://localhost/reload.png" /></div><div id="recentActivityHandle">Recent Activity</div></div>');
-				Whirlpool.css('#recentActivityDropdownContainer { position: fixed; z-index: 9999; top: 0px; left: 50%; width: 20%; margin-left: -10%; color: #fff; }');
-				Whirlpool.css('#recentActivityHandle { background-color: #3A437B; text-align: center; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; padding-top: 5px; box-shadow: 2px; 0 8px rgba(255, 255, 255, 0.5); width: 150px; margin: 0 auto; cursor: pointer; font-family: Georgia,Cambria,Charter,\'Century Schoolbook\',serif;  height: 25px; font-weight: bold; }');
-				Whirlpool.css('#recentActivity { overflow: hidden; color: #333; max-height: 600px; display: none; background-color: #e5e5e5; text-align: center; border: solid 2px #3A437B; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; border-top: none; padding-top: 5px; }');
-				Whirlpool.css('#recentActivity a { color: #333; }');
-				Whirlpool.css('.recentActivityOverlayUnread { font-weight: 900; }');
-				Whirlpool.css('#recentActivityReload { width: 20px; height: 20px; float: right; margin-top: -30px; margin-right: 30px; cursor: pointer; }');
-				Whirlpool.css('#recentActivityContent { overflow-y: scroll; height: 200px;  margin-top: -4px; }');
+				$(document.body).append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="http://i56.tinypic.com/6gfl75.png" /></div><div id="recentActivityHandle">Recent Activity <img src="' + Whirlpool.image('emoticon_star') + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
+				Whirlpool.css('#recentActivityDropdownContainer { position: fixed; z-index: 9999; top: 0px; left: 50%; width: 20%; margin-left: -10%; color: #fff; }' +
+				'#recentActivityHandle { background-color: #3A437B; text-align: center; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; padding-top: 5px; box-shadow: 2px; 0 8px rgba(255, 255, 255, 0.5); width: 150px; margin: 0 auto; cursor: pointer; font-family: Georgia,Cambria,Charter,\'Century Schoolbook\',serif;  height: 25px; font-weight: bold; }' +
+				'#recentActivity { overflow: hidden; color: #333; max-height: 600px; display: none; background-color: #e5e5e5; text-align: center; border: solid 2px #3A437B; border-bottom-right-radius: 40px 20px; border-bottom-left-radius: 40px 20px; border-top: none; padding-top: 5px; }' +
+				'#recentActivity a { color: #333; }' + 
+				'.recentActivityOverlayUnread { font-weight: 900; }' + 
+				'#recentActivityReload { width: 20px; height: 20px; float: right; margin-top: -30px; margin-right: 30px; cursor: pointer; }' +
+				'#recentActivityUnreadThreads { width: 10px; height: 10px; display: none; }' +
+				'#recentActivityContent { overflow-y: scroll; height: 200px;  margin-top: -4px; }');
 				
 				var activityOpen = false;
 				var activityArea = $('#recentActivity');
