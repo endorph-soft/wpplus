@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.2
+// @version       4.2.3
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -145,12 +145,13 @@
  changes - 4.2.0 - Readded popular colouring options to WLR tracker, fixed another tracker bug
  changes - 4.2.1 - Added an option to unhide a post by a hidden user
  changes - 4.2.2 - Fixed thread tracking on search pages
+ changes - 4.2.3 - Fixed gap under logo with floating sidebar
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.2';
+	var version = '4.2.3';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -351,10 +352,10 @@ try {
 			});
 		});
 		$(window).scroll(function () {
-			$('#left').css('top', ((201 - window.scrollY) >= 1 ? 201 - window.scrollY : 0) + 'px');
+			$('#left').css('top', ((190 - window.scrollY) >= 1 ? 190 - window.scrollY : 0) + 'px');
 		});
 		$(window).load(function () {
-			$('#left').css('top', ((201 - window.scrollY) >= 1 ? 201 - window.scrollY : 0) + 'px');
+			$('#left').css('top', ((190 - window.scrollY) >= 1 ? 190 - window.scrollY : 0) + 'px');
 		});
 
 	}
