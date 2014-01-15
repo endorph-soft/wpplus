@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.3
+// @version       4.3.4
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -155,6 +155,7 @@
  changes - 4.3.1 - Fixed bugs with quick edit and removing the &p=-1&#bottom options
  changes - 4.3.2 - Added Whirlcode buttons on Wiki Preview pages
  changes - 4.3.3 - New Chatbox (thanks Erwin, Chris)
+ changes - 4.3.4 - Moved auto-updater to userscripts.org, Fix to recent activity days code
  ***************/
 // ==/Changes==
 
@@ -166,7 +167,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.3';
+	var version = '4.3.4';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -438,9 +439,9 @@ try {
 	/*! Smart Updater */
 	/**
 	 Automatically updates WP+.
-	 @author		Troberto
+	 @author		Troberto, Modification to work with userscripts.org by tbwd
 	 @date		2009-12-23
-	 @version	3.9.4
+	 @version	3.9.4, updated 4.3.4
 	 @runson		ALL
 	 */
 
@@ -466,22 +467,45 @@ try {
 			var next_seconds = next * 60;
 
 			if (currentTime > last + next_seconds) {
-				
-				var url = server + '/txt/updater.txt';
-				var mine = version.replace(/\./g, '');
+			
+				var url = 'http://userscripts.org/scripts/source/85217.meta.js';
 				
 				Whirlpool.HttpRequest(url, function (data) {
 					var dataText = data.responseText;
-
-					if (mine < dataText) {
-						Whirlpool.set('updaterInterval', 30);
-						Whirlpool.notify('A new version of WP+ is available.', true, 50000);
-						Whirlpool.set('updaterChecked', currentTime);
+					
+					var newVersionText = dataText.split('// @version       ')[1].split('\r\n// @require')[0];
+					
+					var newVersionParts = newVersionText.split('.');
+					
+					var oldVersionParts = version.split('.');
+					
+					var newMajorVersion = parseInt(newVersionParts[0]);
+					var newMiddleVersion = parseInt(newVersionParts[1]);
+					var newMinorVersion = parseInt(newVersionParts[2]);
+					
+					var oldMajorVersion = parseInt(oldVersionParts[0]);
+					var oldMiddleVersion = parseInt(oldVersionParts[1]);
+					var oldMinorVersion = parseInt(oldVersionParts[2]);
+					
+					function update(){
+						Whirlpool.notify('A new version of WP+ is available', true, 50000);
 						GM_openInTab('http://userscripts.org/scripts/source/85217.user.js');
-					} else if (next * 2 < 7690) {
-						Whirlpool.set('updaterInterval', next * 2);
-						Whirlpool.set('updaterChecked', currentTime);
 					}
+
+					if (newMajorVersion > oldMajorVersion) {
+						update();
+					}else{
+						if(newMiddleVersion > oldMiddleVersion){
+							update();
+						}else{
+							if(newMinorVersion > oldMinorVersion){
+								update();
+							}
+						}
+					}
+					
+					
+					Whirlpool.set('updaterChecked', currentTime);
 
 				});
 
@@ -847,7 +871,12 @@ try {
 
 	//Set default userpage days
 	if (Whirlpool.get('recentActivityDays') != '7') {
-		$('a[href*="/user/"]:not([href*="?"])').each(function(){
+		//have to do this twice, because there are two different ways to link to user pages used
+		$('a[href*="forums.whirlpool.net.au/user/"]:not([href*="?"])').each(function(){
+			var link = $(this);
+			link.attr('href',link.attr('href') + '?days=' + Whirlpool.get('recentActivityDays'));
+		});
+		$('a[href^="/user/"]:not([href*="?"])').each(function(){
 			var link = $(this);
 			link.attr('href',link.attr('href') + '?days=' + Whirlpool.get('recentActivityDays'));
 		});
@@ -1348,7 +1377,7 @@ try {
 			'debugMode': 'false',
 			'smartUpdater': 'true',
 			'installedScriptVersion': version,
-			'lastScriptVersionCheck': '1232062510821',
+			//'lastScriptVersionCheck': '1232062510821',
 			'dynamicMenuSystem': 'none',
 			'quickReplybox': 'true',
 			'quickReplyboxCols': '100',
