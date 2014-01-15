@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.3
+// @version       4.2.4
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -146,12 +146,13 @@
  changes - 4.2.1 - Added an option to unhide a post by a hidden user
  changes - 4.2.2 - Fixed thread tracking on search pages
  changes - 4.2.3 - Fixed gap under logo with floating sidebar
+ changes - 4.2.4 - Removes the troublesome (3 smiley
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.3';
+	var version = '4.2.4';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -568,8 +569,8 @@ try {
 		
 		var blue_icons = {
 			':~': Whirlpool.image('old_blue_anxious'),
-			'(3': Whirlpool.image('old_blue_clown'),
-			'(-3': Whirlpool.image('old_blue_clown'),
+			//'(3': Whirlpool.image('old_blue_clown'),
+			//'(-3': Whirlpool.image('old_blue_clown'),
 			'(:': Whirlpool.image('old_blue_cool'),
 			'(:-': Whirlpool.image('old_blue_cool'),
 			':crazy:': Whirlpool.image('old_blue_crazy'),
