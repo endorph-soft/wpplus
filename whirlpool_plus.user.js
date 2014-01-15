@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.10
+// @version       4.4.11
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -98,6 +98,7 @@
  changes - 4.4.8 - Some fixes for new design. Temp release- there are still many issues
  changes - 4.4.9 - More fixes for new design
  changes - 4.4.10 - Penalty Box highlight, WLR fixes, other fixes for the new design
+ changes - 4.4.11 - Spinner menu changes, Theme fixes
  ***************/
 // ==/Changes==
 
@@ -109,7 +110,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.10';
+	var version = '4.4.11';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -3621,23 +3622,51 @@ try {
 			}
 			unLi.find('*').addClass('notarget');
 			
+			var displayedMouseOver = false;
+			var displayedClick = false;
+			
 			unLi.mouseenter(function(){
+				if(!displayedClick){
+					$(this).css({'height' : 'auto', 'overflow': 'visible'});
+					displayedMouseOver = true;
+					displayedClick = false;
+				}
+			});
+
+			unLi.find('#menuSpinner').click(function(){
 				$(this).css({'height' : 'auto', 'overflow': 'visible'});
+				displayedMouseOver = false;
+				displayedClick = true;
+				
+				return false;
 			});
 			
 			unLi.find('a[href!="#"], a#settingsSpinnerLink').click(function(){
+
 				$(unLi).css({'height' : '19px', 'overflow': 'hidden'});
+				displayedMouseOver = false;
+				displayedClick = false;
+				return true;
+			});
+			
+			unLi.mouseleave(function(){
+				if(displayedMouseOver){
+					$(unLi).css({'height' : '19px', 'overflow': 'hidden'});
+					displayedMouseOver = false;
+				}
 				return true;
 			});
 			
 			unLi.find('a[href="#"]').click(function(event){
 				event.stopPropagation();
-				
 				return false;
 			});
 			
 			$('html').click(function(){
-				$(unLi).css({'height' : '19px', 'overflow': 'hidden'});
+				if(displayedClick){
+					$(unLi).css({'height' : '19px', 'overflow': 'hidden'});
+					displayedClick = false;
+				}
 				return true;
 			});
 			
@@ -3869,9 +3898,9 @@ try {
 			Whirlpool.css(docs.customWPTheme);
 		} else if (docs.customWPTheme !== 'default' && docs.customWPTheme.indexOf('import') < 0) {
 			$('head').append('<link rel="stylesheet" type="text/css" media="screen" href="' + docs.customWPTheme + '">');
-			setTimeout('100', function () {
+			/*setTimeout('100', function () {
 				$('style:first').text('');
-			});
+			});*/
 		}
 	}
 
