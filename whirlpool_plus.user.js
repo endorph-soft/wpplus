@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.1
+// @version       4.3.2
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -153,6 +153,7 @@
  changes - 4.2.9 - Fixes for AJAX quick reply, reduced avatar css size, scroll to anchor on WLR page load, fixed bug with ignore user
  changes - 4.3.0 - Chrome Compatability (with TamperMonkey), made avatars links again
  changes - 4.3.1 - Fixed bugs with quick edit and removing the &p=-1&#bottom options
+ changes - 4.3.2 - Added Whirlcode buttons on Wiki Preview pages
  ***************/
 // ==/Changes==
 
@@ -164,7 +165,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.1';
+	var version = '4.3.2';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -3143,8 +3144,10 @@ document.referrer.indexOf('?action=watched') == -1) {
 
 
 	if (docs.whirlcodeinWikiWhimNewThread === 'true') {
-		if (docs.dUrl.indexOf('whirlpool.net.au/wiki/?action=edit&tag=') > -1) {
-			wcWikiWhimNewThread.wikiNewThread('#f_body');
+		if (docs.dUrl.indexOf('/wiki/?action=edit&tag=') > -1 || docs.dUrl.indexOf('/wiki/index.cfm') > -1) {
+			if($('#f_body').length == 1){
+				wcWikiWhimNewThread.wikiNewThread('#f_body');
+			}
 		} else if (docs.dUrl.indexOf('/forum/index.cfm?action=newthread') > -1) {
 			wcWikiWhimNewThread.wikiNewThread('#body');
 		} else if (docs.dUrl.indexOf('/forum/index.cfm?action=reply') > -1) {
