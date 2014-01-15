@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.5.0
+// @version       4.5.1
 // @include       http://forums.whirlpool.net.au/*
 // @include       https://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
@@ -78,13 +78,13 @@ window.PR_SHOULD_USE_CONTINUATION=true;(function(){var h=["break,continue,do,els
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.0',
+	version : '4.5.1',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 7,
+	storageVersion : 8,
 	
 	//Current page url
 	url : document.location.href,
@@ -349,6 +349,7 @@ var WhirlpoolPlus = {
 		this._setDefaults();
 	
 		switch(this.get('storageVersion')){
+			case null:
 			case false:
 				//New install, or upgrade version 4.4.x to 4.5.0
 				
@@ -612,6 +613,7 @@ var WhirlpoolPlus = {
 	},
 	
 	_changelog : {
+		'4.5.1' : '<ul><li>Fixed issue with image embedding</li></ul>',
 		'4.5.0' : '<ul><li>Internal changes to improve maintainability</li><li>Support for multiple avatars</li><li>Workaround for data-reversion bug in Firefox 17</li><li>Improved Whirlcode editor</li><li>Improved Quick Edit</li><li>Added update dialog</li></ul>',
 		'4.4.18' : '<ul><li>Updated Theme Locations</li></ul>',
 		'4.4.17' : '<ul><li>Fixed oEmbed max width</li><li>Fixed image embed max width</li></ul>',
@@ -1646,7 +1648,13 @@ var features = {
 					
 					if(linkSegments[1]){
 						linkSegments = linkSegments[1].split('/');
-						linkObject.before('<img src="http://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpx_img">');
+						
+						//Check for album embeds
+						if(linkSegments[0] != 'a'){
+							linkObject.before('<img src="http://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpx_img">');
+						}else{
+							linkObject.before('<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="http://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe>');
+						}
 					}
 				}else if(oEmbedEnabled && oEmbedMatchRegex.test(link)){
 					linkObject.oembed(null,{ apikeys: {}, maxWidth: maxContentWidth });
