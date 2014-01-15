@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.7
+// @version       4.4.8
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -95,6 +95,7 @@
  changes - 4.4.5 - Fix for Chrome (thanks Yansky), include on https pages
  changes - 4.4.6 - Fix FF3 Quick Edit
  changes - 4.4.7 - Quick quote now correctly attributes quotes regardless of the selected button, bugfix for quick edit, spinner doesn't disappear on mouseout
+ changes - 4.4.8 - Some fixes for new design. Temp release- there are still many issues
  ***************/
 // ==/Changes==
 
@@ -106,7 +107,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.7';
+	var version = '4.4.8';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -874,7 +875,7 @@ try {
 		}
 		
 		
-		textnodes = $('td.bodytext > p');
+		textnodes = $('div.bodytext > p');
 
 		textnodes.each(function(){
 			node = $(this);
@@ -1020,7 +1021,7 @@ try {
 	// @todo	Document	
 
 	if ( Whirlpool.url.match( "forum-replies" ) && Whirlpool.get( "editInPlace" ) == "true" ) {
-		$( '.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
+		$( '.actions a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
 		$( ".wpp-edit" ).css("cursor", "pointer" );
 		
 		function wpp_quickEdit(e){
@@ -1242,8 +1243,8 @@ try {
    var avatar = {
 		
 		'avatariseRow' : function(replyTr){
-			var userNumber = getUserNumber(replyTr);		
-			replyTr.children('.bodyuser').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
+			var userNumber = getUserNumber(replyTr);
+			replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
 		},
 		
 		'css' : function(){
@@ -1330,15 +1331,16 @@ try {
 		
 			//css rules
 			if(Whirlpool.get('styleFlip') == 'false'){
-				Whirlpool.css('#replies table tr.whirlpoolLastRead_readReply td.bodypost { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
+				Whirlpool.css('#replies #replylist .whirlpoolLastRead_readReply .replytools { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
 			}else{
-				Whirlpool.css('#replies table tr.whirlpoolLastRead_unreadReply td.bodypost { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
+				Whirlpool.css('#replies #replylist .whirlpoolLastRead_unreadReply .replytools { background-color: ' + decodeURIComponent(Whirlpool.get('trackerPostBackgroundColour')) + '; background-image: none; }');
 			}
 		
 			var lastReadReplyNumber = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber)['t'];
-			$('div#replies > table > tbody > tr').not(':hidden').each(function(){
+			$('div#replies .reply').not(':hidden').each(function(){
 				var reply = $(this);
-				var replyNumber = $(reply.find('td:first-child > a')[0]).prop('name').split('r')[1];
+				var replyNumber = $(reply.prevAll('a[name!="bottom"]')[1]).prop('name').split('r')[1];
+				
 				if(parseInt(replyNumber) <= parseInt(lastReadReplyNumber)){
 					reply.addClass('whirlpoolLastRead_readReply');
 				}else{
@@ -1364,7 +1366,7 @@ try {
 			
 			$(window).bind(unloadEvent,function(){
 				//need to find the last read reply
-				var replies = $('div#replies > table > tbody > tr').not('#previewTR').not(':hidden');
+				var replies = $('div#replies .reply').not('#previewTR').not(':hidden');
 				
 				var lastReadReply;
 				
@@ -1383,12 +1385,13 @@ try {
 					//no replies read, so nothing doing
 				}else{
 					//record information for last read reply
-					var replyNumberLinks = lastReadReply.find('td:first-child > a');
+					var replyNumberLinks = lastReadReply.prevAll('a[name!="bottom"]');
+					
 					if(replyNumberLinks.length < 2){
 						alert('WP+: Sorry, something went wrong with thread tracking. If you see this message a lot, the tracker is probably broken');
 					}else{
-						var threadReplyNumber = parseInt($(replyNumberLinks[0]).prop('name').split('r')[1]);
-						var overallReplyNumber = $(replyNumberLinks[1]).prop('name').split('r')[1];
+						var threadReplyNumber = parseInt($(replyNumberLinks[1]).prop('name').split('r')[1]);
+						var overallReplyNumber = $(replyNumberLinks[0]).prop('name').split('r')[1];
 						
 						var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
 												
@@ -1562,7 +1565,7 @@ try {
 		
 		if(Whirlpool.url.match('forum-replies')){
 			
-			//scroll to the post thata we were actually sent to
+			//scroll to the post that we were actually sent to
 			if(window.location.hash){
 				$(window).load(function(){
 					var location = $(window.location.hash);
@@ -1589,7 +1592,7 @@ try {
 		$('.voteblock').each(function(){
 			var block = $(this);
 			var resetUser = block.prop('title');
-			var replyId = $(block.closest('td.bodyuser').find('a')[1]).prop('name').split('r')[1];
+			var replyId = $(block.closest('div.reply')).prop('id').split('r')[1];
 			var clickFunction = 'userVote(' + replyId + ',' + resetUser + ',0,' + user.id + ');';
 			block.children('span[id$="sn1"]').after(' <span class="voteitem" id="vote' + replyId + 's0" title="reset vote" onclick="' + clickFunction + '">?</span> ');
 		});
@@ -2067,8 +2070,8 @@ try {
 
 			if (docs.lmtr && !docs.pTd3) {
 
-				$(docs.lmtr).after('<tr height="100" id="previewTR"><td class="bodyuser" style="vertical-align: middle;"><p style="opacity:0.3;font:2em bold Verdana">' + 'Preview</p></td><td class="bodytext"/><td class="bodypost" style="vertical-align: middle;"><p style="opacity:0.3;font:2em bold ' + 'Verdana">Preview</p></td></tr>');
-				docs.pTd3 = $('#previewTR td:eq(1)');
+				$(docs.lmtr).after('<div class="reply" id="previewTR"><div class="replymeta"><div class="replyuser"><div class="replyuser-inner"><p style="opacity:0.3;font:2em bold Verdana">Preview</p></div></div><div class="replytools"><div class="replytools-inner"><p style="opacity:0.3;font:2em bold ' + 'Verdana">Preview</p></div></div></div><div class="replytext bodytext"></div></div>');
+				docs.pTd3 = $('#previewTR .bodytext');
 
 			}
 
@@ -3181,7 +3184,7 @@ try {
 		}
 
 		var currTime = time();
-		docs.lmtr = docs.repliesTR.eq(docs.repliesTR.length - 1);
+		docs.lmtr =  $('#replylist .reply:last');
 
 		function postPost(textArtex, textOptions) {
 		
@@ -3223,14 +3226,15 @@ try {
 									'p' : '-1'
 								},
 								function(data){
-									var removeS = data.slice(data.lastIndexOf('<tr id="'));
+																		
 									$('#previewTR').remove();
-									var newTR = $(removeS.split('</tr>')[0] + '</tr>')
+									
+									var newPost = $(data).find('#replylist .reply:last');
 									
 									var quickEdit = $("<br><a class='wpp-edit'>(quick edit)</a>").css( "cursor", "pointer" ).on('click', wpp_quickEdit );
 									
-									newTR.find('.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after(quickEdit);
-									$('#replies tr[id^="r"]:last').after(newTR);
+									newPost.find('.actions a[href^="/forum/index.cfm?action=edit"]' ).after(quickEdit);
+									$('#replylist .reply:last').after(newPost);
 									
 								}
 							);
@@ -3360,6 +3364,7 @@ try {
 			}
 
 		});
+		
 
 		docs.repliesA.each(function (i) {
 
@@ -3992,7 +3997,7 @@ document.referrer.indexOf('?action=watched') == -1) {
 	}
 	
 	if (Whirlpool.url.match('forum-replies')) {
-		docs.repliesTR = $('#replies tr[id^="r"]:not([id^="review"])');
+		docs.repliesTR = $('#replies .reply');
 		docs.repliesA = docs.repliesTR.find('a[title="a link to this specific post"]');
       
 		if (Whirlpool.get('quickReplybox') === 'true') {
@@ -4040,7 +4045,7 @@ document.referrer.indexOf('?action=watched') == -1) {
 		avatar.css();
 		
 		if (Whirlpool.get('staticAvatars') === 'true') {
-			avatar.avatariseRow($('tr:first'));
+			avatar.avatariseRow($('div.reply'));
 		}
 		
 	}
