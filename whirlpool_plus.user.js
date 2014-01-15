@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.8
+// @version       4.4.9
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -96,6 +96,7 @@
  changes - 4.4.6 - Fix FF3 Quick Edit
  changes - 4.4.7 - Quick quote now correctly attributes quotes regardless of the selected button, bugfix for quick edit, spinner doesn't disappear on mouseout
  changes - 4.4.8 - Some fixes for new design. Temp release- there are still many issues
+ changes - 4.4.9 - More fixes for new design
  ***************/
 // ==/Changes==
 
@@ -107,7 +108,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.8';
+	var version = '4.4.9';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -601,17 +602,18 @@ try {
 		$('.external').after('<sup style="cursor:pointer;" class="quick">(preview)</sup>');
 		
 		$(document).on('click', '.quick', function (e) {
-				var previewClass = ($(this).prop('id') !== '') ? $(this).prop('id') : 'quick' + Math.floor(Math.random() * 101);
-				if ($('.' + previewClass).hasClass(previewClass)) {
+				var previewClass = 'quick_' + $(this).parents('.reply').prop('id');
+				if ($(this).text() == '(hide)') {
 					$(this).text('(preview)');
-					$('.' + previewClass).parent().parent().remove();
+					$('.' + previewClass).remove();
 				} else {
 					$(this).text('(hide)');
 					$(this).prop('id', previewClass);
 					var link = $(this).prev('a');
-					var post = $(this).closest('tr');
-					$(post).after('<tr><td colspan="3" style="padding:0;height:400px;" class="tr' + previewClass + '"><iframe src="' + link.prop('href') + '" style="margin:0;display:block;border:none;width: 100%;height: 100%;" class="' + previewClass + '"></iframe><div class="handle" style="width: 100px;float:right;cursor:s-resize;">Resize</div></td></tr>');
-					$('.tr' + previewClass).jqResize('.handle');
+					var post = $(this).closest('div.reply');
+					$(post).after('<div id="' + previewClass + '_div" class="' + previewClass + '"><iframe id="' + previewClass + '_iframe" class="jqDnR" src="' + link.prop('href') + '" style="margin:0;display:block;border:none;width: 100%;height: 100%;"></iframe><div class="jqResize handle" style="width: 100%;text-align:right;cursor:s-resize;">Resize</div></div>');
+										
+					$('#' + previewClass + '_div').jqResize('.handle');
 				}
 
 			});
@@ -1156,38 +1158,42 @@ try {
 	 @runson		Forum replies
 	 */
 	function userIgnore(trParent) {
-		var tdBodyUser = trParent.children('.bodyuser');
+		if(trParent.is(':hidden')){
+			return;
+		}
+	
+		var tdBodyUser = trParent.find('.replyuser-inner');
 		var uNum = getUserNumber(trParent);
+		 
+		//add hide smiley (X)
+		if($('span[title="hide user"]',tdBodyUser).length == 0){
+		 var hideUser = $('<span title="hide user" style="margin-right:5px;" class="voteitem">X</span>');
+		 
+		 if ($('.voteblock',tdBodyUser).length != 0) {
+			//normal forum
+			tdBodyUser.find('.voteblock').prepend(hideUser);
+		 } else {
+			//in ItN, need to add voteblock
+			var voteblock = $('<div class="voteblock">');
+			voteblock.append(hideUser);
+			tdBodyUser.append(voteblock);
+		 }
+		 
+		 hideUser.click(function () {
+			if (!docs.hiddenUsersArr.match(uNum)) {
+			
+			   Whirlpool.set('hiddenUsersArr', Whirlpool.get('hiddenUsersArr') + '#' + uNum);
+			   docs.hiddenUsersArr += '#' + uNum;
+			   
+			   //rehide ignored posts
+			   docs.repliesTR.each(function () {
+				  userIgnore($(this));
+			   });
+			}
+		 });
+		}
       
-      //add hide smiley (X)
-      if($('span[title="hide user"]',tdBodyUser).length == 0){
-         var hideUser = $('<span title="hide user" style="margin-right:5px;" class="voteitem">X</span>');
-         
-         if ($('.voteblock',tdBodyUser).length != 0) {
-            //normal forum
-            tdBodyUser.find('.voteblock').prepend(hideUser);
-         } else {
-            //in ItN, need to add voteblock
-            var voteblock = $('<div class="voteblock">');
-            voteblock.append(hideUser);
-            tdBodyUser.append(voteblock);
-         }
-         
-         hideUser.click(function () {
-            if (!docs.hiddenUsersArr.match(uNum)) {
-            
-               Whirlpool.set('hiddenUsersArr', Whirlpool.get('hiddenUsersArr') + '#' + uNum);
-               docs.hiddenUsersArr += '#' + uNum;
-               
-               //rehide ignored posts
-               docs.repliesTR.each(function () {
-                  userIgnore($(this));
-               });
-            }
-         });
-      }
-      
-
+		
       //check if this post is by a user we want to hide
 		if (docs.hiddenUsersArr.length) {
 			var hiddUsersArr = docs.hiddenUsersArr.split('#');
@@ -1216,24 +1222,18 @@ try {
          var rowId = trParent.prop('id');
 			
 			trParent.hide();
-			var row = $('<tr>');
+			
+			var hiddenPostNotice = $('<div class="notice" id="' + rowId +'"><div class="replyuser">User #' + uNum + ' &nbsp; <a style="color:black" href="http://forums.whirlpool.net.au/user/' + uNum + '"><b>' + userName + '</b></a></div><div class="replytools">' + postDate + '</div><i>This post was hidden by you (Whirlpool Plus).</i></div>');
 			
 			var showLink = $('<a href="javascript:void(0)">Unhide</a>').click(function(){
 				trParent.show();
-				row.hide();
+				hiddenPostNotice.hide();
 			});
 			
-			var userNameTd = $('<td class="bodymore small" bgcolor="#e5e5e5">  User #' + uNum + ' &nbsp; <a href="/user/' + uNum + '" style="color: black;"><b>' + userName + '</b></a> </td>');
-			var centerTd = $('<td class="bodymore small" bgcolor="#eeeeee"> <i>This post was hidden by you (Whirlpool Plus).</i></td>');
-			var dateTd = $('<td class="bodymore small" bgcolor="#e5e5e5">' + postDate + '</td>');
 			
-			centerTd.append(showLink)
+			hiddenPostNotice.append(showLink);
 			
-			row.append(userNameTd);
-			row.append(centerTd);
-			row.append(dateTd);
-			
-         trParent.before(row);
+			trParent.before(hiddenPostNotice);
 			
       }
    }
@@ -1245,6 +1245,7 @@ try {
 		'avatariseRow' : function(replyTr){
 			var userNumber = getUserNumber(replyTr);
 			replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
+			replyTr.addClass('wpp_avatar_reply_' + userNumber);
 		},
 		
 		'css' : function(){
@@ -3696,8 +3697,8 @@ try {
 	}
 
 	function userNotes(trParent, i) {
-		var firstDiv = trParent.children('td:first').children('a:last').next();
-		var uNum = firstDiv.text().split('User #')[1].split(' ')[0];
+		var firstDiv = trParent.find('.replyuser-inner div:not(.wpp_avatar)');
+		var uNum = getUserNumber(trParent);
 		var usrNtsPic = Whirlpool.image('green_note');
 		var uNJa = eval('(' + docs.userNotesArr + ')');
 		if (uNJa !== '{}' && uNJa[uNum]) {
@@ -3713,8 +3714,9 @@ try {
 			'padding': '0 5px',
 			'cursor': 'pointer'
 		}).appendTo(firstDiv[0]).bind('mouseup', function (e) {
+			
+			if (!docs.d.getElementById("uS" + uNum)) {
 
-			if (!docs.d.getElementById("uS" + uNum.split('#')[1])) {
 				var modalBackground = $('<div id="wlrsettingsoverlay" style="height: 100%; width: 100%; position: fixed; left: 0pt; top: 0pt; z-index: 2999; opacity: 0.5; background-color:#000000;"/>');
 				$('body').append(modalBackground);
 				var key, uNJ, ithis = $(this),
