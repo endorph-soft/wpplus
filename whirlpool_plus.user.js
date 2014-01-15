@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.3.6
+// @version       4.3.7
 // @require       http://tristanroberts.name/projects/wp-plus/js/jquery-gm.js
 // @require       http://tristanroberts.name/projects/wp-plus/js/prettify.js
 // @require       http://tristanroberts.name/projects/wp-plus/js/lang-css.js
@@ -158,6 +158,7 @@
  changes - 4.3.4 - Moved auto-updater to userscripts.org, Fix to recent activity days code
  changes - 4.3.5 - More quick-edit bug squashing, Remove old themes, updater tweaks
  changes - 4.3.6 - Changed resource addresses, tweaks to sidebar code
+ changes - 4.3.7 - Readded the WP Classic Themes (thanks, Phyco)
  ***************/
 // ==/Changes==
 
@@ -169,7 +170,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.3.6';
+	var version = '4.3.7';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -2001,6 +2002,7 @@ try {
 							'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
 							'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
 							'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
+							'<option value="http://phyco.name/wpplus/wpclassic2011/css/core.css">WP Classic (by Phyco and okidoki)</option>' +
 						'</select>' +
 						'<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
 					'</p>' +
