@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.1
+// @version       4.1.2
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
 // @require       http://wpplus.tristanroberts.name/js/lang-sql.js
-// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=4013
+// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=412
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -134,14 +134,13 @@
  changes - 4.0.13- Moved to tbwd's Userscript (#85217).
  changes - 4.1.0 - Rewrote Last Read Tracker, Some changes to Whirlpool object
  changes - 4.1.1 - Forgot to allow WLR to turn off, fixed
+ changes - 4.1.2 - Readded "Only color end square" option
  ***************/
 // ==/Changes==
 
-var console = unsafeWindow.console;
-
 try {
 
-	var version = '4.1.1';
+	var version = '4.1.2';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -1038,12 +1037,22 @@ try {
 							//change the link
 							thread.find('.goend > a').attr('href',link);
 							
+							unsafeWindow.console.log(thread.find('td'));
 							
 							//now, we need to apply the unread class
-							thread.addClass('whirlpoolLastRead_unreadPosts');
+							if(Whirlpool.get('onlyEndSquare') == 'true'){
+								thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
+							}else{
+								thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
+							}
+							
 						}else{
 							//all posts have been read
-							thread.addClass('whirlpoolLastRead_noUnreadPosts');
+							if(Whirlpool.get('onlyEndSquare') == 'true'){
+								thread.find('td.goend').addClass('whirlpoolLastRead_noUnreadPosts');
+							}else{
+								thread.find('td').addClass('whirlpoolLastRead_noUnreadPosts');
+							}
 						}
 						
 						//add the controls
@@ -1063,8 +1072,8 @@ try {
 		},
 		
 		'forumPageCss' : function(){
-			Whirlpool.css('.whirlpoolLastRead_unreadPosts td { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #95B0CB !important;  }');
-			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts td { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #CBC095 !important;  }');
+			Whirlpool.css('.whirlpoolLastRead_unreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #95B0CB !important;  }');
+			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #CBC095 !important;  }');
 			Whirlpool.css('#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top:-5px; opacity:0.3; border-bottom-width:1px; float: left; }');
 		},
 		
@@ -1174,7 +1183,7 @@ try {
 			//'disableNewPostBackgroundColour': 'false',
 			//'noNewPostBackgroundColour': '#cbc095',
 			//'disableNoNewPostBackgroundColour': 'false',
-			//'onlyEndSquare': 'false',
+			'onlyEndSquare': 'false',
 			//'styleFlip': 'false',
 			'dontTrackStickyThreads': 'false',
 			//'noColourEndSquare': 'false',
@@ -1617,7 +1626,7 @@ try {
 
 //			'</p> ' + '<p id="noNewPostBackgroundColour" class="needCpicker">' + '<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' + '<label for="noNewPostBackgroundC">No New Posts Thread Colour: </label>' + '</p>       ' + '<p id="disableNoNewPostBackgroundColour">' + '<input type="checkbox" name="disableNoNewPostBackgroundC" id="disableNoNewPostBackgroundC">' + '<label for="disableNoNewPostBackgroundC">Disable No New Posts Thread colouring</label>' +
 
-//			'</p>      ' + '<p id="onlyEndSquare">' + '<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' + '<label for="onlyEndSq">Only colour end square </label>' +
+			'</p>      ' + '<p id="onlyEndSquare">' + '<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' + '<label for="onlyEndSq">Only colour end square </label>' +
 
 //			'</p> ' + '<p id="styleFlip">' + '<input type="checkbox" name="styleFl" id="styleFl">' + '<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
 
