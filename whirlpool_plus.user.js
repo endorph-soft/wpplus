@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.4
+// @version       4.2.5
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -147,12 +147,13 @@
  changes - 4.2.2 - Fixed thread tracking on search pages
  changes - 4.2.3 - Fixed gap under logo with floating sidebar
  changes - 4.2.4 - Removes the troublesome (3 smiley
+ changes - 4.2.5 - Fixes auto preview
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.4';
+	var version = '4.2.5';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -2084,13 +2085,23 @@ try {
 							docs.d.location = "http://forums.whirlpool.net.au/forum-replies.cfm?t=" + Whirlpool.threadNumber + "&p=-1#bottom";
 
 						} else {
-
+						
+							//Need to get the last post for the user
 							docs.q.css('background', '#E5E5E5 none no-repeat scroll 50% 50%').val('');
-							var removeS = msg.slice(msg.lastIndexOf('<tr id="'));
-							$('#previewTR').remove();
-							var newTR = $(removeS.split('</tr>')[0] + '</tr>');
-							$('#replies tr[id^="r"]:last').after(newTR);
-	
+							
+							$.get(
+								'http://forums.whirlpool.net.au/forum-replies.cfm',
+								{
+									't' : Whirlpool.threadNumber,
+									'p' : '-1'
+								},
+								function(data){
+									var removeS = data.slice(data.lastIndexOf('<tr id="'));
+									$('#previewTR').remove();
+									var newTR = $(removeS.split('</tr>')[0] + '</tr>');
+									$('#replies tr[id^="r"]:last').after(newTR);
+								}
+							);
 						}
 						Whirlpool.set('textareraSave', '');
 						$( ".bodypost a[href^=/forum/index.cfm?action=edit]:last" ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
@@ -2347,6 +2358,8 @@ try {
 
 
 	}
+	
+	
 	var wcWikiWhimNewThread = {
 
 		wwcButtons: whirlC.buttons("qqbuttonsDiv", "auto;", "qqwcodeButtons"),
