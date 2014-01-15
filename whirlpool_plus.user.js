@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.3
+// @version       4.4.4
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -17,6 +17,7 @@
 // @exclude       http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
 // @exclude       http://forums.whirlpool.net.au/forum-replies-print.cfm*
 // @exclude       http://forums.whirlpool.net.au/forum-replies-archive.cfm*
+// @exclude       http://whirlpool.net.au/blog/*
 // @resource	  emoticon_angry	http://wpplus.endorph.net/resources/png/angry.png
 // @resource	  emoticon_blushing	http://wpplus.endorph.net/resources/png/blushing.png
 // @resource	  emoticon_confused	http://wpplus.endorph.net/resources/png/confused.png
@@ -59,6 +60,9 @@
 // @resource	  focusedthread		http://wpplus.endorph.net/resources/png/focusedthread.png
 // @resource	  closedthread		http://wpplus.endorph.net/resources/png/closedthread.png
 // @resource	  small_whirl_logo	http://wpplus.endorph.net/resources/png/whirlpool.png
+// @resource	  light_gradient	http://wpplus.endorph.net/resources/png/lightgradient.png
+// @resource	  green_note		http://wpplus.endorph.net/resources/png/greennote.png
+// @resource	  red_note			http://wpplus.endorph.net/resources/png/rednote.png
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
 // ==Changes==
@@ -78,6 +82,7 @@
  changes - 4.4.1 - Fixes some FF3 bugs, local storage of some resources, settings dialog auto-collapse.
  changes - 4.4.2 - More jquery related bugs, new location for WP Black Theme
  changes - 4.4.3 - Fix FF3.6 issue
+ changes - 4.4.4 - Aura statistics, readded penalty box highlight
  ***************/
 // ==/Changes==
 
@@ -89,7 +94,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.3';
+	var version = '4.4.4';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -465,23 +470,6 @@ try {
 	
 		SyncStorage.sync();
 	}
-			
-	/* This code deletes all sync data
-	
-	var listOfValues = Whirlpool.list();
-	
-	for(key in listOfValues){
-		var nameOfSetting = listOfValues[key];
-		
-		
-		if(nameOfSetting.indexOf('sync_') != -1){
-			if(nameOfSetting != 'sync_lastSync' && nameOfSetting != 'sync_mostUpToDate' && nameOfSetting != 'sync_scriptId' && nameOfSetting != 'sync_times'){
-				Whirlpool.remove(nameOfSetting);
-			}
-		}
-	}
-	
-	Whirlpool.set('sync_times',JSON.stringify({}));*/
 	
 
 	/*! Posts Per Day */
@@ -1070,7 +1058,59 @@ try {
 	}
 	
 	if(Whirlpool.url.match('action=yourvotes')){
-		$('#breadcrumb').after('<p>Number of Votes: ' + $('#content table tr[bgcolor="white"]').length + '</p>');
+		var auraCount = { 1 : 0, 2 : 0, 3 : 0, 4 : 0 };
+		var totalAuras = 0;
+	
+		$('#content table tr[bgcolor="white"]').each(function(){			
+			switch($(this).find('.voteactive, .votecrusty').prop('title')){
+				case 'irritating scum':
+					auraCount[1]++;
+				break;
+				case 'typical user':
+					auraCount[2]++;
+				break;
+				case 'constructive':
+					auraCount[3]++;
+				break;
+				case 'top person':
+					auraCount[4]++;
+				break;
+			}
+			
+			totalAuras++;
+		});
+		
+		var auraPercentages = {
+			1 : Math.floor((auraCount[1] / totalAuras) * 1000)/10,
+			2 : Math.floor((auraCount[2] / totalAuras) * 1000)/10,
+			3 : Math.floor((auraCount[3] / totalAuras) * 1000)/10,
+			4 : Math.floor((auraCount[4] / totalAuras) * 1000)/10,
+		};
+		
+		var voteHtml = '<p>Stats:</p><div class="voteblock"><table style="text-align: center; font: bold 10px monospace;"><tr>' + 
+			'<td><span class="voteitem" style="cursor: auto;">:(</span></td>' + 
+			'<td><span class="voteitem" style="cursor: auto;">:|</span></td>' + 
+			'<td><span class="voteitem" style="cursor: auto;">:)</span></td>' + 
+			'<td><span class="voteitem" style="cursor: auto;">:D</span></td>' + 
+		'</tr>' + 
+		
+		'<tr>' + 
+			'<td>' + auraPercentages[1] + '%</td>' + 
+			'<td>' + auraPercentages[2] + '%</td>' + 
+			'<td>' + auraPercentages[3] + '%</td>' + 
+			'<td>' + auraPercentages[4] + '%</td>' + 
+		'</tr>' + 
+		
+		'<tr>' + 
+			'<td>' + auraCount[1] + '</td>' + 
+			'<td>' + auraCount[2] + '</td>' + 
+			'<td>' + auraCount[3] + '</td>' + 
+			'<td>' + auraCount[4] + '</td>' + 
+		'</tr>' + 
+
+		'</table><p style="font: bold 10px monospace;">Total: ' + totalAuras + '</p></div>';
+	
+		$('#breadcrumb').after(voteHtml);
 	}
 
 	//Set default userpage days
@@ -2476,7 +2516,7 @@ try {
 						'</div>' +
 						
 					'</div>' +
-					
+										
 					'<div class="subSettings">' +
 						'<p class="subSettings_heading description"><b>Users</b></p>' +
 						'<div class="subSettings_content">' +
@@ -2529,7 +2569,6 @@ try {
 						 '</div>' +
 					'</div>' +
 						
-
 				'</div>' +
 
 				'<div style="display:none;" class="wlrtabmenuDivs">' +
@@ -2692,6 +2731,11 @@ try {
 					'<div class="subSettings">' +
 						'<p class="subSettings_heading description"><b>Display and Formatting Options</b></p>' +
 						'<div class="subSettings_content">' +
+						
+							'<p id="penaltyBoxBackground">' +
+								'<input type="checkbox" name="penaltyBoxBackground_check" id="penaltyBoxBackground_check">' +
+								' <label for="penaltyBoxBackground_check">Highlight when a user is in the penalty box</label>' +
+							'</p>' +
 						
 							'<p id="emoticons">' +
 								'<input type="checkbox" name="smile" id="smile">' +
@@ -3595,10 +3639,10 @@ try {
 	function userNotes(trParent, i) {
 		var firstDiv = trParent.children('td:first').children('a:last').next();
 		var uNum = firstDiv.text().split('User #')[1].split(' ')[0];
-		var usrNtsPic = server + 'png/greennote.png';
+		var usrNtsPic = Whirlpool.image('green_note');
 		var uNJa = eval('(' + docs.userNotesArr + ')');
 		if (uNJa !== '{}' && uNJa[uNum]) {
-			usrNtsPic = server + 'png/rednote.png';
+			usrNtsPic = Whirlpool.image('red_note');
 		}
 
 
@@ -3662,14 +3706,14 @@ try {
 
 						delete uNJ[unThis];
 						Whirlpool.set('userNotesArr', uNJ.toSource().toString());
-						$('').prop('src', server + 'png/greennote.png');
+						$('').prop('src', Whirlpool.image('green_note'));
 
 
 					} else if (texValar !== '') {
 
 						uNJ[unThis] = texValar;
 						Whirlpool.set('userNotesArr', uNJ.toSource().toString());
-						$('').prop('src', server + 'png/greennote.png');
+						$('').prop('src', Whirlpool.image('green_note'));
 
 					}
 
@@ -3866,7 +3910,14 @@ document.referrer.indexOf('?action=watched') == -1) {
 			Whirlpool.css('#root, #footer {width: 99.5% !important;max-width: none !important;}' + '#content > span.shim2 {display: none !important;}body,html,#root{margin:0;padding:0;border:0;}');
 		}
 		if (Whirlpool.get('penaltyBoxBackground') === "true") {
-			Whirlpool.css('tr.In_the_penalty_box > td.bodyuser {background-image:url(' + server + 'png/lightgradient.png)!important;background-repeat:repeat !important;');
+			Whirlpool.css('.penalty_box {background-image:url(' + Whirlpool.image('light_gradient') + ')!important;background-repeat:repeat !important; background-color: #fff !important; } ');
+			
+			$('div#replies > table > tbody > tr > td.bodyuser > div[style="color:#555"]').each(function(){
+				if($(this).text() == 'In the penalty box'){
+					$(this).parent().addClass('penalty_box');
+				}
+			});
+			
 		}
 
 		if (Whirlpool.get('whimAlertNotice') === "true") {
