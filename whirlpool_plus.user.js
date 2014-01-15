@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.0.8
+// @version       4.0.12
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
 // @require       http://wpplus.tristanroberts.name/js/lang-sql.js
-// @require	 	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=408
+// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=4012
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -127,11 +127,15 @@
  changes - 4.0.6 - Added ability to hide deleted threads in user profile (thanks Yansky).
  changes - 4.0.7 - Added ability to hide forums from the main page.
  changes - 4.0.8 - Added open watched threads in section in tabs (thanks, Yansky)
+ changes - 4.0.9 - Added a quick fix for anchors, thanks tbwd.
+ changes - 4.0.10- Replaced Polish Dude's green theme, w/ Chris's, removed Polish Dude's other themes
+ changes - 4.0.11- Updated WP Green, added WP Wood and WP Purple (thanks Chris)
+ changes - 4.0.12- tbwd's fixes (thanks)
  ***************/
 // ==/Changes==
 try {
 
-	var version = '4.0.8';
+	var version = '4.0.12';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -317,7 +321,7 @@ try {
 			'position': 'absolute',
 			'left': '0',
 		});
-		$('.selected ul').append('<li id="wpplus_undock"><a href="javascript:;"> Unfloat Sidebar (temp)</a></li>');
+		$('.selected ul[style~="dashed"]').append('<li id="wpplus_undock"><a href="javascript:;"> Unfloat Sidebar (temp)</a></li>');
 		$('#wpplus_undock a').click(function () {
 			$('#left').css({
 				'position': 'absolute',
@@ -762,7 +766,7 @@ try {
 					$( "input[name=post2]" ).val("post");
 					var data = $("#fm").serialize( );
 					$.post( $("#fm").attr("action"), data, function( text ) {
-						if( text.indexOf( "Edit OK" ) > -1 ) {
+						if( text.indexOf( "Post edited" ) > -1 ) {
 							document.location.reload();
 						} else {
 							alert( "Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Forum Feedback)." );
@@ -812,7 +816,7 @@ try {
 			'quickReplyboxRows': '10',
 			'autoPreview': 'true',
 			'threadArchiveView': 'true',
-			'threadPrintView': 'true',
+			'threadView': 'true',
 			'longThreadView': 'true',
 			'moderatorPostView': 'true',
 			'representativePostView': 'true',
@@ -830,6 +834,7 @@ try {
 			'inlineVideos': 'true',
 			'emoticonsBlue': 'true',
 			'ignoreUser': 'false',
+         'removeIgnoredUsers' : 'false',
 			'customWPTheme': 'default',
 			'whirlpoolBreadcrumbFont': 'default font',
 			'whirlpoolSidemenuFont': 'default font',
@@ -1210,8 +1215,6 @@ try {
 
 			'</p> ' + '<p id="longThreadView">' + '<input type="checkbox" name="longThreadV" id="longThreadV">' + '<label for="longThreadV">Show all Posts in Long Thread View Link at top of thread.</label>' +
 
-			'</p> ' + '</p>     ' + '<p id="threadPrintView">' + '<input type="checkbox" name="threadPrintV" id="threadPrintV">' + '<label for="threadPrintV">Show all Posts in Thread Print View Link at top of thread.</label>' +
-
 			'</p>       ' + '</p>     ' + '<p id="moderatorPostView">' + '<input type="checkbox" name="moderatorPostV" id="moderatorPostV">' + '<label for="moderatorPostV">Show a link to view only moderator posts.</label>' +
 
 			'</p> ' + '</p>  ' + '<p id="representativePostView">' + '<input type="checkbox" name="representativePostV" id="representativePostV">' + '<label for="representativePostV">Show a link to view only representative posts.</label>' +
@@ -1246,13 +1249,15 @@ try {
 
 			'</p>  ' + '<p id="inlinePages">' + '<input type="checkbox" name="inlinePages" id="inlinePages">' + '<label for="inlinePages">Adds the ability to see links inline of WP.</label>' +
 
-			'</p> ' + '</p>             ' + '<p id="ignoreUser">' + '<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' + '<label for="ignoreUserB">Adds a button next to each user\'s aura vote smilies, which when activated will prevent you from ' + 'seeing that user. <strong>WARNING: Ignoring a user will cause ALL of their posts not to appear for you any more. If you want to remove someone from ' + 'being ignored, click on the "Hidden Users" tab above.</strong></label>' +
+			'</p> ' + '</p>             ' + '<p id="ignoreUser">' + '<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' + '<label for="ignoreUserB">Adds a button next to each user\'s aura vote smilies, which when activated will prevent you from ' + 'seeing that user (you will see a post hidden message, similar to a post removed by a moderator). <strong>WARNING: Ignoring a user will cause ALL of their posts not to appear for you any more. If you want to remove someone from ' + 'being ignored, click on the "Hidden Users" tab above.</strong></label>' +
+         
+			'</p> ' + '</p>             ' + '<p id="removeIgnoredUsers">' + '<input type="checkbox" name="removeIgnoredUsersB" id="removeIgnoredUsersB">' + '<label for="removeIgnoredUsersB">Completely hide all indication of removed users (the hidden post bar will not be displayed). <strong>WARNING: You will see no indication that a user has been removed.</strong></label>' +
 
 			'</p> ' + '</p>             ' + '<p id="userNotes">' + '<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' + '<label for="ignoreUserB">User Notes</label>' +
 
 			'</p> ' + '<p id="watchedThreadsAlert">' + '<select name="s_threadalert" id="s_threadAlert">' + '<option value="default">None</option>' + '<option value="watched">Go to watched threads</option>' + '<option value="thread">Return to the thread</option>' + '</select>     ' + '<label for="s_threadAlert">Choose what action to do on the "watching thread" alert.</label>' +
 
-			'</p> ' + '<p id="customWPTheme">' + '<select name="s_customtheme" id="s_customtheme">' + '<option value="">Default (by Simon Wright)</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by ═CHRIS═)</option>' + '<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/classic/css/core.css);">WP Classic</option>' + '<option value="http://www.systemadmins.info/whirlpool/themes/green/wp_mint.css">WP Green (by polish dude)</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/greyscale/css/core.css);" selected="selected">WP Grey</option>' + '<option value="http://www.systemadmins.info/whirlpool/themes/purple/purple.css">WP Purple (by polish dude)</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/steelyellow/css/core.css);">WP Steel Yellow</option>' + '</select>     ' + '<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
+			'</p> ' + '<p id="customWPTheme">' + '<select name="s_customtheme" id="s_customtheme">' + '<option value="">Default (by Simon Wright)</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' + '<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/classic/css/core.css);">WP Classic</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' + '<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/greyscale/css/core.css);" selected="selected">WP Grey</option>' + '<option value="@import url(http://members.optusnet.com.au/whirlpoolian/steelyellow/css/core.css);">WP Steel Yellow</option>' + '</select>     ' + '<label for="s_cutomtheme">Choose a WP Theme to Use</label>' +
 
 			'</p> ' + '<p id="noTextShadow">' + '<input type="checkbox" name="textShadow" id="textShadow">' + '<label for="textShadow">Disable all <tt>text-shadow</tt> CSS attributes (FF 3.5+ only).</label>' +
 
@@ -2569,72 +2574,73 @@ s
 		});
 
 	}
-
+   
+   
+   //utility function to make hiding posts easier
+   function hideIgnoredPost(trParent,uNum){
+      //do we want to hide completely?
+      if(docs.removeIgnoredUsers === 'true'){
+         //bye bye
+         trParent.hide();
+      }else{
+         //display the deleted message
+         var userName = trParent.find('.bu_name').text();
+         var postDate = trParent.find('.date').not('.edited').text().replace('posted ', '');
+         var rowId = trParent.attr('id');
+         trParent.replaceWith('<tr id="' + rowId + '"><td class="bodymore small" bgcolor="#e5e5e5">  User #' + uNum + ' &nbsp; <a href="/user/' + uNum + '" style="color: black;"><b>' + userName + '</b></a> </td> <td class="bodymore small" bgcolor="#eeeeee"> <i>This post was hidden by you. (Whirlpool Plus).</i> </td> <td class="bodymore small" bgcolor="#e5e5e5">' + postDate + '</td></tr>');
+      }
+   }
+   
+   
 	function userIgnore(trParent) {
-		var tdFirst = trParent.children('td:first');
-		var firstDiv = tdFirst.children('a:last').next();
-		var uNum = firstDiv.text().split('User ')[1].split(' ')[0];
+		var tdBodyUser = trParent.children('.bodyuser');
+		var uNum = trParent.find('a[href*="/user/"]').attr('href').split('/user/')[1];
+      
+      //add hide smiley (X)
+      if($('span[title="hide user"]',tdBodyUser).length == 0){
+         var hideUser = $('<span title="hide user" style="margin-right:5px;" class="voteitem">X</span>');
+         
+         if ($('.voteblock',tdBodyUser).length != 0) {
+            //normal forum
+            tdBodyUser.find('.voteblock').prepend(hideUser);
+         } else {
+            //in ItN, need to add voteblock
+            var voteblock = $('<div class="voteblock">');
+            voteblock.append(hideUser);
+            tdBodyUser.append(voteblock);
+         }
+         
+         hideUser.click(function () {
+            if (!docs.hiddenUsersArr.match(uNum)) {
+            
+               Whirlpool.set('hiddenUsersArr', Whirlpool.get('hiddenUsersArr') + '#' + uNum);
+               docs.hiddenUsersArr += '#' + uNum;
+               
+               //rehide ignored posts
+               docs.repliesTR.each(function () {
+                  userIgnore($(this));
+               });
+            }
+         });
+      }
+      
 
+      //check if this post is by a user we want to hide
 		if (docs.hiddenUsersArr.length) {
 			var hiddUsersArr = docs.hiddenUsersArr.split('#');
-			hiddUsersArr.shift();
-			for (var i = 0; i < hiddUsersArr.length; i++) {
-
-				var uNumWithoutHash = uNum.split('#')[1];
-				var numwithHash = '#' + hiddUsersArr[i];
-
-				if (numwithHash == uNum) {
-					var user_number = numwithHash;
-					var user_name = trParent.find('.bu_name').text();
-					var post_date = trParent.find('.bodypost div:last').text().replace('posted ', '');
-					trParent.text('');
-					trParent.append('<td class="bodymore small" bgcolor="#e5e5e5">  User #' + user_number + ' &nbsp; <a href="/user/' + user_number + '" style="color: black;"><b>' + user_name + '</b></a> </td> <td class="bodymore small" bgcolor="#eeeeee"> <i>This post was hidden by you. (Whirlpool Plus).</i> </td> <td class="bodymore small" bgcolor="#e5e5e5">' + post_date + '</td> ');
-
-				}
-			}
-		}
-
-		var lastDiv = tdFirst.children('div:last');
-		var hideU = $('<span title="hide user" style="margin-right:5px;" class="voteitem"> X </span>');
-
-		if (lastDiv.attr('class')) {
-
-			lastDiv.prepend(hideU);
-
-		} else {
-			var itnX = $('<div class="voteblock">')
-			itnX.append(hideU);
-			lastDiv.after(itnX);
-
-		}
-
-		hideU.click(function () {
-
-			var uNum2 = firstDiv.text().split('User ')[1].split(' ')[0];
-			var uNumWithoutHash2 = uNum2.split('#')[1];
-			if (!docs.hiddenUsersArr.match(uNum2)) {
-
-				Whirlpool.set('hiddenUsersArr', Whirlpool.get('hiddenUsersArr') + uNum2);
-				docs.hiddenUsersArr += uNum2;
-
-				docs.repliesTR.each(function () {
-					var repParent = $(this);
-
-					if (repParent.children('td:first').find('a[href$="forum-user.cfm?id=' + uNumWithoutHash2 + '"]')[0]) {
-
-						repParent.hide();
-
-					}
-
-				});
-
-			}
-
-			return false;
-
-		});
-
+         
+         if ($.inArray(uNum,hiddUsersArr) != -1) {
+            //hide this post
+            hideIgnoredPost(trParent,uNum);   
+         }
+         
+      }
+      
+      return false;
 	}
+   
+
+   
 	var toggleSections = {
 		links: function () {
 			var ts_sections = document.getElementsByTagName('h3');
@@ -2671,8 +2677,8 @@ s
 		var futSub = $('.foot_subs:first');
 		var repl = $('#replies');
 		if (docs.threadArchiveView == 'true') {
-			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies-archive.cfm/' + docs.threadNumber + '.html">Thread Archive</a>');
-			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies-archive.cfm/' + docs.threadNumber + '.html">Thread Archive</a>');
+			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/archive/' + docs.threadNumber + '">Thread Archive</a>');
+			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/archive/' + docs.threadNumber + '">Thread Archive</a>');
 			if (repl[0].style.marginTop !== '10px') {
 				repl.attr('style', 'margin-Top:10px');
 			}
@@ -2699,13 +2705,6 @@ s
 
 			}
 
-		}
-		if (docs.threadPrintView == 'true') {
-			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies-print.cfm?t=' + docs.threadNumber + '">Print View</a>');
-			futSub.append('&nbsp;&nbsp;<a href="http://forums.whirlpool.net.au/forum-replies-print.cfm?t=' + docs.threadNumber + '">Print View</a>');
-			if (repl[0].style.marginTop !== '10px') {
-				repl.attr('style', 'margin-Top:10px');
-			}
 		}
 		if (docs.moderatorPostView == 'true') {
 			wBP.append('<a class="bwatch" href="http://forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + docs.threadNumber + '">Mod Posts</a>');
@@ -2776,7 +2775,7 @@ s
 
 	function deletedThreadsCacheLink() {
 		var deletedThreadNumber = docs.dUrl.split('t=')[1].split('&')[0];
-		$('h2:last').append(' <a href="http://google.com/search?q=cache:forums.whirlpool.net.au/forum-replies-archive.cfm/' + deletedThreadNumber + '.html">(Google Cache)');
+		$('h2:last').append(' <a href="http://google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)');
 	}
 
 	function userpageInfoToggle() {
@@ -2870,23 +2869,6 @@ document.referrer.indexOf('?action=watched') == -1) {
 	if (docs.dUrl.match('forum-replies')) {
 		docs.repliesTR = $('#replies tr[id^="r"]:not([id^="review"])');
 		docs.repliesA = docs.repliesTR.find('a[title="a link to this specific post"]');
-      
-      //convert anchor links, using herring link
-      docs.repliesA.each(function (i) {
-      
-         //go up to the parent div, then grab the herring link (only should be one)
-         var herringLink = $(this).parent().find('a[title="alert moderators to this post"]')[0];
-         
-         //get info from herring link
-         var fragments = herringLink.toString().split('tpr=')[1].split(',');
-         
-         var newAnchor = 'http://forums.whirlpool.net.au/forum-replies.cfm?t=' + fragments[0] + '&p=' + fragments[1] + '#r' + fragments[2];
-         
-         $(this).attr('href',newAnchor);
-         
-         
-      });
-
       
 		if (docs.dUrl.match('t=')) {
 			docs.threadNumber = docs.dUrl.split('t=')[1].split('&')[0].split('#')[0];
