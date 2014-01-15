@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.0
+// @version       4.2.1
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -143,12 +143,13 @@
  changes - 4.1.8 - Fixed issue with FF4b11, Added a "reset vote" aura option
  changes - 4.1.9 - Fixed an issue with the tracker that caused threads to not track correctly
  changes - 4.2.0 - Readded popular colouring options to WLR tracker, fixed another tracker bug
+ changes - 4.2.1 - Added an option to unhide a post by a hidden user
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.0';
+	var version = '4.2.1';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -870,7 +871,27 @@ try {
          var userName = trParent.find('.bu_name').text();
          var postDate = trParent.find('.date').not('.edited').text().replace('posted ', '');
          var rowId = trParent.attr('id');
-         trParent.replaceWith('<tr id="' + rowId + '"><td class="bodymore small" bgcolor="#e5e5e5">  User #' + uNum + ' &nbsp; <a href="/user/' + uNum + '" style="color: black;"><b>' + userName + '</b></a> </td> <td class="bodymore small" bgcolor="#eeeeee"> <i>This post was hidden by you. (Whirlpool Plus).</i> </td> <td class="bodymore small" bgcolor="#e5e5e5">' + postDate + '</td></tr>');
+			
+			trParent.hide();
+			var row = $('<tr>');
+			
+			var showLink = $('<a href="javascript:void(0)">Unhide</a>').click(function(){
+				trParent.show();
+				row.hide();
+			});
+			
+			var userNameTd = $('<td class="bodymore small" bgcolor="#e5e5e5">  User #' + uNum + ' &nbsp; <a href="/user/' + uNum + '" style="color: black;"><b>' + userName + '</b></a> </td>');
+			var centerTd = $('<td class="bodymore small" bgcolor="#eeeeee"> <i>This post was hidden by you (Whirlpool Plus).</i></td>');
+			var dateTd = $('<td class="bodymore small" bgcolor="#e5e5e5">' + postDate + '</td>');
+			
+			centerTd.append(showLink)
+			
+			row.append(userNameTd);
+			row.append(centerTd);
+			row.append(dateTd);
+			
+         trParent.before(row);
+			
       }
    }
 	
@@ -969,7 +990,7 @@ try {
 			}
 		
 			var lastReadReplyNumber = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber)['threadReplyNumber'];
-			$('div#replies > table > tbody > tr').each(function(){
+			$('div#replies > table > tbody > tr').not(':hidden').each(function(){
 				var reply = $(this);
 				var replyNumber = $(reply.find('td:first-child > a')[0]).attr('name').split('r')[1];
 				if(parseInt(replyNumber) <= parseInt(lastReadReplyNumber)){
@@ -990,7 +1011,7 @@ try {
 			
 			$(window).unload(function(){
 				//need to find the last read reply
-				var replies = $('div#replies > table > tbody > tr').not('#previewTR');
+				var replies = $('div#replies > table > tbody > tr').not('#previewTR').not(':hidden');
 				
 				var lastReadReply;
 				
