@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.8
+// @version       4.2.9
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -150,12 +150,13 @@
  changes - 4.2.6 - New Avatar Server
  changes - 4.2.7 - Fixed auto updater, changed smilies, change recent activity days, tidied up settings box
  changes - 4.2.8 - Only load inline images once per page, tweaks to smilies code, removed redundant code, identify WP+ alerts better to end user
+ changes - 4.2.9 - Fixes for AJAX quick reply, reduced avatar css size, scroll to anchor on WLR page load, fixed bug with ignore user
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.8';
+	var version = '4.2.9';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -826,7 +827,7 @@ try {
    
    //Return the user who made a post. Accepts the table row that represents each post
    function getUserNumber(tr){
-      return tr.find('a[href*="/user/"]').attr('href').split('/user/')[1];
+      return parseInt(tr.find('a[href*="/user/"]').attr('href').split('/user/')[1]);
    }
    
    /*! Ignore User */
@@ -873,11 +874,12 @@ try {
       //check if this post is by a user we want to hide
 		if (docs.hiddenUsersArr.length) {
 			var hiddUsersArr = docs.hiddenUsersArr.split('#');
-         
-         if ($.inArray(uNum,hiddUsersArr) != -1) {
-            //hide this post
-            hideIgnoredPost(trParent,uNum);   
-         }
+		 
+			//need uNum as a string
+			if ($.inArray('' + uNum,hiddUsersArr) != -1) {
+				//hide this post
+				hideIgnoredPost(trParent,uNum);   
+			}
          
       }
       
@@ -918,6 +920,30 @@ try {
 			
       }
    }
+   
+   //Avatars lite
+   
+   var avatar = {
+		
+		'avatariseRow' : function(replyTr){
+			var userNumber = getUserNumber(replyTr);		
+			replyTr.children('.bodyuser').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
+		},
+		
+		'css' : function(){
+			if (Whirlpool.get('staticAvatars') == 'true') {
+				$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/avatar_lite.css">');
+			}
+
+			if (Whirlpool.get('animatedAvatars') == 'true') {
+				$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/animatedavatar_lite.css">');
+			}
+			
+			Whirlpool.css('.wpp_avatar_link { margin:0 auto; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;}');
+		}
+   }
+	
+	//end avatars lite
 	
 	
 	var whirlpoolLastRead = {
@@ -1229,6 +1255,17 @@ try {
 		}
 		
 		if(Whirlpool.url.match('forum-replies')){
+			
+			//scroll to the post thata we were actually sent to
+			if(window.location.hash){
+				$(window).load(function(){
+					var location = $(window.location.hash);
+					if(location.length > 0){
+						$(window).scrollTop(location.offset().top);
+					}
+				});
+			}
+		
 			whirlpoolLastRead.forumReplies();
 		}
 		if(Whirlpool.url.match('/forum/') || Whirlpool.url.match('/user/')){
@@ -1376,29 +1413,6 @@ try {
 
 	}
 
-	function avatars() {
-		
-		var isAvatars = false;
-		
-		if (docs.staticAvatars == 'true') {
-			$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/avatar.css">');
-			isAvatars = true;
-		}
-
-		if (docs.animatedAvatars == 'true') {
-			$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/animatedavatar.css">');
-			isAvatars = true;
-		}
-		
-		if(isAvatars){
-			Whirlpool.css('td.bodyuser > div:first-child > a:first-child { margin:0 auto; } #replies tr .bodyuser div div:last-child:before { padding:5px 0 0; }');
-			
-			if (docs.penaltyBoxBackground === 'true') {
-					Whirlpool.css('tr.In_the_penalty_box > td.bodyuser {background-image:url(' + server + 'png/tinygradient.png)!important;background-repeat:repeat !important;');
-			}
-		}
-		
-	}
 
 	function hideDelPosts() {
 		$('.bodymore').parent().hide();
@@ -1547,6 +1561,9 @@ try {
 				//get current value to quick reply text area
 				var qqcurrentValue = tAr.val();
 				var qqtheSelection = tAr.val().substring(tAr[0].selectionStart, tAr[0].selectionEnd);
+				
+				var cursorPos = tAr[0].selectionStart;
+				var scrollPos = $(tAr[0]).scrollTop();
 
 				function insertAtCursor(qqmyField, qqmyValue) {
 
@@ -1561,6 +1578,13 @@ try {
 						qqmyField.value += qqmyValue;
 
 					}
+					
+					//cursorpos = current position + (length of new value - length of original) + (selection length)
+					cursorPos = cursorPos + (qqmyValue.length - qqtheSelection.length) + (qqtheSelection.length);
+					
+					tAr[0].focus();
+					tAr[0].setSelectionRange(cursorPos,cursorPos);
+					$(tAr[0]).scrollTop(scrollPos);
 
 				}
 
@@ -1605,15 +1629,11 @@ try {
 				} else {
 
 					if (qqtheSelection.indexOf('\n') > -1 || qqtheSelection.indexOf('\r') > -1) {
-
 						var tSel = qqtheSelection.replace(/^(.+)$/mg, whirlCode[qqbuttonID].encloseLeft + "$1" + whirlCode[qqbuttonID].encloseRight);
-
-						tAr.val(tAr.val().replace(qqtheSelection, tSel));
-
+						//tAr.val(tAr.val().replace(qqtheSelection, tSel));
+						insertAtCursor(tAr[0], tSel);
 					} else {
-
 						insertAtCursor(tAr[0], whirlCode[qqbuttonID].encloseLeft + qqtheSelection + whirlCode[qqbuttonID].encloseRight);
-
 					}
 
 				}
@@ -2668,8 +2688,6 @@ try {
 
 			Whirlpool.css("#pmenu {padding:0;list-style-type: none; position:fixed;z-index:50;height:19px;overflow:hidden;width:18px;left:" + whereMenu + ";}" + "#pmenu img{margin;0;padding:0;border:none;background:transparent;width:16px;}" + "#pmenu:hover {height:auto;overflow:visible;}" + "#pmenu ul {padding:0; margin:0; list-style-type: none; width:101px;}" + "#pmenu li {position:relative;z-index:51;}" + "#pmenu a{display:block;width:110px;font-weight:bold;font-size:12px; color:#FFFFFF; height:26px; line-height:26px; " + "text-decoration:none; text-indent:5px; background:#616CA3; border:1px solid orange;white-space: nowrap; }" + "#pmenu>li>ul>li>a{background:#EDEDED;color:#000;}" + "#pmenu li:hover > a {background:#dfd7ca; color:#c00;}" + "#pmenu li ul {display: none;} " + "#pmenu li:hover > ul {display:block; position:absolute; top:0; z-index:52;margin-left:111px;}");
 
-
-
 			var spinner = server + 'png/whirlpool.png';
 
 			var gfx = 'http://forums.whirlpool.net.au/skin/web/img/favicon.gif';
@@ -2748,16 +2766,6 @@ try {
 
 		});
 
-	}
-
-	function avatar(dreThis) {
-
-		var bfirst = dreThis.children('td:first');
-		var cDiv = bfirst.children('div');
-		var uNumClass = parseInt(cDiv.eq(1).children('a:first').attr('href').split('/user/')[1]);
-		var uClassClass = cDiv.eq(2).text().replace(/ /g, '_');
-		dreThis.addClass("wlr_" + uNumClass + " " + uClassClass);
-		bfirst.prepend('<div><a href="/user/' + uNumClass + '" class="wpp_avatar"/></div>');
 	}
 
 	function userNotes(trParent, i) {
@@ -3059,14 +3067,15 @@ document.referrer.indexOf('?action=watched') == -1) {
 		if (docs.hideDelPosts === 'true') {
 			hideDelPosts();
 		}
-		avatars();
+		
+		avatar.css();
 
 		docs.repliesTR.each(function (i) {
 
 			var tdThis = $(this).children('td:eq(1)');
 
-			if (docs.staticAvatars === 'true') {
-				avatar($(this));
+			if (docs.staticAvatars === 'true' || docs.animatedAvatars === 'true') {
+				avatar.avatariseRow($(this));
 			}
 			if (docs.ignoreUser === 'true') {
 				userIgnore($(this));
@@ -3091,11 +3100,15 @@ document.referrer.indexOf('?action=watched') == -1) {
 			userpageInfoToggle();
 		}
 	}
+	
 	if (docs.dUrl.indexOf('whirlpool.net.au/whim/?action=read') > -1) {
-		avatars();
+	
+		avatar.css();
+		
 		if (docs.staticAvatars === 'true') {
-			avatar($('tr:first'));
+			avatar.avatariseRow($('tr:first'));
 		}
+		
 	}
 
 
