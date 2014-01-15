@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.0.13
+// @version       4.1.0
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -132,11 +132,12 @@
  changes - 4.0.11- Updated WP Green, added WP Wood and WP Purple (thanks Chris)
  changes - 4.0.12- tbwd's fixes (thanks)
  changes - 4.0.13- Moved to tbwd's Userscript (#85217).
+ changes - 4.1.0 - Rewrote Last Read Tracker, Some changes to Whirlpool object
  ***************/
 // ==/Changes==
 try {
 
-	var version = '4.0.13';
+	var version = '4.1.0';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -146,6 +147,12 @@ try {
 		 @var	(string)
 		 */
 		'url': document.location.toString(),
+		/**
+       The current thread number
+       @var (string or false)
+		 @since 4.1.0
+      */
+      'threadNumber' : (typeof unsafeWindow.thisThreadID != 'undefined') ? (unsafeWindow.thisThreadID) : (false),
 		/**
 		 Returns the stored value.
 		 @param	name	(string) The name of the stored value.
@@ -779,6 +786,315 @@ try {
 		} );
 	}
 
+	
+/*************************************** TBWD's code *******************************************/
+   
+   //Return the user who made a post. Accepts the table row that represents each post
+   function getUserNumber(tr){
+      return tr.find('a[href*="/user/"]').attr('href').split('/user/')[1];
+   }
+   
+   /*! Ignore User */
+	/**
+	 Hides users as necessary
+	 @author		tbwd
+	 @date		2010-11-04
+	 @version	4.0.12
+	 @runson		Forum replies
+	 */
+	function userIgnore(trParent) {
+		var tdBodyUser = trParent.children('.bodyuser');
+		var uNum = getUserNumber(trParent);
+      
+      //add hide smiley (X)
+      if($('span[title="hide user"]',tdBodyUser).length == 0){
+         var hideUser = $('<span title="hide user" style="margin-right:5px;" class="voteitem">X</span>');
+         
+         if ($('.voteblock',tdBodyUser).length != 0) {
+            //normal forum
+            tdBodyUser.find('.voteblock').prepend(hideUser);
+         } else {
+            //in ItN, need to add voteblock
+            var voteblock = $('<div class="voteblock">');
+            voteblock.append(hideUser);
+            tdBodyUser.append(voteblock);
+         }
+         
+         hideUser.click(function () {
+            if (!docs.hiddenUsersArr.match(uNum)) {
+            
+               Whirlpool.set('hiddenUsersArr', Whirlpool.get('hiddenUsersArr') + '#' + uNum);
+               docs.hiddenUsersArr += '#' + uNum;
+               
+               //rehide ignored posts
+               docs.repliesTR.each(function () {
+                  userIgnore($(this));
+               });
+            }
+         });
+      }
+      
+
+      //check if this post is by a user we want to hide
+		if (docs.hiddenUsersArr.length) {
+			var hiddUsersArr = docs.hiddenUsersArr.split('#');
+         
+         if ($.inArray(uNum,hiddUsersArr) != -1) {
+            //hide this post
+            hideIgnoredPost(trParent,uNum);   
+         }
+         
+      }
+      
+      return false;
+	}
+   
+   //utility function to make hiding posts easier
+   function hideIgnoredPost(trParent,uNum){
+      //do we want to hide completely?
+      if(docs.removeIgnoredUsers === 'true'){
+         //bye bye
+         trParent.hide();
+      }else{
+         //display the deleted message
+         var userName = trParent.find('.bu_name').text();
+         var postDate = trParent.find('.date').not('.edited').text().replace('posted ', '');
+         var rowId = trParent.attr('id');
+         trParent.replaceWith('<tr id="' + rowId + '"><td class="bodymore small" bgcolor="#e5e5e5">  User #' + uNum + ' &nbsp; <a href="/user/' + uNum + '" style="color: black;"><b>' + userName + '</b></a> </td> <td class="bodymore small" bgcolor="#eeeeee"> <i>This post was hidden by you. (Whirlpool Plus).</i> </td> <td class="bodymore small" bgcolor="#e5e5e5">' + postDate + '</td></tr>');
+      }
+   }
+	
+	
+	var whirlpoolLastRead = {
+	
+		//Data stored in 'trackerData' variable, set by loadData function
+		
+		'init' : function(){
+			this.loadData();
+		},		
+		
+		'loadData' : function(){
+			this.trackerData = JSON.parse(Whirlpool.get('whirlpoolLastReadData'));
+			
+			if(this.trackerData == false){
+				this.trackerData = {};
+			}
+			
+		},
+		
+		'saveData' : function(){
+			Whirlpool.set('whirlpoolLastReadData',JSON.stringify(this.trackerData));
+		},
+		
+		'saveThreadData' : function(threadNumber,threadReplyNumber,overallReplyNumber){
+			this.trackerData[threadNumber] = {
+				'threadReplyNumber' : threadReplyNumber,
+				'overallReplyNumber' : overallReplyNumber
+			};
+			
+			
+			this.saveData();
+		},
+		
+		'loadThreadData' : function(threadNumber){
+			if(this.trackerData[threadNumber]){
+				return this.trackerData[threadNumber];
+			}else{
+				return false;
+			}
+		},
+		
+		'importOldData' : function(){
+			//run-once method to get all the old data
+			var oldData = Whirlpool.get('lastRead0');
+			
+			var dataParts = oldData.split(',');
+			
+			for(partIndex in dataParts){
+				var part = dataParts[partIndex];
+				if(part.match('t=undefined') || part == ''){
+					continue;
+				}
+			
+				var threadReplyNumber = part.split('#r')[1];
+				
+				if(part.match('&p=')){
+					var pageNumber = part.split('#r')[0].split('&p=')[1];
+				}else{
+					var pageNumber = '1';
+				}
+			
+				var threadNumber = part.split('t=')[1].split('&')[0].split('#')[0];
+				
+				//write this data into the variable
+				this.trackerData[threadNumber] = {
+					'threadReplyNumber' : threadReplyNumber,
+					'pageNumber' : pageNumber
+				};
+				
+				
+				
+			}
+			
+			whirlpoolLastRead.saveData();
+			
+		},
+		
+		
+		/*
+		 * Records the last read reply in a thread. Should be run on forum-replies pages
+		 */
+		'forumReplies' : function(){
+		
+			//css rules
+			Whirlpool.css('#replies table tr.whirlpoolLastRead_readReply td.bodypost { background-color: #CFCBBC; background-image: none; }');
+		
+			var lastReadReplyNumber = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber)['threadReplyNumber'];
+			$('div#replies > table > tbody > tr').each(function(){
+				var reply = $(this);
+				var replyNumber = $(reply.find('td:first-child > a')[0]).attr('name').split('r')[1];
+				if(replyNumber <= lastReadReplyNumber){
+					reply.addClass('whirlpoolLastRead_readReply');
+				}else{
+					reply.addClass('whirlpoolLastRead_unreadReply');
+				}
+			});
+		
+			var currentViewHeight = window.innerHeight + window.pageYOffset;
+			
+			$(window).scroll(function(e){
+				currentViewHeight = window.innerHeight + window.pageYOffset;
+			});
+			
+			$(window).unload(function(){
+				//need to find the last read reply
+				var replies = $('div#replies > table > tbody > tr');
+				
+				var lastReadReply;
+				
+				replies.each(function(){
+					reply = $(this);
+				
+					var positionOfBottom = reply.offset().top + reply.height();
+					if(positionOfBottom < currentViewHeight){
+						lastReadReply = reply;
+					}else{
+						return;
+					}
+				});
+				
+				if(!lastReadReply){
+					//no replies read, so nothing doing
+				}else{
+					//record information for last read reply
+					var replyNumberLinks = lastReadReply.find('td:first-child > a');
+					var threadReplyNumber = $(replyNumberLinks[0]).attr('name').split('r')[1];
+					var overallReplyNumber = $(replyNumberLinks[1]).attr('name').split('r')[1];
+					
+					var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
+					
+					if(currentData == false || currentData['threadReplyNumber'] <= threadReplyNumber){
+						whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
+					}
+				}
+				
+			});
+		},
+		
+		'forumPage' : function(){
+			var threads = $('#threads > table > tbody > tr:not(.section)');
+			
+			threads.each(function(){
+				var thread = $(this);
+				var threadNumber = thread.find('a.title').attr('href').split('t=')[1];
+				var threadData = whirlpoolLastRead.loadThreadData(threadNumber);
+				if((Whirlpool.get('dontTrackStickyThreads') == 'true') && (thread.is('.sticky'))){
+					//leave the stickies alone
+				}else{
+					if(threadData){
+						//we are tracking this thread
+						
+						var numberOfReplies = parseInt(thread.find('td.reps').not(':has(a)').text()) + 1; //need to add one, as original post is not counted as a reply here
+						
+						
+						if(threadData['threadReplyNumber'] < numberOfReplies){
+							//there are unread posts
+								
+							//build the link
+							var link;
+							
+							//do we have the new reply method?
+							if(threadData['overallReplyNumber']){
+								link = '/forum-replies.cfm?r=' +  threadData['overallReplyNumber'] + '#r' + threadData['overallReplyNumber']; //used by Simon's jumpToReplyId method, so preferred
+							}else{
+								//use the old page number method
+								link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['pageNumber'] + '#r' + threadData['threadReplyNumber'];
+							}
+							
+							
+							//change the link
+							thread.find('.goend > a').attr('href',link);
+							
+							
+							//now, we need to apply the unread class
+							thread.addClass('whirlpoolLastRead_unreadPosts');
+						}else{
+							//all posts have been read
+							thread.addClass('whirlpoolLastRead_noUnreadPosts');
+						}
+						
+						//add the controls
+						thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
+						
+						thread.find('.whirlpoolLastRead_stopTracking').click(function(){
+							whirlpoolLastRead.stopTracking(threadNumber);
+							thread.removeClass('whirlpoolLastRead_unreadPosts whirlpoolLastRead_noUnreadPosts');
+							thread.find('.whirlpoolLastRead_controls').remove();
+							return false;
+						});
+						
+					}
+				}
+			});
+			
+		},
+		
+		'forumPageCss' : function(){
+			Whirlpool.css('.whirlpoolLastRead_unreadPosts td { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #95B0CB !important;  }');
+			Whirlpool.css('.whirlpoolLastRead_noUnreadPosts td { background: url("http://tristanroberts.name/projects/wp-plus/png/gradient.png") repeat scroll 0 0 #CBC095 !important;  }');
+			Whirlpool.css('#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top:-5px; opacity:0.3; border-bottom-width:1px; float: left; }');
+		},
+		
+		'stopTracking' : function(threadNumber){
+			delete this.trackerData[threadNumber];
+			this.saveData();
+		}
+		
+		
+		
+	};
+	
+	
+	whirlpoolLastRead.init();
+	
+	//check to see if we need to import data from the old tracker
+	if(Whirlpool.get('whirlpoolLastReadOldImported') == false){
+		whirlpoolLastRead.importOldData();
+		Whirlpool.set('whirlpoolLastReadOldImported',true)
+	}
+	
+	
+
+	
+	
+	if(Whirlpool.url.match('forum-replies')){
+		whirlpoolLastRead.forumReplies();
+	}
+	if(Whirlpool.url.match('/forum/') || Whirlpool.url.match('/user/')){
+		whirlpoolLastRead.forumPageCss()
+		whirlpoolLastRead.forumPage();
+	}
+	
 
 	// ! Glug (Legacy JS)
 	/******************************************************* GLUG ***************************************************************************************************/
@@ -849,19 +1165,19 @@ try {
 			'hideMVThreads': 'false',
 			'textareraSave': '',
 			'lastReadTracker': 'true',
-			'numThreads2Track': '1000',
-			'trackerPostBackgroundColour': '#CFCBBC',
-			'disableTrackerPostBackgroundColour': 'false',
+			//'numThreads2Track': '1000',
+			//'trackerPostBackgroundColour': '#CFCBBC',
+			//'disableTrackerPostBackgroundColour': 'false',
 			'readTheRulesYet': 'false',
-			'newPostBackgroundColour': '#95b0cb',
-			'disableNewPostBackgroundColour': 'false',
-			'noNewPostBackgroundColour': '#cbc095',
-			'disableNoNewPostBackgroundColour': 'false',
-			'onlyEndSquare': 'false',
-			'styleFlip': 'false',
+			//'newPostBackgroundColour': '#95b0cb',
+			//'disableNewPostBackgroundColour': 'false',
+			//'noNewPostBackgroundColour': '#cbc095',
+			//'disableNoNewPostBackgroundColour': 'false',
+			//'onlyEndSquare': 'false',
+			//'styleFlip': 'false',
 			'dontTrackStickyThreads': 'false',
-			'noColourEndSquare': 'false',
-			'wlrSettingsScrollTo': 'false',
+			//'noColourEndSquare': 'false',
+			//'wlrSettingsScrollTo': 'false',
 			'lastPost': 'false',
 			'CSStextBox': ' ',
 			'WLRfirstRun': 'true',
@@ -1292,23 +1608,23 @@ try {
 
 			'</p>' + '<p id="lastReadTracker">' + '<input type="checkbox" name="lastReadT" id="lastReadT">' + '<label for="lastReadT">Turns WLR Last Read Tracker on or off.</label>' +
 
-			'</p>       ' + '<p id="numThreads2Track">' + '<select name="s_numThreads2Track" id="s_numThreads2Track">' + '<option value="300">300</option>' + '<option value="500">500</option>' + '<option value="1000">1000</option>' + '<option value="2000">2000</option>' + '<option value="5000">5000</option>' + '</select>     ' + '<label for="s_numThreads2Track">Number Of Threads To Track:</label>' +
+//			'</p>       ' + '<p id="numThreads2Track">' + '<select name="s_numThreads2Track" id="s_numThreads2Track">' + '<option value="300">300</option>' + '<option value="500">500</option>' + '<option value="1000">1000</option>' + '<option value="2000">2000</option>' + '<option value="5000">5000</option>' + '</select>     ' + '<label for="s_numThreads2Track">Number Of Threads To Track:</label>' +
 
-			'</p>     ' + '<p id="trackerPostBackgroundColour" class="needCpicker">' + '<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' + '<label for="trackerPostBackgroundC">Highlighted Posts Colour:</label>' + '</p>     ' + '<p id="disableTrackerPostBackgroundColour">' + '<input type="checkbox" name="disableTrackerPostBackgroundC" id="disableTrackerPostBackgroundC">' + '<label for="disableTrackerPostBackgroundC">Disable Highlighted Posts colouring</label>' +
+//			'</p>     ' + '<p id="trackerPostBackgroundColour" class="needCpicker">' + '<input type="text" name="trackerPostBackgroundC" id="trackerPostBackgroundC">' + '<label for="trackerPostBackgroundC">Highlighted Posts Colour:</label>' + '</p>     ' + '<p id="disableTrackerPostBackgroundColour">' + '<input type="checkbox" name="disableTrackerPostBackgroundC" id="disableTrackerPostBackgroundC">' + '<label for="disableTrackerPostBackgroundC">Disable Highlighted Posts colouring</label>' +
 
-			'</p>     ' + '<p id="newPostBackgroundColour" class="needCpicker">' + '<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' + '<label for="newPostBackgroundC">New Posts Thread Colour: </label>' + '</p>     ' + '<p id="disableNewPostBackgroundColour">' + '<input type="checkbox" name="disableNewPostBackgroundC" id="disableNewPostBackgroundC">' + '<label for="disableNewPostBackgroundC">Disable New Posts Thread colouring</label>' +
+//			'</p>     ' + '<p id="newPostBackgroundColour" class="needCpicker">' + '<input type="text" name="newPostBackgroundC" id="newPostBackgroundC">' + '<label for="newPostBackgroundC">New Posts Thread Colour: </label>' + '</p>     ' + '<p id="disableNewPostBackgroundColour">' + '<input type="checkbox" name="disableNewPostBackgroundC" id="disableNewPostBackgroundC">' + '<label for="disableNewPostBackgroundC">Disable New Posts Thread colouring</label>' +
 
-			'</p> ' + '<p id="noNewPostBackgroundColour" class="needCpicker">' + '<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' + '<label for="noNewPostBackgroundC">No New Posts Thread Colour: </label>' + '</p>       ' + '<p id="disableNoNewPostBackgroundColour">' + '<input type="checkbox" name="disableNoNewPostBackgroundC" id="disableNoNewPostBackgroundC">' + '<label for="disableNoNewPostBackgroundC">Disable No New Posts Thread colouring</label>' +
+//			'</p> ' + '<p id="noNewPostBackgroundColour" class="needCpicker">' + '<input type="text" name="noNewPostBackgroundC" id="noNewPostBackgroundC">' + '<label for="noNewPostBackgroundC">No New Posts Thread Colour: </label>' + '</p>       ' + '<p id="disableNoNewPostBackgroundColour">' + '<input type="checkbox" name="disableNoNewPostBackgroundC" id="disableNoNewPostBackgroundC">' + '<label for="disableNoNewPostBackgroundC">Disable No New Posts Thread colouring</label>' +
 
-			'</p>      ' + '<p id="onlyEndSquare">' + '<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' + '<label for="onlyEndSq">Only colour end square </label>' +
+//			'</p>      ' + '<p id="onlyEndSquare">' + '<input type="checkbox" name="onlyEndSq" id="onlyEndSq">' + '<label for="onlyEndSq">Only colour end square </label>' +
 
-			'</p> ' + '<p id="styleFlip">' + '<input type="checkbox" name="styleFl" id="styleFl">' + '<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
+//			'</p> ' + '<p id="styleFlip">' + '<input type="checkbox" name="styleFl" id="styleFl">' + '<label for="styleFl">Style flip - Colours unread posts in threads rather than read posts</label>' +
 
 			'</p>       ' + '<p id="dontTrackStickyThreads">' + '<input type="checkbox" name="dontTrackStickyT" id="dontTrackStickyT">' + '<label for="dontTrackStickyT">Don\'t track sticky threads</label>' +
 
-			'</p>       ' + '<p id="noColourEndSquare">' + '<input type="checkbox" name="noColourEndSq" id="noColourEndSq">' + '<label for="noColourEndSq">Don\'t colour end square</label>' +
+//			'</p>       ' + '<p id="noColourEndSquare">' + '<input type="checkbox" name="noColourEndSq" id="noColourEndSq">' + '<label for="noColourEndSq">Don\'t colour end square</label>' +
 
-			'</p> ' + '<p id="wlrSettingsScrollTo">' + '<input type="checkbox" name="wlrSettingsScroll2" id="wlrSettingsScroll2">' + '<label for="wlrSettingsScroll2">Scroll to anchor after page load</label>' +
+//			'</p> ' + '<p id="wlrSettingsScrollTo">' + '<input type="checkbox" name="wlrSettingsScroll2" id="wlrSettingsScroll2">' + '<label for="wlrSettingsScroll2">Scroll to anchor after page load</label>' +
 
 			'</p>   ' + '<p id="lastPost">' + '<input type="checkbox" name="lastPos" id="lastPos">' + '<label for="lastPos">Go to the last post in the thread after posting</label>' +
 
@@ -1570,423 +1886,6 @@ try {
 
 	}
 
-	var tracker = {
-
-		checkIfPrev: function (tn) {
-
-			var ofTheMac, checkForAmp;
-			var cLR = Whirlpool.get('lastRead0');
-
-			if (cLR) {
-         
-				if (cLR.match(tn)) {
-
-					var clrThis = cLR.split(',');
-					clrThis.pop();
-
-					for (var u = 0; u < clrThis.length; u++) {
-
-						checkForAmp = clrThis[u].split('t=')[1].split('&')[0].split('#')[0];
-
-						if (checkForAmp == tn) {
-
-							ofTheMac = clrThis[u];
-							break;
-
-						}
-
-					}
-
-				} else {
-
-					ofTheMac = 'newThread';
-
-				}
-
-			} else {
-
-				ofTheMac = 'newCookie';
-
-			}
-
-			return ofTheMac;
-s
-		},
-		threadsAndUserPage: function (durM) {
-
-			var stupidimages, stupidAtags, lazyFuckers = 'newread',
-				lazyFuckers2 = "nonewread";
-			//var durM = docs.dUrl.match('user');
-			var userLink = $('#left .userinfo dt a span').text();
-
-			if (docs.disableNewPostBackgroundColour == 'true') {
-				lazyFuckers = 'lazyFuckers';
-			}
-			if (docs.disableNoNewPostBackgroundColour == 'true') {
-				lazyFuckers2 = 'lazyFuckers';
-			}
-			if (durM === 'user') {
-				stupidimages = $("#threads a[href$='#bottom']");
-			} else {
-				stupidimages = $("a[title='Jump to last post']");
-			}
-			var ttttntd = server + 'png/gradient.png';
-
-			Whirlpool.css("#threads table tbody tr.newread td{background:" + decodeURIComponent(docs.newPostBackgroundColour) + " url(" + ttttntd + ") !important}" + "#threads table tbody tr.nonewread td{background:" + decodeURIComponent(docs.noNewPostBackgroundColour) + " url(" + ttttntd + ") !important}" + ".stopTrack{" + "border-bottom-color:grey;" + "border-bottom-style:dashed;" + "border-bottom-width:1px;" + "float:left;" + "margin-top:-5px;" + "margin-left:-14px;" + "opacity:0.3;" + "}			" + ".markRead{" + "float:right;" + "opacity:0.3;" + "border-bottom-color:grey;" + "border-bottom-style:dashed;" + "border-bottom-width:1px;" + "margin-top:-5px;" + "}" + ".wlrx{" + "	position:absolute;" + "	font-size:9px !important;" + "	width:95px;		" + "}");
-			$('tr.closed td').css({
-				'background': '#DDDDDD url(/img/forum/grad-ltgrey.gif)',
-				'border-bottom-color': '#CCCCCC'
-			});
-			$('tr.closed a.title').css({
-				'color': '#555555'
-			});
-
-			$('tr.sticky td').css({
-				'background': '#CCCCCC url(/img/forum/grad-grey.gif)',
-				'border-bottom-color': '#BBBBBB'
-			});
-			$('tr.sticky a.title').css({
-				'color': '#773300'
-			});
-
-
-			for (var z = 0; z < stupidimages.length; z++) {
-
-				var jThis = $(stupidimages[z]);
-				var checkClass = jThis.parent().parent()[0].className.match('sticky');
-
-				if (docs.dontTrackStickyThreads == 'true' && checkClass) {
-
-					continue;
-
-				} else {
-
-					var jumpThreadNum = stupidimages[z].href.split('t=')[1].split('&')[0].split('#')[0];
-					var tCheck = tracker.checkIfPrev(jumpThreadNum);
-					var lastPoster, postedInColour;
-					var postedin = false,
-						jThisParent = jThis.parent();
-
-					if (tCheck != 'newCookie' && tCheck != 'newThread') {
-
-						var cookArrThreadNum = tCheck.split('t=')[1].split('&')[0].split('#')[0];
-
-						if (durM === 'user') {
-
-							stupidAtags = Number(jThis.parent().prev().prev().text());
-							lastPoster = jThis.parent().prev().find('b').text();
-
-							if (jThisParent[0].style.backgroundColor == "rgb(226, 208, 187)") {
-
-								postedin = true;
-								postedInColour = "background-image: url(http://forums.whirlpool.net.au/img/forum/grad-morange.gif) !important; background-color: #E2C6A8 !important;";
-
-							}
-
-						} else {
-
-							stupidAtags = Number(jThis.parent().prev().prev().prev().prev().text());
-							lastPoster = jThis.parent().prev().find('a').text();
-
-							if (jThisParent[0].style.backgroundColor == "rgb(192, 180, 167)") {
-
-								postedin = true;
-								postedInColour = "background-color: #C2B7AA !important;";
-
-							}
-
-						}
-
-						if (jumpThreadNum == cookArrThreadNum) {
-
-							var tholdpare = jThisParent.parent();
-							var tCSp = tCheck.split('#r');
-							var tCheckSpl = tCSp[1];
-
-							if ((tCheckSpl < (stupidAtags + 1)) && (stupidAtags !== 0) && (lastPoster != userLink)) { //stupidAtags+1 cause the OP is not counted as a reply
-								if (docs.onlyEndSquare == 'true' && docs.disableNewPostBackgroundColour == 'false') {
-
-									lazyFuckers = 'lazyFuckers';
-									jThisParent.attr("style", "background:" + decodeURIComponent(docs.newPostBackgroundColour) + " url(" + ttttntd + ") !important");
-
-								}
-
-								var newpostsTitle = stupidAtags - tCheckSpl + ' new posts';
-								jThis.attr('href', '/forum-replies.cfm?' + tCSp[0] + '#r' + (Number(tCheckSpl) + 1)).attr('title', 'Jump to last read post');
-								//jThis.attr('href', '/forum-replies.cfm?'+tCheck).attr('title', 'Jump to last read post');
-								var sPrep = $('<span>');
-								var attC = jumpThreadNum + ',' + tCheck + ',' + stupidAtags;
-								sPrep.attr('attcheat', attC);
-								sPrep.attr('class', 'small wlrx');
-								sPrep.html('<a href="#" title="Stop Tracking Thread" class="stopTrack">S</a>');
-								sPrep.append('<a href="#" title="Mark All Posts As Read" class="markRead">M</a>');
-
-								tholdpare.attr("class", lazyFuckers).children('td.reps:first').attr('title', newpostsTitle).prepend(sPrep);
-
-							} else {
-								if (!tholdpare.hasClass("pointer")) {
-
-									if (docs.onlyEndSquare == 'true' && docs.disableNoNewPostBackgroundColour == 'false') {
-
-										lazyFuckers2 = 'lazyFuckers2';
-										jThisParent.attr("style", "background:" + decodeURIComponent(docs.noNewPostBackgroundColour) + " url(" + ttttntd + ") !important");
-
-									}
-
-									tholdpare.attr("class", lazyFuckers2).children('td.reps:first').prepend('<span attcheat="' + jumpThreadNum + ',' + stupidAtags + '" class="small wlrx">' + '<a href="#" title="Stop Tracking Thread" class="stopTrack">S</a>' + '</span>');
-
-								}
-
-							}
-							if (docs.onlyEndSquare == 'false' && docs.noColourEndSquare == 'true' && postedin) {
-
-								jThisParent.attr('style', postedInColour + ' !important;');
-
-							}
-
-						}
-
-					}
-
-				}
-
-			}
-
-			/***stop tracking thread***/
-
-			var awhof = $('.stopTrack, .markRead');
-
-			for (var d = 0; d < awhof.length; d++) {
-
-				awhof[d].addEventListener('click', function (e) {
-
-					e.preventDefault();
-
-					var mehThis = $(this);
-					var mehThisParent = mehThis.parent();
-					var aSP = mehThisParent.attr('attcheat').split(',');
-					var stRem = Whirlpool.get("lastRead0");
-					var wholeThreadNum = stRem.slice(stRem.indexOf(aSP[0]), stRem.indexOf(',', stRem.indexOf(aSP[0])));
-					var getLastTD = mehThisParent.parent().parent().children('td:last');
-					var wholeReplace, setReadAll;
-					var mehParent = mehThisParent.parent();
-					var pppA = mehParent.parent().find('a:last');
-					pppA.attr('href', '/forum-replies.cfm?t=' + aSP[0] + '&p=-1#bottom').attr('title', 'Jump to last post');
-
-					if (mehThis.hasClass("stopTrack")) {
-
-						wholeReplace = stRem.replace("t=" + wholeThreadNum + ",", "");
-						Whirlpool.set("lastRead0", wholeReplace);
-						getLastTD.removeAttr("style");
-						mehThisParent.parent().parent().removeClass("newread nonewread");
-						var grabMark = mehThis.next();
-						if (grabMark[0]) {
-							grabMark.remove();
-						}
-
-					} else {
-
-						var pageNo = '&p=1';
-						var getLastPage = mehParent.prev().prev().children('span.small').children('a:last');
-						//unsafeWindow.console.log('getLastPage[0]   '+getLastPage[0]);
-						if (getLastPage[0]) {
-							//unsafeWindow.console.log('if(getLastPage[0])   ');
-							pageNo = '&p=' + getLastPage[0].href.split('&p=')[1];
-						}
-						//unsafeWindow.console.log('pageNo   '+pageNo);
-						setReadAll = wholeThreadNum.split('&')[0].split('#r')[0] + pageNo + '#r' + ((Number(aSP[2]) + 1).toString()); //+1 cause the OP is not counted as a reply (loose type FTL!)
-						//unsafeWindow.console.log('setReadAll   '+setReadAll);
-						wholeReplace = stRem.replace(wholeThreadNum, setReadAll);
-						//unsafeWindow.console.log('wholeReplace   '+wholeReplace);
-						Whirlpool.set("lastRead0", wholeReplace);
-						getLastTD.attr("style", "background:" + decodeURIComponent(docs.noNewPostBackgroundColour) + " url(" + ttttntd + ") !important");
-						mehThisParent.parent().parent().removeClass("newread").attr("class", lazyFuckers2);
-
-					}
-
-					mehThis.remove();
-
-					return false;
-
-				},
-				false);
-
-			}
-
-
-		},
-		forumReplies: function () {
-			var lastReadLink;
-			var yOff = (docs.win.pageYOffset + docs.win.innerHeight);
-			var threadNumber = docs.threadNumber;
-			var nam = document.evaluate('//td[@class = "bodyuser"]/a[contains(@name, "r")][1][last()]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-         
-
-			var anchorSP = 0;
-
-			if (docs.dUrl.indexOf('#r') > -1 && docs.dUrl.indexOf('r=') < 0) {
-				anchorSP = docs.dUrl.split('#r')[1].split('&')[0];
-			}
-
-
-			var pagLiLast = $('#top_pagination li.last').prev().prev().attr('class');
-
-
-			if (Number(anchorSP) > Number(nam.snapshotItem(nam.snapshotLength - 1).name.split('r')[1]) && pagLiLast == 'current') {
-				window.location = nextpage.href + '#r' + anchorSP;
-			}
-
-
-			function hazRead(rN, eType) {
-
-				if (Number(docs.repliesA[docs.repliesA.length - 1].href.split('#r')[1]) <= Number(rN) && (eType != 'new') && (docs.disableTrackerPostBackgroundColour == 'false') && (docs.styleFlip == 'false')) {
-
-					Whirlpool.css(".bodypost{background:" + decodeURIComponent(docs.trackerPostBackgroundColour) + " !important}");
-					return 'noNew';
-
-				} else {
-
-					docs.repliesA.each(function (i) {
-
-						var t = $(this);
-						var h = t.attr('href');
-						var curtop = t.offset().top;
-
-						if (i === 0) {
-
-							lastReadLink = h;
-
-						}
-						if ((docs.styleFlip == 'false') && ((Number(h.slice(h.lastIndexOf('#r') + 2))) < Number(rN)) && (eType == 'load') && (docs.disableTrackerPostBackgroundColour == 'false')) {
-
-							$(this).parent().parent().css('background', decodeURIComponent(docs.trackerPostBackgroundColour));
-
-						} else if ((docs.styleFlip == 'true') && ((Number(h.slice(h.lastIndexOf('#r') + 2))) > Number(rN)) && (eType == 'load') && (docs.disableTrackerPostBackgroundColour == 'false')) {
-
-							$(this).parent().parent().css('background', decodeURIComponent(docs.trackerPostBackgroundColour));
-
-						}
-						if (curtop < yOff) {
-
-							lastReadLink = h;
-
-							if (docs.repliesA.index(t[0]) == (docs.repliesA.length - 1)) { //check if the last post is a deleted one
-								var containerTR = t.parent().parent().parent();
-								var rSplitArr = h.split('#r');
-								var currentAnchor = Number(rSplitArr[1]);
-								while (containerTR.next()[0] && !containerTR.next().attr('id') && !$('#top_pagination a[href*="&p="]')[0]) {
-									currentAnchor++;
-									containerTR = containerTR.next();
-								}
-
-								lastReadLink = rSplitArr[0] + '#r' + (currentAnchor.toString());
-
-							}
-
-						}
-
-					});
-
-					return 't=' + lastReadLink.split('t=')[1];
-
-				}
-
-			}
-
-			docs.win.addEventListener('scroll', function () {
-
-				if ((docs.win.pageYOffset + docs.win.innerHeight) > yOff) {
-
-					yOff = (docs.win.pageYOffset + docs.win.innerHeight);
-
-				}
-
-			},
-			false);
-
-			docs.win.addEventListener('load', function () {
-
-				var loadCheck = tracker.checkIfPrev(threadNumber);
-
-				if (loadCheck != 'newThread' && loadCheck != 'newCookie') {
-
-					hazRead(loadCheck.slice(loadCheck.lastIndexOf('#r') + 2), 'load');
-
-				}
-
-			},
-			false);
-
-
-			docs.win.addEventListener('beforeunload', function () {
-
-				var cP = tracker.checkIfPrev(threadNumber);
-				var returnedLink;
-
-				if (cP == 'newThread') {
-
-					returnedLink = hazRead(0, 'beforeunload');
-					var getLR2splitCheck = Whirlpool.get("lastRead0").split(',');
-
-					if (getLR2splitCheck.length < Number(docs.numThreads2Track)) {
-
-						Whirlpool.set("lastRead0", Whirlpool.get('lastRead0') + returnedLink + ",");
-
-					} else {
-
-						var sliceFirstTrack = Whirlpool.get("lastRead0");
-						var sliceFirstTrack2 = sliceFirstTrack.substr(sliceFirstTrack.indexOf(',') + 1) + returnedLink + ",";
-						Whirlpool.set("lastRead0", sliceFirstTrack2);
-
-					}
-
-				} else if (cP == 'newCookie') {
-
-					returnedLink = hazRead(0, 'beforeunload');
-					Whirlpool.set("lastRead0", returnedLink + ",");
-
-				} else {
-
-					var checkSplit = cP.slice(cP.lastIndexOf('#r') + 2);
-					returnedLink = hazRead(checkSplit, 'beforeunload');
-
-					if ((returnedLink != 'noNew') && (Number(returnedLink.slice(returnedLink.lastIndexOf('#r') + 2)) > Number(checkSplit))) {
-
-						var repREturned = Whirlpool.get("lastRead0").replace(cP, returnedLink);
-						Whirlpool.set("lastRead0", repREturned);
-
-					}
-
-				}
-
-			},
-			false);
-
-			if (docs.dUrl.indexOf('#') > -1 && docs.wlrSettingsScrollTo == 'true' && !docs.dUrl.match('bottom')) {
-
-				docs.win.setTimeout(function () {
-
-					var an = '#' + docs.dUrl.split('#')[1];
-					var a = $('a[href$=' + an + ']');
-					var avatarCheck = a.parent().parent().prev().prev().find('a:first').height();
-
-					if (avatarCheck > 30) {
-
-						$.scrollTo(a, 500, {
-							offset: -150
-						});
-
-					}
-
-				},
-				1000);
-
-			}
-
-		}
-
-
-	}
 	function quickQuote() {
 
 		var gottaPee, backImg, pReply = $('.foot_reply a');
@@ -2576,70 +2475,6 @@ s
 
 	}
    
-   
-   //utility function to make hiding posts easier
-   function hideIgnoredPost(trParent,uNum){
-      //do we want to hide completely?
-      if(docs.removeIgnoredUsers === 'true'){
-         //bye bye
-         trParent.hide();
-      }else{
-         //display the deleted message
-         var userName = trParent.find('.bu_name').text();
-         var postDate = trParent.find('.date').not('.edited').text().replace('posted ', '');
-         var rowId = trParent.attr('id');
-         trParent.replaceWith('<tr id="' + rowId + '"><td class="bodymore small" bgcolor="#e5e5e5">  User #' + uNum + ' &nbsp; <a href="/user/' + uNum + '" style="color: black;"><b>' + userName + '</b></a> </td> <td class="bodymore small" bgcolor="#eeeeee"> <i>This post was hidden by you. (Whirlpool Plus).</i> </td> <td class="bodymore small" bgcolor="#e5e5e5">' + postDate + '</td></tr>');
-      }
-   }
-   
-   
-	function userIgnore(trParent) {
-		var tdBodyUser = trParent.children('.bodyuser');
-		var uNum = trParent.find('a[href*="/user/"]').attr('href').split('/user/')[1];
-      
-      //add hide smiley (X)
-      if($('span[title="hide user"]',tdBodyUser).length == 0){
-         var hideUser = $('<span title="hide user" style="margin-right:5px;" class="voteitem">X</span>');
-         
-         if ($('.voteblock',tdBodyUser).length != 0) {
-            //normal forum
-            tdBodyUser.find('.voteblock').prepend(hideUser);
-         } else {
-            //in ItN, need to add voteblock
-            var voteblock = $('<div class="voteblock">');
-            voteblock.append(hideUser);
-            tdBodyUser.append(voteblock);
-         }
-         
-         hideUser.click(function () {
-            if (!docs.hiddenUsersArr.match(uNum)) {
-            
-               Whirlpool.set('hiddenUsersArr', Whirlpool.get('hiddenUsersArr') + '#' + uNum);
-               docs.hiddenUsersArr += '#' + uNum;
-               
-               //rehide ignored posts
-               docs.repliesTR.each(function () {
-                  userIgnore($(this));
-               });
-            }
-         });
-      }
-      
-
-      //check if this post is by a user we want to hide
-		if (docs.hiddenUsersArr.length) {
-			var hiddUsersArr = docs.hiddenUsersArr.split('#');
-         
-         if ($.inArray(uNum,hiddUsersArr) != -1) {
-            //hide this post
-            hideIgnoredPost(trParent,uNum);   
-         }
-         
-      }
-      
-      return false;
-	}
-   
 
    
 	var toggleSections = {
@@ -2902,9 +2737,6 @@ document.referrer.indexOf('?action=watched') == -1) {
 		extraThreadLinks();
 
 	} else if (fSecText && docs.dUrl.split(fSecText[0])[1].length) {
-		if (docs.lastReadTracker === 'true') {
-			tracker.threadsAndUserPage('threads');
-		}
 		if (docs.hideDRThreads === 'true') {
 			hideDelMov.delRem();
 		}
@@ -2914,9 +2746,6 @@ document.referrer.indexOf('?action=watched') == -1) {
 	} else if (docs.dUrl.indexOf('/user/') > -1) {
 		if (docs.recentActivityDays != '7') {
 			userpageDays();
-		}
-		if (docs.lastReadTracker === 'true') {
-			tracker.threadsAndUserPage('user');
 		}
 		whimSize();
 		if (docs.userpageInfoToggle === 'true') {
@@ -2947,11 +2776,6 @@ document.referrer.indexOf('?action=watched') == -1) {
 	}
 	if (docs.dUrl.indexOf('/forum/index.cfm?action=reply') > -1 && $('#breadcrumb').text().match('Greasemonkey')) {
 		Wp.notify('Found a bug? Report it using the <a href="http://code.google.com/p/whirlpool-plus/issues/list">issue tracker</a> as well as posting it.', false, 9000);
-	}
-	if (docs.dUrl.match('forum-replies')) {
-		if (docs.lastReadTracker === 'true') {
-			tracker.forumReplies();
-		}
 	}
 
 	// ! Basic fix for anchors
