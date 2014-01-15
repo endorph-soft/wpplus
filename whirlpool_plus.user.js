@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.5
+// @version       4.2.6
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -148,12 +148,13 @@
  changes - 4.2.3 - Fixed gap under logo with floating sidebar
  changes - 4.2.4 - Removes the troublesome (3 smiley
  changes - 4.2.5 - Fixes auto preview
+ changes - 4.2.6 - New Avatar Server
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.5';
+	var version = '4.2.6';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -1367,12 +1368,12 @@ try {
 	function avatars() {
 		if (docs.staticAvatars == 'true') {
 			$('head').append('<link rel="stylesheet" type="text/css" href="' + server + 'css/avatars.css">');
-			$('head').append('<link rel="stylesheet" type="text/css" href="http://goodbyepolar.com/wpavatars/avatar.css">');
+			$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/avatar.css">');
 		}
 
 		if (docs.animatedAvatars == 'true') {
 			$('head').append('<link rel="stylesheet" type="text/css" href="' + server + 'css/animatedavatars.css">');
-			$('head').append('<link rel="stylesheet" type="text/css" href="http://goodbyepolar.com/wpavatars/animatedavatar.css">');
+			$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/animatedavatar.css">');
 		}
 	}
 
@@ -1508,7 +1509,8 @@ try {
 		},
 		buttons: function (id, w, c) {
 
-			return '<div id="' + id + '" style="text-align:center;padding-bottom:10px;width:' + w + '">' + '<button type="button" class="' + c + '" title="Bold WhirlCode" accesskey="b" id="wc_whirlBold" >Bold</button>' + '<button type="button" class="' + c + '" title="Italic WhirlCode" accesskey="i" id="wc_whirlItalic" >Italic</button>' + '<button type="button" class="' + c + '" title="SingleQuote WhirlCode" accesskey="t" id="wc_whirlSingleQuote" >\'quote\'</button>' + '<button type="button" class="' + c + '" title="DoubleQuote WhirlCode" accesskey="q" id="wc_whirlDoubleQuote" >"quote"</button>' + '<button type="button" class="' + c + '" title="Quote WhirlCode" accesskey="h" id="wc_whirlQuote" >who</button>' + '<button type="button" class="' + c + '" title="Superscript WhirlCode" accesskey="p" id="wc_whirlSuperscript" >Super</button>' + '<button type="button" class="' + c + '" title="Subscript WhirlCode" accesskey="\\" id="wc_whirlSubscript" >Sub</button>' + '<button type="button" class="' + c + '" title="Strike WhirlCode" accesskey="k" id="wc_whirlStrike" >Strike</button>' + '<button type="button" class="' + c + '" title="Courier WhirlCode" accesskey="c" id="wc_whirlCourier" >Courier</button>' + '<button type="button" class="' + c + '" title="Small WhirlCode" accesskey="m" id="wc_whirlSmall" >Small</button>' + '<button type="button" class="' + c + '" title="Grey WhirlCode" accesskey="r" id="wc_whirlGrey" >Grey</button>' + '<button type="button" class="' + c + '" title="Serif WhirlCode" accesskey="s" id="wc_whirlSerif" >Serif</button>' + '<button type="button" class="' + c + '" title="Google WhirlCode" accesskey="g" id="wc_whirlGoogle" >Google</button>' + '<button type="button" class="' + c + '" title="Escape WhirlCode" accesskey="e" id="wc_whirlEscape" >Esc</button>' + '<button type="button" class="' + c + '" title="Wiki WhirlCode" accesskey="w" id="wc_whirlWiki" >Wiki</button>' + '<button type="button" class="' + c + '" title="Spoiler WhirlCode" accesskey="o" id="wc_whirlSpoil" >Spoiler</button>' + '<button type="button" class="' + c + '" title="URL Link" accesskey="u" id="wc_whirlurl" >URL</button>' + '<button type="button" class="' + c + '" title="Link" accesskey="l" id="wc_whirllink" >Link</button>' + '</div>';
+			return '<div id="' + id + '" style="text-align:center;padding-bottom:10px;width:' + w + '">' + '<button type="button" class="' + c + '" title="Bold WhirlCode" accesskey="b" id="wc_whirlBold" >Bold</button>' + '<button type="button" class="' + c + '" title="Italic WhirlCode" accesskey="i" id="wc_whirlItalic" >Italic</button>' + '<button type="button" class="' + c + '" title="SingleQuote WhirlCode" accesskey="t" id="wc_whirlSingleQuote" >\'quote\'</button>' + '<button type="button" class="' + c + '" title="DoubleQuote WhirlCode" accesskey="q" id="wc_whirlDoubleQuote" >"quote"</button>' + '<button type="button" class="' + c + '" title="Quote WhirlCode" accesskey="h" id="wc_whirlQuote" >who</button>' + '<button type="button" class="' + c + '" title="Superscript WhirlCode" accesskey="p" id="wc_whirlSuperscript" >Super</button>' + '<button type="button" class="' + c + '" title="Subscript WhirlCode" accesskey="\\" id="wc_whirlSubscript" >Sub</button>' + '<button type="button" class="' + c + '" title="Strike WhirlCode" accesskey="k" id="wc_whirlStrike" >Strike</button>' + '<button type="button" class="' + c + '" title="Courier WhirlCode" accesskey="c" id="wc_whirlCourier" >Courier</button>' + '<button type="button" class="' + c + '" title="Small WhirlCode" accesskey="m" id="wc_whirlSmall" >Small</button>' + '<button type="button" class="' + c + '" title="Grey WhirlCode" accesskey="r" id="wc_whirlGrey" >Grey</button>' + '<button type="button" class="' + c + '" title="Serif WhirlCode" accesskey="s" id="wc_whirlSerif" >Serif</button>' + '<button type="button" class="' + c + '" title="Google WhirlCode" accesskey="g" id="wc_whirlGoogle" >Google</button>' + '<button type="button" class="' + c + '" title="Escape WhirlCode" accesskey="e" id="wc_whirlEscape" >Esc</button>' + '<button type="button" class="' + c + '" title="Wiki WhirlCode" accesskey="w" id="wc_whirlWiki" >Wiki</button>' + '<button type="button" class="' + c + '" title="Spoiler WhirlCode" accesskey="o" id="wc_whirlSpoil" >Spoiler</button>' + '<button type="button" class="' + c + '" title="URL Link" accesskey="u" id="wc_whirlurl" >URL</button>' + '<button type="button" class="' + c + '" title="Link" accesskey="l" id="wc_whirllink" >Link</button>' + 
+			'</div>';
 
 		},
 		buttonEvents: function (c, tAr, whirlCode) {
