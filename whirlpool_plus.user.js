@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.11
+// @version       4.4.12
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -99,6 +99,7 @@
  changes - 4.4.9 - More fixes for new design
  changes - 4.4.10 - Penalty Box highlight, WLR fixes, other fixes for the new design
  changes - 4.4.11 - Spinner menu changes, Theme fixes
+ changes - 4.4.12 - New Teal theme, smiley fix
  ***************/
 // ==/Changes==
 
@@ -110,7 +111,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.11';
+	var version = '4.4.12';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -810,7 +811,7 @@ try {
 			'<3':Whirlpool.image('emoticon_kiss'),
 			':X': Whirlpool.image('emoticon_lips'),
 			':-X': Whirlpool.image('emoticon_lips'),
-			':shout': Whirlpool.image('emoticon_shout'),
+			':shout:': Whirlpool.image('emoticon_shout'),
 			':snore:': Whirlpool.image('emoticon_sleep'),
 			':)': Whirlpool.image('emoticon_smile'),
 			':-)': Whirlpool.image('emoticon_smile'),
@@ -2427,6 +2428,7 @@ try {
 								'<select name="s_customtheme" id="s_customtheme">' +
 									'<option value="">Default (by Simon Wright)</option>' +
 									'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
+									'<option value="http://www.members.optusnet.com.au/kev.nat/teal/wp-teal.css">WP Teal (by =CHRIS=)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/WP-BLACK.css">WP Black (by =CHRIS=)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
@@ -3999,8 +4001,9 @@ document.referrer.indexOf('?action=watched') == -1) {
 		if (Whirlpool.get('penaltyBoxBackground') === "true") {
 			Whirlpool.css('.penalty_box {background-image:url(' + Whirlpool.image('light_gradient') + ')!important;background-repeat:repeat !important; background-color: #fff !important; } ');
 			
-			$('#replies .replyuser-inner .usergroup').each(function(){			
-				if($(this).text().indexOf('penalty box') > 0){
+			$('#replies .replyuser-inner .usergroup').each(function(){	
+				var userGroup = $(this).text();
+				if(userGroup.indexOf('penalty box') > 0 || userGroup.indexOf('Banned') > 0){
 					$(this).parents('.replyuser').addClass('penalty_box');
 				}
 			});
