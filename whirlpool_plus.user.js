@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.2.9
+// @version       4.3.0
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
 // @require       http://wpplus.tristanroberts.name/js/lang-sql.js
-// @require	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=419
+// @require	  	  http://wpplus.tristanroberts.name/js/jqdnr.pjs?version=419
 // @include       http://forums.whirlpool.net.au/*
 // @include       http://bc.whirlpool.net.au/*
 // @include       http://whirlpool.net.au/*
@@ -151,12 +151,19 @@
  changes - 4.2.7 - Fixed auto updater, changed smilies, change recent activity days, tidied up settings box
  changes - 4.2.8 - Only load inline images once per page, tweaks to smilies code, removed redundant code, identify WP+ alerts better to end user
  changes - 4.2.9 - Fixes for AJAX quick reply, reduced avatar css size, scroll to anchor on WLR page load, fixed bug with ignore user
+ changes - 4.3.0 - Chrome Compatability (with TamperMonkey), made avatars links again
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.2.9';
+	if(typeof $.browser['mozilla'] != 'undefined'){
+		var notFirefox = false;
+	}else{
+		var notFirefox = true;
+	}
+
+	var version = '4.3.0';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -167,11 +174,11 @@ try {
 		 */
 		'url': document.location.toString(),
 		/**
-       The current thread number
-       @var (string or false)
+		 The current thread number
+		 @var (string or false)
 		 @since 4.1.0
-      */
-      'threadNumber' : (typeof unsafeWindow.thisThreadID != 'undefined') ? (unsafeWindow.thisThreadID) : (false),
+		 */
+        'threadNumber' : (typeof unsafeWindow.thisThreadID != 'undefined') ? (unsafeWindow.thisThreadID) : (false),
 		/**
 		 Returns the stored value.
 		 @param	name	(string) The name of the stored value.
@@ -179,11 +186,25 @@ try {
 		 @see	Whirlpool.set()
 		 */
 		'get': function (name) {
-			var value = GM_getValue(name, false);
-			return (value);
+			if(notFirefox){
+				var value = unsafeWindow.localStorage.getItem(name);
+				
+				if(value == null){
+					return false;
+				}
+				
+				return (value);
+			}else{		
+				var value = GM_getValue(name, false);
+				return (value);
+			}
 		},
 		'set': function (name, value) {
-			GM_setValue(name, value);
+			if(notFirefox){
+				unsafeWindow.localStorage.setItem(name, value);
+			}else{
+				GM_setValue(name, value);
+			}
 		},
 		/**
 		 Returns a list of stored values.
@@ -420,44 +441,48 @@ try {
 	 @runson		ALL
 	 */
 
-	if (Whirlpool.get("smartUpdater") == "true" && (Whirlpool.url.match("user") || Whirlpool.url.match("/forum/"))) {
+	// Don't run in chrome- tampermonkey has an inbuilt updater
+	if(!notFirefox){
+		if (Whirlpool.get("smartUpdater") == "true" && (Whirlpool.url.match("user") || Whirlpool.url.match("/forum/"))) {
 
-		var date = new Date();
-		var currentTime = (date.getTime() - date.getMilliseconds()) / 1000;
+			var date = new Date();
+			var currentTime = (date.getTime() - date.getMilliseconds()) / 1000;
 
-		if (Whirlpool.get('updaterInterval') === false) {
-			Whirlpool.set('updaterInterval', 30);
-		}
+			if (Whirlpool.get('updaterInterval') === false) {
+				Whirlpool.set('updaterInterval', 30);
+			}
 
-		var next = Whirlpool.get('updaterInterval');
+			var next = Whirlpool.get('updaterInterval');
 
-		if (Whirlpool.get('updaterChecked') === false) {
-			Whirlpool.set('updaterChecked', currentTime);
-		}
+			if (Whirlpool.get('updaterChecked') === false) {
+				Whirlpool.set('updaterChecked', currentTime);
+			}
 
-		var last = Whirlpool.get('updaterChecked');
+			var last = Whirlpool.get('updaterChecked');
 
-		var next_seconds = next * 60;
+			var next_seconds = next * 60;
 
-		if (currentTime > last + next_seconds) {
-			var url = server + '/txt/updater.txt';
-			var mine = version.replace(/\./g, '');
+			if (currentTime > last + next_seconds) {
+				
+				var url = server + '/txt/updater.txt';
+				var mine = version.replace(/\./g, '');
+				
+				Whirlpool.HttpRequest(url, function (data) {
+					var dataText = data.responseText;
 
-			Whirlpool.HttpRequest(url, function (data) {
-				var dataText = data.responseText;
+					if (mine < dataText) {
+						Whirlpool.set('updaterInterval', 30);
+						Whirlpool.notify('A new version of WP+ is available.', true, 50000);
+						Whirlpool.set('updaterChecked', currentTime);
+						GM_openInTab('http://userscripts.org/scripts/source/85217.user.js');
+					} else if (next * 2 < 7690) {
+						Whirlpool.set('updaterInterval', next * 2);
+						Whirlpool.set('updaterChecked', currentTime);
+					}
 
-				if (mine < dataText) {
-					Whirlpool.set('updaterInterval', 30);
-					Whirlpool.notify('A new version of WP+ is available.', true, 50000);
-					Whirlpool.set('updaterChecked', currentTime);
-					GM_openInTab('http://userscripts.org/scripts/source/85217.user.js');
-				} else if (next * 2 < 7690) {
-					Whirlpool.set('updaterInterval', next * 2);
-					Whirlpool.set('updaterChecked', currentTime);
-				}
+				});
 
-			});
-
+			}
 		}
 	}
 
@@ -939,7 +964,7 @@ try {
 				$('head').append('<link rel="stylesheet" type="text/css" href="http://wpplus.endorph.net/avatars/animatedavatar_lite.css">');
 			}
 			
-			Whirlpool.css('.wpp_avatar_link { margin:0 auto; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;}');
+			Whirlpool.css('.wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;}');
 		}
    }
 	
@@ -955,12 +980,13 @@ try {
 		},		
 		
 		'loadData' : function(){
-			this.trackerData = JSON.parse(Whirlpool.get('whirlpoolLastReadData'));
-			
-			if(this.trackerData == false){
-				this.trackerData = {};
-			}
-			
+			var rawData = Whirlpool.get('whirlpoolLastReadData');
+            
+            if(rawData){
+                this.trackerData = JSON.parse(rawData);
+            }else{
+                this.trackerData = {};
+            }			
 		},
 		
 		'saveData' : function(){
@@ -978,11 +1004,12 @@ try {
 		
 		'loadThreadData' : function(threadNumber){
 			this.loadData();
-			if(this.trackerData[threadNumber]){
-				return this.trackerData[threadNumber];
-			}else{
-				return false;
-			}
+			
+			if(this.trackerData && threadNumber in this.trackerData){
+                return this.trackerData[threadNumber];
+            }else{
+                return false;
+            }
 		},
 		
 		'importOldData' : function(){
@@ -1319,7 +1346,7 @@ try {
 			'smartUpdater': 'true',
 			'installedScriptVersion': version,
 			'lastScriptVersionCheck': '1232062510821',
-			'dynamicMenuSystem': 'spinner',
+			'dynamicMenuSystem': 'none',
 			'quickReplybox': 'true',
 			'quickReplyboxCols': '100',
 			'quickReplyboxRows': '10',
@@ -1910,14 +1937,16 @@ try {
 					'<p id="reset_aura_vote">' +
 						'<input type="checkbox" name="reset_aura_vote" id="reset_aura_vote_checkbox">' +
 						'<label for="reset_aura_vote_checkbox">Add a reset aura smiley</label>' +
-					'</p> ' +
+					'</p> ';
 					
-					'<p id="userNotes">' +
-						'<input type="checkbox" name="userNotesBox" id="userNotesBox">' +
-						'<label for="userNotesBox">User Notes</label>' +
-					'</p> ' +
+					if(!notFirefox){
+						settingsHTML = settingsHTML + '<p id="userNotes">' +
+							'<input type="checkbox" name="userNotesBox" id="userNotesBox">' +
+							'<label for="userNotesBox">User Notes</label>' +
+						'</p> ';
+					}
 					
-					'<p id="watchedThreadsAlert">' +
+					settingsHTML = settingsHTML + '<p id="watchedThreadsAlert">' +
 						'<select name="s_threadalert" id="s_threadAlert">' +
 							'<option value="default">None</option>' +
 							'<option value="watched">Go to watched threads</option>' +
@@ -3080,7 +3109,7 @@ document.referrer.indexOf('?action=watched') == -1) {
 			if (docs.ignoreUser === 'true') {
 				userIgnore($(this));
 			}
-			if (docs.userNotes === 'true') {
+			if (docs.userNotes === 'true' && !notFirefox) {
 				userNotes($(this), i);
 			}
 		});
