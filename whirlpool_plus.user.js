@@ -2,12 +2,12 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.14
+// @version       4.4.15
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
 // @require       http://wpplus.endorph.net/resources/js/lang-sql.js
-// @require       http://wpplus.endorph.net/resources/js/jqdnr.pjs?version=419
+// @require       http://wpplus.endorph.net/resources/js/jqdnr.pjs
 // @require       http://wpplus.endorph.net/resources/js/tea.js
 // @include       http://forums.whirlpool.net.au/*
 // @include       https://forums.whirlpool.net.au/*
@@ -74,6 +74,8 @@
 // @resource	  red_note			http://wpplus.endorph.net/resources/png/rednote.png
 // @resource	  check				http://wpplus.endorph.net/resources/png/check.png
 // @resource	  cross				http://wpplus.endorph.net/resources/png/cross.png
+// @resource	  oembedcss			http://wpplus.endorph.net/resources/css/jquery.oembed.css
+// @resource	  oembedjs			http://wpplus.endorph.net/resources/js/jquery.oembed.js
 // ==/UserScript==
 // Some icons from http://www.pinvoke.com/
 // ==Changes==
@@ -104,6 +106,7 @@
  changes - 4.4.12 - New Teal theme, smiley fix
  changes - 4.4.13 - Hide forums fix, Auto load WLR colours on theme change, typo correction
  changes - 4.4.14 - Temp disable tracker, rework emoticons, add emoticon buttons to quick reply (and preview), fix avatars in whims
+ changes - 4.4.15 - Changed Youtube embed to more general oEmbed support
  ***************/
 // ==/Changes==
 
@@ -115,7 +118,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.14';
+	var version = '4.4.15';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -1039,6 +1042,45 @@ try {
 		$('head').append('<style type="text/css">*{text-shadow:none!important;}</style>');
 	}
 	
+	/* oEmbed Links */
+	
+	//Migrate old settings
+	if(Whirlpool.get('inlineVideos',false) !== false){
+		if(Whirlpool.get('inlineVideos') == 'true'){
+			Whirlpool.set('oembed','true');
+			Whirlpool.remove('inlineVideos');
+		}else{
+			Whirlpool.set('oembed','false');
+			Whirlpool.remove('inlineVideos');
+		}
+	}
+	
+	if (Whirlpool.get( "oembed" ) == 'true' && Whirlpool.url.match("forum-replies.cfm")) {
+		Whirlpool.css(GM_getResourceText('oembedcss'));
+
+		//From http://stackoverflow.com/questions/2303147/injecting-js-functions-into-the-page-from-a-greasemonkey-script-on-chrome
+		var injectOEmbed = unsafeWindow.document.createElement('script');
+		injectOEmbed.appendChild(unsafeWindow.document.createTextNode('function injectOEmbed(){ '+ GM_getResourceText('oembedjs') +'}'));
+		unsafeWindow.document.head.appendChild(injectOEmbed);
+		
+		unsafeWindow.injectOEmbed();
+		
+		try{
+			var matchingRegex = new RegExp(decodeURIComponent(Whirlpool.get("oembed_types").replace('.','\.')));
+			
+			unsafeWindow.$('#replies .replytext a').not('.internal').each(function(){
+				var link = unsafeWindow.$(this);
+				
+				if(matchingRegex.test(link.prop('href'))){
+					link.oembed(null,{ });
+				}
+			});
+		}catch(error){
+			Whirlpool.notify('oEmbed content types is invalid! (WP+ Settings > Posts > Display and Formatting Options)',false,10000);
+		}
+		
+	}
+	
 	if (Whirlpool.url.match("forum-replies.cfm")) {
 		var extensions = "bmp|gif|jpg|png".split("|");
 		var width = '100%'; //$(".bodytext").css("width").toString( );
@@ -1057,7 +1099,7 @@ try {
 				}
 			}
 			
-			if ( Whirlpool.get( "inlineVideos" ) == "true" ) {
+			/*if ( Whirlpool.get( "inlineVideos" ) == "true" ) {
 				if ( link.indexOf( "youtube.com/watch" ) > -1 && displayed[link] != true ) {
 					var id = link.split("v=")[1];
 					if(typeof id != 'undefined'){
@@ -1067,7 +1109,7 @@ try {
 					$(this).before(code);
 					displayed[link] = true;
 				}
-			}
+			}*/
 		} );
 		
 		$(".wpx_img").css("max-width", width );
@@ -2057,7 +2099,7 @@ try {
 			'whIMMessageTextAreaRows': '10',
 			//'smilies': 'true',
 			'inlineImages': 'true',
-			'inlineVideos': 'true',
+			//'inlineVideos': 'true',
 			'emoticonsBlue': 'true',
 			'ignoreUser': 'false',
 			'removeIgnoredUsers' : 'false',
@@ -2120,6 +2162,8 @@ try {
 			'syncEncKey' : '',
 			'tempDisableTracker' : 'true',
 			'quickReplyboxSmilies' : 'false',
+			'oembed' : 'true',
+			'oembed_types' : 'youtu|vimeo|twitter',
 		};
 
 		for (var k in gmDefaults) {
@@ -2894,17 +2938,42 @@ try {
 								' <label for="smileb">Use blue smilies</label>' +
 							'</p>' +
 							
+							'<p id="oembed">' +
+								'<input type="checkbox" name="oembed_check" id="oembed_check">' +
+								' <label for="oembed_check">Enable oEmbed</label>' +
+								' <span class="settingDesc">Embeds many common content types (see below)</span>'+
+							'</p>  ' +
+							
+							'<p>' +
+								'oEmbed allows many common types of content to be embedded within posts. To do this, it searches for urls that ' +
+								' match the expression below. If the service is able to embed this content, it will attempt to do so.' +
+								'<br /> In order to create a custom expression, enter parts of each url that you want to match, seperated by a ' +
+								' pipe (|) symbol. For example, to match youtube.com, youtu.be and vimeo.com links, try "youtube.com|youtu.be|vimeo.com". ' +
+								' You could also use "youtu|vimeo" (the first portion will match both youtube links). ' +
+								'<br /> Many services are supported- for example video (youtube, vimeo), photo (flickr, photobucket), audio (soundcloud), and text (twitter, wikipedia). ' +
+								'For a full list, see <a href="https://github.com/starfishmod/jquery-oembed-all#current-3rd-party-sources-include">this page</a>. ' +
+								'To match everything, try "[a-z]".' +
+								
+								'<br /> Note: the service also supports url-shortened links like bit.ly, tinyurl.com etc' +
+							'</p>  ' +
+							
+							'<p id="oembed_types">' +
+								'<input type="text" name="oembed_types_text" id="oembed_check">' +
+								' <label for="oembed_types_text">oEmbed Content Types</label>' +
+								' <span class="settingDesc">Enter portions of URLs to match, separated with the | (pipe) character</span>'+
+							'</p>  ' +
+							
 							'<p id="inlineImages">' +
 								'<input type="checkbox" name="inlineI" id="inlineI">' +
 								' <label for="inlineI">Inline Images</label>' +
 								' <span class="settingDesc">Converts image links into images</span>'+
 							'</p>' +
 							
-							'<p id="inlineVideos">' +
+							/*'<p id="inlineVideos">' +
 								'<input type="checkbox" name="inlineV" id="inlineV">' +
 								' <label for="inlineV">Inline Videos</label>' +
 								' <span class="settingDesc">Converts Youtube links into videos</span>'+
-							'</p>  ' +
+							'</p>  ' +*/
 							
 							'<p id="inlinePages">' +
 								'<input type="checkbox" name="inlinePages" id="inlinePages">' +
