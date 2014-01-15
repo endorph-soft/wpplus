@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.5
+// @version       4.1.6
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -138,12 +138,13 @@
  changes - 4.1.3 - Zapped FF4 + GM 0.9.0 bugs (thanks to jaromir for debugging help)
  changes - 4.1.4 - Added some parseInt calls to hopefully fix tracking, added "mark as read", changed tracker to always replace link on tracked threads.
  changes - 4.1.5 - Don't highlight deleted/moved threads, move the S and M links further apart, remove user notes until a replacement for eval can be found
+ changes - 4.1.6 - Add mark as read link for those using "Only colour end square"
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.1.5';
+	var version = '4.1.6';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -1053,7 +1054,8 @@ try {
 						//change the link
 						thread.find('.goend > a').attr('href',link).attr('title','Jump to last read post');
 						
-						
+						//add the controls
+						thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
 						
 						if(threadData['threadReplyNumber'] < numberOfReplies){
 							//there are unread posts
@@ -1065,6 +1067,10 @@ try {
 								thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
 							}
 							
+							if(Whirlpool.url.match('/forum/')){
+								thread.find('.whirlpoolLastRead_controls').append('<a href="#" class="whirlpoolLastRead_markAsRead" title="Mark this thread as read">M</a>');
+							}
+							
 						}else{
 							//all posts have been read
 							if(Whirlpool.get('onlyEndSquare') == 'true'){
@@ -1074,12 +1080,9 @@ try {
 							}
 						}
 						
-						//add the controls
-						thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
+
 						
-						if(Whirlpool.url.match('/forum/')){
-							thread.find('.whirlpoolLastRead_unreadPosts .whirlpoolLastRead_controls').append('<a href="#" class="whirlpoolLastRead_markAsRead" title="Mark this thread as read">M</a>');
-						}
+						
 						
 						thread.find('.whirlpoolLastRead_stopTracking').click(function(){
 							whirlpoolLastRead.stopTracking(threadNumber);
@@ -1090,7 +1093,7 @@ try {
 						
 						thread.find('.whirlpoolLastRead_markAsRead').click(function(){					
 							whirlpoolLastRead.markAsRead(threadNumber);
-							thread.children().removeClass('whirlpoolLastRead_unreadPosts').addClass('whirlpoolLastRead_noUnreadPosts');
+							thread.children('.whirlpoolLastRead_unreadPosts').removeClass('whirlpoolLastRead_unreadPosts').addClass('whirlpoolLastRead_noUnreadPosts');
 							thread.find('.whirlpoolLastRead_controls .whirlpoolLastRead_markAsRead').remove();
 							return false;
 						});
