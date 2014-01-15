@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.4.1
+// @version       4.4.2
 // @require       http://wpplus.endorph.net/resources/js/jquery-1.7.1.min.js
 // @require       http://wpplus.endorph.net/resources/js/prettify.js
 // @require       http://wpplus.endorph.net/resources/js/lang-css.js
@@ -76,6 +76,7 @@
  changes - 4.3.10 - Move all resources to endorph.net (tristanroberts.name is 404ing right now)
  changes - 4.4.0 - Added Synchronisation of WLR data, Updated jQuery (1.4.2 => 1.7.1), changed "attr" methods to "prop". Lots of small bug fixes. Incorportated Yansky's Thread Search Date Order script. Code cleanup. New settings dialog
  changes - 4.4.1 - Fixes some FF3 bugs, local storage of some resources, settings dialog auto-collapse.
+ changes - 4.4.2 - More jquery related bugs, new location for WP Black Theme
  ***************/
 // ==/Changes==
 
@@ -87,7 +88,7 @@ try {
 		var notFirefox = true;
 	}
 
-	var version = '4.4.1';
+	var version = '4.4.2';
 
 	var server = "http://wpplus.endorph.net/resources/";
 
@@ -1020,7 +1021,7 @@ try {
 		$( '.bodypost a[href^="/forum/index.cfm?action=edit"]' ).after( "<br><a class='wpp-edit'>(quick edit)</a>" );
 		$( ".wpp-edit" ).css("cursor", "pointer" );
 		
-		$( ".wpp-edit" ).on( "click", function( e ) {
+		$('#replies').on('click','.wpp-edit', function( e ) {
 			$(this).hide( );
 			$(this).after( "<a class='wpp-c-edit'>(cancel)</a>" );
 			$( ".wpp-c-edit" ).css("cursor", "pointer" );
@@ -1298,7 +1299,7 @@ try {
 				}
 			});
 			
-			$(window).unload(function(){
+			$(window).bind('beforeunload',function(){
 				//need to find the last read reply
 				var replies = $('div#replies > table > tbody > tr').not('#previewTR').not(':hidden');
 				
@@ -1327,13 +1328,15 @@ try {
 						var overallReplyNumber = $(replyNumberLinks[1]).prop('name').split('r')[1];
 						
 						var currentData = whirlpoolLastRead.loadThreadData(Whirlpool.threadNumber);
-						
+												
 						if(currentData == false || parseInt(currentData['t']) <= threadReplyNumber){
 							whirlpoolLastRead.saveThreadData(Whirlpool.threadNumber,threadReplyNumber,overallReplyNumber);
 						}
+						
+						
+						
 					}
-				}
-				
+				}				
 			});
 		},
 		
@@ -2360,7 +2363,7 @@ try {
 								'<select name="s_customtheme" id="s_customtheme">' +
 									'<option value="">Default (by Simon Wright)</option>' +
 									'<option value="@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);">WP Blue (by Foonly)</option>' +
-									'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/1/WP%20BLACK.css">WP Black (by =CHRIS=)</option>' +
+									'<option value="http://www.members.optusnet.com.au/kev.nat/Whirlpool%20Noir/WP-BLACK.css">WP Black (by =CHRIS=)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/green/WP-GREEN.css">WP Green (by =CHRIS=)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/wood/WP-WOOD.css">WP Wood (by =CHRIS=)</option>' +
 									'<option value="http://www.members.optusnet.com.au/kev.nat/purple/WP-PURPLE.css">WP Purple (by =CHRIS=)</option>' +
