@@ -2,7 +2,7 @@
 // @name          Whirlpool Plus
 // @namespace     WhirlpoolPlus
 // @description   Adds a suite of extra optional features to the Whirlpool forums.
-// @version       4.1.7
+// @version       4.1.8
 // @require       http://wpplus.tristanroberts.name/js/jquery-gm.js
 // @require       http://wpplus.tristanroberts.name/js/prettify.js
 // @require       http://wpplus.tristanroberts.name/js/lang-css.js
@@ -140,12 +140,13 @@
  changes - 4.1.5 - Don't highlight deleted/moved threads, move the S and M links further apart, remove user notes until a replacement for eval can be found
  changes - 4.1.6 - Add mark as read link for those using "Only colour end square"
  changes - 4.1.7 - Readded user notes (Please update to Greasemonkey 0.9.1 if you are running 0.9.0). Changed position of M and S links
+ changes - 4.1.8 - Fixed issue with FF4b11, Added a "reset vote" aura option
  ***************/
 // ==/Changes==
 
 try {
 
-	var version = '4.1.7';
+	var version = '4.1.8';
 
 	var server = "http://tristanroberts.name/projects/wp-plus/";
 
@@ -264,7 +265,7 @@ try {
 
 	if (!Whirlpool.url.match('alert')) {
 		user.name = $('.userinfo dt:first').text();
-		user.id = user.name.split('#')[1];
+		user.id = $('.userinfo dd:first').text().split('#')[1];
 	}
 
 	var Wp = Whirlpool;
@@ -365,17 +366,17 @@ try {
 	if (Whirlpool.get("inlinePages") == "true" && Whirlpool.url.match("forum-replies.cfm")) {
 		$('.external').after('<sup style="cursor:pointer;" class="quick">(preview)</sup>');
 		$('.quick').live('click', function (e) {
-			var class = ($(this).attr('id') != '') ? $(this).attr('id') : 'quick' + Math.floor(Math.random() * 101);
-			if ($('.' + class).hasClass(class)) {
+			var previewClass = ($(this).attr('id') != '') ? $(this).attr('id') : 'quick' + Math.floor(Math.random() * 101);
+			if ($('.' + previewClass).hasClass(previewClass)) {
 				$(this).text('(preview)');
-				$('.' + class).parent().parent().remove();
+				$('.' + previewClass).parent().parent().remove();
 			} else {
 				$(this).text('(hide)');
-				$(this).attr('id', class);
+				$(this).attr('id', previewClass);
 				var link = $(this).prev('a');
 				var post = $(this).closest('tr');
-				$(post).after('<tr><td colspan="3" style="padding:0;height:400px;" class="tr' + class + '"><iframe src="' + link.attr('href') + '" style="margin:0;display:block;border:none;width: 100%;height: 100%;" class="' + class + '"></iframe><div class="handle" style="width: 100px;float:right;cursor:s-resize;">Resize</div></td></tr>');
-				$('.tr' + class).jqResize('.handle');
+				$(post).after('<tr><td colspan="3" style="padding:0;height:400px;" class="tr' + previewClass + '"><iframe src="' + link.attr('href') + '" style="margin:0;display:block;border:none;width: 100%;height: 100%;" class="' + previewClass + '"></iframe><div class="handle" style="width: 100px;float:right;cursor:s-resize;">Resize</div></td></tr>');
+				$('.tr' + previewClass).jqResize('.handle');
 			}
 
 		});
@@ -1182,6 +1183,21 @@ try {
 		}
 	}
 	
+	
+	
+	/*
+	 * Add a "Reset Vote" button to aura, from http://whirlpool.net.au/wiki/reset_aura_vote
+	 */
+	if(Whirlpool.get('reset_aura_vote') == 'true' && Whirlpool.url.match('forum-replies')){
+		$('.voteblock').each(function(){
+			var block = $(this);
+			var resetUser = block.attr('title');
+			var replyId = $(block.closest('td.bodyuser').find('a')[1]).attr('name').split('r')[1];
+			var clickFunction = 'userVote(' + replyId + ',' + resetUser + ',0,' + user.id + ');';
+			block.children('span[id$="sn1"]').after(' <span class="voteitem" id="vote' + replyId + 's0" title="reset vote" onclick="' + clickFunction + '">?</span> ');
+		});
+	}
+	
 
 	// ! Glug (Legacy JS)
 	/******************************************************* GLUG ***************************************************************************************************/
@@ -1289,7 +1305,8 @@ try {
 			'opOnlyView': 'false',
 			'hide_closed_profile':'false',
 			'hideForumIDs':'',
-			'whim_archive_sort': true
+			'whim_archive_sort': true,
+			'reset_aura_vote': 'false'
 		};
 
 		for (var k in gmDefaults) {
@@ -1656,6 +1673,8 @@ try {
 			'</p> ' + '</p>             ' + '<p id="ignoreUser">' + '<input type="checkbox" name="ignoreUserB" id="ignoreUserB">' + '<label for="ignoreUserB">Adds a button next to each user\'s aura vote smilies, which when activated will prevent you from ' + 'seeing that user (you will see a post hidden message, similar to a post removed by a moderator). <strong>WARNING: Ignoring a user will cause ALL of their posts not to appear for you any more. If you want to remove someone from ' + 'being ignored, click on the "Hidden Users" tab above.</strong></label>' +
          
 			'</p> ' + '</p>             ' + '<p id="removeIgnoredUsers">' + '<input type="checkbox" name="removeIgnoredUsersB" id="removeIgnoredUsersB">' + '<label for="removeIgnoredUsersB">Completely hide all indication of removed users (the hidden post bar will not be displayed). <strong>WARNING: You will see no indication that a user has been removed.</strong></label>' +
+			
+			'</p> ' + '</p>             ' + '<p id="reset_aura_vote">' + '<input type="checkbox" name="reset_aura_vote" id="reset_aura_vote_checkbox">' + '<label for="reset_aura_vote_checkbox">Add a reset aura smiley</label>' +
 
 			'</p> ' + '</p>             ' + '<p id="userNotes">' + '<input type="checkbox" name="userNotesBox" id="userNotesBox">' + '<label for="userNotesBox">User Notes</label>' +
 
@@ -2881,21 +2900,25 @@ document.referrer.indexOf('?action=watched') == -1) {
 
 }
 catch(error) {
-	if (Whirlpool.get('debugMode') == 'true') {
-		var message = 'An error (' + error.name + ') occurred. Information: ' + error.message + '.  Please <a href="">report it</a>.';
-		var color = 'black';
-		var background = 'orange';
-		var opacity = '0.9';
+	if(typeof Whirlpool == 'undefined'){
+		alert("Sorry, an error occured during WP+ startup.\n Information: " + error);
+	}else{
+		if (Whirlpool.get('debugMode') == 'true') {
+			var message = 'An error (' + error.name + ') occurred. Information: ' + error.message + '.  Please <a href="">report it</a>.';
+			var color = 'black';
+			var background = 'orange';
+			var opacity = '0.9';
 
-		$('head').append('<style type="text/css">.wpplus_notify{ width: 85%; height: 20px; background-color: ' + background + '; opacity: ' + opacity + '; position: fixed; top: 25px; left: 7.5%; z-index: 500; -moz-border-radius: 10px; padding-top: 7px; text-align: center; color: ' + color + '} .wpplus_notify:hover{ cursor: pointer; }</style>');
+			$('head').append('<style type="text/css">.wpplus_notify{ width: 85%; height: 20px; background-color: ' + background + '; opacity: ' + opacity + '; position: fixed; top: 25px; left: 7.5%; z-index: 500; -moz-border-radius: 10px; padding-top: 7px; text-align: center; color: ' + color + '} .wpplus_notify:hover{ cursor: pointer; }</style>');
 
-		$('body').prepend('<div class="wpplus_notify">' + message + ' (close)</div>');
-		$('.wpplus_notify').click(function (e) {
-			$(this).fadeOut();
-		});
-		setTimeout(function () {
-			$('.wpplus_notify').fadeOut();
-		},
-		5000);
+			$('body').prepend('<div class="wpplus_notify">' + message + ' (close)</div>');
+			$('.wpplus_notify').click(function (e) {
+				$(this).fadeOut();
+			});
+			setTimeout(function () {
+				$('.wpplus_notify').fadeOut();
+			},
+			5000);
+		}
 	}
 }
