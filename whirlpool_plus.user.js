@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.6
+// @version			4.5.7
 // @include			http://forums.whirlpool.net.au/*
 // @include			https://forums.whirlpool.net.au/*
 // @include			http://bc.whirlpool.net.au/*
@@ -75,16 +75,17 @@
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.6',
+	version : '4.5.7',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 14,
+	storageVersion : 15,
 	
 	//Script changelog
 	_changelog : {
+		'4.5.7' : '<ul><li>Update to move themes</li></ul>',
 		'4.5.6' : '<ul><li>Fixed aura reset, various small bugs</li></ul>',
 		'4.5.5' : '<ul><li>Fixed image embedding bug</li></ul>',
 		'4.5.4' : '<ul><li>Yet More bugfixes</li></ul>',
@@ -891,11 +892,11 @@ var display = {
 
 	_themes : {
 		blue : '@import url(http://members.optusnet.com.au/foonly/wpblue/1/css/core.css);',
-		teal : '@import url(http://www.users.on.net/~chrispotter/Teal/wp-teal.css);',
-		black : '@import url(http://www.users.on.net/~chrispotter/Black/wp-black.css);',
-		green : '@import url(http://www.users.on.net/~chrispotter/Green/wp-green.css);',
-		wood : '@import url(http://www.users.on.net/~chrispotter/Wood/wp-wood.css);',
-		purple : '@import url(http://www.users.on.net/~chrispotter/Purple/wp-purple.css);',
+		teal : '@import url(http://wpplus.endorph.net/themes/teal/wp-teal.css);',
+		black : '@import url(http://wpplus.endorph.net/themes/black/wp-black.css);',
+		green : '@import url(http://wpplus.endorph.net/themes/green/wp-green.css);',
+		wood : '@import url(http://wpplus.endorph.net/themes/wood/wp-wood.css);',
+		purple : '@import url(http://wpplus.endorph.net/themes/purple/wp-purple.css);',
 		classic : '@import url(http://phyco.name/wpplus/wpclassic2011/css/core.css);',
 	},
 
