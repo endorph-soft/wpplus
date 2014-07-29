@@ -25,7 +25,7 @@
 // @exclude			http://whirlpool.net.au/blog/*
 // @exclude			https://whirlpool.net.au/blog/*
 // @require			http://code.jquery.com/jquery-2.1.1.min.js
-// @require			https://simplemodal.googlecode.com/files/jquery.simplemodal.1.4.4.min.js
+// @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.oembed.js
 // @require			http://wpplus.endorph.net/resources/js/min/prettify.js
@@ -4123,6 +4123,10 @@ try{
 		if(WhirlpoolPlus.pageType.forums){
 			load_jQueryAutosize($,WhirlpoolPlus.window);
 			load_jQueryoEmbed($);
+			
+			if(typeof jQuery.modal == 'undefined'){
+				load_jQuerySimpleModal($);
+			}
 			
 			WhirlpoolPlus.execute();
 			
