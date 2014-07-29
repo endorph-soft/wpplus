@@ -1251,7 +1251,7 @@ var autoUpdate = {
 				
 				WhirlpoolPlus.ajax({
 					method: 'GET',
-					url: 'https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js',
+					url: 'https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.meta.js',
 					headers: {
 						'User-Agent': 'Mozilla/5.0',
 						'User-Agent': 'Mozilla/5.0',
@@ -1277,7 +1277,7 @@ var autoUpdate = {
 						
 						function update(){
 							WhirlpoolPlus.notify('A new version of WP+ is available', true, 50000);
-							window.open('https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js');
+							window.open('https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.user.js');
 						}
 
 						if (newMajorVersion > oldMajorVersion) {
@@ -3526,7 +3526,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
 			'<p class="wpp_hideNotForum">' +
 				'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoUpdate_enabled">' +
 				' <label for="autoUpdate_enabled">Automatic updater</label>' +
-				' <a href="https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js" id="force_update">Force Update</a>' +
+				' <a href="https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.user.js" id="force_update">Force Update</a>' +
 				' <span class="settingDesc">Automatically update the script to the newest version</span>'+
 			'</p>' +
 			
