@@ -2,7 +2,12 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.7
+// @version			4.5.8
+// @grant			unsafeWindow
+// @grant			GM_addStyle
+// @grant			GM_getResourceURL
+// @grant			GM_getResourceText
+// @grant			GM_xmlhttpRequest
 // @include			http://forums.whirlpool.net.au/*
 // @include			https://forums.whirlpool.net.au/*
 // @include			http://bc.whirlpool.net.au/*
@@ -19,6 +24,8 @@
 // @exclude			https://forums.whirlpool.net.au/archive/*
 // @exclude			http://whirlpool.net.au/blog/*
 // @exclude			https://whirlpool.net.au/blog/*
+// @require			http://code.jquery.com/jquery-2.1.1.min.js
+// @require			https://simplemodal.googlecode.com/files/jquery.simplemodal.1.4.4.min.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.oembed.js
 // @require			http://wpplus.endorph.net/resources/js/min/prettify.js
@@ -75,16 +82,17 @@
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.7',
+	version : '4.5.8',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 15,
+	storageVersion : 17,
 	
 	//Script changelog
 	_changelog : {
+		'4.5.8' : '<ul><li>Initial update for Greasemonkey 2.0 compatibility</li><li>Move hosting to Github</li><li>Remove remaining http-specific urls</li></ul>',
 		'4.5.7' : '<ul><li>Update to move themes</li></ul>',
 		'4.5.6' : '<ul><li>Fixed aura reset, various small bugs</li></ul>',
 		'4.5.5' : '<ul><li>Fixed image embedding bug</li></ul>',
@@ -105,7 +113,7 @@ var WhirlpoolPlus = {
 	},
 	
 	//Feature spotlight for this version (can be left blank)
-	_spotlight : '',//'<p>Here are some more useful Whirlpool userscripts: <a href="http://whrl.pl/RdzH8d">http://whrl.pl/RdzH8d</a>, <a href="http://whrl.pl/RdAoQZ">http://whrl.pl/RdAoQZ</a> </p>',
+	_spotlight : '',//'<p>Here are some more useful Whirlpool userscripts: <a href="//whrl.pl/RdzH8d">whrl.pl/RdzH8d</a>, <a href="//whrl.pl/RdAoQZ">whrl.pl/RdAoQZ</a> </p>',
 	
 	//Current page url
 	url : document.location.href,
@@ -588,7 +596,7 @@ WhirlpoolPlus.execute = function(){
 	}
 	
 	/** RUN: Front page **/
-	if(WhirlpoolPlus.url == 'http://forums.whirlpool.net.au/'){
+	if(WhirlpoolPlus.url == 'http://forums.whirlpool.net.au/' || WhirlpoolPlus.url == 'https://forums.whirlpool.net.au/' ){
 		display.hideForums();
 		features.removeLinkToLastPage();
 	}
@@ -1195,12 +1203,12 @@ var display = {
 	wpPlusLogo : function(){
 		$('.copyright').append('<dt><img src="' 
 			+ WhirlpoolPlus.image('wp_plus_logo') + '" alt="Whirlpool Plus" /></dt><dd>Extra Awesomeness added  <br /> with '
-			+ '<a href="http://whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + WhirlpoolPlus.getVersionText() + '</a></dd>');
+			+ '<a href="//whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + WhirlpoolPlus.getVersionText() + '</a></dd>');
 	},
 	
 	whimAlert : function(){
 		if (WhirlpoolPlus.get('display_whimAlert') && $('#menu_whim').text()) {
-			WhirlpoolPlus.notify('You have an unread <a href="http://whirlpool.net.au/whim/">whim</a>.', true, 15000);
+			WhirlpoolPlus.notify('You have an unread <a href="//whirlpool.net.au/whim/">whim</a>.', true, 15000);
 		}
 	},
 	
@@ -1243,7 +1251,7 @@ var autoUpdate = {
 				
 				WhirlpoolPlus.ajax({
 					method: 'GET',
-					url: 'http://userscripts.org/scripts/source/85217.meta.js',
+					url: 'https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js',
 					headers: {
 						'User-Agent': 'Mozilla/5.0',
 						'User-Agent': 'Mozilla/5.0',
@@ -1269,7 +1277,7 @@ var autoUpdate = {
 						
 						function update(){
 							WhirlpoolPlus.notify('A new version of WP+ is available', true, 50000);
-							window.open('http://userscripts.org/scripts/source/85217.user.js');
+							window.open('https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js');
 						}
 
 						if (newMajorVersion > oldMajorVersion) {
@@ -1449,9 +1457,9 @@ var features = {
 						
 						//Check for album embeds
 						if(linkSegments[0] != 'a'){
-							linkObject.before('<img src="http://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpx_img">');
+							linkObject.before('<img src="//i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpx_img">');
 						}else{
-							linkObject.before('<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="http://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe>');
+							linkObject.before('<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="//imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe>');
 						}
 					}
 				}else if(oEmbedEnabled && oEmbedMatchRegex.test(link)){
@@ -2051,7 +2059,7 @@ features.ignoreUser = {
 			
 			trParent.hide();
 			
-			var hiddenPostNotice = $('<div class="notice" id="' + rowId +'"><div class="replyuser">User #' + uNum + ' &nbsp; <a style="color:black" href="http://forums.whirlpool.net.au/user/' + uNum + '"><b>' + userName + '</b></a></div><div class="replytools">' + postDate + '</div><i>This post was hidden by you (Whirlpool Plus).</i></div>');
+			var hiddenPostNotice = $('<div class="notice" id="' + rowId +'"><div class="replyuser">User #' + uNum + ' &nbsp; <a style="color:black" href="//forums.whirlpool.net.au/user/' + uNum + '"><b>' + userName + '</b></a></div><div class="replytools">' + postDate + '</div><i>This post was hidden by you (Whirlpool Plus).</i></div>');
 			
 			var showLink = $('<a href="javascript:void(0)">Unhide</a>').click(function(){
 				trParent.show();
@@ -3196,7 +3204,7 @@ var settings = {
 			var hiddenUsers = WhirlpoolPlus.get('hiddenUsers');
 			
 			for(i = 0; i < hiddenUsers.length; i++){
-				hiddenUsersHTML += '<p>User <a href="http://forums.whirlpool.net.au/user/' + hiddenUsers[i] + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
+				hiddenUsersHTML += '<p>User <a href="//forums.whirlpool.net.au/user/' + hiddenUsers[i] + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
 			}
 			
 			$('#hiddenUsers').append(hiddenUsersHTML);
@@ -3518,7 +3526,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
 			'<p class="wpp_hideNotForum">' +
 				'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoUpdate_enabled">' +
 				' <label for="autoUpdate_enabled">Automatic updater</label>' +
-				' <a href="http://userscripts.org/scripts/source/85217.user.js" id="force_update">Force Update</a>' +
+				' <a href="https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js" id="force_update">Force Update</a>' +
 				' <span class="settingDesc">Automatically update the script to the newest version</span>'+
 			'</p>' +
 			
@@ -4001,7 +4009,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
 			'<p class="subSettings_heading description"><b>Avatars</b></p>' +
 			'<div class="subSettings_content">' +		
 			
-				'<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="http://tinypic.com">tinypic.com</a>, then put the direct url in the field below.' +
+				'<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//tinypic.com">tinypic.com</a>, then put the direct url in the field below.' +
 				
 				'<div id="currentAvatars" class="wpp_hideNotForum">' +
 					'<div style="float: left;">' +
@@ -4058,12 +4066,12 @@ settings._html = '<div id="wppSettingsWrapper">' +
 	
 		'<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
 		'<p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features. </p>' +
-		'<p class="description">Another good source of information is the <a href="http://whirlpool.net.au/wiki/whirlpool_plus">wiki article<a>.</p>' +
-		'<p class="description">The script is maintained by <a href="http://forums.whirlpool.net.au/user/272563">tbwd</a>, so you can also whim him.</p>' +
+		'<p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus">wiki article<a>.</p>' +
+		'<p class="description">The script is maintained by <a href="//forums.whirlpool.net.au/user/272563">tbwd</a>, so you can also whim him.</p>' +
 	
 		'<p class="description"><b>Privacy</b></p>' +
 		'<p class="description">As stated in the wiki article, a user script like Whirlpool Plus could possibly be used to steal user information.  To our knowledge, there is no such code in this script. </p>' +
-		'<p class="description">The script relies on an external server to run the avatars and synchronisation. This server (endorph.net) is operated by <a href="http://forums.whirlpool.net.au/user/272563">tbwd</a>. Both these services use your API key to validate your identity, but do not store this key.</p>' +
+		'<p class="description">The script relies on an external server to run the avatars and synchronisation. This server (endorph.net) is operated by <a href="//forums.whirlpool.net.au/user/272563">tbwd</a>. Both these services use your API key to validate your identity, but do not store this key.</p>' +
 
 		'<p class="description"><b>About Whirlpool Plus</b></p>' +
 		'<p class="description">Whirlpool Plus was created by various members of the Whirlpool community to add extra features to the Whirlpool Forums. Many people have contributed to the script- see the wiki article for credits.</p>' +
@@ -4091,7 +4099,6 @@ settings._html += '<p class="description">Further changelogs can be viewed in th
 
 //Run the script
 try{
-	var $ = unsafeWindow.jQuery;
 	
 	if(typeof $ != 'undefined'){
 		// Rebuild jQuery.browser
@@ -4103,7 +4110,7 @@ try{
 	WhirlpoolPlus.redirects();
 	WhirlpoolPlus.init();
 	
-	if(typeof $ == 'undefined'){
+	if(typeof unsafeWindow.jQuery == 'undefined'){
 		WhirlpoolPlus.executeNojQuery();
 	}else{
 		//If this is Firefox 3.6 or Chrome, jQuery cannot bind events to window and document
