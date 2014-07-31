@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.8
+// @version			4.5.9
 // @grant			unsafeWindow
 // @grant			GM_addStyle
 // @grant			GM_getResourceURL
@@ -82,16 +82,17 @@
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.8',
+	version : '4.5.9',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 17,
+	storageVersion : 18,
 	
 	//Script changelog
 	_changelog : {
+		'4.5.9' : '<ul><li>Greasemonkey 2.0+ fixes take two</li></ul>',
 		'4.5.8' : '<ul><li>Initial update for Greasemonkey 2.0 compatibility</li><li>Move hosting to Github</li><li>Remove remaining http-specific urls</li></ul>',
 		'4.5.7' : '<ul><li>Update to move themes</li></ul>',
 		'4.5.6' : '<ul><li>Fixed aura reset, various small bugs</li></ul>',
@@ -4107,6 +4108,11 @@ try{
 		if(!jQuery.browser){jQuery.uaMatch=function(e){e=e.toLowerCase();var t=/(chrome)[ \/]([\w.]+)/.exec(e)||/(webkit)[ \/]([\w.]+)/.exec(e)||/(opera)(?:.*version|)[ \/]([\w.]+)/.exec(e)||/(msie) ([\w.]+)/.exec(e)||e.indexOf("compatible")<0&&/(mozilla)(?:.*? rv:([\w.]+)|)/.exec(e)||[];return{browser:t[1]||"",version:t[2]||"0"}};matched=jQuery.uaMatch(navigator.userAgent);browser={};if(matched.browser){browser[matched.browser]=true;browser.version=matched.version}if(browser.chrome){browser.webkit=true}else if(browser.webkit){browser.safari=true}jQuery.browser=browser}
 	}
 	
+	// Needed for init
+	if(typeof jQuery.modal == 'undefined'){
+		load_jQuerySimpleModal($);
+	}
+	
 	WhirlpoolPlus.redirects();
 	WhirlpoolPlus.init();
 	
@@ -4123,10 +4129,6 @@ try{
 		if(WhirlpoolPlus.pageType.forums){
 			load_jQueryAutosize($,WhirlpoolPlus.window);
 			load_jQueryoEmbed($);
-			
-			if(typeof jQuery.modal == 'undefined'){
-				load_jQuerySimpleModal($);
-			}
 			
 			WhirlpoolPlus.execute();
 			
