@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.9
+// @version			4.5.10
 // @grant			unsafeWindow
 // @grant			GM_addStyle
 // @grant			GM_getResourceURL
@@ -82,16 +82,17 @@
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.9',
+	version : '4.5.10',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 18,
+	storageVersion : 19,
 	
 	//Script changelog
 	_changelog : {
+		'4.5.10' : '<ul><li>Fix quick quote and quick reply</li></ul>',
 		'4.5.9' : '<ul><li>Greasemonkey 2.0+ fixes take two</li></ul>',
 		'4.5.8' : '<ul><li>Initial update for Greasemonkey 2.0 compatibility</li><li>Move hosting to Github</li><li>Remove remaining http-specific urls</li></ul>',
 		'4.5.7' : '<ul><li>Update to move themes</li></ul>',
@@ -2269,7 +2270,7 @@ features.quickEdit = {
 		
 		var editUrl = $(this).prev().prev().prop('href').toString(); //The 'Edit my Post' link url
 		var replyID = editUrl.split( "e=" )[1]; //Post id
-		var replyHTML = $('#r' + replyID + ' .bodytext'); //Body of the post
+		var replyHTML = $('#rr' + replyID + ' .bodytext'); //Body of the post
 		var original = replyHTML.html().toString(); //Original HTML
 		
 		//Activate the CSS hacks
@@ -3010,7 +3011,7 @@ features.enhancedCompose = {
 				return false;
 			}
 			
-			var replyID = selectionParent.prop('id').split('r')[1];
+			var replyID = selectionParent.prop('id').split('rr')[1];
 			var username = selectionParent.find('.bu_name').text();
 			
 			var quotation = window.getSelection().toString().replace(/^(.+)$/mg, '["$1"]');
