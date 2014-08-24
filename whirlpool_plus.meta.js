@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.10
+// @version			4.5.11
 // @grant			unsafeWindow
 // @grant			GM_addStyle
 // @grant			GM_getResourceURL

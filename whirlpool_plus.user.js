@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.10
+// @version			4.5.11
 // @grant			unsafeWindow
 // @grant			GM_addStyle
 // @grant			GM_getResourceURL
@@ -82,16 +82,17 @@
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.10',
+	version : '4.5.11',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 19,
+	storageVersion : 20,
 	
 	//Script changelog
 	_changelog : {
+		'4.5.11' : '<ul><li>Fix aura reset, other bugs</li></ul>',
 		'4.5.10' : '<ul><li>Fix quick quote and quick reply</li></ul>',
 		'4.5.9' : '<ul><li>Greasemonkey 2.0+ fixes take two</li></ul>',
 		'4.5.8' : '<ul><li>Initial update for Greasemonkey 2.0 compatibility</li><li>Move hosting to Github</li><li>Remove remaining http-specific urls</li></ul>',
@@ -1534,7 +1535,7 @@ var features = {
 		if(WhirlpoolPlus.get('resetAuraVote')){
 			$('.voteblock').each(function(){
 				var block = $(this);
-				var replyId = $(block.closest('div.reply')).prop('id').split('r')[1];
+				var replyId = $(block.closest('div.reply')).prop('id').split('rr')[1];
 				var clickFunction = 'userVote(' + replyId + ',' + block.prop('title') + ',0,' + WhirlpoolPlus.tools.getUserID() + ',this);';
 				block.children('span[id$="sn1"]').after(' <span class="voteitem" id="vote' + replyId + 's0" title="reset vote" onclick="' + clickFunction + '">?</span> ');
 			});
@@ -2863,7 +2864,7 @@ features.enhancedCompose = {
 			var linkPrompt = window.prompt('Enter Text:', '');
 			
 			if ((linkPrompt != '') & (linkPrompt != null)) {
-				if (selection.indexOf('http://') < 0) {
+				if (selection.indexOf('http://') < 0 && selection.indexOf('https://') < 0) {
 					selection = 'http://' + selection;
 				}
 				
@@ -4136,7 +4137,7 @@ try{
 		}else{
 			WhirlpoolPlus.executeNotForum();
 		}
-		
+				
 	}
 }catch(e){
 	if(typeof console != 'undefined'){
