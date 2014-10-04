@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.11
+// @version			4.5.12
 // @grant			unsafeWindow
 // @grant			GM_addStyle
 // @grant			GM_getResourceURL
@@ -27,7 +27,6 @@
 // @require			http://code.jquery.com/jquery-2.1.1.min.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
-// @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.oembed.js
 // @require			http://wpplus.endorph.net/resources/js/min/prettify.js
 // @require			http://wpplus.endorph.net/resources/js/min/tea.js
 // @require			http://wpplus.endorph.net/resources/js/min/lang-css.js
@@ -76,5 +75,4 @@
 // @resource		red_note			http://wpplus.endorph.net/resources/png/rednote.png
 // @resource		check				http://wpplus.endorph.net/resources/png/check.png
 // @resource		cross				http://wpplus.endorph.net/resources/png/cross.png
-// @resource		oembedcss			http://wpplus.endorph.net/resources/css/jquery.oembed.css
 // ==/UserScript==

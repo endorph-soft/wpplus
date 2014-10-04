@@ -2,7 +2,7 @@
 // @name			Whirlpool Plus
 // @namespace		WhirlpoolPlus
 // @description		Adds a suite of extra optional features to the Whirlpool forums.
-// @version			4.5.11
+// @version			4.5.12
 // @grant			unsafeWindow
 // @grant			GM_addStyle
 // @grant			GM_getResourceURL
@@ -27,7 +27,6 @@
 // @require			http://code.jquery.com/jquery-2.1.1.min.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
 // @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
-// @require			http://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.oembed.js
 // @require			http://wpplus.endorph.net/resources/js/min/prettify.js
 // @require			http://wpplus.endorph.net/resources/js/min/tea.js
 // @require			http://wpplus.endorph.net/resources/js/min/lang-css.js
@@ -76,22 +75,22 @@
 // @resource		red_note			http://wpplus.endorph.net/resources/png/rednote.png
 // @resource		check				http://wpplus.endorph.net/resources/png/check.png
 // @resource		cross				http://wpplus.endorph.net/resources/png/cross.png
-// @resource		oembedcss			http://wpplus.endorph.net/resources/css/jquery.oembed.css
 // ==/UserScript==
 
 var WhirlpoolPlus = {
 	
 	//Script Version
-	version : '4.5.11',
+	version : '4.5.12',
 	
 	//Prerelease version- 0 for a standard release
 	prerelease : 0,
 	
 	//Meaningless value to force the script to upgrade
-	storageVersion : 20,
+	storageVersion : 21,
 	
 	//Script changelog
 	_changelog : {
+		'4.5.12' : '<ul><li>Fixed infinite redirect on profile page</li><li>Convert search archive links to standard links</li><li>Video embedding option added (youtube, vimeo)</li><li>Remove non-functional oEmbed option</li><li>Removed non-functional search sort code</li></ul>',
 		'4.5.11' : '<ul><li>Fix aura reset, other bugs</li></ul>',
 		'4.5.10' : '<ul><li>Fix quick quote and quick reply</li></ul>',
 		'4.5.9' : '<ul><li>Greasemonkey 2.0+ fixes take two</li></ul>',
@@ -213,7 +212,7 @@ var WhirlpoolPlus = {
 		'newThread' : 'action=newthread', //Creating a new thread
 		'reply' : 'action=reply', //Posting a reply
 		'edit' : 'action=edit', //Editing a post
-		'search' : 'action=threads_search', //Thread search
+		'search' : 'action=search', //Thread search
 		'forums' : 'forums.whirlpool', //forums.whirlpool.net.au
 		'wiki' : '.net.au/wiki/', //Wiki
 		'watchedThreads' : 'action=watched', // Watched threads page
@@ -269,9 +268,8 @@ var WhirlpoolPlus = {
 		avatar_static : true,
 		avatar_animated : false,
 		stats_postsPerDay : true,
-		embed_oembed : true,
+		embed_videos : true,
 		embed_images: true,
-		embed_oembedTypes : 'youtu|vimeo|twitter',
 		recentActivityOverlay : false,
 		recentActivityOverlay_days : '7',
 		recentActivityOverlay_data : '',
@@ -448,12 +446,8 @@ var WhirlpoolPlus = {
 };
 
 WhirlpoolPlus.redirects = function(){
-	if(document.location.toString().indexOf('//whirlpool.net.au/whim/') >= 0){
-		document.location = '//forums.whirlpool.net.au' + document.location.pathname;
-	}
-	
-	if(document.location.toString().indexOf('//whirlpool.net.au/profile/') >= 0){
-		document.location = '//forums.whirlpool.net.au' + document.location.pathname;
+	if(/http(s)?:\/\/whirlpool.net.au\/whim(\/)?$/i.test(document.location)){
+		document.location = location.protocol + '//forums.whirlpool.net.au' + document.location.pathname;
 	}
 }
 
@@ -617,7 +611,7 @@ WhirlpoolPlus.execute = function(){
 	
 	/** RUN: Thread Search pages **/
 	if(WhirlpoolPlus.pageType.search){
-		features.threadSearchSort();
+		features.editSearchLinks();
 	}
 	
 	/** RUN: Watched Threads **/
@@ -1417,31 +1411,24 @@ var features = {
 	},
 	
 	embed : function(){
-		var oEmbedEnabled = WhirlpoolPlus.get('embed_oembed');
 		var imageEnabled = WhirlpoolPlus.get('embed_images');
+		var videoEnabled = WhirlpoolPlus.get('embed_videos');
 		var maxContentWidth = $('.replytext').width();
-	
-	
-		//Image embedding setup
-		if(imageEnabled){
-			var imageMatchRegex = /bmp|gif|jpg|png/i;
-			var imgurRegex = /http:\/\/imgur\.com\/(.+)/i;
-			WhirlpoolPlus.css('.wpx_img { max-width: ' + maxContentWidth + 'px; }');
-		}
 		
-		//oEmbed setup
-		if (oEmbedEnabled) {
-			WhirlpoolPlus.css(WhirlpoolPlus.resource('oembedcss'));
-			
-			var oEmbedMatchRegex;
-			
-			try{
-				oEmbedMatchRegex = new RegExp(WhirlpoolPlus.get('embed_oembedTypes').replace('.','\.'));
-			}catch(error){
-				oEmbedMatchRegex = false;
-				WhirlpoolPlus.notify('oEmbed content types is invalid! (WP+ Settings > Posts > Display and Formatting Options)',false,10000);
-			}
-		}
+		var imageMatchRegex = /bmp|gif|jpg|png/i;
+		var imgurRegex = /http(s)?:\/\/imgur\.com\/(.+)/i;
+		
+		var youtubeRegex = /http(s)?:\/\/(www.)?youtube\.com/i;
+		var youtubeVidId = /v=([^&]*)/i;
+		var youtubeShortRegex = /http(s)?:\/\/(www.)?youtu\.be/i;
+		var youtubeShortVidId = /\.be\/(.*)/i;
+		
+		var vimeoRegex = /http(s)?:\/\/(www.)?vimeo.com\/([0-9]*)/i;
+		
+		WhirlpoolPlus.css('.wpx_img { max-width: ' + maxContentWidth + 'px; }');
+		
+		var vidWidth = 390;
+		var vidHeight = 315;
 		
 		var displayed = {};
 				
@@ -1450,23 +1437,45 @@ var features = {
 			var link = linkObject.prop('href');
 			
 			if(displayed[link] != true){
+			
 				if (imageEnabled && imageMatchRegex.test(link)){
+					// Basic Image Match
 					linkObject.before('<img src="' + link + '" class="wpx_img">');
 				}else if(imageEnabled && imgurRegex.test(link)){
+					// Imgur Embed
 					var linkSegments = imgurRegex.exec(link);
 					
-					if(linkSegments[1]){
-						linkSegments = linkSegments[1].split('/');
+					if(linkSegments[2]){
+						linkSegments = linkSegments[2].split('/');
 						
 						//Check for album embeds
 						if(linkSegments[0] != 'a'){
-							linkObject.before('<img src="//i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpx_img">');
+							linkObject.before('<img src="//i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpx_img"><br />');
 						}else{
-							linkObject.before('<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="//imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe>');
+							linkObject.before('<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="//imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe><br />');
 						}
 					}
-				}else if(oEmbedEnabled && oEmbedMatchRegex.test(link)){
-					linkObject.oembed(null,{ apikeys: {}, maxWidth: maxContentWidth });
+				}else if(videoEnabled && youtubeRegex.test(link)){
+					// Youtube Embed (part 1 - full links)
+					var linkSegments = youtubeVidId.exec(link);
+					
+					if(linkSegments && linkSegments[1]){
+						linkObject.before('<iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe><br />');
+					}
+				}else if(videoEnabled && youtubeShortRegex.test(link)){
+					// Youtube Embed (part 2 - short links)
+					var linkSegments = youtubeShortVidId.exec(link);
+					
+					if(linkSegments && linkSegments[1]){
+						linkObject.before('<iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe><br />');
+					}
+				}else if(videoEnabled && vimeoRegex.test(link)){
+					// Vimeo Embed
+					var linkSegments = vimeoRegex.exec(link);
+					
+					if(linkSegments && linkSegments[3]){
+						linkObject.before('<iframe src="//player.vimeo.com/video/' + linkSegments[3] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe><br />');
+					}
 				}
 				
 				displayed[link] = true;
@@ -1579,161 +1588,11 @@ var features = {
 
 		}
 	},
-	
-	threadSearchSort : function(){
-		//Sort search results by date (Thanks, Yanksy, http://userscripts.org/scripts/show/92400)
 		
-		//true == down
-		var oldestDirection = true;
-		var newestDirection = true;
-		
-		var fPA = $('<a href="#" style="color:white;" />');
-
-		fPA.click(function(){
-			GM_orderSearch('.oldest',oldestDirection ? 'down' : 'up');
-			oldestDirection = !oldestDirection;
-			return false;
-		});
-		
-		$('td.oldest:first b').wrap(fPA);
-		
-		var fPA2 = $('<a href="#" style="color:white;" />');
-		
-		fPA2.click(function(){
-			GM_orderSearch('.newest',newestDirection ? 'down' : 'up');
-			newestDirection = !newestDirection;
-			return false;
-		});
-		
-		$('td.newest:first b').wrap(fPA2);
-		
-
-		function GM_orderSearch(firstOrLast,upOrDown){
-
-			$('#threads td.group:first').html('<b>Forum</b>').prop('style','background-color: #937F69;color: white;font-size: 11px;padding: 4px;text-align: center;');
-
-			var getTrs = $('#content #threads tbody tr');
-			var titleTxt=true;
-			var plainArr = [];
-			var daysArr=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-			var daysArrStore=[];	
-			
-			getTrs.each(function(i){
-			
-					var hasC = $(this).hasClass('section');
-					if(hasC){
-						if($(this).css('display')!='none'){	//if it has already been run once
-							titleTxt=$(this).find('a:first');
-							$(this).css('display','none');
-						}
-						else{
-							titleTxt=false;
-						}
-					}    
-					else{
-						if(titleTxt){	//if it has already been run once
-							$(this).children('.group').empty().append(titleTxt.clone());
-						}
-						var dS, dS2, ds2Num, tymeHTML=$(this).children(firstOrLast).html().split('<br>')[1];
-						
-						var newDate = new Date();
-						var todaysDate = newDate.getDate();
-						var todaysDay = newDate.getDay();
-						var currHour = newDate.getHours(); 
-						var currMinute = newDate.getMinutes();
-						var currMonth = newDate.getMonth();
-						var currYear = newDate.getFullYear();	
-						
-						if(!tymeHTML.match('m')){
-							newDate="Thu, 01 Jan 1970 00:00:00 GMT";
-						}
-						else if(tymeHTML.match('minutes ago')){		//32 minutes ago
-							dS=Number(tymeHTML.split('minutes ago')[0]);
-							newDate.setMinutes(currMinute-dS);		//cause it's "minutes ago"
-						}
-						else if(tymeHTML.match('Today at ')){		//Today at 1:23 am
-							dS=tymeHTML.split('Today at ')[1].split(' ')[0];
-							dS2=dS.split(':');
-							newDate.setMinutes(Number(dS2[1]));
-							ds2Num=Number(dS2[0]);
-							if(tymeHTML.match('pm') && ds2Num!=12){
-								ds2Num+=12;
-							}
-							newDate.setHours(ds2Num);
-						}
-						else if(tymeHTML.match('Yesterday at ')){		//Yesterday at 2:11 pm
-							newDate.setDate((todaysDate-1));
-							dS=tymeHTML.split('Yesterday at ')[1].split(' ')[0];
-							dS2=dS.split(':');
-							newDate.setMinutes(Number(dS2[1]));
-							ds2Num=Number(dS2[0]);
-							if(tymeHTML.match('pm') && ds2Num!=12){
-								ds2Num+=12;
-							}
-							newDate.setHours(ds2Num);				
-						}
-						else if(tymeHTML.match(/Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday/)){		//Wednesday at 5:02 pm
-
-							dS=tymeHTML.split(' at ');
-							dS2=dS[1].split(' ')[0].split(':');
-
-							var daysArrSl=daysArr.slice(0,todaysDay);
-							var daysArrS2=daysArr.slice(todaysDay);
-							daysArrStore =daysArrS2.concat(daysArrSl);						
-
-							daysArrStore.reverse();
-							var theHolyIndex=null;
-							for(var i=0;i<daysArrStore.length;i++){
-								if(dS[0] == daysArrStore[i]){
-									theHolyIndex=i+1;
-									break;
-								}
-							}
-							
-							ds2Num=Number(dS2[0]);
-							if(tymeHTML.match('pm') && ds2Num!=12){
-								ds2Num+=12;
-							}
-							
-							newDate.setDate((todaysDate-theHolyIndex));
-							newDate.setHours(ds2Num);
-							newDate.setMinutes(Number(dS2[1]));
-						}
-						else{		//2010-Jan-4, 3:24 pm
-							dS= tymeHTML.split(',');
-							dS2=dS[0].split('-');
-							newDate=dS2[2]+" "+dS2[1]+" "+dS2[0]+dS[1];
-						}
-						var tyme = {
-							ele: this,
-							t:Date.parse(newDate.toString())
-						};
-						plainArr.push(tyme);
-					}
-
-				
-			});
-
-			plainArr.sort(function(a,b) { 
-				if(upOrDown=='up'){
-					return a.t < b.t ? -1 : 1; 
-				}
-				else{
-					return a.t > b.t ? -1 : 1; 
-				}
-			});
-
-			var tTB=document.querySelector('#threads tbody');
-			for(var j=0;j<plainArr.length;j++){
-				tTB.appendChild(plainArr[j].ele);
-			}
-		}
-	},
-	
 	changeLinks : function(){
-		$('a[href*="whirlpool.net.au/profile"], a[href*="whirlpool.net.au/whim"]').each(function(){
+		$('a[href*="whirlpool.net.au/whim"]').each(function(){
 			var link = $(this);
-			var parts = /whirlpool.net.au\/(profile|whim)\/(.*)/.exec(link.prop('href'));
+			var parts = /whirlpool.net.au\/(whim)\/(.*)/.exec(link.prop('href'));
 			
 			link.prop('href','//forums.whirlpool.net.au/' + parts[1] + '/' + parts[2]);
 		});
@@ -1779,6 +1638,16 @@ var features = {
 			});	
 			
 		});
+	},
+	
+	editSearchLinks : function(){
+	
+		$('.results .title a').each(function(){
+			var link = $(this);
+			link.prop('href',link.prop('href').replace('archive/','forum-replies.cfm?t='));
+		});
+	
+	
 	}
 	
 }
@@ -1865,7 +1734,7 @@ features.recentActivityOverlay = {
 	
 		$.ajax({
 			type : 'GET',
-			url : 'http://whirlpool.net.au/api/?key=' + WhirlpoolPlus.get('whirlpoolAPIKey') + '&output=json&get=recent&recentdays=' + WhirlpoolPlus.get('recentActivityOverlay_days'),
+			url : 'https://whirlpool.net.au/api/?key=' + WhirlpoolPlus.get('whirlpoolAPIKey') + '&output=json&get=recent&recentdays=' + WhirlpoolPlus.get('recentActivityOverlay_days'),
 			success : function(data,textStatus,response){
 								
 				if(response.status == 200){
@@ -2119,11 +1988,11 @@ features.spinnerMenu = {
 		var uNumber = WhirlpoolPlus.tools.getUserID();
 		
 		if(WhirlpoolPlus.get('spinnerMenu_settingsLocation') == 'top'){
-			this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//forums.whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//forums.whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+			this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
 		}else if(WhirlpoolPlus.get('spinnerMenu_settingsLocation') == 'underuser'){
-			this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//forums.whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//forums.whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
+			this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
 		}else {
-			this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//forums.whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//forums.whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+			this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
 		}
 		
 		var newUL2;
@@ -3951,35 +3820,16 @@ settings._html = '<div id="wppSettingsWrapper">' +
 				'</p>' +
 				
 				'<p class="wpp_hideNotForum">' +
-					'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_oembed">' +
-					' <label for="embed_oembed">Enable oEmbed</label>' +
-					' <span class="settingDesc">Embeds many common content types (see below)</span>'+
-				'</p>  ' +
-				
-				'<p class="wpp_hideNotForum">' +
-					'oEmbed allows many common types of content to be embedded within posts. To do this, it searches for urls that ' +
-					' match the expression below. If the service is able to embed this content, it will attempt to do so.' +
-					'<br /> In order to create a custom expression, enter parts of each url that you want to match, seperated by a ' +
-					' pipe (|) symbol. For example, to match youtube.com, youtu.be and vimeo.com links, try "youtube.com|youtu.be|vimeo.com". ' +
-					' You could also use "youtu|vimeo" (the first portion will match both youtube links). ' +
-					'<br /> Many services are supported- for example video (youtube, vimeo), photo (flickr, photobucket), audio (soundcloud), and text (twitter, wikipedia). ' +
-					'For a full list, see <a href="https://github.com/starfishmod/jquery-oembed-all#current-3rd-party-sources-include">this page</a>. ' +
-					'To match everything, try "[a-z]".' +
-					
-					'<br /> Note: the service also supports url-shortened links like bit.ly, tinyurl.com etc' +
-				'</p>  ' +
-				
-				'<p class="wpp_hideNotForum">' +
-					'<input class="wpp_setting wpp_forumSetting" type="text" id="embed_oembedTypes">' +
-					' <label for="embed_oembedTypes">oEmbed Content Types</label>' +
-					' <span class="settingDesc">Enter portions of URLs to match, separated with the | (pipe) character</span>'+
-				'</p>  ' +
-				
-				'<p class="wpp_hideNotForum">' +
 					'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_images">' +
 					' <label for="embed_images">Inline Images</label>' +
 					' <span class="settingDesc">Converts image links into images</span>'+
 				'</p>' +
+				
+				'<p class="wpp_hideNotForum">' +
+					'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_videos">' +
+					' <label for="embed_videos">Inline Videos</label>' +
+					' <span class="settingDesc">Converts videos links into videos</span>'+
+				'</p>  ' +
 				
 				'<p class="wpp_hideNotForum">' +
 					'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_syntaxHighlight">' +
@@ -4130,7 +3980,6 @@ try{
 		
 		if(WhirlpoolPlus.pageType.forums){
 			load_jQueryAutosize($,WhirlpoolPlus.window);
-			load_jQueryoEmbed($);
 			
 			WhirlpoolPlus.execute();
 			
