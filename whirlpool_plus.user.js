@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         4.5.13
+// @version         4.5.14
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -80,16 +80,17 @@
 var WhirlpoolPlus = {
     
     //Script Version
-    version : '4.5.13',
+    version : '4.5.14',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 22,
+    storageVersion : 23,
     
     //Script changelog
     _changelog : {
+		'4.5.14' : '<ul><li>Bugfix for 4.5.13</li></ul>',
 		'4.5.13' : '<ul><li>Change all server resources to https</li></ul>',
         '4.5.12' : '<ul><li>Fixed infinite redirect on profile page</li><li>Convert search archive links to standard links</li><li>Video embedding option added (youtube, vimeo)</li><li>Remove non-functional oEmbed option</li><li>Removed non-functional search sort code</li></ul>',
         '4.5.11' : '<ul><li>Fix aura reset, other bugs</li></ul>',
@@ -377,42 +378,39 @@ var WhirlpoolPlus = {
         //Set any undefined values to their default values
         this._setDefaults();
     
-        switch(this.get('storageVersion')){
-            case null:
-            case false:
-                //New install, or upgrade version 4.4.x to 4.5.0
-                
-                //Upgrade code removed in v4.5.5 (4 months)
-            
-            case 4:
-                //Upgrade from storageVersion:4 requires the clearing of values from localstorage
-                //If we aren't on the main forums page
-                if(!this.pageType.forums){
-                    unsafeWindow.localStorage.clear();
-                    
-                    //Set the default values
-                    this._setDefaults();
-                }
-            
-			case 21: 
-				// Connect to sync server over https
-				this.set('sync_server',this.get('sync_server').replace('http','https'))
-			
-            default:
-            
-                //Show the update dialog (But only on a forums page)
-                if(this.pageType.forums){
-                    this._upgradeDialog();
-                }
-                
-                //Set version information
-                this.set('storageVersion',this.storageVersion);
-                this.set('scriptVersion',this.version);
-                this.set('prerelease',this.prerelease);
-            
-            break;
-            
-        }
+        var oldVersion = this.get('storageVersion');
+		
+		if(oldVersion == null || oldVersion == false){
+			oldVersion = 0;
+		}
+		
+		if(oldVersion <= 4){
+			//Upgrade from storageVersion:4 requires the clearing of values from localstorage
+			//If we aren't on the main forums page
+			if(!this.pageType.forums){
+				unsafeWindow.localStorage.clear();
+				
+				//Set the default values
+				this._setDefaults();
+			}
+		}
+		
+		if(oldVersion <= 21){
+			// Connect to sync server over https
+			if(this.get('sync_server') !== false){
+				this.set('sync_server',this.get('sync_server').replace('http','https'));
+			}
+		}
+
+		//Show the update dialog (But only on a forums page)
+		if(this.pageType.forums){
+			this._upgradeDialog();
+		}
+		
+		//Set version information
+		this.set('storageVersion',this.storageVersion);
+		this.set('scriptVersion',this.version);
+		this.set('prerelease',this.prerelease);
     
     },
     
@@ -1263,7 +1261,7 @@ var autoUpdate = {
                     
                         var dataText = data.responseText;
                         
-                        var newVersionText = dataText.split('// @version\t\t\t')[1].split('\r\n// @require')[0];
+                        var newVersionText = dataText.split('// @version         ')[1].split('\r\n// @grant')[0];
                         
                         var newVersionParts = newVersionText.split('.');
                         
