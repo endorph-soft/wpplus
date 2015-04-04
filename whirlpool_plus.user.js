@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre1
+// @version         5.0.0pre2
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -77,10 +77,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 1,
+    prerelease : 2,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 24,
+    storageVersion : 25,
     
     //Script changelog
     _changelog : {
@@ -448,8 +448,9 @@ WhirlpoolPlus.executeNojQuery = function(){
     if(WhirlpoolPlus.pageType.deletedThread){
         var deletedThreadNumber = WhirlpoolPlus.url.split('t=')[1].split('&')[0];
         var nodes = document.getElementById('alert').childNodes;
-        nodes[nodes.length-2].innerHTML += ' <a href="//google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)</a>';
+        nodes[nodes.length-2].innerHTML += '<br/><a href="//google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)</a>';
     }
+	
 }
 
 //This one runs on wiki/job board etc. Anywhere that isn't forums.whirlpool.net.au/*
@@ -3375,18 +3376,18 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description wpp_hide"><b>Script Configuration</b></p>' +
             '<div class="subSettings_content">' +
 
-            '<p class="wpp_hideNotForum">' +
-                '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoUpdate_enabled">' +
-                ' <label for="autoUpdate_enabled">Automatic updater</label>' +
-                ' <a href="https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.user.js" id="force_update">Force Update</a>' +
-                ' <span class="settingDesc">Automatically update the script to the newest version</span>'+
-            '</p>' +
-            
-            '<p>' +
-                '<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
-                ' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
-                ' <span class="settingDesc">Used for features like the Recent Activity Overlay</span>'+
-            '</p>' +
+				/*'<p class="wpp_hideNotForum">' +
+					'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoUpdate_enabled">' +
+					' <label for="autoUpdate_enabled">Automatic updater</label>' +
+					' <a href="https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.user.js" id="force_update">Force Update</a>' +
+					' <span class="settingDesc">Automatically update the script to the newest version</span>'+
+				'</p>' +
+				
+				'<p>' +
+					'<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
+					' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
+					' <span class="settingDesc">Used for features like the Recent Activity Overlay</span>'+
+				'</p>' + */
                 
             '</div>' +
             
@@ -3396,7 +3397,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
             '<div class="subSettings_content">' +
             
-                '<p class="description">Script data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a></p>' +
+                /* '<p class="description">Script data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a></p>' +
             
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
@@ -3426,7 +3427,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     '<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
                     '<label for="sync_encryptionKey">Encryption Password</label>' +
                     ' <span class="settingDesc">Must be the same for all of your WP+ installs</span>'+
-                '</p>' +
+                '</p>' + */
                 
             '</div>' +
             
@@ -3440,7 +3441,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '</p>' +
             '<div class="subSettings_content">' +
             
-                '<p>' +
+                /* '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_widescreen">' +
                     '<label for="display_widescreen">Widescreen Display</label>' +
                     ' <span class="settingDesc">Stretch the website to fit the entire screen</span>'+
@@ -3550,7 +3551,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     '<span>Custom CSS</span>' +
                     ' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
                     '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 500px; height: 300px; margin:0 auto;"></textarea>' +
-                '</p>' + 
+                '</p>' + */
                 
             '</div>' +
             
@@ -3560,7 +3561,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Users</b></p>' +
             '<div class="subSettings_content">' +
             
-                '<p class="wpp_hideNotForum">' +
+                /*'<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideClosedThreadsOnProfile">' +
                     ' <label for="display_hideClosedThreadsOnProfile">Hide closed threads on user profiles</label>' +
                 '</p>' +
@@ -3601,7 +3602,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="whimArchiveSort">' +
                     '<label for="whimArchiveSort">Sort Whim archives in alphabetical order</label>' +
-                '</p>' +
+                '</p>' + */
                 
             '</div>' +
         '</div>' +
@@ -3615,7 +3616,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
         '<div class="subSettings">' +
             '<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
             '<div class="subSettings_content">' +
-                '<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts</p>' +
+                /*'<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts</p>' +
             
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled">' +
@@ -3659,7 +3660,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_tempDisable">' +
                     ' <label for="wlr_tempDisable">Add a button to temporarily disable the tracker (top right corner)</label>' +
-                '</p>    ' +
+                '</p>    ' + */
                 
 
             '</div>' +
@@ -3670,7 +3671,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Thread Settings</b></p>' +
             '<div class="subSettings_content">' +
             
-                '<p>' +
+                /* '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="text" id="display_hideTheseForums">' +
                     ' <label for="display_hideTheseForums">Forums to hide (on front page) </label>' +
                     ' <span class="settingDesc">Enter the ID\'s of the forums you want to hide (eg. "35 92 137")</span>'+
@@ -3722,7 +3723,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_longThread">' +
                     ' <label for="links_longThread">Long Thread View</label>' +
-                '</p>' +
+                '</p>' + */
             
             '</div>' +
         '</div>' +
@@ -3737,7 +3738,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Quick Reply and Quick Edit</b></p>' +
             '<div class="subSettings_content">' +
             
-                '<p>' +
+                /*'<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply">' +
                     ' <label for="compose_quickReply">Quick Reply</label>' +
                     ' <span class="settingDesc">Adds a Quick Reply box to the bottom of each page</span>'+
@@ -3775,7 +3776,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickEdit">' +
                     ' <label for="quickEdit">Quick Edit</label>' +
                     ' <span class="settingDesc">Allows inline editing of posts</span>'+
-                '</p>' +
+                '</p>' +*/
             
             '</div>' +
         '</div>' +
@@ -3784,7 +3785,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Display and Formatting Options</b></p>' +
             '<div class="subSettings_content">' +
             
-                '<p class="wpp_hideNotForum">' +
+                /*'<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_penaltyBox">' +
                     ' <label for="display_penaltyBox">Highlight when a user is in the penalty box</label>' +
                 '</p>' +
@@ -3824,7 +3825,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedPosts">' +
                     ' <label for="display_hideDeletedPosts">Hide deleted posts</label>' +
-                '</p>  ' +
+                '</p>  ' + */
                         
                 '<p class="wpp_hideNotForum">' +
                     '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
@@ -3835,6 +3836,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     
                     ' <label for="watchedThreadsAlert">Action to perform when watching a thread</label>' +
                 '</p> ' +
+				
             '</div>' +
         '</div>' +
         
@@ -3842,7 +3844,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Avatars</b></p>' +
             '<div class="subSettings_content">' +       
             
-                '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//tinypic.com">tinypic.com</a>, then put the direct url in the field below.' +
+                /* '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//tinypic.com">tinypic.com</a>, then put the direct url in the field below.' +
                 
                 '<div id="currentAvatars" class="wpp_hideNotForum">' +
                     '<div style="float: left;">' +
@@ -3869,7 +3871,8 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     ' <label for="avatar_animated">Display Animated avatars</label>' +
                 '</p>' +
                     
-                '</table>' + 
+                + */
+				
             '</div>' +
         '</div>' +
         
@@ -3877,7 +3880,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Hide Users</b></p>' +
             '<div class="subSettings_content">' +
             
-                '<p>' +
+                /* '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hiddenUsers_enabled">' +
                     '<label for="hiddenUsers_enabled">Adds an option to hide posts from users (next to aura)</label>' +
                 '</p>' +
@@ -3888,7 +3891,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '</p>' + 
 
                 '<p class="description">Currently Hidden Users: </p>' +
-                '<div id="hiddenUsers"></div>' +
+                '<div id="hiddenUsers"></div>' + */
                 
             '</div>' +
         '</div>' +
@@ -3949,8 +3952,7 @@ try{
     WhirlpoolPlus.init();
     
     if(typeof unsafeWindow.jQuery == 'undefined'){
-		// DISABLE
-        // WhirlpoolPlus.executeNojQuery();
+        WhirlpoolPlus.executeNojQuery();
     }else{
         // If this is Firefox 3.6 or Chrome, jQuery cannot bind events to window and document
         // Need to use unsafeWindow and unsafeWindow.document
