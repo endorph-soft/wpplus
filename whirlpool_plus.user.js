@@ -80,7 +80,7 @@ var WhirlpoolPlus = {
     prerelease : 1,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 23,
+    storageVersion : 24,
     
     //Script changelog
     _changelog : {
@@ -412,6 +412,11 @@ var WhirlpoolPlus = {
             close: true,
             containerCss : {
                 'text-align' : 'center',
+				'background-color' : '#ddd',
+				'border' : '1px solid #000',
+				'padding' : '20px',
+				'height' : '300px',
+				'width' : '400px',
             },
         });
         
