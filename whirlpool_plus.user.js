@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         4.5.14
+// @version         5.0.0
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -10,10 +10,6 @@
 // @grant           GM_xmlhttpRequest
 // @include         http://forums.whirlpool.net.au/*
 // @include         https://forums.whirlpool.net.au/*
-// @include         http://bc.whirlpool.net.au/*
-// @include         https://bc.whirlpool.net.au/*
-// @include         http://whirlpool.net.au/*
-// @include         https://whirlpool.net.au/*
 // @exclude         http://forums.whirlpool.net.au/whim-send*
 // @exclude         https://forums.whirlpool.net.au/whim-send*
 // @exclude         http://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
@@ -22,8 +18,6 @@
 // @exclude         https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
 // @exclude         http://forums.whirlpool.net.au/archive/*
 // @exclude         https://forums.whirlpool.net.au/archive/*
-// @exclude         http://whirlpool.net.au/blog/*
-// @exclude         https://whirlpool.net.au/blog/*
 // @require         https://code.jquery.com/jquery-2.1.1.min.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
@@ -80,40 +74,17 @@
 var WhirlpoolPlus = {
     
     //Script Version
-    version : '4.5.14',
+    version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 0,
+    prerelease : 1,
     
     //Meaningless value to force the script to upgrade
     storageVersion : 23,
     
     //Script changelog
     _changelog : {
-		'4.5.14' : '<ul><li>Bugfix for 4.5.13</li></ul>',
-		'4.5.13' : '<ul><li>Change all server resources to https</li></ul>',
-        '4.5.12' : '<ul><li>Fixed infinite redirect on profile page</li><li>Convert search archive links to standard links</li><li>Video embedding option added (youtube, vimeo)</li><li>Remove non-functional oEmbed option</li><li>Removed non-functional search sort code</li></ul>',
-        '4.5.11' : '<ul><li>Fix aura reset, other bugs</li></ul>',
-        '4.5.10' : '<ul><li>Fix quick quote and quick reply</li></ul>',
-        '4.5.9' : '<ul><li>Greasemonkey 2.0+ fixes take two</li></ul>',
-        '4.5.8' : '<ul><li>Initial update for Greasemonkey 2.0 compatibility</li><li>Move hosting to Github</li><li>Remove remaining http-specific urls</li></ul>',
-        '4.5.7' : '<ul><li>Update to move themes</li></ul>',
-        '4.5.6' : '<ul><li>Fixed aura reset, various small bugs</li></ul>',
-        '4.5.5' : '<ul><li>Fixed image embedding bug</li></ul>',
-        '4.5.4' : '<ul><li>Yet More bugfixes</li></ul>',
-        '4.5.3' : '<ul><li>More bugfixes</li><li>Script resources included inline</li></ul>',
-        '4.5.2' : '<ul><li>Fixed jQuery issue</li></ul>',
-        '4.5.1' : '<ul><li>Fixed issue with image embedding</li></ul>',
-        '4.5.0' : '<ul><li>Internal changes to improve maintainability</li><li>Support for multiple avatars</li><li>Workaround for data-reversion bug in Firefox 17</li><li>Improved Whirlcode editor</li><li>Improved Quick Edit</li><li>Added update dialog</li></ul>',
-        '4.4.18' : '<ul><li>Updated Theme Locations</li></ul>',
-        '4.4.17' : '<ul><li>Fixed oEmbed max width</li><li>Fixed image embed max width</li></ul>',
-        '4.4.16' : '<ul><li>oEmbed max width</li><li>Firefox 3.6 bugfixes</li><li>Auto-resizing quick reply box</li></ul>',
-        '4.4.15' : '<ul><li>Added oEmbed support (videos, twitter, and many others)</li></ul>',
-        '4.4.14' : '<ul><li>Added a way to temporarily disable the thread tracker</li><li>Added emoticon buttons to quick reply</li><li>Fixed avatars in whims</li></ul>',
-        '4.4.13' : '<ul><li>Fixed the hide forums feature</li><li>Auto-suggests changes to WLR colours based on the loaded theme</li><li>Spelling fixes</li></ul>',
-        '4.4.12' : '<ul><li>Added Teal theme</li><li>Fixed Emoticons</li></ul>',
-        '4.4.11' : '<ul><li>Fixed spinner menu</li><li>Fixed themes</li></ul>',
-        '4.4.10' : '<ul><li>Fixed penalty box highlight</li><li>WLR fixes</li><li>Fixes for the changed site design</li></ul>',
+		'5.0.0' : '<ul><li>New version for new Whirlpool</li></ul>',
     },
     
     //Feature spotlight for this version (can be left blank)
@@ -159,13 +130,13 @@ var WhirlpoolPlus = {
     //display a notification
     _notified : false,
     notify : function (message, important, duration) {
-        var color = 'white', 
-            background = 'black', 
+        var color = '#fff', 
+            background = '#000', 
             opacity = '0.9';
         
         if (important === true) {
-            color = 'black';
-            background = 'orange';
+            color = '#fff';
+            background = '#d87400';
         }
         
         if (!this._notified) {
@@ -457,7 +428,7 @@ WhirlpoolPlus.redirects = function(){
 //Run this when jQuery isn't available
 //Usually alert pages, or (T|B)SOD
 WhirlpoolPlus.executeNojQuery = function(){
-    
+	
     /** RUN: Watched Thread Alert **/
     if(WhirlpoolPlus.pageType.watchedThreadAlert){
         if (WhirlpoolPlus.get('watchedThreadsAlert') == 'watched' || document.referrer.indexOf('?action=watched') >= 0) {
@@ -521,37 +492,37 @@ WhirlpoolPlus.executeNotForum = function(){
 WhirlpoolPlus.execute = function(){
     //Dump CSS as early as possible
     this.css(
-        settings.css() +
-        display.css() +
-        features.css() +
-        features.avatar.css() +
-        features.recentActivityOverlay.css() +
-        features.spinnerMenu.css() +
-        features.quickEdit.css() +
-        features.whirlpoolLastRead.css() +
-        features.enhancedCompose.css() +
-        features.userNotes.css() +
-        WhirlpoolPlus.tools.sync.css()
+        settings.css() //+
+        // display.css() +
+        // features.css() +
+        // features.avatar.css() +
+        // features.recentActivityOverlay.css() +
+        // features.spinnerMenu.css() +
+        // features.quickEdit.css() +
+        // features.whirlpoolLastRead.css() +
+        // features.enhancedCompose.css() +
+        // features.userNotes.css() +
+        // WhirlpoolPlus.tools.sync.css()
     );
 
 
     /** RUN: Everywhere **/
-    autoUpdate.check();
+    // autoUpdate.check();
     
     /** RUN: Not Alerts **/
     if(!WhirlpoolPlus.pageType.alert){
         settings.init();
-        display.wpPlusLogo();
-        display.floatSidebar();
-        display.whimAlert();
-        display.penaltyBoxHighlight();
-        features.recentActivityOverlay.run();
-        features.spinnerMenu.run();
-        features.changeLinks();
-        WhirlpoolPlus.tools.sync.init();
+        // display.wpPlusLogo();
+        // display.floatSidebar();
+        // display.whimAlert();
+        // display.penaltyBoxHighlight();
+        // features.recentActivityOverlay.run();
+        // features.spinnerMenu.run();
+        // features.changeLinks();
+        // WhirlpoolPlus.tools.sync.init();
     }
     
-    
+    return;
     
     /** RUN: Posts Pages **/
     if(WhirlpoolPlus.pageType.posts){
@@ -3028,8 +2999,8 @@ var settings = {
     },
     
     init : function(){
-        // Add settings link
-        var settingsLink = $('<li id="menu_wpplus" class="even"><a class="xx" href="#"><span id="wpsettingslink">WP+ Settings</span></a><span class="shim1"></span></li>');
+		// Add settings link
+        var settingsLink = $('<li id="menu_wpp" class="even"><a href="#"><span>WP+ Settings</span></a></li>');
         $('#menu_industry').after(settingsLink);
         
         settingsLink.click(function(){
@@ -3053,6 +3024,7 @@ var settings = {
         dialog.modal({
             close: true,
             containerId : 'wppSettings',
+			overlayCss : { backgroundColor : '#000' },
             onShow : function(){
                 var settings = WhirlpoolPlus.pageType.forums ? $('.wpp_setting') : $('.wpp_setting').not('.wpp_forumSetting');
             
@@ -3972,11 +3944,13 @@ try{
     WhirlpoolPlus.init();
     
     if(typeof unsafeWindow.jQuery == 'undefined'){
-        WhirlpoolPlus.executeNojQuery();
+		// DISABLE
+        // WhirlpoolPlus.executeNojQuery();
     }else{
-        //If this is Firefox 3.6 or Chrome, jQuery cannot bind events to window and document
+        // If this is Firefox 3.6 or Chrome, jQuery cannot bind events to window and document
         // Need to use unsafeWindow and unsafeWindow.document
-
+		
+		
         if(($.browser.mozilla == true && $.browser.version.substring(0,4) == '1.9.') || $.browser.webkit == true){
             WhirlpoolPlus.compatibilityMode();
         }
@@ -3987,10 +3961,12 @@ try{
             WhirlpoolPlus.execute();
             
         }else{
-            WhirlpoolPlus.executeNotForum();
+            // WhirlpoolPlus.executeNotForum();
         }
+		
                 
     }
+	
 }catch(e){
     if(typeof console != 'undefined'){
         console.error(e);

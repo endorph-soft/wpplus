@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         4.5.14
+// @version         5.0.0
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -10,10 +10,6 @@
 // @grant           GM_xmlhttpRequest
 // @include         http://forums.whirlpool.net.au/*
 // @include         https://forums.whirlpool.net.au/*
-// @include         http://bc.whirlpool.net.au/*
-// @include         https://bc.whirlpool.net.au/*
-// @include         http://whirlpool.net.au/*
-// @include         https://whirlpool.net.au/*
 // @exclude         http://forums.whirlpool.net.au/whim-send*
 // @exclude         https://forums.whirlpool.net.au/whim-send*
 // @exclude         http://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
@@ -22,8 +18,6 @@
 // @exclude         https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
 // @exclude         http://forums.whirlpool.net.au/archive/*
 // @exclude         https://forums.whirlpool.net.au/archive/*
-// @exclude         http://whirlpool.net.au/blog/*
-// @exclude         https://whirlpool.net.au/blog/*
 // @require         https://code.jquery.com/jquery-2.1.1.min.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
