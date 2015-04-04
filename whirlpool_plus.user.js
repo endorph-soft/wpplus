@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre3
+// @version         5.0.0pre4
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -77,10 +77,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 3,
+    prerelease : 4,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 26,
+    storageVersion : 27,
     
     //Script changelog
     _changelog : {
@@ -506,11 +506,11 @@ WhirlpoolPlus.execute = function(){
         settings.css() +
         // display.css() +
         // features.css() +
-        features.avatar.css() //+
+        features.avatar.css() +
         // features.recentActivityOverlay.css() +
         // features.spinnerMenu.css() +
         // features.quickEdit.css() +
-        // features.whirlpoolLastRead.css() +
+        features.whirlpoolLastRead.css() //+
         // features.enhancedCompose.css() +
         // features.userNotes.css() +
         // WhirlpoolPlus.tools.sync.css()
@@ -542,7 +542,7 @@ WhirlpoolPlus.execute = function(){
         // features.extraNavLinks();
         // features.auraReset();
         // features.quickEdit.run();
-        // features.whirlpoolLastRead.runPosts();
+        features.whirlpoolLastRead.runPosts();
         // features.enhancedCompose.quickReply();
         
         //Loop through each reply
@@ -554,24 +554,24 @@ WhirlpoolPlus.execute = function(){
         });
         
     }
-	
-	return;
     
     /** RUN: Threads Pages **/
     if(WhirlpoolPlus.pageType.threads){
-        display.hideThreads();
-        features.unansweredThreadsLink();
+        // display.hideThreads();
+        // features.unansweredThreadsLink();
         features.whirlpoolLastRead.runThreads();
     }
     
     /** RUN: Profiles **/
     if(WhirlpoolPlus.pageType.profile){
-        stats.postsPerDay();
-        display.hideClosedThreads();
+        // stats.postsPerDay();
+        // display.hideClosedThreads();
         features.whirlpoolLastRead.runThreads();
-        display.userPageInfoToggle();
+        // display.userPageInfoToggle();
     }
     
+	return;
+	
     /** RUN: Aura Votes Page **/
     if(WhirlpoolPlus.pageType.auraVotes){
         stats.auraCount();
@@ -627,7 +627,7 @@ WhirlpoolPlus.tools = {
     },
     
     getThreadNumber : function(){
-        return (typeof unsafeWindow.thisThreadID != 'undefined') ? (unsafeWindow.thisThreadID) : (false);
+        return (typeof unsafeWindow.thread_id != 'undefined') ? (unsafeWindow.thread_id) : (false);
     },
     
     getUserID : function(){
@@ -2261,20 +2261,16 @@ features.whirlpoolLastRead = {
             }
         });
         
-        var unloadEvent = 'beforeunload';
-        
-        //firefox 3.6 does not support 'beforeunload'
-        if($.browser.mozilla == true && $.browser.version.substring(0,4) == '1.9.'){
-            unloadEvent = 'unload';
-        }
-        
-        $(WhirlpoolPlus.window).bind(unloadEvent,function(){
+		
+		
+        $(WhirlpoolPlus.window).bind('unload',function(){
+			
             if(features.whirlpoolLastRead.trackThisThread == false){
                 return;
             }
-        
+			
             //need to find the last read reply
-            var replies = $('div#replies .reply, div#replies .notice').not('#previewTR');
+            var replies = $('div#replies .reply, div#replies .notice').not('.preview');
             
             var lastReadReply;
             
@@ -3621,24 +3617,24 @@ settings._html = '<div id="wppSettingsWrapper">' +
         '<div class="subSettings">' +
             '<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
             '<div class="subSettings_content">' +
-                /*'<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts</p>' +
+                '<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts</p>' +
             
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled">' +
                     ' <label for="wlr_enabled">Activate tracker</label>' +
-                '</p>     ' +
+                '</p>' +
                 
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadThreadColour">' +
                     ' <label for="wlr_display_unreadThreadColour">Unread Posts Colour</label>' +
                     ' <span class="settingDesc">Used to highlight threads containing posts you haven\'t read</span>'+
-                '</p>  ' +
+                '</p>' +
                 
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_readThreadColour">' +
                     ' <label for="wlr_display_readThreadColour">No Unread Posts Colour</label>' +
                     ' <span class="settingDesc">Used to highlight threads containing no unread posts</span>'+
-                '</p>       ' +
+                '</p>' +
             
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_onlyEndSquare">' +
@@ -3655,17 +3651,17 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadPostColour">' +
                     ' <label for="wlr_display_unreadPostColour">Post Highlight Colour (Posts Pages)</label>' +
                     ' <span class="settingDesc">Used to highlight posts (right most column) on posts pages</span>'+
-                '</p> ' +
+                '</p>' +
                 
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_flipStyles">' +
                     ' <label for="wlr_display_flipStyles">Highlight unread posts instead of read posts (Posts Pages)</label>' +
-                '</p>    ' +    
+                '</p>' +    
                 
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_tempDisable">' +
                     ' <label for="wlr_tempDisable">Add a button to temporarily disable the tracker (top right corner)</label>' +
-                '</p>    ' + */
+                '</p>' + 
                 
 
             '</div>' +
