@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre2
+// @version         5.0.0pre3
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -77,10 +77,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 2,
+    prerelease : 3,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 25,
+    storageVersion : 26,
     
     //Script changelog
     _changelog : {
@@ -160,7 +160,11 @@ var WhirlpoolPlus = {
         if(value == null){
             return false;
         }else{
-            return JSON.parse(value);
+			try {
+			return JSON.parse(value);
+			} catch (e) {
+				alert('Error loading setting: ' + key + ' = ' + value)
+			}
         }
     },
     set : function(key,value){
@@ -418,6 +422,7 @@ var WhirlpoolPlus = {
 				'height' : '300px',
 				'width' : '400px',
             },
+			overlayCss : { backgroundColor : '#000' },
         });
         
     },
@@ -498,10 +503,10 @@ WhirlpoolPlus.executeNotForum = function(){
 WhirlpoolPlus.execute = function(){
     //Dump CSS as early as possible
     this.css(
-        settings.css() //+
+        settings.css() +
         // display.css() +
         // features.css() +
-        // features.avatar.css() +
+        features.avatar.css() //+
         // features.recentActivityOverlay.css() +
         // features.spinnerMenu.css() +
         // features.quickEdit.css() +
@@ -528,29 +533,29 @@ WhirlpoolPlus.execute = function(){
         // WhirlpoolPlus.tools.sync.init();
     }
     
-    return;
-    
     /** RUN: Posts Pages **/
     if(WhirlpoolPlus.pageType.posts){
-        display.hidePosts();
-        display.syntaxHighlight();
-        display.emoticons.init();
-        features.embed();
-        features.extraNavLinks();
-        features.auraReset();
-        features.quickEdit.run();
-        features.whirlpoolLastRead.runPosts();
-        features.enhancedCompose.quickReply();
+        // display.hidePosts();
+        // display.syntaxHighlight();
+        // display.emoticons.init();
+        // features.embed();
+        // features.extraNavLinks();
+        // features.auraReset();
+        // features.quickEdit.run();
+        // features.whirlpoolLastRead.runPosts();
+        // features.enhancedCompose.quickReply();
         
         //Loop through each reply
-        $('#replies .reply').each(function(){
+        $('#replies .reply:not(.preview)').each(function(){
             $this = $(this);
-            features.ignoreUser.userIgnore($this);
+            // features.ignoreUser.userIgnore($this);
             features.avatar.avatariseRow($this);
-            features.userNotes.runOnReply($this);
+            // features.userNotes.runOnReply($this);
         });
         
     }
+	
+	return;
     
     /** RUN: Threads Pages **/
     if(WhirlpoolPlus.pageType.threads){
@@ -626,11 +631,11 @@ WhirlpoolPlus.tools = {
     },
     
     getUserID : function(){
-        return $('.userinfo dd:first').text().split('#')[1];
+        return $('#ub_name a').prop('href').split('/').slice(-1)[0];
     },
     
     getUsername : function(){
-        return $('.userinfo dt:first').text();
+        return $('#ub_name a').text();
     }
 
 };
@@ -3006,8 +3011,8 @@ var settings = {
     
     init : function(){
 		// Add settings link
-        var settingsLink = $('<li id="menu_wpp" class="even"><a href="#"><span>WP+ Settings</span></a></li>');
-        $('#menu_industry').after(settingsLink);
+        var settingsLink = $('<li id="menu_wpp" class="odd"><a href="#"><span>WP+ Settings</span></a></li>');
+        $('#menu_whim').after(settingsLink);
         
         settingsLink.click(function(){
             settings._launch();
@@ -3381,13 +3386,13 @@ settings._html = '<div id="wppSettingsWrapper">' +
 					' <label for="autoUpdate_enabled">Automatic updater</label>' +
 					' <a href="https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.user.js" id="force_update">Force Update</a>' +
 					' <span class="settingDesc">Automatically update the script to the newest version</span>'+
-				'</p>' +
+				'</p>' +*/
 				
 				'<p>' +
 					'<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
 					' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
 					' <span class="settingDesc">Used for features like the Recent Activity Overlay</span>'+
-				'</p>' + */
+				'</p>' + 
                 
             '</div>' +
             
@@ -3397,7 +3402,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
             '<div class="subSettings_content">' +
             
-                /* '<p class="description">Script data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a></p>' +
+                '<p class="description">Script data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a></p>' +
             
                 '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
@@ -3427,7 +3432,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     '<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
                     '<label for="sync_encryptionKey">Encryption Password</label>' +
                     ' <span class="settingDesc">Must be the same for all of your WP+ installs</span>'+
-                '</p>' + */
+                '</p>' + 
                 
             '</div>' +
             
@@ -3844,7 +3849,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Avatars</b></p>' +
             '<div class="subSettings_content">' +       
             
-                /* '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//tinypic.com">tinypic.com</a>, then put the direct url in the field below.' +
+                '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//tinypic.com">tinypic.com</a>, then put the direct url in the field below.' +
                 
                 '<div id="currentAvatars" class="wpp_hideNotForum">' +
                     '<div style="float: left;">' +
@@ -3870,8 +3875,6 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     '<input class="wpp_setting" type="checkbox" id="avatar_animated">' +
                     ' <label for="avatar_animated">Display Animated avatars</label>' +
                 '</p>' +
-                    
-                + */
 				
             '</div>' +
         '</div>' +
