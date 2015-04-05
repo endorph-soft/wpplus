@@ -21,10 +21,7 @@
 // @require         https://code.jquery.com/jquery-2.1.1.min.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
-// @require         https://wpplus.endorph.net/resources/js/min/prettify.js
 // @require         https://wpplus.endorph.net/resources/js/min/tea.js
-// @require         https://wpplus.endorph.net/resources/js/min/lang-css.js
-// @require         https://wpplus.endorph.net/resources/js/min/lang-sql.js
 // @resource        emoticon_angry      https://wpplus.endorph.net/resources/png/angry.png
 // @resource        emoticon_blushing   https://wpplus.endorph.net/resources/png/blushing.png
 // @resource        emoticon_confused   https://wpplus.endorph.net/resources/png/confused.png

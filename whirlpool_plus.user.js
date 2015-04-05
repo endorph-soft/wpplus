@@ -21,10 +21,7 @@
 // @require         https://code.jquery.com/jquery-2.1.1.min.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
 // @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
-// @require         https://wpplus.endorph.net/resources/js/min/prettify.js
 // @require         https://wpplus.endorph.net/resources/js/min/tea.js
-// @require         https://wpplus.endorph.net/resources/js/min/lang-css.js
-// @require         https://wpplus.endorph.net/resources/js/min/lang-sql.js
 // @resource        emoticon_angry      https://wpplus.endorph.net/resources/png/angry.png
 // @resource        emoticon_blushing   https://wpplus.endorph.net/resources/png/blushing.png
 // @resource        emoticon_confused   https://wpplus.endorph.net/resources/png/confused.png
@@ -220,31 +217,20 @@ var WhirlpoolPlus = {
     },
     
     _defaults : {
-        display_theme : 'default',
         display_hideDeletedThreads : false,
         display_hideMovedThreads : false,
         display_hideDeletedPosts : false,
-        display_noTextShadow : false,
         display_floatSidebar : false,
-        display_syntaxHighlight : true,
         display_emoticons_enabled : true,
         display_emoticons_blue : true,
         display_hideTheseForums : '',
         display_hideClosedThreadsOnProfile : false,
         display_whimAlert : true,
-        display_breadcrumbFont : 'default font',
-        display_sidebarFont : 'default font',
-        display_showFooter : true,
         display_widescreen : false,
         display_customCSS : '',
         display_penaltyBox : false,
-        display_userPageInfoToggle : false,
-        autoUpdate_enabled : true,
-        autoUpdate_interval : 30,
-        autoUpdate_lastChecked : 0,
         avatar_static : true,
         avatar_animated : false,
-        stats_postsPerDay : true,
         embed_videos : true,
         embed_images: true,
         recentActivityOverlay : false,
@@ -266,9 +252,6 @@ var WhirlpoolPlus = {
         links_unanswered : true,
         resetAuraVote : false,
         autoSubscribeToNewThread : false,
-        spinnerMenu : 'none',
-        spinnerMenu_settingsLocation : 'top',
-        whimArchiveSort : true,
         defaultRecentActivityDays : '7',
         quickEdit : true,
         wlr_display_flipStyles : false,
@@ -303,20 +286,12 @@ var WhirlpoolPlus = {
     //These values are used for the minimal install
     _notForumValues : [
         'whirlpoolAPIKey',
-        'display_theme',
-        'display_noTextShadow',
         'display_floatSidebar',
         'display_whimAlert',
-        'display_breadcrumbFont',
-        'display_sidebarFont',
-        'display_showFooter',
         'display_widescreen',
         'display_customCSS',
         'avatar_static',
         'avatar_animated',
-        'spinnerMenu',
-        'spinnerMenu_settingsLocation',
-        'whimArchiveSort',
         'defaultRecentActivityDays',
         'compose_enhancedEditor',
         'recentActivityOverlay',
@@ -466,7 +441,6 @@ WhirlpoolPlus.executeNotForum = function(){
         display.css() +
         features.css() +
         features.avatar.css() +
-        features.spinnerMenu.css() +
         features.recentActivityOverlay.css() +
         features.enhancedCompose.css()
     );
@@ -477,7 +451,6 @@ WhirlpoolPlus.executeNotForum = function(){
         display.wpPlusLogo();
         display.floatSidebar();
         display.whimAlert();
-        features.spinnerMenu.run();
         features.changeLinks();
         features.recentActivityOverlay.run();
     }
@@ -485,11 +458,6 @@ WhirlpoolPlus.executeNotForum = function(){
     /** RUN: Whim Reading **/
     if(WhirlpoolPlus.pageType.whimRead){
         $('#replies table tr').each(features.avatar.avatariseWhim);
-    }
-    
-    /** RUN: Whim Archive **/
-    if(WhirlpoolPlus.pageType.whimArchive){
-        features.whimArchiveSort();
     }
     
     /** RUN: Editing (wiki) **/
@@ -507,27 +475,20 @@ WhirlpoolPlus.execute = function(){
         // display.css() +
         features.avatar.css() +
         features.recentActivityOverlay.css() +
-        // features.spinnerMenu.css() +
         // features.quickEdit.css() +
         features.whirlpoolLastRead.css() +
         features.enhancedCompose.css() +
         features.userNotes.css() +
         WhirlpoolPlus.tools.sync.css()
     );
-
-
-    /** RUN: Everywhere **/
-    // autoUpdate.check();
     
     /** RUN: Not Alerts **/
     if(!WhirlpoolPlus.pageType.alert){
         settings.init();
-        // display.wpPlusLogo();
         // display.floatSidebar();
         // display.whimAlert();
         // display.penaltyBoxHighlight();
         features.recentActivityOverlay.run();
-        // features.spinnerMenu.run();
         // features.changeLinks();
         WhirlpoolPlus.tools.sync.init();
     }
@@ -535,7 +496,6 @@ WhirlpoolPlus.execute = function(){
     /** RUN: Posts Pages **/
     if(WhirlpoolPlus.pageType.posts){
         // display.hidePosts();
-        // display.syntaxHighlight();
         // display.emoticons.init();
         features.embed();
         // features.extraNavLinks();
@@ -564,15 +524,8 @@ WhirlpoolPlus.execute = function(){
     
     /** RUN: Profiles **/
     if(WhirlpoolPlus.pageType.profile){
-        // stats.postsPerDay();
         // display.hideClosedThreads();
         features.whirlpoolLastRead.runThreads();
-        // display.userPageInfoToggle();
-    }
-    
-    /** RUN: Aura Votes Page **/
-    if(WhirlpoolPlus.pageType.auraVotes){
-        // stats.auraCount();
     }
     
     /** RUN: Front page **/
@@ -609,11 +562,6 @@ WhirlpoolPlus.execute = function(){
     /** RUN: Whim Reading **/
     if(WhirlpoolPlus.pageType.whimRead){
         $('#replies table tr').each(features.avatar.avatariseWhim);
-    }
-    
-    /** RUN: Whim Archive **/
-    if(WhirlpoolPlus.pageType.whimArchive){
-        features.whimArchiveSort();
     }
     
 }
@@ -882,43 +830,9 @@ WhirlpoolPlus.tools.sync = {
 //Things that modify the display of the forum pages
 var display = {
 
-    _themes : {
-        blue    : '@import url(https://wpplus.endorph.net/themes/css.php?theme=blue);',
-        teal    : '@import url(https://wpplus.endorph.net/themes/teal/wp-teal.css);',
-        black   : '@import url(https://wpplus.endorph.net/themes/black/wp-black.css);',
-        green   : '@import url(https://wpplus.endorph.net/themes/green/wp-green.css);',
-        wood    : '@import url(https://wpplus.endorph.net/themes/wood/wp-wood.css);',
-        purple  : '@import url(https://wpplus.endorph.net/themes/purple/wp-purple.css);',
-        classic : '@import url(https://wpplus.endorph.net/themes/css.php?theme=classic);',
-    },
-
     //CSS that is included everywhere
     css : function(){
         var styles = '';
-    
-        //Fonts
-        if (WhirlpoolPlus.get('display_sidebarFont') != 'default font'){
-            styles += '#menu * { font-family: ' + WhirlpoolPlus.get('display_sidebarFont') + ' !important; }';
-        }
-        if (WhirlpoolPlus.get('display_breadcrumbFont') != 'default font'){
-            styles += '#breadcrumb * { font-family: ' + WhirlpoolPlus.get('display_breadcrumbFont') + ' !important; }';
-        }
-        
-        //Theme
-        var theTheme = WhirlpoolPlus.get('display_theme');
-        if(theTheme != 'default' && theTheme in this._themes){
-            WhirlpoolPlus.css(this._themes[theTheme]);
-        }
-        
-        //Text Shadow
-        if(WhirlpoolPlus.get('display_noTextShadow')) {
-            styles += '* {text-shadow:none!important;}';
-        }
-        
-        //Remove footer
-        if(!WhirlpoolPlus.get('display_showFooter')){
-            styles += '#footer {display:none;}';
-        }
         
         //Widescreen
         if (WhirlpoolPlus.get('display_widescreen')) {
@@ -1014,14 +928,6 @@ var display = {
                 $(this).parent().remove();
             });
             
-        }
-    },
-    
-    syntaxHighlight : function(){
-        if(WhirlpoolPlus.get('display_syntaxHighlight')) {
-            $('pre').addClass("prettyprint");
-            WhirlpoolPlus.css(WhirlpoolPlus.resource('prettify'));
-            prettyPrint();
         }
     },
     
@@ -1183,12 +1089,6 @@ var display = {
 
         },
     },
-
-    wpPlusLogo : function(){
-        $('.copyright').append('<dt><img src="' 
-            + WhirlpoolPlus.image('wp_plus_logo') + '" alt="Whirlpool Plus" /></dt><dd>Extra Awesomeness added  <br /> with '
-            + '<a href="//whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + WhirlpoolPlus.getVersionText() + '</a></dd>');
-    },
     
     whimAlert : function(){
         if (WhirlpoolPlus.get('display_whimAlert') && $('#menu_whim').text()) {
@@ -1206,186 +1106,6 @@ var display = {
             });
         }
     },
-
-    userPageInfoToggle : function(){
-        if(WhirlpoolPlus.get('display_userPageInfoToggle')){
-            var h2s = $('#userprofile h2:lt(2)');
-            h2s.css('cursor', 'pointer').next('table').hide();
-            h2s.click(function () {
-                $(this).next('table').slideToggle();
-            });
-        }
-    }
-    
-}
-
-//Updater
-var autoUpdate = {
-
-    check : function(){
-        if (WhirlpoolPlus.get('autoUpdate_enabled')){
-            var currentTime = ((new Date()).getTime()) / 1000;
-
-            //In seconds
-            var next = WhirlpoolPlus.get('autoUpdate_interval') * 60; 
-
-            var last = WhirlpoolPlus.get('autoUpdate_lastChecked');
-
-            if (currentTime > last + next) {
-                
-                WhirlpoolPlus.ajax({
-                    method: 'GET',
-                    url: 'https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.meta.js',
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0',
-                        'User-Agent': 'Mozilla/5.0',
-                        'Accept': 'text/xml'
-                    },
-                    onload: function (data) {
-                    
-                        var dataText = data.responseText;
-                        
-                        var newVersionText = dataText.split('// @version         ')[1].split('\r\n// @grant')[0];
-                        
-                        var newVersionParts = newVersionText.split('.');
-                        
-                        var oldVersionParts = WhirlpoolPlus.version.split('.');
-                        
-                        var newMajorVersion = parseInt(newVersionParts[0]);
-                        var newMiddleVersion = parseInt(newVersionParts[1]);
-                        var newMinorVersion = parseInt(newVersionParts[2]);
-                        
-                        var oldMajorVersion = parseInt(oldVersionParts[0]);
-                        var oldMiddleVersion = parseInt(oldVersionParts[1]);
-                        var oldMinorVersion = parseInt(oldVersionParts[2]);
-                        
-                        function update(){
-                            WhirlpoolPlus.notify('A new version of WP+ is available', true, 50000);
-                            window.open('https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.user.js');
-                        }
-
-                        if (newMajorVersion > oldMajorVersion) {
-                            update();
-                        }else if(newMajorVersion == oldMajorVersion){
-                            if(newMiddleVersion > oldMiddleVersion){
-                                update();
-                            }else if(newMiddleVersion == oldMiddleVersion){
-                                if(newMinorVersion > oldMinorVersion){
-                                    update();
-                                }else if(newMinorVersion == oldMinorVersion && WhirlpoolPlus.prerelease > 0){
-                                    //This is a prerelease version, and a full release is available
-                                    update();
-                                }
-                            }
-                        }
-                        
-                        WhirlpoolPlus.set('autoUpdate_lastChecked', currentTime);
-
-                    }
-                });
-            }
-        }
-    }
-    
-}
-
-var stats = {
-    
-    postsPerDay : function(){
-        if(!WhirlpoolPlus.get('stats_postsPerDay')){
-            return;
-        }
-    
-        var posts = $('td:contains("Post count")').next('td').text();
-
-        var split = $('td:contains("Joined")').next('td').text().split(' ');
-        var months = {
-            'January': 0,
-            'February': 1,
-            'March': 2,
-            'April': 3,
-            'May': 4,
-            'June': 5,
-            'July': 6,
-            'August': 7,
-            'September': 8,
-            'October': 9,
-            'November': 10,
-            'December': 11
-        };
-        var user_date = {
-            'day': split[1],
-            'month': months[split[2]],
-            'year': split[3]
-        };
-
-        var join_date = new Date();
-        join_date.setYear(user_date.year);
-        join_date.setMonth(user_date.month);
-        join_date.setDate(user_date.day);
-
-        var current = new Date();
-        var difference = Math.abs(join_date.getTime() - current.getTime());
-        var days = Math.round(difference / (1000 * 60 * 60 * 24));
-
-        $('tr:contains("Post"):first').after('<tr><td align="right"><b>Posts per Day:</b></td><td>' + (Math.round($('td:contains("Post count")').next('td').text() / days * 100) / 100) + '</td></tr>');
-    },
-    
-    auraCount : function(){
-        var auraCount = { 1 : 0, 2 : 0, 3 : 0, 4 : 0 };
-        var totalAuras = 0;
-    
-        $('#content table tr[bgcolor="white"]').each(function(){            
-            switch($(this).find('.voteactive, .votecrusty').prop('title')){
-                case 'irritating scum':
-                    auraCount[1]++;
-                break;
-                case 'typical user':
-                    auraCount[2]++;
-                break;
-                case 'constructive':
-                    auraCount[3]++;
-                break;
-                case 'top person':
-                    auraCount[4]++;
-                break;
-            }
-            
-            totalAuras++;
-        });
-        
-        var auraPercentages = {
-            1 : Math.floor((auraCount[1] / totalAuras) * 1000)/10,
-            2 : Math.floor((auraCount[2] / totalAuras) * 1000)/10,
-            3 : Math.floor((auraCount[3] / totalAuras) * 1000)/10,
-            4 : Math.floor((auraCount[4] / totalAuras) * 1000)/10,
-        };
-        
-        var voteHtml = '<p>Stats:</p><div class="voteblock"><table style="text-align: center; font: bold 10px monospace;"><tr>' + 
-            '<td><span class="voteitem" style="cursor: auto;">:(</span></td>' + 
-            '<td><span class="voteitem" style="cursor: auto;">:|</span></td>' + 
-            '<td><span class="voteitem" style="cursor: auto;">:)</span></td>' + 
-            '<td><span class="voteitem" style="cursor: auto;">:D</span></td>' + 
-        '</tr>' + 
-        
-        '<tr>' + 
-            '<td>' + auraPercentages[1] + '%</td>' + 
-            '<td>' + auraPercentages[2] + '%</td>' + 
-            '<td>' + auraPercentages[3] + '%</td>' + 
-            '<td>' + auraPercentages[4] + '%</td>' + 
-        '</tr>' + 
-        
-        '<tr>' + 
-            '<td>' + auraCount[1] + '</td>' + 
-            '<td>' + auraCount[2] + '</td>' + 
-            '<td>' + auraCount[3] + '</td>' + 
-            '<td>' + auraCount[4] + '</td>' + 
-        '</tr>' + 
-
-        '</table><p style="font: bold 10px monospace;">Total: ' + totalAuras + '</p></div>';
-    
-        $('#breadcrumb').after(voteHtml);
-    }
     
 }
 
@@ -1539,38 +1259,6 @@ var features = {
 		autoSubscribe : function(){
 			if(WhirlpoolPlus.get('autoSubscribeToNewThread')) {
 				$('#modesu').prop('checked', 'checked');
-			}
-		},
-		
-		whimArchiveSort : function(){
-			if (WhirlpoolPlus.get('whimArchiveSort')) {
-				WhirlpoolPlus.css('#content > table > tbody > tr { background-color: #EEF0F8; } ');
-				$('tr[style="padding-right:10px; color:black;"]').css('display','none');
-			
-				var whimTRsParent = document.querySelector('#content>table>tbody');
-				var whimTRs = whimTRsParent.querySelectorAll('tr[bgcolor]');
-
-				var plainArr = [];
-
-				for each(var item in whimTRs) {
-					if (typeof item == "object") {
-						var Name = {
-							real: item.querySelector('b').textContent
-						};
-						Name.Sort = Name.real.toLowerCase().replace(/[^a-z,0-9]/gm, '');
-						Name.tr = item;
-						plainArr.push(Name);
-					}
-				}
-
-				plainArr.sort(function (a, b) {
-					return a.Sort < b.Sort ? -1 : 1;
-				});
-
-				plainArr.forEach(function(item,index,array) {
-					whimTRsParent.appendChild(item.tr);
-				});
-
 			}
 		},
 			
@@ -1933,169 +1621,6 @@ features.ignoreUser = {
     },
 
 }
-
-features.disabled.spinnerMenu = {
-    
-    run : function(){
-        switch(WhirlpoolPlus.get('spinnerMenu')){
-            case 'spinner':
-                this.spinner();
-            break;
-            
-            case 'rightClick':
-                this.rightClick();
-            break;
-        }
-    },
-    
-    css : function(){
-        var sidebar = $('#left');
-        var whereMenu 
-        if(WhirlpoolPlus.get('display_widescreen')){
-            whereMenu = sidebar.width() - 4 + "px";
-        }else{
-            whereMenu = sidebar.offset().left + sidebar.width() - 4 + "px";
-        }
-
-        return "#pmenu {padding:0;list-style-type: none; position:fixed;z-index:50;height:19px;overflow:hidden;width:18px;left:" + whereMenu + ";}" +
-            "#pmenu img{margin;0;padding:0;border:none;background:transparent;width:16px;} #pmenu ul {padding:0; margin:0; list-style-type: none; width:101px;}" + 
-            "#pmenu li {position:relative;z-index:51;}" + "#pmenu a{display:block;width:130px;font-weight:bold;font-size:12px; color:#FFFFFF; height:26px; line-height:26px; " + 
-            "text-decoration:none; text-indent:5px; background:#616CA3; border:1px solid orange;white-space: nowrap; }" + "#pmenu>li>ul>li>a{background:#EDEDED;color:#000;}" + 
-            "#pmenu li:hover > a {background:#dfd7ca; color:#c00;}" + "#pmenu li ul {display: none;} " + 
-            "#pmenu li:hover > ul {display:block; position:absolute; top:0; z-index:52;margin-left:130px;}";
-    },
-
-    _menu : null,
-
-    generateMenu : function () {
-
-        this._menu = $('<ul id="pmenu">');
-        
-        var spinner = WhirlpoolPlus.image('small_whirl_logo');
-        var uNumber = WhirlpoolPlus.tools.getUserID();
-        
-        if(WhirlpoolPlus.get('spinnerMenu_settingsLocation') == 'top'){
-            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
-        }else if(WhirlpoolPlus.get('spinnerMenu_settingsLocation') == 'underuser'){
-            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
-        }else {
-            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
-        }
-        
-        var newUL2;
-        $('.forumlist').each(function () {
-            $(this).children().each(function () {
-                if (this.tagName == 'DT') {
-                    var newLI1 = $('<li>');
-                    var newA1 = $('<a href="#">');
-                    newUL2 = $('<ul>');
-                    newA1.text($(this).text());
-                    newLI1.append(newA1);
-                    newLI1.append(newUL2);
-                    features.spinnerMenu._menu.append(newLI1);
-                } else {
-                    var newLI2 = $('<li>');
-                    newLI2.html($(this).html());
-                    newUL2.append(newLI2);
-                }
-            });
-        });
-        
-        if(WhirlpoolPlus.get('spinnerMenu_settingsLocation') == 'bottom'){
-            this._menu.append('<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
-        }
-        
-        this._menu.find('*').addClass('notarget');
-        
-        var displayedMouseOver = false;
-        var displayedClick = false;
-        
-        this._menu.mouseenter(function(){
-            if(!displayedClick){
-                $(this).css({'height' : 'auto', 'overflow': 'visible'});
-                displayedMouseOver = true;
-                displayedClick = false;
-            }
-        });
-
-        this._menu.find('#menuSpinner').click(function(){
-            $(this).css({'height' : 'auto', 'overflow': 'visible'});
-            displayedMouseOver = false;
-            displayedClick = true;
-            
-            return false;
-        });
-        
-        this._menu.find('a[href!="#"], a#settingsSpinnerLink').click(function(){
-            $(features.spinnerMenu._menu).css({'height' : '19px', 'overflow': 'hidden'});
-            displayedMouseOver = false;
-            displayedClick = false;
-            return true;
-        });
-        
-        this._menu.mouseleave(function(){
-            if(displayedMouseOver){
-                $(features.spinnerMenu._menu).css({'height' : '19px', 'overflow': 'hidden'});
-                displayedMouseOver = false;
-            }
-            return true;
-        });
-        
-        this._menu.find('a[href="#"]').click(function(event){
-            event.stopPropagation();
-            return false;
-        });
-        
-        $('html').click(function(){
-            if(displayedClick){
-                $(features.spinnerMenu._menu).css({'height' : '19px', 'overflow': 'hidden'});
-                displayedClick = false;
-            }
-            return true;
-        });
-                
-    },
-    
-    rightClick : function () {
-
-        this.generateMenu();
-
-        document.addEventListener('mouseup', function (e) {
-
-            if (e.which == 3 && e.target.tagName != 'A' && e.target.tagName != 'TEXTAREA') {
-
-                features.spinnerMenu._menu.remove();
-                $('body').prepend(features.spinnerMenu._menu);
-                $('#settingsSpinnerLink').click(function(){ settings._launch(); return false; })
-                $('#menuSpinner').remove();
-                features.spinnerMenu._menu[0].style.position = 'absolute';
-                features.spinnerMenu._menu[0].style.left = '' + e.pageX - 250 + 'px';
-                features.spinnerMenu._menu[0].style.top = '' + e.pageY + 'px';
-                features.spinnerMenu._menu[0].style.overflow = 'visible';
-
-            }
-            if (e.which == 1 && $('#pmenu')[0] && e.target.className != 'notarget') {
-
-                features.spinnerMenu._menu.remove();
-
-            }
-
-
-        },
-        false);
-    },
-    
-    spinner : function () {
-
-        this.generateMenu();
-
-        $('body').prepend(this._menu);
-        $('#settingsSpinnerLink').click(function(){ settings._launch(); return false; })
-        this._menu.css('margin', '25px 0 50px 5px');
-
-    }
-
-};
 
 features.disabled.quickEdit = {
     
@@ -3041,7 +2566,6 @@ var settings = {
         
         var currentSyncServer = WhirlpoolPlus.get('sync_server');
         var currentSyncEncryptionKey = WhirlpoolPlus.get('sync_encryptionKey');
-        var currentTheme = WhirlpoolPlus.get('display_theme');
         
         dialog.modal({
             close: true,
@@ -3133,62 +2657,6 @@ var settings = {
                         WhirlpoolPlus.set('sync_encryptionKey', newSyncEncryptionKey);
                     }else{
                         alert('Encryption Password reverted');
-                    }
-                }
-                
-                var newTheme = WhirlpoolPlus.get('display_theme');
-                if(newTheme != currentTheme){
-                    if(confirm('Would you like to load the suggested WLR highlight colours for your theme?')){
-                        var newPostColour, noNewPostColour, postBackgroundColour;
-                        
-                        switch(newTheme){
-                            case 'blue':
-                                newPostColour = '#79A1FC';
-                                noNewPostColour = '#BEDBFA';
-                                postBackgroundColour = '#DEE6FA';
-                            break;
-
-                            case 'teal':
-                                newPostColour = '#B2F8F8';
-                                noNewPostColour = '#99C5CB';
-                                postBackgroundColour = '#D2E5E2';
-                            break;
-                            
-                            case 'black':
-                                newPostColour = '#FFFFFF';
-                                noNewPostColour = '#555555';
-                                postBackgroundColour = '#A1A1A1';
-                            break;      
-                            
-                            case 'green':
-                                newPostColour = '#4DA255';
-                                noNewPostColour = '#B9E3BD';
-                                postBackgroundColour = '#B6FCBC';
-                            break;      
-                            
-                            case 'purple':
-                                newPostColour = '#B580F3';
-                                noNewPostColour = '#E6D1FF';
-                                postBackgroundColour = '#E6D1FF';
-                            break;      
-                            
-                            case 'classic':
-                                newPostColour = '#79A1FC';
-                                noNewPostColour = '#EAA53F';
-                                postBackgroundColour = '#DEE6FA';
-                            break;
-                            
-                            case 'default':
-                            default:
-                                newPostColour = '#95B0CB';
-                                noNewPostColour = '#CBC095';
-                                postBackgroundColour = '#CFCBBC';
-                            break;
-                        }
-                        
-                        WhirlpoolPlus.set('wlr_display_unreadThreadColour',newPostColour);
-                        WhirlpoolPlus.set('wlr_display_readThreadColour',noNewPostColour);
-                        WhirlpoolPlus.set('wlr_display_unreadPostColour',postBackgroundColour);
                     }
                 }
                 
@@ -3391,13 +2859,6 @@ settings._html = '<div id="wppSettingsWrapper">' +
         '<div class="subSettings">' +
             '<p class="subSettings_heading description wpp_hide"><b>Script Configuration</b></p>' +
             '<div class="subSettings_content">' +
-
-				/*'<p class="wpp_hideNotForum">' +
-					'<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoUpdate_enabled">' +
-					' <label for="autoUpdate_enabled">Automatic updater</label>' +
-					' <a href="https://github.com/endorph-soft/wpplus/raw/master/whirlpool_plus.user.js" id="force_update">Force Update</a>' +
-					' <span class="settingDesc">Automatically update the script to the newest version</span>'+
-				'</p>' +*/
 				
 				'<p>' +
 					'<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
@@ -3452,7 +2913,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
         '<div class="subSettings">' +
             '<p class="subSettings_heading description">' +
                 '<b>Forum Display</b>'+
-                '<br /><i>Themes, Custom CSS, Other Formatting Options</i>'+
+                '<br /><i>Custom CSS, Other Formatting Options</i>'+
                 '<br /><i>Recent Activity Overlay, Whim Notification, Dynamic Menu</i>'+
                 '</p>' +
             '<div class="subSettings_content">' +
@@ -3466,54 +2927,6 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_floatSidebar">' +
                     '<label for="display_floatSidebar">Float the sidebar</label>' +
-                '</p>' +
-                
-                '<p>' +
-                    '<select class="wpp_setting" id="display_theme">' +
-                        '<option value="default">Default (by Simon Wright)</option>' +
-                        '<option value="blue">WP Blue (by Foonly)</option>' +
-                        '<option value="teal">WP Teal (by =CHRIS=)</option>' +
-                        '<option value="black">WP Black (by =CHRIS=)</option>' +
-                        '<option value="green">WP Green (by =CHRIS=)</option>' +
-                        '<option value="wood">WP Wood (by =CHRIS=)</option>' +
-                        '<option value="purple">WP Purple (by =CHRIS=)</option>' +
-                        '<option value="classic">WP Classic (by Phyco)</option>' +
-                    '</select>' +
-                    ' <label for="display_theme">Custom Theme</label>' +
-                '</p>' +
-                
-                '<p>' +
-                    '<input class="wpp_setting" type="checkbox" id="display_showFooter">' +
-                    ' <label for="display_showFooter">Show the forum footer</label>' +
-                '</p>' +
-                
-                '<p>' +
-                    '<input class="wpp_setting" type="checkbox" id="display_noTextShadow">' +
-                    ' <label for="display_noTextShadow">Remove Text Shadows</label>' +
-                '</p>' +
-                
-                '<p>' +
-                    '<select class="wpp_setting" id="display_breadcrumbFont">' +
-                        '<option value="default font">default</option>' +
-                        '<option value="Verdana">Verdana</option>' +
-                        '<option value="Arial">Arial</option>' +
-                        '<option value="Georgia">Georgia</option>' +
-                        '<option value="Tahoma">Tahoma</option>' +
-                        '<option value="Trebuchet MS">Trebuchet MS</option>' +
-                    '</select>' +
-                    ' <label for="display_breadcrumbFont">Choose Breadcrumb Font</label>' +
-                '</p>' +
-                
-                '<p>' +
-                    '<select class="wpp_setting" id="display_sidebarFont">' +
-                        '<option value="default font">default</option>' +
-                        '<option value="Verdana">Verdana</option>' +
-                        '<option value="Arial">Arial</option>' +
-                        '<option value="Georgia">Georgia</option>' +
-                        '<option value="Tahoma">Tahoma</option>' +
-                        '<option value="Trebuchet MS">Trebuchet MS</option>' +
-                    '</select>' +
-                    ' <label for="display_sidebarFont">Choose Sidebar Font</label>' +
                 '</p>' + */
                 
                 '<p>' +
@@ -3544,26 +2957,6 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '</p> ' +
                 
                 '<p>' +
-                    '<select class="wpp_setting" id="spinnerMenu">' +
-                        '<option value="none">none</option>' +
-                        '<option value="rightClick">Right Click</option>' +
-                        '<option value="spinner">Spinner</option>' +
-                    '</select>' +
-                    ' <label for="spinnerMenu">Dynamic Menu System (select type)</label>' +
-                    ' <span class="settingDesc">Display a dropdown navigation menu for the site</span>'+
-                '</p>' +
-                
-                '<p>' +
-                    '<select class="wpp_setting" id="spinnerMenu_settingsLocation">' +
-                        '<option value="none">none</option>' +
-                        '<option value="top">Top</option>' +
-                        '<option value="underuser">Under User</option>' +
-                        '<option value="bottom">Bottom</option>' +
-                    '</select>' +
-                    ' <label for="spinnerMenu_settingsLocation">Location of settings link in dynamic menu</label>' +
-                '</p>' +
-                
-                '<p>' +
                     '<span>Custom CSS</span>' +
                     ' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
                     '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 500px; height: 300px; margin:0 auto;"></textarea>' +
@@ -3581,17 +2974,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideClosedThreadsOnProfile">' +
                     ' <label for="display_hideClosedThreadsOnProfile">Hide closed threads on user profiles</label>' +
                 '</p>' +
-                
-                '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="stats_postsPerDay">' +
-                    ' <label for="stats_postsPerDay">Enable "Posts per day" statistic</label>' +
-                '</p>' +
-                
-                '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_userPageInfoToggle">' +
-                    '<label for="display_userPageInfoToggle">Hide/Toggle user info</label>' +
-                '</p> ' +
-                
+                               
                 '<p>' +
                     '<select class="wpp_setting" id="defaultRecentActivityDays">' +
                         '<option value="1">1 Day</option>' +
@@ -3613,12 +2996,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 /*'<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="resetAuraVote">' +
                     ' <label for="resetAuraVote">Add an Aura Reset smiley (?)</label>' +
-                '</p> ' +
-                
-                '<p>' +
-                    '<input class="wpp_setting" type="checkbox" id="whimArchiveSort">' +
-                    '<label for="whimArchiveSort">Sort Whim archives in alphabetical order</label>' +
-                '</p>' + */
+                '</p> ' + */
                 
             '</div>' +
         '</div>' +
@@ -3828,12 +3206,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     ' <span class="settingDesc">Converts videos links into videos</span>'+
                 '</p>  ' +
                 
-                /* '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_syntaxHighlight">' +
-                    ' <label for="display_syntaxHighlight">Syntax Highlighting for code blocks</label>' +
-                '</p> ' +
-            
-                '<p>' +
+                /* '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="compose_enhancedEditor">' +
                     ' <label for="compose_enhancedEditor">Add Whirlcode buttons when creating a new thread (also in wiki)</label>' +
                 '</p>' +
