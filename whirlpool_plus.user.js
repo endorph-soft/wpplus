@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre7
+// @version         5.0.0pre8
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -77,10 +77,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 7,
+    prerelease : 8,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 30,
+    storageVersion : 31,
     
     //Script changelog
     _changelog : {
@@ -505,7 +505,6 @@ WhirlpoolPlus.execute = function(){
     this.css(
         settings.css() +
         // display.css() +
-        // features.css() +
         features.avatar.css() +
         features.recentActivityOverlay.css() +
         // features.spinnerMenu.css() +
@@ -538,7 +537,7 @@ WhirlpoolPlus.execute = function(){
         // display.hidePosts();
         // display.syntaxHighlight();
         // display.emoticons.init();
-        // features.embed();
+        features.embed();
         // features.extraNavLinks();
         // features.auraReset();
         // features.quickEdit.run();
@@ -1428,6 +1427,7 @@ var features = {
             
                 if (imageEnabled && imageMatchRegex.test(link)){
                     // Basic Image Match
+                    linkObject.before('<img src="' + link + '" class="wpp_img">');
                 }else if(imageEnabled && imgurRegex.test(link)){
                     // Imgur Embed
                     var linkSegments = imgurRegex.exec(link);
@@ -3814,7 +3814,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_blue">' +
                     ' <label for="display_emoticons_blue">Use blue smilies</label>' +
-                '</p>' +
+                '</p>' + */
                 
                 '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_images">' +
@@ -3828,7 +3828,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     ' <span class="settingDesc">Converts videos links into videos</span>'+
                 '</p>  ' +
                 
-                '<p class="wpp_hideNotForum">' +
+                /* '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_syntaxHighlight">' +
                     ' <label for="display_syntaxHighlight">Syntax Highlighting for code blocks</label>' +
                 '</p> ' +
