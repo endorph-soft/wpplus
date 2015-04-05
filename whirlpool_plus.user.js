@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre5
+// @version         5.0.0pre6
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -77,10 +77,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 5,
+    prerelease : 6,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 28,
+    storageVersion : 29,
     
     //Script changelog
     _changelog : {
@@ -507,7 +507,7 @@ WhirlpoolPlus.execute = function(){
         // display.css() +
         // features.css() +
         features.avatar.css() +
-        // features.recentActivityOverlay.css() +
+        features.recentActivityOverlay.css() +
         // features.spinnerMenu.css() +
         // features.quickEdit.css() +
         features.whirlpoolLastRead.css() +
@@ -527,7 +527,7 @@ WhirlpoolPlus.execute = function(){
         // display.floatSidebar();
         // display.whimAlert();
         // display.penaltyBoxHighlight();
-        // features.recentActivityOverlay.run();
+        features.recentActivityOverlay.run();
         // features.spinnerMenu.run();
         // features.changeLinks();
         WhirlpoolPlus.tools.sync.init();
@@ -1796,7 +1796,7 @@ features.recentActivityOverlay = {
     },
     
     displayOverlay : function(){
-        $('body.not_IE').append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="' + WhirlpoolPlus.image('reload') + '" /></div><div id="recentActivityHandle">Recent Activity <img src="' + WhirlpoolPlus.image('emoticon_star') + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
+        $('body').append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="' + WhirlpoolPlus.image('reload') + '" /></div><div id="recentActivityHandle">Recent Activity <img src="' + WhirlpoolPlus.image('emoticon_star') + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
 
         
         var activityOpen = false;
@@ -3510,7 +3510,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                         '<option value="Trebuchet MS">Trebuchet MS</option>' +
                     '</select>' +
                     ' <label for="display_sidebarFont">Choose Sidebar Font</label>' +
-                '</p>' + 
+                '</p>' + */
                 
                 '<p>' +
                     '<input class="wpp_setting " type="checkbox" id="recentActivityOverlay">' +
@@ -3533,7 +3533,7 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     ' <span class="settingDesc">How much of your recent activity to use for the overlay</span>'+
                 '</p>' +
                 
-                '<p>' +
+                /*'<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_whimAlert">' +
                     '<label for="display_whimAlert">Whim Notification</label>' +
                     ' <span class="settingDesc">Display a notification when you receive a new WHIM</span>'+
