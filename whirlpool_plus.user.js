@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre6
+// @version         5.0.0pre7
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -77,10 +77,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 6,
+    prerelease : 7,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 29,
+    storageVersion : 30,
     
     //Script changelog
     _changelog : {
@@ -512,7 +512,7 @@ WhirlpoolPlus.execute = function(){
         // features.quickEdit.css() +
         features.whirlpoolLastRead.css() +
         features.enhancedCompose.css() +
-        // features.userNotes.css() +
+        features.userNotes.css() +
         WhirlpoolPlus.tools.sync.css()
     );
 
@@ -551,7 +551,7 @@ WhirlpoolPlus.execute = function(){
             $this = $(this);
             // features.ignoreUser.userIgnore($this);
             features.avatar.avatariseRow($this);
-            // features.userNotes.runOnReply($this);
+            features.userNotes.runOnReply($this);
         });
         
     }
@@ -1413,7 +1413,7 @@ var features = {
         
         var vimeoRegex = /http(s)?:\/\/(www.)?vimeo.com\/([0-9]*)/i;
         
-        WhirlpoolPlus.css('.wpx_img { max-width: ' + maxContentWidth + 'px; }');
+        WhirlpoolPlus.css('.wpp_img { max-width: ' + maxContentWidth + 'px; }');
         
         var vidWidth = 390;
         var vidHeight = 315;
@@ -1428,7 +1428,6 @@ var features = {
             
                 if (imageEnabled && imageMatchRegex.test(link)){
                     // Basic Image Match
-                    linkObject.before('<img src="' + link + '" class="wpx_img">');
                 }else if(imageEnabled && imgurRegex.test(link)){
                     // Imgur Embed
                     var linkSegments = imgurRegex.exec(link);
@@ -2927,7 +2926,7 @@ features.userNotes = {
         return '.userNotes_button { display: inline-block; cursor: pointer; width: 16px; height: 16px;}' +
             '.userNotes_button_notes { background-image: url(' + WhirlpoolPlus.image('red_note') + '); }' +
             '.userNotes_button_noNotes { background-image: url(' + WhirlpoolPlus.image('green_note') + '); }' +
-            '.userNotes_dialog textarea { width: 100%; height: 250px; }' +
+            '.userNotes_dialog textarea { width: 100%; height: 200px; }' +
             '.userNotes_close { width: 100%; text-align: right; padding-bottom: 5px; font-weight: bold; cursor: pointer; }';
     },
     
@@ -2955,7 +2954,12 @@ features.userNotes = {
                 close: true,
                 closeHTML : '<div class="userNotes_close">Close</div>',
                 containerCss : {
-                    height: '280px',
+                    height : '240px',
+					width : '280px',
+					'text-align' : 'center',
+					'background-color' : '#ddd',
+					'border' : '1px solid #000',
+					'padding' : '20px',
                 },
                 onClose : function(){
                     features.userNotes._setNotes(userNumber,notebox.val());
@@ -3599,14 +3603,14 @@ settings._html = '<div id="wppSettingsWrapper">' +
                         '<option value="120">120 Days</option>' +
                     '</select>' +
                     ' <label for="defaultRecentActivityDays">Default amount of recent activity to display on a user page</label>' +
-                '</p>' +
+                '</p>' + */
 
                 '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="userNotes_enabled">' +
                     ' <label for="userNotes_enabled">User Notes</label>' +
                 '</p> ' +
                 
-                '<p class="wpp_hideNotForum">' +
+                /*'<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="resetAuraVote">' +
                     ' <label for="resetAuraVote">Add an Aura Reset smiley (?)</label>' +
                 '</p> ' +
