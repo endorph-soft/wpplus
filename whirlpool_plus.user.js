@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         4.5.14
+// @version         4.5.15
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -80,16 +80,17 @@
 var WhirlpoolPlus = {
     
     //Script Version
-    version : '4.5.14',
+    version : '4.5.15',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 23,
+    storageVersion : 24,
     
     //Script changelog
     _changelog : {
+		'4.5.15' : '<ul><li>Prepare for upcoming Whirlpool Redesign</li></ul>',
 		'4.5.14' : '<ul><li>Bugfix for 4.5.13</li></ul>',
 		'4.5.13' : '<ul><li>Change all server resources to https</li></ul>',
         '4.5.12' : '<ul><li>Fixed infinite redirect on profile page</li><li>Convert search archive links to standard links</li><li>Video embedding option added (youtube, vimeo)</li><li>Remove non-functional oEmbed option</li><li>Removed non-functional search sort code</li></ul>',
@@ -219,6 +220,7 @@ var WhirlpoolPlus = {
         'wiki' : '.net.au/wiki/', //Wiki
         'watchedThreads' : 'action=watched', // Watched threads page
         'watchedThreadAlert' : '?a=subs-', // Watched threads page
+		'oldScript' : 'beta.cfm?switch=gm', // Old script error page
     },
     
     matchUrl : function(url){
@@ -458,6 +460,10 @@ WhirlpoolPlus.redirects = function(){
 //Usually alert pages, or (T|B)SOD
 WhirlpoolPlus.executeNojQuery = function(){
     
+	if(WhirlpoolPlus.pageType.oldScript){
+		alert("WP+ MESSAGE\n\nA new Whirlpool design has been launched that is incompatible with the 4.x.x series of WP+, and the automatic update seems to have failed. You'll need to:\n\n1. Disable Greasemonkey and/or WP+\n2. Visit the WP+ Thread in Feedback\n3. Install the latest 5.x.x version\n4. Re-enable Greasemonkey/WP+.");
+	}
+	
     /** RUN: Watched Thread Alert **/
     if(WhirlpoolPlus.pageType.watchedThreadAlert){
         if (WhirlpoolPlus.get('watchedThreadsAlert') == 'watched' || document.referrer.indexOf('?action=watched') >= 0) {
