@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre10
+// @version         5.0.0pre11
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -71,10 +71,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 10,
+    prerelease : 11,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 33,
+    storageVersion : 34,
     
     //Script changelog
     _changelog : {
@@ -469,7 +469,7 @@ WhirlpoolPlus.execute = function(){
     //Dump CSS as early as possible
     this.css(
         settings.css() +
-        // display.css() +
+        display.css() +
         features.avatar.css() +
         features.recentActivityOverlay.css() +
         // features.quickEdit.css() +
@@ -833,14 +833,14 @@ var display = {
         
         //Widescreen
         if (WhirlpoolPlus.get('display_widescreen')) {
-            styles += '#root, #footer {width: 99.5% !important;max-width: none !important;} #content > span.shim2 {display: none !important;}body,html,#root{margin:0;padding:0;border:0;}';
+            styles += '#topbar, #page, #footer { max-width: none; }';
         }
         
         //Custom CSS
-        styles += WhirlpoolPlus.get('display_customCSS');
+        // styles += WhirlpoolPlus.get('display_customCSS');
         
         //Penalty Box
-        styles += '.penalty_box {background-image:url(' + WhirlpoolPlus.image('light_gradient') + ')!important;background-repeat:repeat !important; background-color: #fff !important; } ';
+        // styles += '.penalty_box {background-image:url(' + WhirlpoolPlus.image('light_gradient') + ')!important;background-repeat:repeat !important; background-color: #fff !important; } ';
         
         
         return styles;
@@ -2911,13 +2911,13 @@ settings._html = '<div id="wppSettingsWrapper">' +
                 '</p>' +
             '<div class="subSettings_content">' +
             
-                /* '<p>' +
+                '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_widescreen">' +
                     '<label for="display_widescreen">Widescreen Display</label>' +
                     ' <span class="settingDesc">Stretch the website to fit the entire screen</span>'+
                 '</p>' +
                 
-                '<p>' +
+                /* '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_floatSidebar">' +
                     '<label for="display_floatSidebar">Float the sidebar</label>' +
                 '</p>' + */
@@ -3323,6 +3323,8 @@ try{
         if(!jQuery.browser){jQuery.uaMatch=function(e){e=e.toLowerCase();var t=/(chrome)[ \/]([\w.]+)/.exec(e)||/(webkit)[ \/]([\w.]+)/.exec(e)||/(opera)(?:.*version|)[ \/]([\w.]+)/.exec(e)||/(msie) ([\w.]+)/.exec(e)||e.indexOf("compatible")<0&&/(mozilla)(?:.*? rv:([\w.]+)|)/.exec(e)||[];return{browser:t[1]||"",version:t[2]||"0"}};matched=jQuery.uaMatch(navigator.userAgent);browser={};if(matched.browser){browser[matched.browser]=true;browser.version=matched.version}if(browser.chrome){browser.webkit=true}else if(browser.webkit){browser.safari=true}jQuery.browser=browser}
     }
     
+	loadSimpleModal($);
+	
     WhirlpoolPlus.redirects();
     WhirlpoolPlus.init();
     
@@ -3331,7 +3333,6 @@ try{
     }else{
         // If this is Firefox 3.6 or Chrome, jQuery cannot bind events to window and document
         // Need to use unsafeWindow and unsafeWindow.document
-		
 		
         if(($.browser.mozilla == true && $.browser.version.substring(0,4) == '1.9.') || $.browser.webkit == true){
             WhirlpoolPlus.compatibilityMode();
