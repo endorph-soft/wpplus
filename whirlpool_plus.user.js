@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre11
+// @version         5.0.0pre12
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -71,10 +71,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 11,
+    prerelease : 12,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 34,
+    storageVersion : 35,
     
     //Script changelog
     _changelog : {
@@ -248,7 +248,6 @@ var WhirlpoolPlus = {
         links_rep : true,
         links_unanswered : true,
         resetAuraVote : false,
-        autoSubscribeToNewThread : false,
         defaultRecentActivityDays : '7',
         quickEdit : true,
         wlr_display_flipStyles : false,
@@ -260,9 +259,6 @@ var WhirlpoolPlus = {
         wlr_display_unreadThreadColour : '#95B0CB',
         wlr_display_readThreadColour: '#CBC095',
         compose_quickReply : true,
-        compose_quickReply_backup : '',
-        compose_quickReply_preview : true,
-        compose_quickReply_goToEndAfterPost : false,
         compose_quickReply_emoticons : false,
         compose_autoExpand : true,
         compose_enhancedEditor : true,
@@ -430,40 +426,6 @@ WhirlpoolPlus.executeNojQuery = function(){
 	
 }
 
-//This one runs on wiki/job board etc. Anywhere that isn't forums.whirlpool.net.au/*
-WhirlpoolPlus.executeNotForum = function(){
-    //Dump CSS as early as possible
-    this.css(
-        settings.css() +
-        display.css() +
-        features.css() +
-        features.avatar.css() +
-        features.recentActivityOverlay.css() +
-        features.enhancedCompose.css()
-    );
-    
-    /** RUN: Not alerts **/
-    if(!WhirlpoolPlus.pageType.alert){
-        settings.init();
-        display.wpPlusLogo();
-        display.floatSidebar();
-        display.whimAlert();
-        features.changeLinks();
-        features.recentActivityOverlay.run();
-    }
-    
-    /** RUN: Whim Reading **/
-    if(WhirlpoolPlus.pageType.whimRead){
-        $('#replies table tr').each(features.avatar.avatariseWhim);
-    }
-    
-    /** RUN: Editing (wiki) **/
-    if(WhirlpoolPlus.pageType.wiki && WhirlpoolPlus.pageType.edit){
-        features.enhancedCompose.generalCompose('#f_body');
-    }
-    
-}
-
 //This function is used to run the script on the main forums page
 WhirlpoolPlus.execute = function(){
     //Dump CSS as early as possible
@@ -474,7 +436,7 @@ WhirlpoolPlus.execute = function(){
         features.recentActivityOverlay.css() +
         // features.quickEdit.css() +
         features.whirlpoolLastRead.css() +
-        features.enhancedCompose.css() +
+        features.editor.css() +
         features.userNotes.css() +
         WhirlpoolPlus.tools.sync.css()
     );
@@ -499,8 +461,9 @@ WhirlpoolPlus.execute = function(){
         // features.auraReset();
         // features.quickEdit.run();
         features.whirlpoolLastRead.runPosts();
-        // features.enhancedCompose.quickReply();
-		features.enhancedCompose.whirlcodify('#replyformBlock #body');
+        features.editor.showInlineReply();
+		features.editor.whirlcodify('#replyformBlock #body');
+		features.editor.autosize('#replyformBlock #body');
         
         //Loop through each reply
         $('#replies .reply:not(.preview)').each(function(){
@@ -534,14 +497,12 @@ WhirlpoolPlus.execute = function(){
     /** RUN: Posting (new thread, reply) **/
     if(WhirlpoolPlus.pageType.newThread || WhirlpoolPlus.pageType.reply){
         // features.autoSubscribe();
-        // features.enhancedCompose.generalCompose('#body');
-		features.enhancedCompose.whirlcodify('#replyformBlock #body');
+		features.editor.whirlcodify('#replyformBlock #body');
     }
     
     /** RUN: Editing (posts) **/
     if(WhirlpoolPlus.pageType.forums && WhirlpoolPlus.pageType.edit){
-        // features.enhancedCompose.generalCompose('#body');
-		features.enhancedCompose.whirlcodify('#replyformBlock #body');
+		features.editor.whirlcodify('#replyformBlock #body');
     }
 	
 	return;
@@ -583,7 +544,7 @@ WhirlpoolPlus.tools = {
     
     getUsername : function(){
         return $('#ub_name a').text();
-    }
+    },
 
 };
 
@@ -1182,7 +1143,7 @@ var features = {
             }
         });
     },
-    
+	
 	disabled : {
 	
 		removeLinkToLastPage : function(){
@@ -1250,12 +1211,6 @@ var features = {
 					var clickFunction = 'userVote(' + replyId + ',' + block.prop('title') + ',0,' + WhirlpoolPlus.tools.getUserID() + ',this);';
 					block.children('span[id$="sn1"]').after(' <span class="voteitem" id="vote' + replyId + 's0" title="reset vote" onclick="' + clickFunction + '">?</span> ');
 				});
-			}
-		},
-		
-		autoSubscribe : function(){
-			if(WhirlpoolPlus.get('autoSubscribeToNewThread')) {
-				$('#modesu').prop('checked', 'checked');
 			}
 		},
 			
@@ -1977,7 +1932,7 @@ features.whirlpoolLastRead = {
     
 };  
 
-features.enhancedCompose = {
+features.editor = {
 
 	css : function(){
 		return '' +
@@ -1994,6 +1949,44 @@ features.enhancedCompose = {
 			'#wpp_whirlcode button { padding: 2px 4px; margin: 2px; }';
 	},
 
+	whirlcodify : function(target){
+		$target = $(target)
+		
+		$target.parents('.editor').prepend('<div id="wpp_whirlcode"></div>');
+		
+		this._addWhirlcodeControls('#wpp_whirlcode',$target);
+	},
+
+	autosize : function(target){
+		if(WhirlpoolPlus.get('compose_autoExpand')){
+			var $target = $(target);
+			
+			// Patch the onpage appendQuote function to fire an event to alert autosize
+			$('.quote button').bind('click',function(){
+				// There isn't an easy way to detect when the quote has been 'pasted'
+				// So we cheat
+				setTimeout(function(){
+					features.editor._triggerAutosize();
+				},100);
+			});
+			
+			// Trigger autosize behaviour
+			autosize($target);
+		}
+	},
+	
+	showInlineReply : function(){
+		if(WhirlpoolPlus.get('compose_quickReply')){
+			// Trigger the inbuilt quick reply functionality
+			$('#replyformBlock').show();
+		}
+		
+		if(WhirlpoolPlus.get('compose_autoExpand')){
+			$('#replyformBlock textarea').prop('rows','5');
+		}
+
+	},
+	
     _basicWhirlcode : {
         bold : { left : '[*', right : '*]', name : 'Bold' },
         italic : { left : '[/', right : '/]', name : 'Italic' },
@@ -2022,7 +2015,7 @@ features.enhancedCompose = {
             var urlPrompt = window.prompt('Enter URL:', 'http://');
             
             if ((urlPrompt !== 'http://') && (urlPrompt != '') & (urlPrompt != null)) {
-                features.enhancedCompose._insert(textarea,'<a href="' + urlPrompt + '">' + selection + '</a>',start,end);
+                features.editor._insert(textarea,'<a href="' + urlPrompt + '">' + selection + '</a>',start,end);
             }
         }, },
         link : { left: '', right : '', name : 'Link', callback : function(textarea,start,end,selection){
@@ -2039,7 +2032,7 @@ features.enhancedCompose = {
                     selection = 'http://' + selection;
                 }
                 
-                features.enhancedCompose._insert(textarea,'<a href="' + selection + '">' + linkPrompt + '</a>',start,end);
+                features.editor._insert(textarea,'<a href="' + selection + '">' + linkPrompt + '</a>',start,end);
             }
         }, },
         escape : { left: '', right : '', name : 'Escape Whirlcode', callback : function(textarea,start,end,selection){
@@ -2048,10 +2041,10 @@ features.enhancedCompose = {
                 return;
             }
         
-            features.enhancedCompose._insert(textarea,selection.replace(/\[([^\.])/mg,'[.$1').replace(/([^\.])]/mg,'$1.]'),start,end);
+            features.editor._insert(textarea,selection.replace(/\[([^\.])/mg,'[.$1').replace(/([^\.])]/mg,'$1.]'),start,end);
         }, },
         hr : { left: '', right : '', name : 'Horizontal Rule', callback : function(textarea,start,end,selection){
-            features.enhancedCompose._insert(textarea,'\n-----\n',end,end);
+            features.editor._insert(textarea,'\n-----\n',end,end);
         }, },
         code : { left: '', right : '', name : 'Code Block', callback : function(textarea,start,end,selection){
             var lineBegin;
@@ -2062,14 +2055,14 @@ features.enhancedCompose = {
             }
         
             if(lineBegin > 0){
-                features.enhancedCompose._insert(textarea,'\n$ ',lineBegin,lineBegin+1);
+                features.editor._insert(textarea,'\n$ ',lineBegin,lineBegin+1);
             }else{
-                features.enhancedCompose._insert(textarea,'$ ',0,0);
+                features.editor._insert(textarea,'$ ',0,0);
             }
         }, },
     },
     
-    addWhirlcodeControls : function(locationID,textarea){   
+    _addWhirlcodeControls : function(locationID,textarea){   
         var controls = '';
         
         //Generate first row - basic controls
@@ -2107,11 +2100,11 @@ features.enhancedCompose = {
             var left, right;
             
             if(type == 'basic'){
-                left = features.enhancedCompose._basicWhirlcode[code].left;
-                right = features.enhancedCompose._basicWhirlcode[code].right;
+                left = features.editor._basicWhirlcode[code].left;
+                right = features.editor._basicWhirlcode[code].right;
             }else if(type == 'advanced'){
-                left = features.enhancedCompose._advancedWhirlcode[code].left;
-                right = features.enhancedCompose._advancedWhirlcode[code].right;
+                left = features.editor._advancedWhirlcode[code].left;
+                right = features.editor._advancedWhirlcode[code].right;
             }
             
             
@@ -2124,19 +2117,19 @@ features.enhancedCompose = {
             if(type == 'basic' || type == 'advanced'){  
                 if(selection == ''){
                     if((textarea.val().split(left).length + textarea.val().split(right).length) % 2 == 0){
-                        features.enhancedCompose._insert(textarea,left,selectionStart,selectionEnd);
+                        features.editor._insert(textarea,left,selectionStart,selectionEnd);
                     }else{
-                        features.enhancedCompose._insert(textarea,right,selectionStart,selectionEnd);
+                        features.editor._insert(textarea,right,selectionStart,selectionEnd);
                     }
                 }else{
-                    features.enhancedCompose._insert(textarea,selection.replace(/^(.+)/mg,left + '$1' + right),selectionStart,selectionEnd);
+                    features.editor._insert(textarea,selection.replace(/^(.+)/mg,left + '$1' + right),selectionStart,selectionEnd);
                 }
                 
                 if(type == 'advanced'){
-                    features.enhancedCompose._advancedWhirlcode[code].callback(textarea,selectionStart,selectionEnd,selection);
+                    features.editor._advancedWhirlcode[code].callback(textarea,selectionStart,selectionEnd,selection);
                 }
             }/*else if(type == 'emoticon'){
-                features.enhancedCompose._insert(textarea,code + ' ',selectionEnd,selectionEnd);
+                features.editor._insert(textarea,code + ' ',selectionEnd,selectionEnd);
             }*/
             
         });
@@ -2168,262 +2161,18 @@ features.enhancedCompose = {
     
 	_forceUpdate : function(textarea){
 		unsafeWindow.$(textarea[0]).trigger('keyup');
+		this._triggerAutosize();
 	},
 	
-	whirlcodify : function(targetSelector){
-		var replyTextarea = $(targetSelector);
-		
-		replyTextarea.parents('.editor').prepend('<div id="wpp_whirlcode"></div>');
-		
-		this.addWhirlcodeControls('#wpp_whirlcode',replyTextarea);
+	_triggerAutosize : function(){
+		// Autosize doesn't speak jQuery...
+		var evt = document.createEvent('Event');
+		evt.initEvent('autosize.update', true, false);
+		$('textarea[data-autosize-on="true"]').each(function(index, value){
+			value.dispatchEvent(evt);
+		});
 	},
-
-	disabledCode : {
-		_isPreview : false,
-		
-		_replyPreview : function(replyContents,waitTime){
-			if(!this._isPreview){
-				//Create the preview row
-				$('#replies .reply:last').after('<div class="reply" id="quickReply_preview">' + 
-					'<div class="replymeta"><div class="replyuser"><div class="replyuser-inner"></div></div>' + 
-					'<div class="replytools"><div class="replytools-inner"></div></div></div><div class="replytext bodytext"></div></div>');
-				
-				$('#quickReply_preview').hide();
-				
-				this._isPreview = true;
-			}
-			
-			if(typeof waitTime == 'undefined'){
-				waitTime = 600;
-			}
-			
-			var previewRow = $('#quickReply_preview');
-			var previewContainer = $('#quickReply_preview .replytext');
-			
-			var previewTimer;
-			var previewWait = false;
-			if (!previewWait) {
-				previewWait = true;
-				previewTimer = setTimeout(function(){
-					var replyText = replyContents.val();
-					
-					if(replyText == ''){
-						$('#quickReply_preview').hide();
-					}else{
-						previewContainer.html(features.enhancedCompose._textProcess(replyText));
-						$('#quickReply_preview').show();
-					}
-					
-					previewWait = false;
-				},
-				waitTime);
-			}
-		},
-		
-		_textProcess : function(text){
-			text = unsafeWindow.whirlcode2(text); //use default settings
-			text = display.emoticons.run(text);
-			return text;
-		},
-		
-		quickReply : function(){
-			
-			if(WhirlpoolPlus.get('compose_quickReply')){
-				
-				//Check if this thread can be replied to
-				var replyLinkObject = $('.foot_reply a');
-				var replyLink = false;
-				
-				if(replyLinkObject.length == 1){
-					replyLink = replyLinkObject.prop('href');
-				}
-				
-				if(replyLink != false){
-					$('#replies').append('<div id="quickReply"><div id="quickReply_whirlcode"></div><div id="quickReply_container"><textarea id="quickReply_contents"></textarea><div id="quickReply_controls"><div class="quickReply_control_container"><button id="quickReply_clear">Clear</button></div><div class="quickReply_control_container"><button id="quickReply_post">Post Reply</button></div></div></div></div>');
-					
-					var replyContents = $('#quickReply_contents');
-					
-					if(WhirlpoolPlus.title.match(' - Focused - The Pool Room')){
-						replyContents.addClass('quickReply_focused');
-					}
-					
-					this.addWhirlcodeControls('#quickReply_whirlcode',replyContents);
-					this._quickQuote(replyContents);
-					
-					//Load backup
-					if(replyContents.val() == ''){
-						replyContents.val(WhirlpoolPlus.get('compose_quickReply_backup'));
-					}
-					
-					//Setup autosize
-					if(WhirlpoolPlus.get('compose_autoExpand')){
-						replyContents.autosize({append : '\n'});
-					}
-					
-					//On change
-					replyContents.keyup(function(){
-						WhirlpoolPlus.set('compose_quickReply_backup',replyContents.val());
-						if(WhirlpoolPlus.get('compose_quickReply_preview')){
-							features.enhancedCompose._replyPreview(replyContents);
-						}
-					});
-					
-					//The clear button
-					$('#quickReply_clear').click(function(){
-						//Clear the textarea, and simulate a keypress
-						replyContents.val('');
-						features.enhancedCompose._forceUpdate(replyContents);
-					});
-					
-					//Prepare to submit post
-					var startTime = this._getFormattedTime();
-					var whirlcodeOptions = 'modewc=true&modeht=true&modewl=true&modest=true';
-					
-					$('#quickReply_post').click(function(){
-						if(replyContents.val() == ''){
-							alert('WP+: Quick Reply is empty- cannot post');
-							return;
-						}
-					
-						features.enhancedCompose._submitPost(replyContents,replyLink,startTime,whirlcodeOptions);
-					});
-					
-					$(WhirlpoolPlus.document).keydown(function(event){
-						if(event.ctrlKey == 1 && event.keyCode == 13) {
-							if(replyContents.val() == ''){
-								alert('WP+: Quick Reply is empty- cannot post');
-								return;
-							}
-						
-							features.enhancedCompose._submitPost(replyContents,replyLink,startTime,whirlcodeOptions);
-						}
-					});
-					
-				}
-			}
-			
-		},
-		
-		_submitPost : function(textarea,replyUrl,startTime,whirlcodeOptions){
-			textarea.addClass('quickReply_posting').prop('readonly','readonly');
-			
-			//Simulate a post
-			$.get(replyUrl, function(data){
-			
-				var tinkle = data.split('name="tinkle" value="')[1].split('">')[0];
-				
-				if(WhirlpoolPlus.get('autoSubscribeToNewThread')){
-					whirlcodeOptions += '&modesu=true'
-				}
-				
-				$.ajax({
-					type: 'POST',
-					url: replyUrl,
-					data: 'version=3&post2=post&form=too+right&tinkle=' + tinkle + '&poll_enabled=false&poll_choice_size=0&timestart=%7Bts+%27' + encodeURIComponent(startTime) + '%27%7D&body=' + encodeURIComponent(textarea.val()) + '&' +  whirlcodeOptions + '&cliptemp=Paste+external+quotes+here',
-					success: function(msg){
-						textarea.removeClass('quickReply_posting').prop('readonly','');
-					
-						if (msg.indexOf('You are quoting significantly more words than you have written.') != -1){
-							alert('WP+: Could not submit reply- Overquoting');
-						}else{
-							//Post successful
-							
-							//Erase textarea
-							textarea.val('');
-							//This will update the backup, and remove the preview
-							features.enhancedCompose._replyPreview(textarea,0);
-							features.enhancedCompose._forceUpdate(textarea);
-							
-							if (WhirlpoolPlus.get('compose_quickReply_goToEndAfterPost')){
-								window.location = window.location.protocol + '//forums.whirlpool.net.au/forum-replies.cfm?t=' + WhirlpoolPlus.tools.getThreadNumber() + '&p=-1&#bottom';
-							}else{
-								//Need to get the last post for the user
-								$.get(
-									window.location.protocol + '//forums.whirlpool.net.au/forum-replies.cfm?t=' + WhirlpoolPlus.tools.getThreadNumber() + '&p=-1',
-									function(data){
-										$('#previewTR').remove();
-										var newPost = $(data).find('#replylist .reply:last');
-										var replyNumberLinks = newPost.prevAll('a[name!="bottom"]');
-										var quickEdit = $('<br><a class="wpp-edit">(quick edit)</a>').on('click', features.quickEdit._onClick);
-										
-										newPost.find('.actions a[href^="/forum/index.cfm?action=edit"]').after(quickEdit);
-										
-										$('#replylist .reply:last').after(newPost).after(replyNumberLinks[0]).after(replyNumberLinks[1]);
-										
-										features.avatar.avatariseRow(newPost);
-										features.userNotes.runOnReply(newPost);
-									}
-								);
-							}
-						}
-					},
-					error: function (XMLHttpRequest, textStatus, errorThrown) {
-						alert('WP+: Could not submit reply- Unknown Error. Please try again.');
-					}
-				});
-			});
-		},
-		
-		_getFormattedTime : function(){
-			var xDate = new Date();
-			var gF = xDate.getFullYear();
-			var gM = xDate.getMonth() + 1;
-			var dArr = ['' + gM + '', '' + xDate.getDate() + '', '' + xDate.getHours() + '', '' + xDate.getMinutes() + '', '' + xDate.getSeconds() + ''];
-
-			for (var i = 0; i < dArr.length; i++) {
-				if (dArr[i].length == 1) {
-					dArr[i] = '0' + dArr[i];
-				}
-			}
-			
-			return gF + "-" + dArr[0] + "-" + dArr[1] + "+" + dArr[2] + ":" + dArr[3] + ":" + dArr[4];
-		},
-		
-		_quickQuote : function(textarea){
-			$('.tools .greylink:first-child').after('<span class="bar"> | </span><a class="quickReply_quote greylink" href="#">q-quote</a>');
-			
-			$('.quickReply_quote').click(function(){
-				var selectionParent = $(WhirlpoolPlus.window.getSelection().getRangeAt(0).commonAncestorContainer.parentNode).closest('div.reply');
-				
-				if(selectionParent.length != 1){
-					alert('WP+: Cannot quote across multiple posts, or outside posts');
-					return false;
-				}
-				
-				var replyID = selectionParent.prop('id').split('rr')[1];
-				var username = selectionParent.find('.bu_name').text();
-				
-				var quotation = window.getSelection().toString().replace(/^(.+)$/mg, '["$1"]');
-				
-				if(textarea.val() == ''){
-					textarea.val(textarea.val() + '@' + replyID + ' ' + username + ' writes... \n' + quotation + '\n\n');
-				}else{
-					textarea.val(textarea.val() + '\n@' + replyID + ' ' + username + ' writes... \n' + quotation + '\n\n');
-				}
-				
-				features.enhancedCompose._forceUpdate(textarea);
-				
-				return false;
-			});
-			
-		},
-		
-		generalCompose : function(id){
-			if(WhirlpoolPlus.get('compose_enhancedEditor')){
-				
-				var textarea = $(id);
-				textarea.before('<div id="quickReply_whirlcode">');
-				
-				this.addWhirlcodeControls('#quickReply_whirlcode',textarea);
-				
-				if(typeof unsafeWindow.doPreview == 'function'){
-					$('.quickReply_whirlcodeButton').mouseup(function(){
-						unsafeWindow.doPreview();
-					});
-				}
-			}
-		}
-	}
+	
 };
 
 features.userNotes = {
@@ -3125,10 +2874,10 @@ settings._html = '<div id="wppSettingsWrapper">' +
             '<p class="subSettings_heading description"><b>Quick Reply and Quick Edit</b></p>' +
             '<div class="subSettings_content">' +
             
-                /*'<p>' +
+                '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply">' +
                     ' <label for="compose_quickReply">Quick Reply</label>' +
-                    ' <span class="settingDesc">Adds a Quick Reply box to the bottom of each page</span>'+
+                    ' <span class="settingDesc">Automatically open the inline reply box at the end of every thread</span>'+
                 '</p>' +
 
                 '<p>' +
@@ -3137,26 +2886,10 @@ settings._html = '<div id="wppSettingsWrapper">' +
                     ' <span class="settingDesc">Auto expand quick reply box as you type</span>'+
                 '</p>' +
 
-                '<p>' +
+                /* '<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_emoticons">' +
                     ' <label for="compose_quickReply_emoticons">Quick Reply Smilies</label>' +
                     ' <span class="settingDesc">Display the available smilies under the whirlcode buttons</span>'+
-                '</p>' +
-                
-                '<p>' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_preview">' +
-                    ' <label for="compose_quickReply_preview">Auto Preview</label>' +
-                    ' <span class="settingDesc">Automatically preview what you are typing in the quick reply box</span>'+
-                '</p>' +
-                
-                '<p>' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_goToEndAfterPost">' +
-                    '<label for="compose_quickReply_goToEndAfterPost">Go to the last post in the thread after posting</label>' +
-                '</p>' +
-                
-                '<p>' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoSubscribeToNewThread">' +
-                    ' <label for="autoSubscribeToNewThread">Automatically subscribe to a thread after posting</label>' +
                 '</p>' +
                 
                 '<p>' +
@@ -3340,11 +3073,7 @@ try{
         
         if(WhirlpoolPlus.pageType.forums){
             WhirlpoolPlus.execute();
-        }else{
-            // WhirlpoolPlus.executeNotForum();
-        }
-		
-                
+        }       
     }
 	
 }catch(e){
