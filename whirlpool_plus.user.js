@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre9
+// @version         5.0.0pre10
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -18,51 +18,51 @@
 // @exclude         https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
 // @exclude         http://forums.whirlpool.net.au/archive/*
 // @exclude         https://forums.whirlpool.net.au/archive/*
-// @require         https://code.jquery.com/jquery-2.1.1.min.js
-// @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.simplemodal.js
-// @require         https://wpplus.endorph.net/resources/js/min/delayedLoad.jquery.autosize.js
-// @require         https://wpplus.endorph.net/resources/js/min/tea.js
-// @resource        emoticon_angry      https://wpplus.endorph.net/resources/png/angry.png
-// @resource        emoticon_blushing   https://wpplus.endorph.net/resources/png/blushing.png
-// @resource        emoticon_confused   https://wpplus.endorph.net/resources/png/confused.png
-// @resource        emoticon_cool       https://wpplus.endorph.net/resources/png/cool.png
-// @resource        emoticon_cry        https://wpplus.endorph.net/resources/png/crying.png
-// @resource        emoticon_frown      https://wpplus.endorph.net/resources/png/frown.png
-// @resource        emoticon_gasp       https://wpplus.endorph.net/resources/png/gasp.png
-// @resource        emoticon_grin       https://wpplus.endorph.net/resources/png/grin.png
-// @resource        emoticon_kiss       https://wpplus.endorph.net/resources/png/kiss.png
-// @resource        emoticon_lips       https://wpplus.endorph.net/resources/png/lips.png
-// @resource        emoticon_shout      https://wpplus.endorph.net/resources/png/shouting.png
-// @resource        emoticon_sleep      https://wpplus.endorph.net/resources/png/sleeping.png
-// @resource        emoticon_smile      https://wpplus.endorph.net/resources/png/smile.png
-// @resource        emoticon_smirk      https://wpplus.endorph.net/resources/png/smirk.png
-// @resource        emoticon_straight   https://wpplus.endorph.net/resources/png/straight.png
-// @resource        emoticon_tongue     https://wpplus.endorph.net/resources/png/tongue.png
-// @resource        emoticon_wink       https://wpplus.endorph.net/resources/png/wink.png
-// @resource        emoticon_star       https://wpplus.endorph.net/resources/png/star.png
-// @resource        old_blue_anxious    https://wpplus.endorph.net/resources/gif/anxious.gif
-// @resource        old_blue_clown      https://wpplus.endorph.net/resources/gif/clown.gif
-// @resource        old_blue_cool       https://wpplus.endorph.net/resources/gif/cool.gif
-// @resource        old_blue_eyes       https://wpplus.endorph.net/resources/gif/eyes.gif
-// @resource        old_blue_grin       https://wpplus.endorph.net/resources/gif/grin.gif
-// @resource        old_blue_happy      https://wpplus.endorph.net/resources/gif/happy.gif
-// @resource        old_blue_happy2     https://wpplus.endorph.net/resources/gif/happy-2.gif
-// @resource        old_blue_neutral    https://wpplus.endorph.net/resources/gif/neutral.gif
-// @resource        old_blue_ninja      https://wpplus.endorph.net/resources/gif/ninja.gif
-// @resource        old_blue_sad        https://wpplus.endorph.net/resources/gif/sad.gif
-// @resource        old_blue_sad2       https://wpplus.endorph.net/resources/gif/sad-2.gif
-// @resource        old_blue_smirk      https://wpplus.endorph.net/resources/gif/smirk.gif
-// @resource        old_blue_tongue     https://wpplus.endorph.net/resources/gif/tongue.gif
-// @resource        loader              https://wpplus.endorph.net/resources/gif/loader.gif
-// @resource        reload              https://wpplus.endorph.net/resources/png/reload.png
-// @resource        noavatar            https://wpplus.endorph.net/resources/png/noavatar.png
-// @resource        waiting             https://wpplus.endorph.net/resources/gif/waiting.gif
-// @resource        focusedthread       https://wpplus.endorph.net/resources/png/focusedthread.png
-// @resource        light_gradient      https://wpplus.endorph.net/resources/png/lightgradient.png
-// @resource        green_note          https://wpplus.endorph.net/resources/png/greennote.png
-// @resource        red_note            https://wpplus.endorph.net/resources/png/rednote.png
-// @resource        check               https://wpplus.endorph.net/resources/png/check.png
-// @resource        cross               https://wpplus.endorph.net/resources/png/cross.png
+// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/jquery.min.js
+// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/jquery.simplemodal.min.js
+// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/autosize.min.js
+// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/tea.js
+// @resource        emoticon_angry      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/angry.png
+// @resource        emoticon_blushing   https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/blushing.png
+// @resource        emoticon_confused   https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/confused.png
+// @resource        emoticon_cool       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/cool.png
+// @resource        emoticon_cry        https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/crying.png
+// @resource        emoticon_frown      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/frown.png
+// @resource        emoticon_gasp       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/gasp.png
+// @resource        emoticon_grin       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/grin.png
+// @resource        emoticon_kiss       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/kiss.png
+// @resource        emoticon_lips       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/lips.png
+// @resource        emoticon_shout      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/shouting.png
+// @resource        emoticon_sleep      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/sleeping.png
+// @resource        emoticon_smile      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/smile.png
+// @resource        emoticon_smirk      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/smirk.png
+// @resource        emoticon_straight   https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/straight.png
+// @resource        emoticon_tongue     https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/tongue.png
+// @resource        emoticon_wink       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/wink.png
+// @resource        emoticon_star       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/star.png
+// @resource        old_blue_anxious    https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/anxious.gif
+// @resource        old_blue_clown      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/clown.gif
+// @resource        old_blue_cool       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/cool.gif
+// @resource        old_blue_eyes       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/eyes.gif
+// @resource        old_blue_grin       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/grin.gif
+// @resource        old_blue_happy      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/happy.gif
+// @resource        old_blue_happy2     https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/happy-2.gif
+// @resource        old_blue_neutral    https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/neutral.gif
+// @resource        old_blue_ninja      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/ninja.gif
+// @resource        old_blue_sad        https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/sad.gif
+// @resource        old_blue_sad2       https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/sad-2.gif
+// @resource        old_blue_smirk      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/smirk.gif
+// @resource        old_blue_tongue     https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/tongue.gif
+// @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/loader.gif
+// @resource        reload              https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/reload.png
+// @resource        noavatar            https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/noavatar.png
+// @resource        waiting             https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/gif/waiting.gif
+// @resource        light_gradient      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/lightgradient.png
+// @resource        green_note          https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/greennote.png
+// @resource        red_note            https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/rednote.png
+// @resource        check               https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/check.png
+// @resource        cross               https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/cross.png
+// @resource        gradient            https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/gradient.png
 // ==/UserScript==
 
 var WhirlpoolPlus = {
@@ -71,10 +71,10 @@ var WhirlpoolPlus = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 9,
+    prerelease : 10,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 32,
+    storageVersion : 33,
     
     //Script changelog
     _changelog : {
@@ -1702,28 +1702,24 @@ features.whirlpoolLastRead = {
         var styles = '';
         //Post highlighting
         if(!WhirlpoolPlus.get('wlr_display_flipStyles')){
-            styles += '#replies #replylist .whirlpoolLastRead_readReply .replytools { margin-top: -2px; background-color: ' + WhirlpoolPlus.get('wlr_display_unreadPostColour') + '; background-image: none; }';
+            styles += '#replies #replylist .whirlpoolLastRead_readReply .replytools { margin-top: -2px; background-color: ' + WhirlpoolPlus.get('wlr_display_unreadPostColour') + '; background-image: none; } ';
         }else{
-            styles += '#replies #replylist .whirlpoolLastRead_unreadReply .replytools { background-color: ' + WhirlpoolPlus.get('wlr_display_unreadPostColour') + '; background-image: none; }';
+            styles += '#replies #replylist .whirlpoolLastRead_unreadReply .replytools { background-color: ' + WhirlpoolPlus.get('wlr_display_unreadPostColour') + '; background-image: none; } ';
         }
         
         //Tracker disable
-        styles += '#wlr_disableTracker { height: 40px; width: 40px; position: fixed; top: 0px; right: 0px; border-bottom-left-radius: 30px; background-color: #3A437B; z-index: 10; }' +
-            ' .wlr_disableTracker_img { width: 25px; position: relative; top: 5px; left: 10px; } ' +
-            ' #wlr_disableTracker_disabled { display: none; } ';
+        styles += '#wlr_disableTracker { height: 40px; width: 40px; position: fixed; top: 0px; right: 0px; border-bottom-left-radius: 30px; background-color: #3A437B; z-index: 10; } ' +
+            '.wlr_disableTracker_img { width: 25px; position: relative; top: 5px; left: 10px; } ' +
+            '#wlr_disableTracker_disabled { display: none; } ';
             
             
         //Thread highlighting
-        styles += '.whirlpoolLastRead_unreadPosts { background: url("https://wpplus.endorph.net/resources/png/gradient.png") repeat scroll 0 0 ' + 
-            WhirlpoolPlus.get('wlr_display_unreadThreadColour') + ' !important;  }' +
-            '.whirlpoolLastRead_noUnreadPosts { background: url("https://wpplus.endorph.net/resources/png/gradient.png") repeat scroll 0 0 ' +  
-            WhirlpoolPlus.get('wlr_display_readThreadColour') + ' !important;  }' +
-            '#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top: -5px; opacity:0.3; border-bottom-width:1px; float: left; }' +
-            '#content a.whirlpoolLastRead_markAsRead { margin-top: -8px; }';
-            
-        
+        styles += '.whirlpoolLastRead_unreadPosts { background: url(' + WhirlpoolPlus.image('gradient') + ') repeat scroll 0 0 ' + WhirlpoolPlus.get('wlr_display_unreadThreadColour') + ' !important; } ' +
+            '.whirlpoolLastRead_noUnreadPosts { background: url(' + WhirlpoolPlus.image('gradient') + ') repeat scroll 0 0 ' +  WhirlpoolPlus.get('wlr_display_readThreadColour') + ' !important; } ' +
+            '#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top: -5px; opacity:0.3; border-bottom-width:1px; float: left; } ' +
+            '#content a.whirlpoolLastRead_markAsRead { margin-top: -8px; } ';
+		
         return styles;
-        
     },
 
     trackThisThread : true,
@@ -3327,11 +3323,6 @@ try{
         if(!jQuery.browser){jQuery.uaMatch=function(e){e=e.toLowerCase();var t=/(chrome)[ \/]([\w.]+)/.exec(e)||/(webkit)[ \/]([\w.]+)/.exec(e)||/(opera)(?:.*version|)[ \/]([\w.]+)/.exec(e)||/(msie) ([\w.]+)/.exec(e)||e.indexOf("compatible")<0&&/(mozilla)(?:.*? rv:([\w.]+)|)/.exec(e)||[];return{browser:t[1]||"",version:t[2]||"0"}};matched=jQuery.uaMatch(navigator.userAgent);browser={};if(matched.browser){browser[matched.browser]=true;browser.version=matched.version}if(browser.chrome){browser.webkit=true}else if(browser.webkit){browser.safari=true}jQuery.browser=browser}
     }
     
-    // Needed for init
-    if(typeof jQuery.modal == 'undefined'){
-        load_jQuerySimpleModal($);
-    }
-    
     WhirlpoolPlus.redirects();
     WhirlpoolPlus.init();
     
@@ -3347,10 +3338,7 @@ try{
         }
         
         if(WhirlpoolPlus.pageType.forums){
-            load_jQueryAutosize($,WhirlpoolPlus.window);
-            
             WhirlpoolPlus.execute();
-            
         }else{
             // WhirlpoolPlus.executeNotForum();
         }
