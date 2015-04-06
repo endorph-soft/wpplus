@@ -6,8 +6,6 @@
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
-// @grant           GM_getResourceText
-// @grant           GM_xmlhttpRequest
 // @include         http://forums.whirlpool.net.au/*
 // @include         https://forums.whirlpool.net.au/*
 // @exclude         http://forums.whirlpool.net.au/whim-send*
