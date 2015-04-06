@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre13
+// @version         5.0.0pre14
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -70,10 +70,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 13,
+    prerelease : 14,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 36,
+    storageVersion : 37,
     
     //Script changelog
     changelog : {
@@ -2557,6 +2557,7 @@ WhirlpoolPlus.feat.editor = {
             // '.quickReply_posting { background: #E5E5E5 url(' + WhirlpoolPlus.util.image('waiting') + ') no-repeat scroll center center; }' +
             // '.quickReply_whirlcodeButton_emoticon img { height: 15px; } ' +
             // '.quickReply_whirlcodeButton_emoticon { padding: 0px; height: 25px; } '+
+            '#body { min-height: 100px; }' +
             '#wpp_whirlcode { text-align: center; }' +
             '#wpp_whirlcode button { padding: 2px 4px; margin: 2px; }';
     },
@@ -2595,8 +2596,9 @@ WhirlpoolPlus.feat.editor = {
         
         if(WhirlpoolPlus.util.get('compose_autoExpand')){
             $('#replyformBlock textarea').prop('rows','5');
-			this._triggerAutosize();
         }
+        
+        this._triggerAutosize();
 
     },
     
