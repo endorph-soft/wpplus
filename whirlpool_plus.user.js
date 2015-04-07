@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre14
+// @version         5.0.0pre15
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -18,7 +18,6 @@
 // @exclude         https://forums.whirlpool.net.au/archive/*
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/jquery.min.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/jquery.simplemodal.min.js
-// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/autosize.min.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/tea.js
 // @resource        emoticon_angry      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/angry.png
 // @resource        emoticon_blushing   https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/blushing.png
@@ -70,10 +69,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 14,
+    prerelease : 15,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 37,
+    storageVersion : 38,
     
     //Script changelog
     changelog : {
@@ -163,7 +162,6 @@ WhirlpoolPlus.install = {
         wlr_display_readThreadColour: '#CBC095',
         compose_quickReply : true,
         compose_quickReply_emoticons : false,
-        compose_autoExpand : true,
         compose_enhancedEditor : true,
         userNotes_enabled : false,
         userNotes : {},
@@ -183,7 +181,6 @@ WhirlpoolPlus.install = {
     _notForumValues : [
         'whirlpoolAPIKey',
         'display_floatSidebar',
-        'display_whimAlert',
         'display_widescreen',
         'display_customCSS',
         'avatar_static',
@@ -1006,9 +1003,7 @@ WhirlpoolPlus.settings = {
                 '<div class="subSettings">' +
                     '<p class="subSettings_heading description">' +
                         '<b>Forum Display</b>'+
-                        '<br /><i>Custom CSS, Other Formatting Options</i>'+
-                        '<br /><i>Recent Activity Overlay, Whim Notification, Dynamic Menu</i>'+
-                        '</p>' +
+                    '</p>' +
                     '<div class="subSettings_content">' +
                     
                         '<p>' +
@@ -1043,17 +1038,11 @@ WhirlpoolPlus.settings = {
                             ' <span class="settingDesc">How much of your recent activity to use for the overlay</span>'+
                         '</p>' +
                         
-                        /*'<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_whimAlert">' +
-                            '<label for="display_whimAlert">Whim Notification</label>' +
-                            ' <span class="settingDesc">Display a notification when you receive a new WHIM</span>'+
-                        '</p> ' +
-                        
                         '<p>' +
                             '<span>Custom CSS</span>' +
                             ' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
-                            '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 500px; height: 300px; margin:0 auto;"></textarea>' +
-                        '</p>' + */
+                            '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 200px; height: 100px; margin:0 auto;"></textarea>' +
+                        '</p>' +
                         
                     '</div>' +
                     
@@ -1231,12 +1220,6 @@ WhirlpoolPlus.settings = {
                             ' <span class="settingDesc">Automatically open the inline reply box at the end of every thread</span>'+
                         '</p>' +
 
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_autoExpand">' +
-                            ' <label for="compose_autoExpand">Auto Expand</label>' +
-                            ' <span class="settingDesc">Auto expand quick reply box as you type</span>'+
-                        '</p>' +
-
                         /* '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_emoticons">' +
                             ' <label for="compose_quickReply_emoticons">Quick Reply Smilies</label>' +
@@ -1256,12 +1239,12 @@ WhirlpoolPlus.settings = {
                     '<p class="subSettings_heading description"><b>Display and Formatting Options</b></p>' +
                     '<div class="subSettings_content">' +
                     
-                        /*'<p class="wpp_hideNotForum">' +
+                        '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_penaltyBox">' +
                             ' <label for="display_penaltyBox">Highlight when a user is in the penalty box</label>' +
                         '</p>' +
                     
-                        '<p class="wpp_hideNotForum">' +
+                        /* '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_enabled">' +
                             ' <label for="display_emoticons_enabled">Display Image Emoticons (Smilies)</label>' +
                         '</p>' +
@@ -1474,6 +1457,18 @@ WhirlpoolPlus.feat = {
         });
     },
     
+	penaltyBoxCss : function(){
+		return '.penalty_box .replyuser { background-image:url(' + WhirlpoolPlus.util.image('light_gradient') + ')!important; background-repeat: repeat !important; background-color: #fff !important; } ';
+	},
+	
+	penaltyBoxHighlight : function(reply){
+		var groupText = reply.find('.usergroup').text();
+		
+		if(groupText.indexOf('penalty box') >= 0 || groupText.indexOf('Banned') >= 0){
+			reply.addClass('penalty_box');
+		}
+	},
+	
     disabled : {
     
         removeLinkToLastPage : function(){
@@ -1621,11 +1616,7 @@ WhirlpoolPlus.feat.display = {
         }
         
         //Custom CSS
-        // styles += WhirlpoolPlus.util.get('display_customCSS');
-        
-        //Penalty Box
-        // styles += '.penalty_box {background-image:url(' + WhirlpoolPlus.util.image('light_gradient') + ')!important;background-repeat:repeat !important; background-color: #fff !important; } ';
-        
+        styles += WhirlpoolPlus.util.get('display_customCSS');
         
         return styles;
     },
@@ -1870,23 +1861,6 @@ WhirlpoolPlus.feat.display = {
                 return smiley;
 
             },
-        },
-        
-        whimAlert : function(){
-            if (WhirlpoolPlus.util.get('display_whimAlert') && $('#menu_whim').text()) {
-                WhirlpoolPlus.util.notify('You have an unread <a href="//whirlpool.net.au/whim/">whim</a>.', true, 15000);
-            }
-        },
-        
-        penaltyBoxHighlight : function(){
-            if(WhirlpoolPlus.util.get('display_penaltyBox')){
-                $('#replies .replyuser-inner .usergroup').each(function(){  
-                    var userGroup = $(this).text();
-                    if(userGroup.indexOf('penalty box') > 0 || userGroup.indexOf('Banned') > 0){
-                        $(this).parents('.replyuser').addClass('penalty_box');
-                    }
-                });
-            }
         },
         
     },
@@ -2569,36 +2543,14 @@ WhirlpoolPlus.feat.editor = {
         
         this._addWhirlcodeControls('#wpp_whirlcode',$target);
     },
-
-    autosize : function(target){
-        if(WhirlpoolPlus.util.get('compose_autoExpand')){
-            var $target = $(target);
-            
-            // Patch the onpage appendQuote function to fire an event to alert autosize
-            $('.quote button').bind('click',function(){
-                // There isn't an easy way to detect when the quote has been 'pasted'
-                // So we cheat
-                setTimeout(function(){
-                    WhirlpoolPlus.feat.editor._triggerAutosize();
-                },100);
-            });
-            
-            // Trigger autosize behaviour
-            autosize($target);
-        }
-    },
     
     showInlineReply : function(){
-        if(WhirlpoolPlus.util.get('compose_quickReply')){
+        
+		if(WhirlpoolPlus.util.get('compose_quickReply')){
             // Trigger the inbuilt quick reply functionality
             $('#replyformBlock').show();
+			$('#replyformBlock textarea').prop('rows','2');
         }
-        
-        if(WhirlpoolPlus.util.get('compose_autoExpand')){
-            $('#replyformBlock textarea').prop('rows','5');
-        }
-        
-        this._triggerAutosize();
 
     },
     
@@ -2776,16 +2728,6 @@ WhirlpoolPlus.feat.editor = {
     
     _forceUpdate : function(textarea){
         unsafeWindow.$(textarea[0]).trigger('keyup');
-        this._triggerAutosize();
-    },
-    
-    _triggerAutosize : function(){
-        // Autosize doesn't speak jQuery...
-        var evt = document.createEvent('Event');
-        evt.initEvent('autosize.update', true, false);
-        $('textarea[data-autosize-on="true"]').each(function(index, value){
-            value.dispatchEvent(evt);
-        });
     },
     
 };
@@ -2900,15 +2842,14 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.whirlpoolLastRead.css() +
         WhirlpoolPlus.feat.editor.css() +
         WhirlpoolPlus.feat.userNotes.css() +
-        WhirlpoolPlus.util.sync.css()
+        WhirlpoolPlus.util.sync.css() +
+		WhirlpoolPlus.feat.penaltyBoxCss()
     );
     
     /** RUN: Not Alerts **/
     if(!WhirlpoolPlus.util.pageType.alert){
         WhirlpoolPlus.settings.init();
         // WhirlpoolPlus.feat.display.floatSidebar();
-        // WhirlpoolPlus.feat.display.whimAlert();
-        // WhirlpoolPlus.feat.display.penaltyBoxHighlight();
         WhirlpoolPlus.feat.recentActivityOverlay.run();
         // WhirlpoolPlus.feat.changeLinks();
         WhirlpoolPlus.util.sync.init();
@@ -2925,7 +2866,6 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.whirlpoolLastRead.runPosts();
         WhirlpoolPlus.feat.editor.showInlineReply();
         WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
-        WhirlpoolPlus.feat.editor.autosize('#replyformBlock #body');
         
         //Loop through each reply
         $('#replies .reply:not(.preview)').each(function(){
@@ -2933,6 +2873,9 @@ WhirlpoolPlus.run = function(){
             WhirlpoolPlus.feat.ignoreUser.userIgnore($this);
             WhirlpoolPlus.feat.avatar.avatariseRow($this);
             WhirlpoolPlus.feat.userNotes.runOnReply($this);
+	        if(WhirlpoolPlus.util.get('display_penaltyBox')){
+				WhirlpoolPlus.feat.penaltyBoxHighlight($this);
+			}
         });
         
     }

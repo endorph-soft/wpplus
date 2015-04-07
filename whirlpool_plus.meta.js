@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre14
+// @version         5.0.0pre15
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -18,7 +18,6 @@
 // @exclude         https://forums.whirlpool.net.au/archive/*
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/jquery.min.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/jquery.simplemodal.min.js
-// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/autosize.min.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/js/tea.js
 // @resource        emoticon_angry      https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/angry.png
 // @resource        emoticon_blushing   https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/blushing.png
