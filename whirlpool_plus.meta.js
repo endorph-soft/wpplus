@@ -2,10 +2,11 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre15
+// @version         5.0.0pre16
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
+// @grant           GM_openInTab
 // @include         http://forums.whirlpool.net.au/*
 // @include         https://forums.whirlpool.net.au/*
 // @exclude         http://forums.whirlpool.net.au/whim-send*
