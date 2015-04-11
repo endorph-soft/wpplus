@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre17
+// @version         5.0.0pre18
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -70,10 +70,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 17,
+    prerelease : 18,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 40,
+    storageVersion : 41,
     
     //Script changelog
     changelog : {
@@ -1206,39 +1206,31 @@ WhirlpoolPlus.settings = {
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_unanswered">' +
                             ' <label for="links_unanswered">Link to Unanswered Threads</label>' +
                             ' <span class="settingDesc">Adds a link to only display unanswered threads after the forum name</span>'+
-                        '</p>' +
+                        '</p>' +*/
                         
                         '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="removeLinkToLastPage">' +
                             '<label for="removeLinkToLastPage">Make the links on the main page of Whirlpool go to the start of the thread</label>' +
-                        '</p>' +
+                        '</p>' + 
                         
                         '<p class="description tabDescription">These settings add links to display only posts from certain users</p>' +
                         
                         '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_originalPoster">' +
                             ' <label for="links_originalPoster">OP posts</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
+
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_mod">' +
-                            ' <label for="links_mod">Moderator posts</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
+                            ' <label for="links_mod">Mod posts</label>' +
+
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_rep">' +
                             ' <label for="links_rep">Rep posts</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
+
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_archive">' +
-                            ' <label for="links_archive">Thread Archive View</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
+                            ' <label for="links_archive">Archive</label>' +
+
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_longThread">' +
-                            ' <label for="links_longThread">Long Thread View</label>' +
-                        '</p>' + */
+                            ' <label for="links_longThread">Single Page Version</label>' +
+                        '</p>' + 
                     
                     '</div>' +
                 '</div>' +
@@ -1443,7 +1435,7 @@ WhirlpoolPlus.feat = {
         
         var vimeoRegex = /http(s)?:\/\/(www.)?vimeo.com\/([0-9]*)/i;
         
-        WhirlpoolPlus.util.css('.wpp_img { max-width: ' + maxContentWidth + 'px; }');
+        WhirlpoolPlus.util.css('.wpp_img { max-width: 100%; }');
         
         var vidWidth = 390;
         var vidHeight = 315;
@@ -1468,7 +1460,7 @@ WhirlpoolPlus.feat = {
                         
                         //Check for album embeds
                         if(linkSegments[0] != 'a'){
-                            linkObject.before('<img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpx_img"><br />');
+                            linkObject.before('<img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpp_img"><br />');
                         }else{
                             linkObject.before('<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe><br />');
                         }
@@ -1579,52 +1571,54 @@ WhirlpoolPlus.feat = {
         }
     },
     
-    disabled : {
-    
-        removeLinkToLastPage : function(){
-            if(WhirlpoolPlus.util.get('removeLinkToLastPage')){
-                $('.threads a').each(function(){
-                    this.href = this.href.replace('&p=-1&#bottom', '');
-                });
-            }
-        },
-        
-        extraNavLinks : function(){
-            var topLinks = $('#watch_button').parent();
-            var bottomLinks = $('.foot_subs:first');
+    extraNavLinks : function(){
+            var topLinks = $('.btop');
+            var bottomLinks = $('.bfoot');
             var threadNumber = WhirlpoolPlus.util.getThreadNumber();
             
-            WhirlpoolPlus.util.css('#replies { margin-top: 10px; }')
-            
-            if(WhirlpoolPlus.util.get('links_archive')){
-                topLinks.append('<a class="bwatch" href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Thread Archive</a>');
-                bottomLinks.append('&nbsp;&nbsp;<a href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Thread Archive</a>');
+            if (WhirlpoolPlus.util.get('links_longThread')) {
+                topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&p=-2">Single Page Version</a>&nbsp;');
+                // Already a link on the bottom bar
             }
             
-            if (WhirlpoolPlus.util.get('links_longThread')) {
-                topLinks.append('<a class="bwatch" href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&p=-2">Long Thread View</a>');
-                bottomLinks.append('&nbsp;&nbsp;<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&p=-2">Long Thread View</a>');
+            if(WhirlpoolPlus.util.get('links_archive')){
+                topLinks.prepend('<a href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Archive</a>&nbsp;');
+                bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Archive</a>&nbsp;');
             }
             
             if (WhirlpoolPlus.util.get('links_originalPoster')){
                 var opPost = $('.op:first').parent().parent();
+                console.log(opPost);
                 if(opPost.length == 1){
                     var opid = WhirlpoolPlus.util.getReplyUserId(opPost);
-                    topLinks.append('<a class="bwatch oponly" href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP Only</a>');
-                    bottomLinks.append('&nbsp;&nbsp;<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP Only</a>');
+                    topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
+                    bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
                 }
             }
             
             if (WhirlpoolPlus.util.get('links_mod')) {
-                topLinks.append('<a class="bwatch" href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mod Posts</a>');
-                bottomLinks.append('&nbsp;&nbsp;<a href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">View moderator posts</a>');
+                topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
+                bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
             }
             
             if (WhirlpoolPlus.util.get('links_rep')) {
-                topLinks.append('<a class="bwatch" href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Rep Posts</a>');
-                bottomLinks.append('&nbsp;&nbsp;<a href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">View representative posts</a>');
+                topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
+                bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
             }
         },
+    
+    removeLinkToLastPage : function(){
+        if(WhirlpoolPlus.util.get('removeLinkToLastPage')){
+            $('.threads a').each(function(){
+                this.href = this.href.replace('&p=-1&#bottom', '');
+            });
+        }
+    },
+    
+    disabled : {
+    
+
+        
         
         unansweredThreadsLink : function(){
             if(WhirlpoolPlus.util.get('links_unanswered')){
@@ -2578,17 +2572,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
 WhirlpoolPlus.feat.editor = {
 
     css : function(){
-        return '' +
-            // '#quickReply_container { margin: 10px 232px; }' +
-            // '#quickReply_contents { min-height: 150px; width: 100%; background-color: #E5E5E5; border: 1px solid #808080; }' +
-            // '#quickReply_controls { width: 100%; margin: 1px; }' +
-            // '#quickReply_controls button { width:150px; font:16px Arial; }' +
-            // '.quickReply_control_container { width: 50%; display: inline-block; text-align: center; }' +
-            // '.quickReply_focused { background: #E5E5E5 url(' + WhirlpoolPlus.util.image('focusedthread') + ') no-repeat scroll center center; }' +
-            // '.quickReply_posting { background: #E5E5E5 url(' + WhirlpoolPlus.util.image('waiting') + ') no-repeat scroll center center; }' +
-            // '.quickReply_whirlcodeButton_emoticon img { height: 15px; } ' +
-            // '.quickReply_whirlcodeButton_emoticon { padding: 0px; height: 25px; } '+
-            '#body { min-height: 100px; }' +
+        return '#body { min-height: 100px; }' +
             '#wpp_whirlcode { text-align: center; }' +
             '#wpp_whirlcode button { padding: 2px 4px; margin: 2px; }';
     },
@@ -2925,7 +2909,7 @@ WhirlpoolPlus.run = function(){
         // WhirlpoolPlus.feat.display.hidePosts();
         // WhirlpoolPlus.feat.display.emoticons.init();
         WhirlpoolPlus.feat.embed();
-        // WhirlpoolPlus.feat.extraNavLinks();
+        WhirlpoolPlus.feat.extraNavLinks();
         WhirlpoolPlus.feat.auraReset();
         // WhirlpoolPlus.feat.quickEdit.run();
         WhirlpoolPlus.feat.whirlpoolLastRead.runPosts();
@@ -2962,7 +2946,7 @@ WhirlpoolPlus.run = function(){
     /** RUN: Front page **/
     if(document.location.href == 'http://forums.whirlpool.net.au/' || document.location.href == 'https://forums.whirlpool.net.au/' ){
         // WhirlpoolPlus.feat.display.hideForums();
-        // WhirlpoolPlus.feat.removeLinkToLastPage();
+        WhirlpoolPlus.feat.removeLinkToLastPage();
     }
     
     /** RUN: Posting (new thread, reply) **/
