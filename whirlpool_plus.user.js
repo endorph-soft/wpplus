@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre18
+// @version         5.0.0pre19
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -70,10 +70,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 18,
+    prerelease : 19,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 41,
+    storageVersion : 42,
     
     //Script changelog
     changelog : {
@@ -165,6 +165,7 @@ WhirlpoolPlus.install = {
         compose_quickReply : true,
         compose_quickReply_emoticons : false,
         compose_enhancedEditor : true,
+        compose_movePreview : true,
         autoSubscribeToNewThread : false,
         userNotes_enabled : false,
         userNotes : {},
@@ -1272,6 +1273,11 @@ WhirlpoolPlus.settings = {
                             '<input class="wpp_setting" type="checkbox" id="compose_enhancedEditor">' +
                             ' <label for="compose_enhancedEditor">Add Whirlcode buttons to editors</label>' +
                         '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting" type="checkbox" id="compose_movePreview">' +
+                            ' <label for="compose_movePreview">Move reply preview above inline reply box</label>' +
+                        '</p>' +
                     
                     '</div>' +
                 '</div>' +
@@ -1588,7 +1594,7 @@ WhirlpoolPlus.feat = {
             
             if (WhirlpoolPlus.util.get('links_originalPoster')){
                 var opPost = $('.op:first').parent().parent();
-                console.log(opPost);
+
                 if(opPost.length == 1){
                     var opid = WhirlpoolPlus.util.getReplyUserId(opPost);
                     topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
@@ -2603,6 +2609,13 @@ WhirlpoolPlus.feat.editor = {
         }
     },
     
+        
+    movePreview : function(){
+        if(WhirlpoolPlus.util.get('compose_movePreview')) {
+            $('#previewBlock').detach().insertBefore('#replyformBlock');
+        }
+    },
+    
     _basicWhirlcode : {
         bold : { left : '[*', right : '*]', name : 'Bold' },
         italic : { left : '[/', right : '/]', name : 'Italic' },
@@ -2915,6 +2928,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.whirlpoolLastRead.runPosts();
         WhirlpoolPlus.feat.editor.showInlineReply();
         WhirlpoolPlus.feat.editor.autoSubscribe();
+        WhirlpoolPlus.feat.editor.movePreview();
         WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
         
         //Loop through each reply
