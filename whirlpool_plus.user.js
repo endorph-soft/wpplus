@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre22
+// @version         5.0.0pre23
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -70,10 +70,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 22,
+    prerelease : 23,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 45,
+    storageVersion : 46,
     
     //Script changelog
     changelog : {
@@ -1462,9 +1462,11 @@ WhirlpoolPlus.feat = {
             
             if(displayed[link] != true){
             
+                // Note: the span class wcrep1 causes the images to be omitted from quotes
+            
                 if (imageEnabled && imageMatchRegex.test(link)){
                     // Basic Image Match
-                    linkObject.before('<img src="' + link + '" class="wpp_img">');
+                    linkObject.before('<span class="wcrep1"><img src="' + link + '" class="wpp_img"></span>');
                 }else if(imageEnabled && imgurRegex.test(link)){
                     // Imgur Embed
                     var linkSegments = imgurRegex.exec(link);
@@ -1474,9 +1476,9 @@ WhirlpoolPlus.feat = {
                         
                         //Check for album embeds
                         if(linkSegments[0] != 'a'){
-                            linkObject.before('<img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpp_img"><br />');
+                            linkObject.before('<span class="wcrep1"><img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" class="wpp_img"></span><br />');
                         }else{
-                            linkObject.before('<iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe><br />');
+                            linkObject.before('<span class="wcrep1"><iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe></span><br />');
                         }
                     }
                 }else if(videoEnabled && youtubeRegex.test(link)){
@@ -1484,21 +1486,21 @@ WhirlpoolPlus.feat = {
                     var linkSegments = youtubeVidId.exec(link);
                     
                     if(linkSegments && linkSegments[1]){
-                        linkObject.before('<iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe><br />');
+                        linkObject.before('<span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
                     }
                 }else if(videoEnabled && youtubeShortRegex.test(link)){
                     // Youtube Embed (part 2 - short links)
                     var linkSegments = youtubeShortVidId.exec(link);
                     
                     if(linkSegments && linkSegments[1]){
-                        linkObject.before('<iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe><br />');
+                        linkObject.before('<span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
                     }
                 }else if(videoEnabled && vimeoRegex.test(link)){
                     // Vimeo Embed
                     var linkSegments = vimeoRegex.exec(link);
                     
                     if(linkSegments && linkSegments[3]){
-                        linkObject.before('<iframe src="https://player.vimeo.com/video/' + linkSegments[3] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe><br />');
+                        linkObject.before('<span class="wcrep1"><iframe src="https://player.vimeo.com/video/' + linkSegments[3] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
                     }
                 }
                 
@@ -1823,7 +1825,6 @@ WhirlpoolPlus.feat.display = {
         },
         
         regex : {},
-        startLine : '<img src ="',
         currentIconSet : {},
         
         initialise : function(){
@@ -1866,7 +1867,11 @@ WhirlpoolPlus.feat.display = {
             var smiley = ' ' + text;
             
             for (icon in (WhirlpoolPlus.feat.display.emoticons.currentIconSet)) {
-                smiley = smiley.replace(WhirlpoolPlus.feat.display.emoticons.regex[icon], '$1' + WhirlpoolPlus.feat.display.emoticons.startLine + WhirlpoolPlus.feat.display.emoticons.currentIconSet[icon] + '" alt="' + icon + '" align="baseline" />');
+                // There's a rather nasty hack here to stop emoticons messing with the inbuilt quote feature.
+                // We pack the original symbol into a hidden span- this will be stripped by the quote function, but the contents will be kept
+                // We then wrap span class="wcrep1" around the image, which will cause it to be omitted from the quote
+                smiley = smiley.replace(WhirlpoolPlus.feat.display.emoticons.regex[icon], 
+                    '$1' + '<span style="display:none">' + icon + '</span><span class="wcrep1"><img src ="' + WhirlpoolPlus.feat.display.emoticons.currentIconSet[icon] + '" alt="' + icon + '" align="baseline" /></span>');
             }
             
             return smiley;
