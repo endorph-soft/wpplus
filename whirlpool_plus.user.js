@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre20
+// @version         5.0.0pre22
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -70,10 +70,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 21,
+    prerelease : 22,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 44,
+    storageVersion : 45,
     
     //Script changelog
     changelog : {
@@ -768,6 +768,12 @@ WhirlpoolPlus.settings = {
                                 postBackgroundColour = '#DEE6FA';
                             break;
                             
+                            case 'black':
+                                newPostColour = '#FFFFFF';
+                                noNewPostColour = '#555555';
+                                postBackgroundColour = '#A1A1A1';
+                            break; 
+                            
                             case 'default':
                             default:
                                 newPostColour = '#95B0CB';
@@ -1074,6 +1080,8 @@ WhirlpoolPlus.settings = {
                             '<select class="wpp_setting" id="display_theme">' +
                                 '<option value="default">Default (by Simon Wright)</option>' +
                                 '<option value="classic">WP Classic (by Phyco)</option>' +
+                                '<option value="black">WP Black (by =CHRIS=)</option>' +
+                                '<option value="wood">WP Wood (by =CHRIS=)</option>' +
                             '</select>' +
                             ' <label for="display_theme">Custom Theme</label>' +
                         '</p>' +
@@ -1115,10 +1123,10 @@ WhirlpoolPlus.settings = {
                             ' <label for="userNotes_enabled">User Notes</label>' +
                         '</p> ' +
                         
-                        '<p class="wpp_hideNotForum">' +
+                        /* '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="resetAuraVote">' +
                             ' <label for="resetAuraVote">Add an Aura Reset smiley (?)</label>' +
-                        '</p> ' + 
+                        '</p> ' + */
                         
                     '</div>' +
                 '</div>' +
@@ -1546,7 +1554,7 @@ WhirlpoolPlus.feat = {
         });
     },
     
-    auraReset : function(){
+    /*auraReset : function(){
         if(WhirlpoolPlus.util.get('resetAuraVote')){
             $('.voteblock').each(function(){
                 var block = $(this);
@@ -1554,7 +1562,7 @@ WhirlpoolPlus.feat = {
                 block.children('span.vote2').after(' <span class="vote vote3" onclick="' + onClick + '" title="reset vote">?</span> ');
             });
         }
-    },
+    },*/
     
     changeLinks : function(){
         $('a[href*="whirlpool.net.au/whim"]').each(function(){
@@ -1655,6 +1663,8 @@ WhirlpoolPlus.feat.display = {
 
     _themes : {
         classic : '@import url(https://wpplus.endorph.net/themes/css.php?theme=classic);',
+        black : '@import url(https://wpplus.endorph.net/themes/css.php?theme=black);',
+        wood : '@import url(https://wpplus.endorph.net/themes/css.php?theme=wood);',
     },
 
     //CSS that is included everywhere
@@ -1682,7 +1692,7 @@ WhirlpoolPlus.feat.display = {
             var floating = true;
             var sidebarContent = $('#left');
             
-            WhirlpoolPlus.util.css('#left.sidebarFloat { position: fixed; top: 0px; left: inherit; background-color: #3a437b;}');
+            WhirlpoolPlus.util.css('#left.sidebarFloat { position: fixed; top: 0px; left: inherit; background-color: inherit;}');
             
             $(window).scroll(function(){
                 if(floating){
@@ -2923,7 +2933,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.display.emoticons.init();
         WhirlpoolPlus.feat.embed();
         WhirlpoolPlus.feat.extraNavLinks();
-        WhirlpoolPlus.feat.auraReset();
+        // WhirlpoolPlus.feat.auraReset();
         // WhirlpoolPlus.feat.quickEdit.run();
         WhirlpoolPlus.feat.whirlpoolLastRead.runPosts();
         WhirlpoolPlus.feat.editor.showInlineReply();
