@@ -70,10 +70,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 20,
+    prerelease : 21,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 43,
+    storageVersion : 44,
     
     //Script changelog
     changelog : {
@@ -3013,5 +3013,4 @@ try{
     }else{
         alert('WP+ Error occured: ' + e);
     }
-}
 }
