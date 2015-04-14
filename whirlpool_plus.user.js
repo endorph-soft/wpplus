@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre19
+// @version         5.0.0pre20
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -70,10 +70,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 19,
+    prerelease : 20,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 42,
+    storageVersion : 43,
     
     //Script changelog
     changelog : {
@@ -122,8 +122,8 @@ WhirlpoolPlus.install = {
         display_hideMovedThreads : false,
         display_hideDeletedPosts : false,
         display_floatSidebar : false,
-        display_emoticons_enabled : true,
-        display_emoticons_blue : true,
+        display_emoticons_enabled : false,
+        display_emoticons_blue : false,
         display_hideTheseForums : '',
         display_hideClosedThreadsOnProfile : false,
         display_whimAlert : true,
@@ -1044,10 +1044,10 @@ WhirlpoolPlus.settings = {
                             ' <span class="settingDesc">Stretch the website to fit the entire screen</span>'+
                         '</p>' +
                         
-                        /* '<p>' +
+                        '<p>' +
                             '<input class="wpp_setting" type="checkbox" id="display_floatSidebar">' +
                             '<label for="display_floatSidebar">Float the sidebar</label>' +
-                        '</p>' + */
+                        '</p>' +
                         
                         '<p>' +
                             '<input class="wpp_setting " type="checkbox" id="recentActivityOverlay">' +
@@ -1081,7 +1081,7 @@ WhirlpoolPlus.settings = {
                         '<p>' +
                             '<span>Custom CSS</span>' +
                             ' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
-                            '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 200px; height: 100px; margin:0 auto;"></textarea>' +
+                            '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
                         '</p>' +
                         
                     '</div>' +
@@ -1252,13 +1252,13 @@ WhirlpoolPlus.settings = {
                             ' <span class="settingDesc">Automatically open the inline reply box at the end of every thread</span>'+
                         '</p>' +
 
-                        /* '<p>' +
+                        '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_emoticons">' +
                             ' <label for="compose_quickReply_emoticons">Quick Reply Smilies</label>' +
                             ' <span class="settingDesc">Display the available smilies under the whirlcode buttons</span>'+
                         '</p>' +
                         
-                        '<p>' +
+                        /* '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickEdit">' +
                             ' <label for="quickEdit">Quick Edit</label>' +
                             ' <span class="settingDesc">Allows inline editing of posts</span>'+
@@ -1291,7 +1291,7 @@ WhirlpoolPlus.settings = {
                             ' <label for="display_penaltyBox">Highlight when a user is in the penalty box</label>' +
                         '</p>' +
                     
-                        /* '<p class="wpp_hideNotForum">' +
+                        '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_enabled">' +
                             ' <label for="display_emoticons_enabled">Display Image Emoticons (Smilies)</label>' +
                         '</p>' +
@@ -1299,7 +1299,7 @@ WhirlpoolPlus.settings = {
                         '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_blue">' +
                             ' <label for="display_emoticons_blue">Use blue smilies</label>' +
-                        '</p>' + */
+                        '</p>' +
                         
                         '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_images">' +
@@ -1550,7 +1550,7 @@ WhirlpoolPlus.feat = {
         if(WhirlpoolPlus.util.get('resetAuraVote')){
             $('.voteblock').each(function(){
                 var block = $(this);
-                var onClick = block.children('span.vote2').attr('onclick').replace(',2,',',0,');
+                var onClick = block.children('span.vote2').attr('onclick').replace(',2);',',0);');
                 block.children('span.vote2').after(' <span class="vote vote3" onclick="' + onClick + '" title="reset vote">?</span> ');
             });
         }
@@ -1599,6 +1599,8 @@ WhirlpoolPlus.feat = {
                     var opid = WhirlpoolPlus.util.getReplyUserId(opPost);
                     topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
                     bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
+                }else{
+                    
                 }
             }
             
@@ -1623,9 +1625,6 @@ WhirlpoolPlus.feat = {
     
     disabled : {
     
-
-        
-        
         unansweredThreadsLink : function(){
             if(WhirlpoolPlus.util.get('links_unanswered')){
                 if(document.location.href.match('nr=1')){
@@ -1672,11 +1671,199 @@ WhirlpoolPlus.feat.display = {
         
         //Widescreen
         if (WhirlpoolPlus.util.get('display_widescreen')) {
-            styles += '#topbar, #page, #footer { max-width: none; }';
+            styles += '#root, #page, #footer { width: 100% !important; max-width: none !important; } #topbar { width: 94% !important; max-width: none !important; }';
         }
         
         return styles;
     },
+    
+    floatSidebar : function(){
+        if(WhirlpoolPlus.util.get('display_floatSidebar')){
+            var floating = true;
+            var sidebarContent = $('#left');
+            
+            WhirlpoolPlus.util.css('#left.sidebarFloat { position: fixed; top: 0px; left: inherit; background-color: #3a437b;}');
+            
+            $(window).scroll(function(){
+                if(floating){
+                    if(window.pageYOffset > 183){
+                        sidebarContent.addClass('sidebarFloat');
+                    }else{
+                        sidebarContent.removeClass('sidebarFloat');
+                    }
+                }
+            }).scroll();
+            
+            $('.selected ul[style~="dashed"]').append('<li id="wpplus_undock"><a href="javascript:;"> Unfloat Sidebar (temp)</a></li>');
+
+            $('#wpplus_undock a').click(function () {
+                floating = false;
+                sidebarContent.removeClass('sidebarFloat');
+                $(this).parent().remove();
+            });
+            
+        }
+    },
+        
+    emoticons : {
+        init : function(){
+            if (WhirlpoolPlus.util.get('display_emoticons_enabled')) {
+                this.prep();
+                this.initialise();
+                $('div.bodytext > p').each(this.runOnTextNode);
+            }
+        },
+    
+        prep : function(){
+            $( ".reference a" ).each( function( ) {
+                var text = $(this).text( ).toString( ).replace( /\:/, "<span>:</span>" );
+                $(this).html( text );
+            } );
+        },
+        
+        icons : {
+            ':angry:': WhirlpoolPlus.util.image('emoticon_angry'),
+            ':glad:': WhirlpoolPlus.util.image('emoticon_blushing'),
+            ':confused:': WhirlpoolPlus.util.image('emoticon_confused'),
+            ':cool:': WhirlpoolPlus.util.image('emoticon_cool'),
+            ':cry:': WhirlpoolPlus.util.image('emoticon_cry'),
+            ':(': WhirlpoolPlus.util.image('emoticon_frown'),
+            ':gasp:': WhirlpoolPlus.util.image('emoticon_gasp'),
+            ':D': WhirlpoolPlus.util.image('emoticon_grin'),
+            '<3':WhirlpoolPlus.util.image('emoticon_kiss'),
+            ':X': WhirlpoolPlus.util.image('emoticon_lips'),
+            ':shout:': WhirlpoolPlus.util.image('emoticon_shout'),
+            ':snore:': WhirlpoolPlus.util.image('emoticon_sleep'),
+            ':)': WhirlpoolPlus.util.image('emoticon_smile'),
+            ':\\\\': WhirlpoolPlus.util.image('emoticon_smirk'),
+            ':|': WhirlpoolPlus.util.image('emoticon_straight'),
+            ':P': WhirlpoolPlus.util.image('emoticon_tongue'),
+            ';)': WhirlpoolPlus.util.image('emoticon_wink'),
+            ':star:': WhirlpoolPlus.util.image('emoticon_star')
+        },
+        
+        duplicates : {
+            ':-(': WhirlpoolPlus.util.image('emoticon_frown'),
+            ':-D': WhirlpoolPlus.util.image('emoticon_grin'),
+            ':X': WhirlpoolPlus.util.image('emoticon_lips'),
+            '=)': WhirlpoolPlus.util.image('emoticon_smile'),
+            ':-)': WhirlpoolPlus.util.image('emoticon_smile'),
+            ':-|': WhirlpoolPlus.util.image('emoticon_straight'),
+            ':-P': WhirlpoolPlus.util.image('emoticon_tongue'),
+            '=P': WhirlpoolPlus.util.image('emoticon_tongue'),
+            ';-)': WhirlpoolPlus.util.image('emoticon_wink'),
+            ':;': WhirlpoolPlus.util.image('emoticon_wink'),
+            ':-;': WhirlpoolPlus.util.image('emoticon_wink'),
+            ':-\\\\': WhirlpoolPlus.util.image('emoticon_smirk'),
+            '=\\\\': WhirlpoolPlus.util.image('emoticon_smirk'),
+        },
+        
+        blue_icons : {
+            ':~': WhirlpoolPlus.util.image('old_blue_anxious'),
+            '(:': WhirlpoolPlus.util.image('old_blue_cool'),
+            '-o.o-': WhirlpoolPlus.util.image('old_blue_eyes'),
+            ':D': WhirlpoolPlus.util.image('old_blue_grin'),
+            ':|)': WhirlpoolPlus.util.image('old_blue_happy2'),
+            ':)': WhirlpoolPlus.util.image('old_blue_happy'),
+            ':|(': WhirlpoolPlus.util.image('old_blue_sad2'),
+            ':(': WhirlpoolPlus.util.image('old_blue_sad'),
+            ':|': WhirlpoolPlus.util.image('old_blue_neutral'),
+            ':ninja:': WhirlpoolPlus.util.image('old_blue_ninja'),
+            ';)': WhirlpoolPlus.util.image('old_blue_smirk'),
+            ':P': WhirlpoolPlus.util.image('old_blue_tongue'),
+            ':star:': WhirlpoolPlus.util.image('emoticon_star')
+        },
+        
+        blue_duplicates : {
+            '(:': WhirlpoolPlus.util.image('old_blue_cool'),
+            '-oo-': WhirlpoolPlus.util.image('old_blue_eyes'),
+            ':-D': WhirlpoolPlus.util.image('old_blue_grin'),
+            ':-)': WhirlpoolPlus.util.image('old_blue_happy'),
+            '=)': WhirlpoolPlus.util.image('old_blue_happy'),
+            ':-(': WhirlpoolPlus.util.image('old_blue_sad'),
+            ':-|': WhirlpoolPlus.util.image('old_blue_neutral'),
+            ':ninja:': WhirlpoolPlus.util.image('old_blue_ninja'),
+            ':\\\\':WhirlpoolPlus.util.image('old_blue_smirk'),
+            ':-\\\\':WhirlpoolPlus.util.image('old_blue_smirk'),
+            '=\\\\':WhirlpoolPlus.util.image('old_blue_smirk'),
+            ';-)': WhirlpoolPlus.util.image('old_blue_smirk'),
+            ':-P': WhirlpoolPlus.util.image('old_blue_tongue'),
+            '=P': WhirlpoolPlus.util.image('old_blue_tongue'),
+        },
+        
+        getIconSet : function(useDuplicates){
+            
+            mainIcons = {};
+            duplicateIcons = {};
+        
+            if(WhirlpoolPlus.util.get('display_emoticons_blue')) {
+                $.extend(mainIcons,this.blue_icons);
+                $.extend(duplicateIcons,this.blue_duplicates);
+            }else{
+                $.extend(mainIcons,this.icons);
+                $.extend(duplicateIcons,this.duplicates);
+            }
+            
+            if(useDuplicates){
+                $.extend(mainIcons,duplicateIcons);
+            }
+            
+            return mainIcons;
+            
+        },
+        
+        regex : {},
+        startLine : '<img src ="',
+        currentIconSet : {},
+        
+        initialise : function(){
+            this.currentIconSet = this.getIconSet(true);
+                        
+            for (icon in this.currentIconSet) {
+                var regkey = icon;
+                regkey = regkey.replace(/</g, "&lt;");
+                regkey = regkey.replace(/>/g, "&gt;");
+                regkey = regkey.replace(/\(/g, "\\(");
+                regkey = regkey.replace(/\)/g, "\\)");
+                regkey = regkey.replace(/\[/g, "\\[");
+                regkey = regkey.replace(/\]/g, "\\]");
+                regkey = regkey.replace(/\|/g, "\\|");
+                
+                regkey = '(\\s|>)' + regkey;
+                
+                this.regex[icon] = new RegExp(regkey, 'g');
+            }
+                        
+
+        },
+        
+        runOnTextNode : function(){
+            node = $(this);
+            
+            var nodeValue = node.html();
+            var smiley = WhirlpoolPlus.feat.display.emoticons.run(nodeValue)
+            
+            if (smiley.length > 1 && smiley != nodeValue) {
+                node.html(smiley);
+            }
+        },
+        
+        run : function(text){
+            if (!WhirlpoolPlus.util.get('display_emoticons_enabled')) {
+                return text;
+            }
+            
+            var smiley = ' ' + text;
+            
+            for (icon in (WhirlpoolPlus.feat.display.emoticons.currentIconSet)) {
+                smiley = smiley.replace(WhirlpoolPlus.feat.display.emoticons.regex[icon], '$1' + WhirlpoolPlus.feat.display.emoticons.startLine + WhirlpoolPlus.feat.display.emoticons.currentIconSet[icon] + '" alt="' + icon + '" align="baseline" />');
+            }
+            
+            return smiley;
+
+        },
+    },
+    
     
     disabled : {
         hideThreads : function(){
@@ -1731,193 +1918,6 @@ WhirlpoolPlus.feat.display = {
                     }
                 });
             }
-        },
-        
-        floatSidebar : function(){
-            if(WhirlpoolPlus.util.get('display_floatSidebar')){
-                var floating = true;
-                var sidebarContent = $('div#left');
-                
-                WhirlpoolPlus.util.css('div#left { left: inherit; top: 190px;} div#left.sidebarFloat { z-index: 2; position: fixed; top: 0px; }');
-                
-                $(window).scroll(function(){
-                    if(floating){
-                        if(window.pageYOffset > 190){
-                            sidebarContent.addClass('sidebarFloat');
-                        }else{
-                            sidebarContent.removeClass('sidebarFloat');
-                        }
-                    }
-                }).scroll();
-                
-                $('.selected ul[style~="dashed"]').append('<li id="wpplus_undock"><a href="javascript:;"> Unfloat Sidebar (temp)</a></li>');
-
-                $('#wpplus_undock a').click(function () {
-                    floating = false;
-                    sidebarContent.removeClass('sidebarFloat');
-                    $(this).parent().remove();
-                });
-                
-            }
-        },
-        
-        emoticons : {
-            init : function(){
-                if (WhirlpoolPlus.util.get('display_emoticons_enabled')) {
-                    this.prep();
-                    this.initialise();
-                    $('div.bodytext > p').each(this.runOnTextNode);
-                }
-            },
-        
-            prep : function(){
-                $( ".reference a" ).each( function( ) {
-                    var text = $(this).text( ).toString( ).replace( /\:/, "<span>:</span>" );
-                    $(this).html( text );
-                } );
-            },
-            
-            icons : {
-                ':angry:': WhirlpoolPlus.util.image('emoticon_angry'),
-                ':glad:': WhirlpoolPlus.util.image('emoticon_blushing'),
-                ':confused:': WhirlpoolPlus.util.image('emoticon_confused'),
-                ':cool:': WhirlpoolPlus.util.image('emoticon_cool'),
-                ':cry:': WhirlpoolPlus.util.image('emoticon_cry'),
-                ':(': WhirlpoolPlus.util.image('emoticon_frown'),
-                ':gasp:': WhirlpoolPlus.util.image('emoticon_gasp'),
-                ':D': WhirlpoolPlus.util.image('emoticon_grin'),
-                '<3':WhirlpoolPlus.util.image('emoticon_kiss'),
-                ':X': WhirlpoolPlus.util.image('emoticon_lips'),
-                ':shout:': WhirlpoolPlus.util.image('emoticon_shout'),
-                ':snore:': WhirlpoolPlus.util.image('emoticon_sleep'),
-                ':)': WhirlpoolPlus.util.image('emoticon_smile'),
-                ':\\\\': WhirlpoolPlus.util.image('emoticon_smirk'),
-                ':|': WhirlpoolPlus.util.image('emoticon_straight'),
-                ':P': WhirlpoolPlus.util.image('emoticon_tongue'),
-                ';)': WhirlpoolPlus.util.image('emoticon_wink'),
-                ':star:': WhirlpoolPlus.util.image('emoticon_star')
-            },
-            
-            duplicates : {
-                ':-(': WhirlpoolPlus.util.image('emoticon_frown'),
-                ':-D': WhirlpoolPlus.util.image('emoticon_grin'),
-                ':X': WhirlpoolPlus.util.image('emoticon_lips'),
-                '=)': WhirlpoolPlus.util.image('emoticon_smile'),
-                ':-)': WhirlpoolPlus.util.image('emoticon_smile'),
-                ':-|': WhirlpoolPlus.util.image('emoticon_straight'),
-                ':-P': WhirlpoolPlus.util.image('emoticon_tongue'),
-                '=P': WhirlpoolPlus.util.image('emoticon_tongue'),
-                ';-)': WhirlpoolPlus.util.image('emoticon_wink'),
-                ':;': WhirlpoolPlus.util.image('emoticon_wink'),
-                ':-;': WhirlpoolPlus.util.image('emoticon_wink'),
-                ':-\\\\': WhirlpoolPlus.util.image('emoticon_smirk'),
-                '=\\\\': WhirlpoolPlus.util.image('emoticon_smirk'),
-            },
-            
-            blue_icons : {
-                ':~': WhirlpoolPlus.util.image('old_blue_anxious'),
-                '(:': WhirlpoolPlus.util.image('old_blue_cool'),
-                '-o.o-': WhirlpoolPlus.util.image('old_blue_eyes'),
-                ':D': WhirlpoolPlus.util.image('old_blue_grin'),
-                ':|)': WhirlpoolPlus.util.image('old_blue_happy2'),
-                ':)': WhirlpoolPlus.util.image('old_blue_happy'),
-                ':|(': WhirlpoolPlus.util.image('old_blue_sad2'),
-                ':(': WhirlpoolPlus.util.image('old_blue_sad'),
-                ':|': WhirlpoolPlus.util.image('old_blue_neutral'),
-                ':ninja:': WhirlpoolPlus.util.image('old_blue_ninja'),
-                ';)': WhirlpoolPlus.util.image('old_blue_smirk'),
-                ':P': WhirlpoolPlus.util.image('old_blue_tongue'),
-                ':star:': WhirlpoolPlus.util.image('emoticon_star')
-            },
-            
-            blue_duplicates : {
-                '(:': WhirlpoolPlus.util.image('old_blue_cool'),
-                '-oo-': WhirlpoolPlus.util.image('old_blue_eyes'),
-                ':-D': WhirlpoolPlus.util.image('old_blue_grin'),
-                ':-)': WhirlpoolPlus.util.image('old_blue_happy'),
-                '=)': WhirlpoolPlus.util.image('old_blue_happy'),
-                ':-(': WhirlpoolPlus.util.image('old_blue_sad'),
-                ':-|': WhirlpoolPlus.util.image('old_blue_neutral'),
-                ':ninja:': WhirlpoolPlus.util.image('old_blue_ninja'),
-                ':\\\\':WhirlpoolPlus.util.image('old_blue_smirk'),
-                ':-\\\\':WhirlpoolPlus.util.image('old_blue_smirk'),
-                '=\\\\':WhirlpoolPlus.util.image('old_blue_smirk'),
-                ';-)': WhirlpoolPlus.util.image('old_blue_smirk'),
-                ':-P': WhirlpoolPlus.util.image('old_blue_tongue'),
-                '=P': WhirlpoolPlus.util.image('old_blue_tongue'),
-            },
-            
-            getIconSet : function(useDuplicates){
-                
-                mainIcons = {};
-                duplicateIcons = {};
-            
-                if(WhirlpoolPlus.util.get('display_emoticons_blue')) {
-                    $.extend(mainIcons,this.blue_icons);
-                    $.extend(duplicateIcons,this.blue_duplicates);
-                }else{
-                    $.extend(mainIcons,this.icons);
-                    $.extend(duplicateIcons,this.duplicates);
-                }
-                
-                if(useDuplicates){
-                    $.extend(mainIcons,duplicateIcons);
-                }
-                
-                return mainIcons;
-                
-            },
-            
-            regex : {},
-            startLine : '<img src ="',
-            currentIconSet : {},
-            
-            initialise : function(){
-                this.currentIconSet = this.getIconSet(true);
-                            
-                for (icon in this.currentIconSet) {
-                    var regkey = icon;
-                    regkey = regkey.replace(/</g, "&lt;");
-                    regkey = regkey.replace(/>/g, "&gt;");
-                    regkey = regkey.replace(/\(/g, "\\(");
-                    regkey = regkey.replace(/\)/g, "\\)");
-                    regkey = regkey.replace(/\[/g, "\\[");
-                    regkey = regkey.replace(/\]/g, "\\]");
-                    regkey = regkey.replace(/\|/g, "\\|");
-                    
-                    regkey = '(\\s|>)' + regkey;
-                    
-                    this.regex[icon] = new RegExp(regkey, 'g');
-                }
-                            
-
-            },
-            
-            runOnTextNode : function(){
-                node = $(this);
-                
-                var nodeValue = node.html();
-                var smiley = WhirlpoolPlus.feat.display.emoticons.run(nodeValue)
-                
-                if (smiley.length > 1 && smiley != nodeValue) {
-                    node.html(smiley);
-                }
-            },
-            
-            run : function(text){
-                if (!WhirlpoolPlus.util.get('display_emoticons_enabled')) {
-                    return text;
-                }
-                
-                var smiley = ' ' + text;
-                
-                for (icon in (WhirlpoolPlus.feat.display.emoticons.currentIconSet)) {
-                    smiley = smiley.replace(WhirlpoolPlus.feat.display.emoticons.regex[icon], '$1' + WhirlpoolPlus.feat.display.emoticons.startLine + WhirlpoolPlus.feat.display.emoticons.currentIconSet[icon] + '" alt="' + icon + '" align="baseline" />');
-                }
-                
-                return smiley;
-
-            },
         },
         
     },
@@ -2708,7 +2708,7 @@ WhirlpoolPlus.feat.editor = {
             controls += '<button type="button" data-type="advanced" data-code="' + i + '" class="wpp_whirlcodeButton" title="' + code.name + '">' + code.name + '</button>';
         }
         
-        /*if(WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.get('compose_quickReply_emoticons')){
+        if(WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.get('compose_quickReply_emoticons')){
             controls += '<br/>';
             
             //Generate third row - emoticons
@@ -2716,7 +2716,7 @@ WhirlpoolPlus.feat.editor = {
             for (icon in icons) {
                 controls += '<button type="button" data-type="emoticon" data-code="' + icon.replace('\\\\','\\') + '" class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"><img src="' + icons[icon] +  '"/></button>';
             }
-        }*/
+        }
         
         $(locationID).append(controls);
         
@@ -2757,9 +2757,9 @@ WhirlpoolPlus.feat.editor = {
                 if(type == 'advanced'){
                     WhirlpoolPlus.feat.editor._advancedWhirlcode[code].callback(textarea,selectionStart,selectionEnd,selection);
                 }
-            }/*else if(type == 'emoticon'){
+            }else if(type == 'emoticon'){
                 WhirlpoolPlus.feat.editor._insert(textarea,code + ' ',selectionEnd,selectionEnd);
-            }*/
+            }
             
         });
         
@@ -2911,7 +2911,7 @@ WhirlpoolPlus.run = function(){
     /** RUN: Not Alerts **/
     if(!WhirlpoolPlus.util.pageType.alert){
         WhirlpoolPlus.settings.init();
-        // WhirlpoolPlus.feat.display.floatSidebar();
+        WhirlpoolPlus.feat.display.floatSidebar();
         WhirlpoolPlus.feat.recentActivityOverlay.run();
         WhirlpoolPlus.feat.changeLinks();
         WhirlpoolPlus.util.sync.init();
@@ -2920,7 +2920,7 @@ WhirlpoolPlus.run = function(){
     /** RUN: Posts Pages **/
     if(WhirlpoolPlus.util.pageType.posts){
         // WhirlpoolPlus.feat.display.hidePosts();
-        // WhirlpoolPlus.feat.display.emoticons.init();
+        WhirlpoolPlus.feat.display.emoticons.init();
         WhirlpoolPlus.feat.embed();
         WhirlpoolPlus.feat.extraNavLinks();
         WhirlpoolPlus.feat.auraReset();
@@ -3013,4 +3013,5 @@ try{
     }else{
         alert('WP+ Error occured: ' + e);
     }
+}
 }
