@@ -2,7 +2,8 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre23
+// @version         5.0.0pre25
+// @updateUrl       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -70,10 +71,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 23,
+    prerelease : 25,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 46,
+    storageVersion : 48,
     
     //Script changelog
     changelog : {
