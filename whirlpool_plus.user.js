@@ -2,7 +2,9 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre23
+// @version         5.0.0pre24
+// @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
+// @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
@@ -63,6 +65,12 @@
 // @resource        gradient            https://raw.githubusercontent.com/endorph-soft/wpplus/new-design/resources/png/gradient.png
 // ==/UserScript==
 
+if(confirm("WP+ reinstall required to ensure ongoing updates. Your settings will be retained. Reinstall?")) {
+	
+	GM_openInTab("https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js");
+	
+}
+
 var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
@@ -70,10 +78,10 @@ WhirlpoolPlus.about = {
     version : '5.0.0',
     
     //Prerelease version- 0 for a standard release
-    prerelease : 23,
+    prerelease : 24,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 46,
+    storageVersion : 47,
     
     //Script changelog
     changelog : {
