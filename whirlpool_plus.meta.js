@@ -2,25 +2,31 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.0pre25
+// @version         5.0.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
 // @grant           GM_addStyle
 // @grant           GM_getResourceURL
+// @grant           GM_getResourceText
 // @grant           GM_openInTab
 // @include         http://forums.whirlpool.net.au/*
 // @include         https://forums.whirlpool.net.au/*
-// @exclude         http://forums.whirlpool.net.au/whim-send*
-// @exclude         https://forums.whirlpool.net.au/whim-send*
-// @exclude         http://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
-// @exclude         https://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
-// @exclude         http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
-// @exclude         https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
-// @exclude         http://forums.whirlpool.net.au/archive/*
-// @exclude         https://forums.whirlpool.net.au/archive/*
+// @include         http://forums.whirlpool.net.au/whim-send*
+// @include         https://forums.whirlpool.net.au/whim-send*
+// @include         http://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
+// @include         https://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
+// @include         http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
+// @include         https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
+// @include         http://forums.whirlpool.net.au/archive/*
+// @include         https://forums.whirlpool.net.au/archive/*
+// @include         http://whirlpool.net.au/*
+// @include         https://whirlpool.net.au/*
+// @exclude         http://whirlpool.net.au/blog/*
+// @exclude         https://whirlpool.net.au/blog/*
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.min.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.simplemodal.min.js
+// @require         https://wpplus.endorph.net/resources/js/min/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
 // @resource        emoticon_angry      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/angry.png
 // @resource        emoticon_blushing   https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/blushing.png
@@ -63,4 +69,7 @@
 // @resource        check               https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/check.png
 // @resource        cross               https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/cross.png
 // @resource        gradient            https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/gradient.png
+// @resource        wp_plus_logo        https://wpplus.endorph.net/resources/png/wp_plus.png
+// @resource        small_whirl_logo    https://wpplus.endorph.net/resources/png/whirlpool.png
+// @resource        prettify            https://wpplus.endorph.net/resources/css/prettify.css
 // ==/UserScript==
