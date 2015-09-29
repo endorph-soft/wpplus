@@ -1,0 +1,107 @@
+/*post body font fix*/
+#replylist div.reply div.replytext {
+	font: 13px Verdana,Arial,Helvetica,sans-serif !important;
+}
+
+/*aura smiley font fix*/
+div.voteblock {
+	font: 10px "Lucida Grande",Verdana,Arial,Helvetica,sans-serif !important;
+	font: bold 10px monospace !important;
+	color:red;
+}
+
+/*>> Forums >> Forum >> [Title] font fix*/
+#upperbar ul.breadcrumb li a {
+    font: 0.7em/1.6em Georgia,Cambria,Charter,"Century Schoolbook",serif;
+    position: relative;
+    top: -1px;
+}
+
+/*username post font fix*/
+#replylist div.reply div.replymeta div.replyuser span.bu_name {
+    font: bold 15px/16px Arial,Helvetica,sans-serif;
+}
+
+/*quip font fix*/
+div.usergroup {
+	font: 10px "Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
+	color: #555 !important;
+}
+
+/*discussion forum hyperlinks font fix*/
+#left ul#menu > li.selected > ul > li > a {
+	font: 1em/16px "Lucida Grande",Calibri,Arial,sans-serif;
+}
+
+/*sidebar [Local Time], [Membership], [Big Numbers] font fix*/
+#left dl dt {
+	font-family: "Lucida Grande",Calibri,Tahoma,sans-serif;
+}
+
+/*sidebar general text font fix*/
+#left dl dd {
+	font: 12px/17px "Lucida Grande",Calibri,Arial,sans-serif;
+}
+
+/*page numbers bar font fix*/
+#content ul.pagination {
+	font: 1.2em/1.6em Georgia,Cambria,Charter,"Century Schoolbook",serif;
+}
+
+/*public thread notice font fix*/
+#replies div.notebar.public {
+	font: bold 1.1em Arial,sans-serif;
+}
+
+/*major title upperbar font fix*/
+ul.breadcrumb li:before {
+	color: #ead2a6;
+}
+ul.breadcrumb li a {
+    color: white;
+}
+
+/* forums front page forum font fix*/
+#forumindex table td.title div.title a {
+	font: bold 1.5em Arial,sans-serif;
+}
+
+/*firefox font fix*/
+#threads table tbody tr td.title a.title {
+    font: bold 14px Arial,Helvetica,sans-serif;
+}
+
+#left ul#menu > li > a {
+    font: 1.63em Georgia,Cambria,Charter,"Century Schoolbook",serif;
+}
+
+#content div.buttons a.breply, #content div.buttons a {
+	font: 1.28em Georgia,Cambria,Charter,"Century Schoolbook",serif;
+}
+
+/* [forums >> forum font] */
+#upperbar ul.breadcrumb li a {
+	font: 0.7em Georgia,Cambria,Charter,"Century Schoolbook",serif;
+}
+#lowerbar ul.breadcrumb li a {
+	font: 1.0em Georgia,Cambria,Charter,"Century Schoolbook",serif;
+}
+ul.breadcrumb li span {
+    font: 0.8em Georgia;
+}
+
+/*forum index font [Whirlpool, Broadband, Mobile, etc] */
+#forumindex h3 {
+	font: 1.6em Georgia;
+	font-weight: none;
+}
+
+/*forum breadcrumb */
+ul.breadcrumb {
+	font: 1.8em Georgia;
+}
+
+/*whim page buttons font*/
+ul#tabs.profile li.picked a, ul#tabs.profile li a {
+	font: 18px Georgia;
+}
