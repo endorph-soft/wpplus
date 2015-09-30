@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.1
+// @version         5.0.2
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.1',
+    version : '5.0.2',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 51,
+    storageVersion : 52,
     
     //Script changelog
     changelog : {
+        '5.0.2' : '<ul><li>Fixes WLR running through reps/reads columns, returns Whirlcode in Wiki, miscellaneous other fixes</li></ul>',
         '5.0.1' : '<ul><li>Adds old font toggle, changes to whim link and image embeds, fixes to aura votes page</li></ul>',
         '5.0.0' : '<ul><li>New version for new Whirlpool</li></ul>',
     },
@@ -1558,7 +1559,7 @@ WhirlpoolPlus.settings = {
 WhirlpoolPlus.feat = {
     
     yourvoteslink : function(){
-        $('tr:contains("Aura"):first').after('<tr style="display:table-row;vertical-align:inherit;"><td align="right"><a href="http://forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a></td></tr>');
+        $('tr:contains("Aura"):first').after('<tr style="display:table-row;vertical-align:inherit;"><td style="white-space:nowrap;" align="right"><a href="http://forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a></td><td></td></tr>');
     },
     
     postsPerDay : function(){
@@ -2813,7 +2814,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         styles += '.whirlpoolLastRead_unreadPosts { background: url(' + WhirlpoolPlus.util.image('gradient') + ') repeat scroll 0 0 ' + WhirlpoolPlus.util.get('wlr_display_unreadThreadColour') + ' !important; } ' +
             '.whirlpoolLastRead_noUnreadPosts { background: url(' + WhirlpoolPlus.util.image('gradient') + ') repeat scroll 0 0 ' +  WhirlpoolPlus.util.get('wlr_display_readThreadColour') + ' !important; } ' +
             '#content .whirlpoolLastRead_controls a { border-bottom-color:grey; border-bottom-style:dashed; font-size: 9px; margin-top: -5px; opacity:0.3; border-bottom-width:1px; float: left; } ' +
-            '#content a.whirlpoolLastRead_markAsRead { margin-top: -8px; } ' + '.reps {background-color: inherit !important;}' + '.reads {background-color: inherit !important;}' + '.unread {background-color: inherit !important;}';
+            '#content a.whirlpoolLastRead_markAsRead { margin-top: -8px; } ';
         
         return styles;
     },
@@ -2973,7 +2974,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         if(WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')){
                             thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
                         }else{
-                            thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
+                            thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_unreadPosts');
                         }
                         
                         if(document.location.href.match('/forum/')){
@@ -2985,7 +2986,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         if(WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')){
                             thread.find('td.goend').addClass('whirlpoolLastRead_noUnreadPosts');
                         }else{
-                            thread.find('td').addClass('whirlpoolLastRead_noUnreadPosts');
+                            thread.find('td:not(.reps):not(.reads)').addClass('whirlpoolLastRead_noUnreadPosts');
                         }
                     }
                     
@@ -3081,13 +3082,13 @@ WhirlpoolPlus.feat.editor = {
             '#wpp_whirlcode button { padding: 2px 4px; margin: 2px; width: initial !important; font-size: inherit; }';
     },
 
-    whirlcodify : function(target){
+    whirlcodify : function(id){
         if(WhirlpoolPlus.util.get('compose_enhancedEditor')){       
-            $target = $(target)
+            var target = $(id)
             
-            $target.parents('.editor').prepend('<div id="wpp_whirlcode"></div>');
+            target.parent().before('<div id="wpp_whirlcode"></div>');
             
-            this._addWhirlcodeControls('#wpp_whirlcode',$target);
+            this._addWhirlcodeControls('#wpp_whirlcode',target);
         }
     },
     
@@ -3433,7 +3434,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.editor.showInlineReply();
         WhirlpoolPlus.feat.editor.autoSubscribe();
         WhirlpoolPlus.feat.editor.movePreview();
-        WhirlpoolPlus.feat.editor.whirlcodify(" .replyform #body");
+        WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
         
         //Loop through each reply
         $('#replies .reply:not(.preview)').each(function(){
@@ -3479,12 +3480,12 @@ WhirlpoolPlus.run = function(){
     /** RUN: Posting (new thread, reply) **/
     if(WhirlpoolPlus.util.pageType.newThread || WhirlpoolPlus.util.pageType.reply){
         WhirlpoolPlus.feat.editor.autoSubscribe();
-        WhirlpoolPlus.feat.editor.whirlcodify("#replyformBlock #body");
+        WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
     }
     
     /** RUN: Editing (posts) **/
     if(WhirlpoolPlus.util.pageType.forums && WhirlpoolPlus.util.pageType.edit){
-        WhirlpoolPlus.feat.editor.whirlcodify("#fm #body");
+        WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
     }
     
     /** RUN: Watched Threads **/
@@ -3509,9 +3510,9 @@ WhirlpoolPlus.run = function(){
     }
     
     /** RUN: Wiki Edit **/
-    /*if(WhirlpoolPlus.util.pageType.wiki && WhirlpoolPlus.util.pageType.edit){
-        WhirlpoolPlus.feat.editor.whirlcodify("#box #body");
-    }*/
+    if(WhirlpoolPlus.util.pageType.wiki && WhirlpoolPlus.util.pageType.edit){
+        WhirlpoolPlus.feat.editor.whirlcodify('#f_body');
+    }
     
 }
 
