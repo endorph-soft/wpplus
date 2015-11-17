@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.2
+// @version         5.0.3
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.2',
+    version : '5.0.3',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 52,
+    storageVersion : 53,
     
     //Script changelog
     changelog : {
+        '5.0.3' : '<ul><li>New toggles added for powered by text, OP/Edited text prominence in threads and reps/reads colouring, adjustments to embedded content link display, miscellaneous other fixes</li></ul>',
         '5.0.2' : '<ul><li>Fixes WLR running through reps/reads columns, returns Whirlcode in Wiki, miscellaneous other fixes</li></ul>',
         '5.0.1' : '<ul><li>Adds old font toggle, changes to whim link and image embeds, fixes to aura votes page</li></ul>',
         '5.0.0' : '<ul><li>New version for new Whirlpool</li></ul>',
@@ -136,6 +137,7 @@ WhirlpoolPlus.install = {
         display_hideMovedThreads : false,
         display_hideDeletedPosts : false,
         display_syntaxHighlight : true,
+        display_opeditlarge : false,
         display_floatSidebar : false,
         display_floatTopbar : false,
         display_emoticons_enabled : false,
@@ -143,6 +145,7 @@ WhirlpoolPlus.install = {
         display_hideTheseForums : '',
         display_hideClosedThreadsOnProfile : false,
         display_whimAlert : true,
+        display_poweredby : true,
         display_widescreen : false,
         display_hideFooter : false,
         display_smallfont : false,
@@ -184,6 +187,7 @@ WhirlpoolPlus.install = {
         wlr_enabled : true,
         wlr_noTrackSticky : false,
         wlr_display_onlyEndSquare : false,
+        wlr_display_acrosscolumns : false,
         wlr_display_unreadThreadColour : '#95B0CB',
         wlr_display_readThreadColour: '#CBC095',
         compose_quickReply : true,
@@ -215,6 +219,7 @@ WhirlpoolPlus.install = {
         'display_widescreen',
         'display_hideFooter',
         'display_customCSS',
+        'display_poweredby',
         'avatar_static',
         'avatar_animated',
         'spinnerMenu',
@@ -1128,6 +1133,8 @@ WhirlpoolPlus.settings = {
                                 '<option value="30">30 Days</option>' +
                                 '<option value="60">60 Days</option>' +
                                 '<option value="120">120 Days</option>' +
+                                '<option value="240">240 Days</option>' +
+                                '<option value="365">365 Days</option>' +
                             '</select>' +
                             ' <label for="recentActivityOverlay_days">Recent Activity Duration</label>' +
                             ' <span class="settingDesc">How much of your recent activity to use for the overlay</span>'+
@@ -1170,13 +1177,19 @@ WhirlpoolPlus.settings = {
                         '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_oldfont">' +
                             ' <label for="display_oldfont">Use old Whirlpool fonts</label>' +
-                            ' <span class="settingDesc">Switches to the pre-2015 re-design font styles</span>'+
+                            ' <span class="settingDesc">Switches to the pre-2015 re-design font styles (credit to =CHRIS=)</span>'+
                         '</p>' +
             
                         '<p>' +
                             '<span>Custom CSS</span>' +
                             ' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
                             '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
+                        '</p>' +
+            
+                        '<p>' +
+                            '<input class="wpp_setting" type="checkbox" id="display_poweredby">' +
+                            '<label for="display_poweredby">Display random "forums powered by" text</label>' +
+                            ' <span class="settingDesc">Because why not?</span>'+
                         '</p>' +
                         
                     '</div>' +
@@ -1213,6 +1226,8 @@ WhirlpoolPlus.settings = {
                                 '<option value="30">30 Days</option>' +
                                 '<option value="60">60 Days</option>' +
                                 '<option value="120">120 Days</option>' +
+                                '<option value="240">240 Days</option>' +
+                                '<option value="365">365 Days</option>' +
                             '</select>' +
                             ' <label for="defaultRecentActivityDays">Default amount of recent activity to display on a user page</label>' +
                             ' <span class="settingDesc">Adjusts the default variable</span>'+
@@ -1277,10 +1292,17 @@ WhirlpoolPlus.settings = {
                             ' <label for="wlr_display_onlyEndSquare">Colour end square </label>' +
                             ' <span class="settingDesc">Just highlight the end square of tracked threads</span>'+
                         '</p> ' +
+            
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_acrosscolumns">' +
+                            ' <label for="wlr_display_acrosscolumns">Colour across Reps/Reads Columns </label>' +
+                            ' <span class="settingDesc">Highlights the reps/reads columns as well</span>'+
+                        '</p> ' +
                         
                         '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_noTrackSticky">' +
                             ' <label for="wlr_noTrackSticky">Don\'t highlight sticky threads</label>' +
+                            ' <span class="settingDesc">If the thread is a sticky, WLR will not highlight it</span>'+
                         '</p>' +
                         
                         '<p>' +
@@ -1416,6 +1438,12 @@ WhirlpoolPlus.settings = {
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_smallfont">' +
                             ' <label for="display_smallfont">Use smaller font</label>' +
                             ' <span class="settingDesc">Uses smaller font for posts, like Whirlpool did in the past</span>'+
+                        '</p>' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_opeditlarge">' +
+                            ' <label for="display_opeditlarge">Increase Edited or OP Post Prominence</label>' +
+                            ' <span class="settingDesc">Uses larger font to indicate edited or OP posts</span>'+
                         '</p>' +
                     
                         '<p class="wpp_hideNotForum">' +
@@ -1559,7 +1587,7 @@ WhirlpoolPlus.settings = {
 WhirlpoolPlus.feat = {
     
     yourvoteslink : function(){
-        $('tr:contains("Aura"):first').after('<tr style="display:table-row;vertical-align:inherit;"><td style="white-space:nowrap;" align="right"><a href="http://forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a></td><td></td></tr>');
+        $('tr:contains("Aura:"):first').after('<tr style="display:table-row;vertical-align:inherit;"><td style="white-space:nowrap;" align="right"><a href="http://forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a></td><td></td></tr>');
     },
     
     postsPerDay : function(){
@@ -1567,7 +1595,7 @@ WhirlpoolPlus.feat = {
             return;
         }
     
-        var posts = $('td:contains("Post count")').next('td').text();
+        var posts = $('td:contains("Post count:")').next('td').text();
 
         var split = $('td:contains("Joined")').next('td').text().split(' ');
         var months = {
@@ -1691,7 +1719,7 @@ WhirlpoolPlus.feat = {
                 if (imageEnabled && imageMatchRegex.test(link)){
                     // Basic Image Match
                     linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="' + link + '" alt="' + link + '" class="wpp_img"></a></span><br />');
-                    linkObject.attr("style", "display:none;");
+                    linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                 }else if(imageEnabled && imgurRegex.test(link)){
                     // Imgur Embed
                     var linkSegments = imgurRegex.exec(link);
@@ -1702,7 +1730,7 @@ WhirlpoolPlus.feat = {
                         //Check for album embeds
                         if(linkSegments[0] != 'a'){
                             linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="' + link + '" class="wpp_img"></a></span><br />');
-                            linkObject.attr("style", "display:none;");
+                            linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }else{
                             linkObject.before('<br /><span class="wcrep1"><iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe></span><br />');
                         }
@@ -1713,7 +1741,7 @@ WhirlpoolPlus.feat = {
                     
                     if(linkSegments && linkSegments[1]){
                         linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
-                        linkObject.attr("style", "display:none;");
+                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                     }
                 }else if(videoEnabled && youtubeShortRegex.test(link)){
                     // Youtube Embed (part 2 - short links)
@@ -1721,7 +1749,7 @@ WhirlpoolPlus.feat = {
                     
                     if(linkSegments && linkSegments[1]){
                         linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
-                        linkObject.attr("style", "display:none;");
+                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                     }
                 }else if(videoEnabled && vimeoRegex.test(link)){
                     // Vimeo Embed
@@ -1729,7 +1757,7 @@ WhirlpoolPlus.feat = {
                     
                     if(linkSegments && linkSegments[3]){
                         linkObject.before('<br /><span class="wcrep1"><iframe src="https://player.vimeo.com/video/' + linkSegments[3] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
-                        linkObject.attr("style", "display:none;");
+                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                     }
                 }
                 
@@ -1952,6 +1980,16 @@ WhirlpoolPlus.feat.display = {
             styles += WhirlpoolPlus.util.resource('oldfont');
         }
         
+        //OP & Edit Prominenece
+        if(WhirlpoolPlus.util.get('display_opeditlarge')) {
+            styles += '#replylist div.reply div.replytext div.op {font-size:20px !important;font-weight:bold !important;color:#888 !important; width:initial !important; margin: auto !important;} #replylist div.reply div.replytext div.edited {font-size:20px !important;width:initial !important;}';
+        }
+        
+        //Unanswered Threads Fix for Pages Where Not Applicable
+        if(WhirlpoolPlus.util.pageType.edit || WhirlpoolPlus.util.pageType.search || WhirlpoolPlus.util.pageType.reply || WhirlpoolPlus.util.pageType.watchedThreads || WhirlpoolPlus.util.pageType.newThread){
+            styles += '.showunanswered {display:none;}';
+        }        
+        
         return styles;
     },
     
@@ -2014,6 +2052,12 @@ WhirlpoolPlus.feat.display = {
         $('.copyright').append('<dt><br /><img src="' 
             + WhirlpoolPlus.util.image('wp_plus_logo') + '" alt="Whirlpool Plus" /></dt><dd>Extra Awesomeness added with '
             + '<a href="//whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + WhirlpoolPlus.about.versionText() + '</a></dd>');
+    },
+    
+    poweredby : function(){
+        if (WhirlpoolPlus.util.get('display_poweredby')){
+            $('dl.bulletproof').append($('<br /><dd style="text-align:left;">').load('https://phyco.name/wpplus/rdmtext/rantex.php'));
+        }
     },
     
     userPageInfoToggle : function(){
@@ -2541,9 +2585,9 @@ WhirlpoolPlus.feat.ignoreUser = {
             
             trParent.hide();
             
-            var hiddenPostNotice = $('<div class="notice" id="' + rowId +'"><div class="replyuser">User #' + uNum + ' &nbsp; <a style="color:black" href="//forums.whirlpool.net.au/user/' + uNum + '"><b>' + userName + '</b></a></div><div class="replytools">' + postDate + '</div><i>This post was hidden by you (WP+).</i></div>');
+            var hiddenPostNotice = $('<div class="notice" id="' + rowId +'"><div class="replyuser">User #' + uNum + ' &nbsp; <a style="color:black" href="//forums.whirlpool.net.au/user/' + uNum + '"><b>' + userName + '</b></a></div><div class="replytools">' + postDate + '</div><i>This users posts are hidden by you (WP+).</i> </div>');
             
-            var showLink = $('<a href="javascript:void(0)">Unhide</a>').click(function(){
+            var showLink = $('<a href="javascript:void(0)">Show post (temporary)</a>').click(function(){
                 trParent.show();
                 hiddenPostNotice.hide();
             });
@@ -2973,7 +3017,10 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         //we need to apply the unread class
                         if(WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')){
                             thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
-                        }else{
+                        }else if(WhirlpoolPlus.util.get('wlr_display_acrosscolumns')){
+                            thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
+                        }
+                        else{
                             thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_unreadPosts');
                         }
                         
@@ -2985,8 +3032,11 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         //all posts have been read
                         if(WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')){
                             thread.find('td.goend').addClass('whirlpoolLastRead_noUnreadPosts');
-                        }else{
-                            thread.find('td:not(.reps):not(.reads)').addClass('whirlpoolLastRead_noUnreadPosts');
+                        }else if(WhirlpoolPlus.util.get('wlr_display_acrosscolumns')){
+                            thread.find('td').addClass('whirlpoolLastRead_noUnreadPosts');
+                        }
+                        else{
+                            thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_noUnreadPosts');
                         }
                     }
                     
@@ -3415,6 +3465,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.display.floatTopbar();
         WhirlpoolPlus.feat.display.whimAlert();
         WhirlpoolPlus.feat.display.wpPlusLogo();
+        WhirlpoolPlus.feat.display.poweredby();
         WhirlpoolPlus.feat.recentActivityOverlay.run();
         WhirlpoolPlus.feat.spinnerMenu.run();
         WhirlpoolPlus.feat.changeLinks();
