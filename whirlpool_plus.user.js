@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.3
+// @version         5.0.4
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.3',
+    version : '5.0.4',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 53,
+    storageVersion : 54,
     
     //Script changelog
     changelog : {
+        '5.0.4' : '<ul><li>New toggle for old user profile page layout, option to open all watched threads in tabs instead of unread only, moved whim link to correct original location</li></ul>',
         '5.0.3' : '<ul><li>New toggles added for powered by text, OP/Edited text prominence in threads and reps/reads colouring, adjustments to embedded content link display, miscellaneous other fixes</li></ul>',
         '5.0.2' : '<ul><li>Fixes WLR running through reps/reads columns, returns Whirlcode in Wiki, miscellaneous other fixes</li></ul>',
         '5.0.1' : '<ul><li>Adds old font toggle, changes to whim link and image embeds, fixes to aura votes page</li></ul>',
@@ -152,6 +153,7 @@ WhirlpoolPlus.install = {
         display_oldfont : false,
         display_customCSS : '',
         display_penaltyBox : false,
+        display_oldProfile : false,
         display_userPageInfoToggle : false,
         avatar_static : true,
         avatar_animated : false,
@@ -195,7 +197,7 @@ WhirlpoolPlus.install = {
         compose_enhancedEditor : true,
         compose_movePreview : true,
         autoSubscribeToNewThread : false,
-        whimLink : false,
+        whimLink : true,
         userNotes_enabled : false,
         userNotes : {},
         watchedThreadsAlert : 'default',
@@ -730,11 +732,13 @@ WhirlpoolPlus.settings = {
         
             var hiddenUsersHTML = '';
             var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
-            
             for(i = 0; i < hiddenUsers.length; i++){
-                hiddenUsersHTML += '<p>User <a href="//forums.whirlpool.net.au/user/' + hiddenUsers[i] + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
+                var hurl = ("//forums.whirlpool.net.au/user/" + hiddenUsers[i]);
+                /*$( " .huname" ).load(url2 + '#upperbar ul.breadcrumb li span', function () {*/
+                hiddenUsersHTML += '<p>User <a class="huname" href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
+                /*}
+                     );*/
             }
-            
             $('#hiddenUsers').append(hiddenUsersHTML);
         }
         
@@ -1213,8 +1217,15 @@ WhirlpoolPlus.settings = {
                 '</p>' +
 
                             '<p class="wpp_hideNotForum">' +
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_oldProfile">' +
+                    '<label for="display_oldProfile">Reverts to old design on User Profile pages</label>' +
+                    ' <span class="settingDesc">Shows recent thread activity below user info as per the old site design</span>'+
+                '</p> ' +
+            
+                            '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_userPageInfoToggle">' +
                     '<label for="display_userPageInfoToggle">Toggle user info on or off on Profiles</label>' +
+                    ' <span class="settingDesc">Adds a toggle to show/hide the user info panel as required</span>'+
                 '</p> ' +
                                        
                         '<p>' +
@@ -1779,13 +1790,15 @@ WhirlpoolPlus.feat = {
     },
     
     openWatchedThreadsInTabs : function(){
-        var openAllInT = $('<a href="#" id="openInTabs">open in tabs</a>');
+        var openAllURInT = $('<a href="#" id="openInTabs">open unread in tabs</a>');
         
-        $('a[href="/forum/?action=watched&showall=1"]').before(openAllInT); 
+        $('a[href="/forum/?action=watched"]').after(openAllURInT); 
         
-        openAllInT.after('&nbsp;&nbsp;|&nbsp;&nbsp;');
+        openAllURInT.before('&nbsp;&nbsp;');
         
-        openAllInT.click(function(){
+        openAllURInT.after('&nbsp;&nbsp;|');
+        
+        openAllURInT.click(function(){
             $('.unread a').each(function (){
                 if(typeof GM_openInTab == 'function'){
                     GM_openInTab(this.href);
@@ -1794,7 +1807,24 @@ WhirlpoolPlus.feat = {
                 }
             });
             return false;       
-        });     
+        });
+        
+        var openAllInT = $('<a href="#" id="openInTabs">open all in tabs</a>');
+        
+        $('a[href="/forum/?action=watched&showall=1"]').after(openAllInT); 
+        
+        openAllInT.before('&nbsp;&nbsp;');
+        
+        openAllInT.click(function(){
+            $('a.title').not(".section a.title").each(function (){
+                if(typeof GM_openInTab == 'function'){
+                    GM_openInTab(this.href);
+                }else{
+                    window.open(this.href);
+                }
+            });
+            return false;       
+        });
         
         $('.section a').each(function(i){
             var openAllinSInT = $('<a href="#" id="openSectionInTabs" style="font-weight:bold;margin-left:35px;">open section in tabs</a>');
@@ -1980,7 +2010,7 @@ WhirlpoolPlus.feat.display = {
             styles += WhirlpoolPlus.util.resource('oldfont');
         }
         
-        //OP & Edit Prominenece
+        //OP & Edit Prominence
         if(WhirlpoolPlus.util.get('display_opeditlarge')) {
             styles += '#replylist div.reply div.replytext div.op {font-size:20px !important;font-weight:bold !important;color:#888 !important; width:initial !important; margin: auto !important;} #replylist div.reply div.replytext div.edited {font-size:20px !important;width:initial !important;}';
         }
@@ -2057,6 +2087,13 @@ WhirlpoolPlus.feat.display = {
     poweredby : function(){
         if (WhirlpoolPlus.util.get('display_poweredby')){
             $('dl.bulletproof').append($('<br /><dd style="text-align:left;">').load('https://phyco.name/wpplus/rdmtext/rantex.php'));
+        }
+    },
+    
+    oldProfile : function(){
+        if (WhirlpoolPlus.util.get('display_oldProfile')) {
+            $('#userprofile h2:lt(1)').detach().insertBefore('#userprofile script:contains("keypress")');
+            $('#threads').detach().insertBefore('#userprofile script:contains("keypress")');
         }
     },
     
@@ -2513,7 +2550,7 @@ WhirlpoolPlus.feat.whimLink = {
     WhimUser : function(reply){
         if(WhirlpoolPlus.util.get('whimLink')) {
             var userNumber = WhirlpoolPlus.util.getReplyUserId(reply);
-            reply.find('.usergroup').append($(' <a href="//forums.whirlpool.net.au/whim/?action=write&to=' + userNumber + '" target="_blank">(Whim)</a>'));
+            reply.find('.actions').append($(' <span class="bar"> |</span> <a title="whim this user" href="//forums.whirlpool.net.au/whim/?action=write&to=' + userNumber + '" target="_blank">Whim user</a>'));
         }
     }
 },
@@ -3513,6 +3550,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.display.hideClosedThreads();
         WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
         WhirlpoolPlus.feat.postsPerDay();
+        WhirlpoolPlus.feat.display.oldProfile();
         WhirlpoolPlus.feat.display.userPageInfoToggle();
         WhirlpoolPlus.feat.yourvoteslink();
     }
