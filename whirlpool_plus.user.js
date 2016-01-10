@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.4
+// @version         5.0.5
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.4',
+    version : '5.0.5',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 54,
+    storageVersion : 55,
     
     //Script changelog
     changelog : {
+        '5.0.5' : '<ul><li>Adds Super Profile option to show Watched Threads on your Profile Page, fixes bug causing random links to display as broken images, miscellaneous other fixes</li></ul>',
         '5.0.4' : '<ul><li>New toggle for old user profile page layout, option to open all watched threads in tabs instead of unread only, moved whim link to correct original location</li></ul>',
         '5.0.3' : '<ul><li>New toggles added for powered by text, OP/Edited text prominence in threads and reps/reads colouring, adjustments to embedded content link display, miscellaneous other fixes</li></ul>',
         '5.0.2' : '<ul><li>Fixes WLR running through reps/reads columns, returns Whirlcode in Wiki, miscellaneous other fixes</li></ul>',
@@ -155,6 +156,7 @@ WhirlpoolPlus.install = {
         display_penaltyBox : false,
         display_oldProfile : false,
         display_userPageInfoToggle : false,
+        display_superProfile : false,
         avatar_static : true,
         avatar_animated : false,
         stats_postsPerDay : true,
@@ -282,8 +284,8 @@ WhirlpoolPlus.install = {
                 'background-color' : '#ddd',
                 'border' : '1px solid #000',
                 'padding' : '20px',
-                'height' : '300px',
-                'width' : '400px',
+                'height' : '500px',
+                'width' : '700px',
             },
             overlayCss : { backgroundColor : '#000' },
         });
@@ -340,10 +342,11 @@ WhirlpoolPlus.util = {
     
     // Should not be accessed without calling initPageType
     pageType : {
+        
         'alert'              : '/forum/alert/',     // An alert page
         'posts'              : 'forum-replies.cfm', // The page where you view posts
         'threads'            : '/forum/',           // The page where you view threads
-        'profile'            : '/user/',            // User account page
+        'profile'            : '/user/',            // User profile page
         'whimArchive'        : 'action=archive',    // Whim archive page
         'whimRead'           : 'action=read',       // Whim archive page
         'deletedThread'      : 'a=priv-deleted',    // Deleted thread alert
@@ -1227,6 +1230,12 @@ WhirlpoolPlus.settings = {
                     '<label for="display_userPageInfoToggle">Toggle user info on or off on Profiles</label>' +
                     ' <span class="settingDesc">Adds a toggle to show/hide the user info panel as required</span>'+
                 '</p> ' +
+            
+                            '<p class="wpp_hideNotForum">' +
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_superProfile">' +
+                    '<label for="display_superProfile">Super Profile Page</label>' +
+                    ' <span class="settingDesc">Shows your Watched Threads on User Profile pages</span>'+
+                '</p> ' +
                                        
                         '<p>' +
                             '<select class="wpp_setting" id="defaultRecentActivityDays">' +
@@ -1598,7 +1607,10 @@ WhirlpoolPlus.settings = {
 WhirlpoolPlus.feat = {
     
     yourvoteslink : function(){
-        $('tr:contains("Aura:"):first').after('<tr style="display:table-row;vertical-align:inherit;"><td style="white-space:nowrap;" align="right"><a href="http://forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a></td><td></td></tr>');
+        var target = $('td:contains("Aura:"):first');
+        
+        target.append('<br><a class="small" href="http://forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a>');
+        target.parent().css({"vertical-align": "top"});
     },
     
     postsPerDay : function(){
@@ -1702,7 +1714,7 @@ WhirlpoolPlus.feat = {
         var videoEnabled = WhirlpoolPlus.util.get('embed_videos');
         var maxContentWidth = $('.replytext').width();
         
-        var imageMatchRegex = /bmp|gif|jpg|png/i;
+        var imageMatchRegex = /(?:jpe?g|gif|bmp|png)$/;
         var imgurRegex = /http(s)?:\/\/imgur\.com\/(.+)/i;
         
         var youtubeRegex = /http(s)?:\/\/(www.)?youtube\.com/i;
@@ -2012,7 +2024,7 @@ WhirlpoolPlus.feat.display = {
         
         //OP & Edit Prominence
         if(WhirlpoolPlus.util.get('display_opeditlarge')) {
-            styles += '#replylist div.reply div.replytext div.op {font-size:20px !important;font-weight:bold !important;color:#888 !important; width:initial !important; margin: auto !important;} #replylist div.reply div.replytext div.edited {font-size:20px !important;width:initial !important;}';
+            styles += '#replylist div.reply div.replytext div.op {font-size:20px !important;font-weight:bold !important;color:#888 !important;width:initial !important;margin: auto !important;padding-left:5px !important;} #replylist div.reply div.replytext div.edited {font-size:19px !important;width:initial !important;padding-left:5px !important;}';
         }
         
         //Unanswered Threads Fix for Pages Where Not Applicable
@@ -2092,8 +2104,8 @@ WhirlpoolPlus.feat.display = {
     
     oldProfile : function(){
         if (WhirlpoolPlus.util.get('display_oldProfile')) {
-            $('#userprofile h2:lt(1)').detach().insertBefore('#userprofile script:contains("keypress")');
             $('#threads').detach().insertBefore('#userprofile script:contains("keypress")');
+            $('#userprofile h2:lt(1)').detach().insertBefore('#threads');
         }
     },
     
@@ -2104,6 +2116,13 @@ WhirlpoolPlus.feat.display = {
             h2s.click(function () {
                 $(this).next('table').slideToggle();
             });
+        }
+    },
+    
+    superProfile : function(){
+        if (WhirlpoolPlus.util.get('display_superProfile')){
+            $('#userprofile').append('<p><h2>Watched Threads</h2>');
+            $('#userprofile').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #threads'));
         }
     },
     
@@ -2679,11 +2698,11 @@ WhirlpoolPlus.feat.spinnerMenu = {
         var uNumber = WhirlpoolPlus.util.getUserId();
         
         if(WhirlpoolPlus.util.get('spinnerMenu_settingsLocation') == 'top'){
-            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="//forums.whirlpool.net.au/user/">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
         }else if(WhirlpoolPlus.util.get('spinnerMenu_settingsLocation') == 'underuser'){
-            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
+            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="//forums.whirlpool.net.au/user/">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
         }else {
-            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="#">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+            this._menu.html('<img id="menuSpinner" src="' + spinner + '" />' + '<li><a href="//forums.whirlpool.net.au/user/">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">People Online</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
         }
         
         var newUL2;
@@ -2799,79 +2818,6 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
     }
 
-};
-
-WhirlpoolPlus.feat.quickEdit = {
-    
-    run : function(){
-        if(WhirlpoolPlus.util.get('quickEdit')){
-            $('.actions a[href^="/forum/index.cfm?action=edit"]').after('<br><a class="wpp-edit">(quick edit)</a>');
-            $('#replies .wpp-edit').click(this._onClick);
-        }
-    },
-    
-    css : function(){
-        //Everyone loves CSS hackery, right?
-        return '.wpp-edit, .wpp-c-edit { cursor: pointer; }' +
-            '.quickEdit > table > tbody > tr:nth-child(1), .quickEdit #reply > table > tbody > tr:nth-child(2), .quickEdit #reply tbody th, .quickEdit #reply tbody .right { display: none; }' +
-            '.quickEdit > table > tbody > tr:nth-child(4) table > tbody > tr:nth-child(1) td { width: 50%; text-align: center; }' +
-            '.quickEdit > table > tbody > tr:nth-child(4) table > tbody > tr:nth-child(2) { display: none; }' +
-            '.quickEdit { margin: 0; }' +
-            '.quickEdit #previewButton { display: none; }' +
-            '.quickEdit button { width:150px; font:16px Arial; }' +
-            '.quickEdit colgroup col { width: auto !important; }' +
-            '.quickEdit textarea#body { min-height: 200px; width: 100%; }' +
-            '.quickEdit td { background-color: transparent !important; padding: 0; }' +
-            '.quickEdit * { box-shadow: none !important; }';
-    },
-    
-    _onClick : function(){
-        $(this).hide();
-        $(this).after('<a class="wpp-c-edit">(cancel)</a>');
-        
-        var editUrl = $(this).prev().prev().prop('href').toString(); //The 'Edit my Post' link url
-        var replyID = editUrl.split( "e=" )[1]; //Post id
-        var replyHTML = $('#rr' + replyID + ' .replytext'); //Body of the post
-        var original = replyHTML.html().toString(); //Original HTML
-        
-        //Activate the CSS hacks
-        replyHTML.addClass('quickEdit');
-
-        //Load the contents of the edit form into replyHTML
-        replyHTML.load(editUrl + ' .replyform', function(){
-            
-            //Prevent errors from this undefined function
-            $('#fm').removeAttr('onkeypress');
-                      
-            //Add Cancel Button
-            $('#fm #previewButton').next().after('<td><button class="wpp-c-edit" type="button">Cancel</button></td>');
-            
-            //On cancel
-            $('.wpp-c-edit').on('click',function(e){
-                replyHTML.html(original);
-                $('.wpp-c-edit').remove();
-                $('.wpp-edit').show();
-            });
-            
-            //On save
-            $('input').on('click',function(e){
-                $('input[name=post2]').value('post');
-                var data = $('#fm').serialize();
-                $.post($('#fm').prop('action'), data, function(text){
-                    if(text.indexOf('Edited. Returning') >= 0){
-                        document.location.reload();
-                        textarea.val('');
-                    }else{
-                        alert('WP+: Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Feedback).');
-                    }
-                });
-                
-                return false;
-            });
-        });
-    }
-        
-        
 };
 
 WhirlpoolPlus.feat.whirlpoolLastRead = {
@@ -3380,6 +3326,82 @@ WhirlpoolPlus.feat.editor = {
     
 };
 
+WhirlpoolPlus.feat.quickEdit = {
+    
+    run : function(){
+        if(WhirlpoolPlus.util.get('quickEdit')){
+            $('.actions a[href^="/forum/index.cfm?action=edit"]').after('<br><a class="wpp-edit">(quick edit)</a>');
+            $('#replies .wpp-edit').click(this._onClick);
+        }
+    },
+    
+    css : function(){
+        //Everyone loves CSS hackery, right?
+        return '.wpp-edit, .wpp-c-edit { cursor: pointer; }' +
+            '.quickEdit > table > tbody > tr:nth-child(1), .quickEdit #reply > table > tbody > tr:nth-child(2), .quickEdit #reply tbody th, .quickEdit #reply tbody .right { display: none; }' +
+            '.quickEdit > table > tbody > tr:nth-child(4) table > tbody > tr:nth-child(1) td { width: 50%; text-align: center; }' +
+            '.quickEdit > table > tbody > tr:nth-child(4) table > tbody > tr:nth-child(2) { display: none; }' +
+            '.quickEdit { margin: 0; }' +
+            '.quickEdit #previewButton { display: none; }' +
+            '.quickEdit button { width:150px; font:16px Arial; }' +
+            '.quickEdit colgroup col { width: auto !important; }' +
+            '.quickEdit textarea#body { min-height: 200px; width: 100%; }' +
+            '.quickEdit td { background-color: transparent !important; padding: 0; }' +
+            '.quickEdit * { box-shadow: none !important; }';
+    },
+    
+    _onClick : function(){
+        $(this).hide();
+        $(this).after('<a class="wpp-c-edit">(cancel)</a>');
+        
+        var editUrl = $(this).prev().prev().prop('href').toString(); //The 'Edit my Post' link url
+        var replyID = editUrl.split( "e=" )[1]; //Post id
+        var replyHTML = $('#rr' + replyID + ' .replytext'); //Body of the post
+        var original = replyHTML.html().toString(); //Original HTML
+        
+        //Activate the CSS hacks
+        replyHTML.addClass('quickEdit');
+
+        //Load the contents of the edit form into replyHTML
+        replyHTML.load(editUrl + ' .replyform', function(){
+            
+            //Prevent errors from this undefined function
+            $('#fm').removeAttr('onkeypress');
+            
+            //Add Whirlcode Block Eventually
+            $('#replylist div.quickEdit div.replyform div.editor').prepend($('<div id="wpp_whirlcode" style="display:none;">Placeholder for Whirlcode Once Implemented</div>'));
+                      
+            //Add Cancel Button
+            $('#fm #previewButton').next().after('<td><button class="wpp-c-edit" type="button">Cancel</button></td>');
+            
+            //On cancel
+            $('.wpp-c-edit').on('click',function(e){
+                replyHTML.html(original);
+                $('.wpp-c-edit').remove();
+                $('.wpp-edit').show();
+            });
+            
+            //On save
+            $('input').on('click',function(e){
+                $('input[name=post2]').value('post');
+                var data = $('#fm').serialize();
+                $.post($('#fm').prop('action'), data, function(text){
+                    if(text.indexOf('Edited. Returning') >= 0){
+                        document.location.reload();
+                        textarea.val('');
+                    }else{
+                        alert('WP+: Something went wrong while editing your post. Some common problems:\n - Overquoting\n - Too much text\n - Invalid characters\nTry using the normal editing function instead. Please report this bug in the WP+ thread (in Feedback).');
+                    }
+                });
+                
+                return false;
+            });
+        });
+    }
+        
+        
+};
+
 WhirlpoolPlus.feat.userNotes = {
 
     _notes : WhirlpoolPlus.util.get('userNotes'),
@@ -3545,7 +3567,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
     }
     
-    /** RUN: Profiles **/
+    /** RUN: Profile Pages **/
     if(WhirlpoolPlus.util.pageType.profile){
         WhirlpoolPlus.feat.display.hideClosedThreads();
         WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
@@ -3553,6 +3575,12 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.display.oldProfile();
         WhirlpoolPlus.feat.display.userPageInfoToggle();
         WhirlpoolPlus.feat.yourvoteslink();
+    }
+    
+    /** RUN: Own Profile **/
+    var uNumber = WhirlpoolPlus.util.getUserId();
+    if(window.location.href.indexOf('' + uNumber + '') > -1 || document.location.href == 'https://forums.whirlpool.net.au/user/' ){
+        WhirlpoolPlus.feat.display.superProfile();
     }
     
     /** RUN: Aura Votes Page **/
