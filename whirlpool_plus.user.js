@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.6
+// @version         5.0.7
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.6',
+    version : '5.0.7',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 56,
+    storageVersion : 57,
     
     //Script changelog
     changelog : {
+        '5.0.7' : '<ul><li>Adds username to hidden users view, toggles for enabling/disabling WLR on different pages, fixes Whirlcode block not appearing in Wiki after previewing updates & reworked settings menu</li></ul>',
         '5.0.6' : '<ul><li>Adds toggle for enhanced Watched Threads page & toggle to reverse mark as read/stop watching buttons, fixes floating top bar background, adds toggle for return to last page after sign-in, miscellaneous code tweaks</li></ul>',
         '5.0.5' : '<ul><li>Adds Super Profile option to show Watched Threads on your Profile Page, fixes bug causing random links to display as broken images, miscellaneous other fixes</li></ul>',
         '5.0.4' : '<ul><li>New toggle for old user profile page layout, option to open all watched threads in tabs instead of unread only, moved whim link to correct original location</li></ul>',
@@ -189,7 +190,9 @@ WhirlpoolPlus.install = {
         wlr_display_flipStyles : false,
         wlr_display_unreadPostColour : '#CFCBBC',
         wlr_tempDisable : true,
-        wlr_enabled : true,
+        wlr_enabled_forums : true,
+        wlr_enabled_profile : true,
+        wlr_enabled_watched : true,
         wlr_noTrackSticky : false,
         wlr_display_onlyEndSquare : false,
         wlr_display_acrosscolumns : false,
@@ -227,6 +230,7 @@ WhirlpoolPlus.install = {
         'display_widescreen',
         'display_hideFooter',
         'display_customCSS',
+        'display_oldfont',
         'display_poweredby',
         'avatar_static',
         'avatar_animated',
@@ -655,7 +659,7 @@ WhirlpoolPlus.util = {
 WhirlpoolPlus.settings = {
 
     css : function(){
-        var styles = '#wppSettings { background-color:#999; border:1px solid #000; color:#333; padding:0 12px; height: 540px; width: 800px; }' + 
+        var styles = '#wppSettings { background-color:#999; border:1px solid #000; color:#333; padding:0 12px; height: 768px; width: 1024px; }' + 
         '#wppSettings #wppSettingsWrapper { overflow: hidden; width: 100%; height: 100%; }' + 
         '#wppSettings #tabMenu { list-style:none; float:left; margin: 14px 0px 0px 32px; }' + 
         '#wppSettings .menuTab { border:3px solid #777; border-width:3px 3px 1px; float:left; height:20px; margin-right:10px; padding:5px; width:140px; text-align:center; color:white; }' + 
@@ -668,16 +672,16 @@ WhirlpoolPlus.settings = {
         '#wppSettings .subSettings_heading { cursor: pointer; margin: 5px 8px; text-align:center; }' + 
         '#wppSettings .subSettings_content { display: none; }' + 
         '#wppSettings .subSettings { border:1px solid #777; border-radius:5px; background-color: #bbb; margin: 5px; }' + 
-        '#wppSettings .menuDiv { width: 794px; height:440px; display: none; overflow-y:scroll; float:left;border:3px solid #333;background-color:#EEEEEE;margin-bottom:5px; }' + 
+        '#wppSettings .menuDiv { width: 1020px; height:660px; display: none; overflow-y:scroll; float:left;border:3px solid #333;background-color:#EEEEEE;margin-bottom:5px; }' + 
         '#wppSettings .menuDiv_active { display: block; }' + 
         '#wppSettings .tabDescription { text-align: center; font-style: italic; }' + 
         '#wppSettings .wpp_settingsMessage { text-align: center; font-weight: bold; padding: 5px 10px;}' + 
-        '#currentUserAvatar { background-image: url("' + WhirlpoolPlus.util.image('noavatar') + '"); height: 80px; width: 80px; margin: 0 auto; }' +
+        '#currentUserAvatar { background-image: url("' + WhirlpoolPlus.util.image('noavatar') + '"); background-repeat: no-repeat; height: 100px; width: 100px; margin: 0 auto; }' +
         '#wppSettings #currentAvatars { width: 200px; margin: 0 auto; background: url("/img/forum/reply-e5e5e5.gif") repeat-x scroll center top #E5E5E5; padding: 5px 20px; border-radius: 4px; }' +
         '#wppSettings #currentAvatars:after { content: ""; display: table; clear: both; }' +
-        '#wppSettings .avatar { background-image: url("' + WhirlpoolPlus.util.image('noavatar') + '"); height: 80px; width: 80px; margin: 0 auto; }' +
-        '#wppSettings .avatarLabel { font-weight: bold; width: 80px; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
-        '#wppSettings .avatarLabel { font-weight: bold; width: 80px; margin: 0 auto; text-align: center; padding-top: 10px; }';
+        '#wppSettings .avatar { background-image: url("' + WhirlpoolPlus.util.image('noavatar') + '"); background-repeat: no-repeat; height: 100px; width: 100px; margin: 0 auto; }' +
+        '#wppSettings .avatarLabel { font-weight: bold; width: 100px; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
+        '#wppSettings .avatarLabel { font-weight: bold; width: 100px; margin: 0 auto; text-align: center; padding-top: 10px; }';
         
         
         if(!WhirlpoolPlus.util.pageType.forums){
@@ -742,10 +746,7 @@ WhirlpoolPlus.settings = {
             var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
             for(i = 0; i < hiddenUsers.length; i++){
                 var hurl = ("//forums.whirlpool.net.au/user/" + hiddenUsers[i]);
-                /*$( " .huname" ).load(url2 + '#upperbar ul.breadcrumb li span', function () {*/
-                hiddenUsersHTML += '<p>User <a class="huname" href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
-                /*}
-                     );*/
+                hiddenUsersHTML += '<p>User <a href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
             }
             $('#hiddenUsers').append(hiddenUsersHTML);
         }
@@ -831,6 +832,18 @@ WhirlpoolPlus.settings = {
                                 postBackgroundColour = '#D2E5E2';
                                 break; 
                             
+                            case 'electrolize':
+                                newPostColour = '#002F58';
+                                noNewPostColour = '#054C66';
+                                postBackgroundColour = '#0C3851';
+                                break;
+                                
+                            case 'wood':
+                                newPostColour = '#994C00';
+                                noNewPostColour = '#A4672B';
+                                postBackgroundColour = '#CFCBBC';
+                                break;
+                                
                             case 'default':
                             default:
                                 newPostColour = '#95B0CB';
@@ -1031,16 +1044,19 @@ WhirlpoolPlus.settings = {
     _buildHtml : function(){
         this._html = '<div id="wppSettingsWrapper">' +
             '<ul id="tabMenu">' +
-                '<li class="menuTab menuTab_active" data-menudiv="menuDiv_forums">Forums</li>' +
-                '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_threads">Threads</li>' +
-                '<li class="menuTab" data-menudiv="menuDiv_posts">Posts</li>' +
-                '<li class="menuTab" data-menudiv="menuDiv_help">Info</li>' +
+                '<li class="menuTab menuTab_active" data-menudiv="menuDiv_help">Info & Config</li>' +
+                '<li class="menuTab" data-menudiv="menuDiv_display">Display</li>' +
+                '<li class="menuTab" data-menudiv="menuDiv_users">Users</li>' +
+                '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_wlr">WLR & Sync</li>' +
+                '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_posts">Threads & Posts</li>' +
             '</ul>' +
 
-            '<div class="menuDiv menuDiv_active" id="menuDiv_forums">' +
-                
-                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
-                
+            '<div class="menuDiv menuDiv_active" id="menuDiv_help">' +
+            
+                '<p class="description"><center><h1>Whirlpool Plus</h1></center></p>' +
+            
+                '<div class="wpp_showNotForum wpp_settingsMessage">Setting made here will not apply to the forums.whirlpool.net.au subdomain</div>' +
+            
                 '<div class="subSettings">' +
                     '<p class="subSettings_heading description wpp_hide"><b>Script Configuration</b></p>' +
                     '<div class="subSettings_content">' +
@@ -1048,56 +1064,73 @@ WhirlpoolPlus.settings = {
                         '<p>' +
                             '<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
                             ' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
-                            ' <span class="settingDesc">Used for features like the Recent Activity Overlay</span>'+
+                            ' <span class="settingDesc">Used for features like the Recent Activity Overlay, Avatars and WLR Synchronisation</span>'+
                         '</p>' + 
                         
                     '</div>' +
                     
                 '</div>' +
-                
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
-                    '<div class="subSettings_content">' +
-                    
-                        '<p class="description">Script data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a></p>' +
-                    
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
-                            '<label for="sync_enabled">Activate Synchronisation</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
-                            // No wpp_setting class intentional
-                            '<input class="syncSetting wpp_forumSetting" type="text" id="sync_server"> ' +
-                            '<label for="sync_server">Server Address</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_user"> ' +
-                            '<label for="sync_user">Whirlpool User ID</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_key"> ' +
-                            '<label for="sync_key">Access Key</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
-                            // No wpp_setting class intentional
-                            '<input class="syncSetting wpp_forumSetting" type="password" id="sync_encryptionKey"> ' +
-                            '<button type="button" id="showEncKey" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button> ' +
-                            '<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
-                            '<label for="sync_encryptionKey">Encryption Password</label>' +
-                            ' <span class="settingDesc">Must be the same for all of your WP+ installs</span>'+
-                        '</p>' + 
-                        
-                    '</div>' +
-                    
-                '</div>' +
-                    
-                '<div class="subSettings">' +
+            
+                '<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
+                '<p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features. </p>' +
+                '<p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus">wiki article<a>.</p>' +
+                '<p class="description">The script is currently maintained by <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>, so you can also whim him.</p>' +
+            
+                '<p class="description"><b>Privacy</b></p>' +
+                '<p class="description">As stated in the wiki article, a user script like Whirlpool Plus could possibly be used to steal user information.  To our knowledge, there is no such code in this script. </p>' +
+                '<p class="description">The script relies on an external server to run the avatars and synchronisation. This server (endorph.net) is operated by <a href="//forums.whirlpool.net.au/user/272563">tbwd</a>. Both these services use your API key to validate your identity, but do not store this key.</p>' +
+
+                '<p class="description"><b>About Whirlpool Plus</b></p>' +
+                '<p class="description">Whirlpool Plus was created by various members of the Whirlpool community to add extra features to the Whirlpool Forums. Many people have contributed to the script- see the wiki article for credits.</p>' +
+            
+                '<p class="description"><b>Changelog</b></p>';
+
+        for(key in WhirlpoolPlus.about.changelog){
+            WhirlpoolPlus.settings._html += '<p class="description">Version ' + key + WhirlpoolPlus.about.changelog[key] + '</p>';
+        }
+            
+        this._html += '<p class="description">Further changelogs can be viewed in the source of previous versions</p></div>' +
+            
+            '<div class="menuDiv" id="menuDiv_display">' +
+
+'<div class="subSettings">' +
                     '<p class="subSettings_heading description">' +
-                        '<b>Forum Display</b>'+
+                        '<b>Themes & Fonts</b>'+
+                    '</p>' +
+                    '<div class="subSettings_content">' +
+                                           
+                        '<p>' +
+                            '<select class="wpp_setting" id="display_theme">' +
+                                '<option value="default">Default (by Simon Wright)</option>' +
+                                '<option value="classic">WP Classic (by Phyco)</option>' +
+                                '<option value="black">WP Black (by =CHRIS=)</option>' +
+                                '<option value="teal">WP Teal (by =CHRIS=)</option>' +
+                                '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
+                                '<option value="wood">WP Wood (by =CHRIS=)</option>' +
+                            '</select>' +
+                            ' <label for="display_theme">Custom Theme<br>To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a></label>' +
+                            ' <span class="settingDesc">A collection of styles provided by members of Whirlpool</span>'+
+                        '</p>' +
+            
+                        '<p>' +
+                            '<input class="wpp_setting" type="checkbox" id="display_oldfont">' +
+                            ' <label for="display_oldfont">Use old Whirlpool fonts</label>' +
+                            ' <span class="settingDesc">Switches to the pre-2015 re-design font styles (credit to =CHRIS=)</span>'+
+                        '</p>' +
+            
+                        '<p>' +
+                            '<span>Custom CSS</span>' +
+                            ' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
+                            '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
+                        '</p>' +
+                                    
+                    '</div>' +
+                    
+                '</div>' +
+            
+'<div class="subSettings">' +
+                    '<p class="subSettings_heading description">' +
+                        '<b>Display Modifications</b>'+
                     '</p>' +
                     '<div class="subSettings_content">' +
                     
@@ -1110,7 +1143,7 @@ WhirlpoolPlus.settings = {
                         '<p>' +
                             '<input class="wpp_setting" type="checkbox" id="display_floatSidebar">' +
                             '<label for="display_floatSidebar">Float the sidebar</label>' +
-                            ' <span class="settingDesc">Keeps the sidebar visible when scrolling</span>'+
+                            ' <span class="settingDesc">Keeps the sidebar navigation visible when scrolling</span>'+
                         '</p>' +
             
                         '<p>' +
@@ -1127,13 +1160,13 @@ WhirlpoolPlus.settings = {
             '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_whimAlert">' +
                     '<label for="display_whimAlert">Whim Notification</label>' +
-                    ' <span class="settingDesc">Display a notification when you receive a new WHIM</span>'+
+                    ' <span class="settingDesc">Display a banner notification when you receive a new WHIM, in addition to Whirlpool\'s inbuilt notification</span>'+
 '</p> ' +
             
                                     '<p>' +
                             '<input class="wpp_setting " type="checkbox" id="recentActivityOverlay">' +
                             '<label for="recentActivityOverlay">Recent Activity Overlay</label>' +
-                            ' <span class="settingDesc">Make sure you enter your API Key in the Script Configuration</span>'+
+                            ' <span class="settingDesc">Shows your recent forum activity in an overlay panel for easy access (make sure you enter your API Key in the Script Configuration)</span>'+
                         '</p>' +
             
                         '<p>' +
@@ -1172,50 +1205,31 @@ WhirlpoolPlus.settings = {
                     ' <label for="spinnerMenu_settingsLocation">Location of settings link in dynamic menu</label>' +
                             ' <span class="settingDesc">Adjusts where this will appear</span>'+
                 '</p>' +
-                        
-                        '<p>' +
-                            '<select class="wpp_setting" id="display_theme">' +
-                                '<option value="default">Default (by Simon Wright)</option>' +
-                                '<option value="classic">WP Classic (by Phyco)</option>' +
-                                '<option value="black">WP Black (by =CHRIS=)</option>' +
-                                '<option value="teal">WP Teal (by =CHRIS=)</option>' +
-                                '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
-                                '<option value="wood">WP Wood (by =CHRIS=)</option>' +
-                            '</select>' +
-                            ' <label for="display_theme">Custom Theme</label>' +
-                            ' <span class="settingDesc">A collection of styles provided by members of Whirlpool</span>'+
-                        '</p>' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_oldfont">' +
-                            ' <label for="display_oldfont">Use old Whirlpool fonts</label>' +
-                            ' <span class="settingDesc">Switches to the pre-2015 re-design font styles (credit to =CHRIS=)</span>'+
-                        '</p>' +
-            
-                        '<p>' +
-                            '<span>Custom CSS</span>' +
-                            ' <span class="settingDesc">Add custom styles to Whirlpool</span>'+
-                            '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
-                        '</p>' +
             
                         '<p>' +
                             '<input class="wpp_setting" type="checkbox" id="display_poweredby">' +
                             '<label for="display_poweredby">Display random "forums powered by" text</label>' +
-                            ' <span class="settingDesc">Because why not?</span>'+
+                            ' <span class="settingDesc">An original Whirlpool feature resurrected, because why not?</span>'+
                         '</p>' +
                         
                     '</div>' +
                     
                 '</div>' +
-                                    
+            
+            '</div>' +
+            
+            '<div class="menuDiv" id="menuDiv_users">' +
+                
+                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
+                                                                        
                 '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Users</b></p>' +
+                    '<p class="subSettings_heading description"><b>User Settings</b></p>' +
                     '<div class="subSettings_content">' +
             
                         '<p>' +
                             '<input class="wpp_setting" type="checkbox" id="returnafterlogin">' +
-                            ' <label for="returnafterlogin">Return to previous page after logging in</label>' +
-                            ' <span class="settingDesc">Redirects you to the last page you were on before logging in</span>'+
+                            ' <label for="returnafterlogin">Return to previous page after logging in<br /><b>Must be enabled on both the whirlpool.net.au and forums.whirlpool.net.au domains to work correctly</b></label>' +
+                            ' <span class="settingDesc">Redirects you to the last thread viewed before login</span>'+
                         '</p>' +
             
                         '<p class="wpp_hideNotForum">' +
@@ -1263,18 +1277,6 @@ WhirlpoolPlus.settings = {
                             ' <label for="defaultRecentActivityDays">Default amount of recent activity to display on a user page</label>' +
                             ' <span class="settingDesc">Adjusts the default variable</span>'+
                         '</p>' + 
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="userNotes_enabled">' +
-                            ' <label for="userNotes_enabled">User Notes</label>' +
-                            ' <span class="settingDesc">Keep notes on each user</span>'+
-                        '</p> ' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="whimLink">' +
-                            ' <label for="whimLink">Whim Links</label>' +
-                            ' <span class="settingDesc">Adds a Whim link next to a users post count on each post</span>'+
-                        '</p> ' +
                         
                         /*'<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="resetAuraVote">' +
@@ -1289,249 +1291,7 @@ WhirlpoolPlus.settings = {
             
                     '</div>' +
                 '</div>' +
-                    
-            '</div>' +
-
-            '<div class="menuDiv wpp_hideNotForum" id="menuDiv_threads">' +
-            
-                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
-            
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
-                    '<div class="subSettings_content">' +
-                        '<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts</p>' +
-                    
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled">' +
-                            ' <label for="wlr_enabled">Activate tracker</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadThreadColour">' +
-                            ' <label for="wlr_display_unreadThreadColour">Unread Posts Colour</label>' +
-                            ' <span class="settingDesc">Used to highlight threads containing posts you haven\'t read</span>'+
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_readThreadColour">' +
-                            ' <label for="wlr_display_readThreadColour">No Unread Posts Colour</label>' +
-                            ' <span class="settingDesc">Used to highlight threads containing no unread posts</span>'+
-                        '</p>' +
-                    
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_onlyEndSquare">' +
-                            ' <label for="wlr_display_onlyEndSquare">Colour end square </label>' +
-                            ' <span class="settingDesc">Just highlight the end square of tracked threads</span>'+
-                        '</p> ' +
-            
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_acrosscolumns">' +
-                            ' <label for="wlr_display_acrosscolumns">Colour across Reps/Reads Columns </label>' +
-                            ' <span class="settingDesc">Highlights the reps/reads columns as well</span>'+
-                        '</p> ' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_noTrackSticky">' +
-                            ' <label for="wlr_noTrackSticky">Don\'t highlight sticky threads</label>' +
-                            ' <span class="settingDesc">If the thread is a sticky, WLR will not highlight it</span>'+
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadPostColour">' +
-                            ' <label for="wlr_display_unreadPostColour">Post Highlight Colour (Posts Pages)</label>' +
-                            ' <span class="settingDesc">Used to highlight posts (right most column) on posts pages</span>'+
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_flipStyles">' +
-                            ' <label for="wlr_display_flipStyles">Highlight unread posts instead of read posts (Posts Pages)</label>' +
-                        '</p>' +    
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_tempDisable">' +
-                            ' <label for="wlr_tempDisable">Add a button to temporarily disable the tracker (top right corner)</label>' +
-                        '</p>' + 
-                        
-
-                    '</div>' +
-                    
-                '</div>' +
-                
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Thread Settings</b></p>' +
-                    '<div class="subSettings_content">' +
-                    
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="display_hideTheseForums">' +
-                            ' <label for="display_hideTheseForums">Forums to hide (on front page) </label>' +
-                            ' <span class="settingDesc">Enter the ID\'s of the forums you want to hide (eg. "35 92 137")</span>'+
-                        '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedThreads">' +
-                            '<label for="display_hideDeletedThreads">Hide Deleted Threads in forums</label>' +
-                        '</p>  ' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideMovedThreads">' +
-                            '<label for="display_hideMovedThreads">Hide Moved Threads in forums</label>' +
-                        '</p> ' +
-                    
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_unanswered">' +
-                            ' <label for="links_unanswered">Link to Unanswered Threads</label>' +
-                            ' <span class="settingDesc">Adds a link to only display unanswered threads after the forum name</span>'+
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="removeLinkToLastPage">' +
-                            '<label for="removeLinkToLastPage">Make the links on the main page of Whirlpool go to the start of the thread</label>' +
-                        '</p>' + 
-                        
-                        '<p class="description tabDescription">These settings add links to display only posts from certain users</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_originalPoster">' +
-                            ' <label for="links_originalPoster">OP posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_mod">' +
-                            ' <label for="links_mod">Mod posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_rep">' +
-                            ' <label for="links_rep">Rep posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_archive">' +
-                            ' <label for="links_archive">Archive</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_longThread">' +
-                            ' <label for="links_longThread">Single Page Version</label>' +
-                        '</p>' + 
-                    
-                    '</div>' +
-                '</div>' +
-                
-            '</div>' +
-            
-            '<div class="menuDiv" id="menuDiv_posts">' +
-                
-                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
-                
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Posting Tools</b></p>' +
-                    '<div class="subSettings_content">' +
-                    
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply">' +
-                            ' <label for="compose_quickReply">Quick Reply</label>' +
-                            ' <span class="settingDesc">Automatically open the inline reply box at the end of every thread</span>'+
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_emoticons">' +
-                            ' <label for="compose_quickReply_emoticons">Quick Reply Smilies</label>' +
-                            ' <span class="settingDesc">Display the available smilies under the whirlcode buttons</span>'+
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickEdit">' +
-                            ' <label for="quickEdit">Quick Edit</label>' +
-                            ' <span class="settingDesc">Allows inline editing of posts</span>'+
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoSubscribeToNewThread">' +
-                            ' <label for="autoSubscribeToNewThread">Automatically watch/mark as read when you post</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="compose_enhancedEditor">' +
-                            ' <label for="compose_enhancedEditor">Add Whirlcode buttons to editors</label>' +
-                        '</p>' +
-                        
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="compose_movePreview">' +
-                            ' <label for="compose_movePreview">Move reply preview above inline reply box</label>' +
-                        '</p>' +
-                    
-                    '</div>' +
-                '</div>' +
-                
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Display and Formatting Options</b></p>' +
-                    '<div class="subSettings_content">' +
-                    
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_penaltyBox">' +
-                            ' <label for="display_penaltyBox">Highlight when a user is in the penalty box</label>' +
-                        '</p>' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_smallfont">' +
-                            ' <label for="display_smallfont">Use smaller font</label>' +
-                            ' <span class="settingDesc">Uses smaller font for posts, like Whirlpool did in the past</span>'+
-                        '</p>' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_opeditlarge">' +
-                            ' <label for="display_opeditlarge">Increase Edited or OP Post Prominence</label>' +
-                            ' <span class="settingDesc">Uses larger font to indicate edited or OP posts</span>'+
-                        '</p>' +
-                    
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_enabled">' +
-                            ' <label for="display_emoticons_enabled">Display Image Emoticons (Smilies)</label>' +
-                        '</p>' +
-                        
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_blue">' +
-                            ' <label for="display_emoticons_blue">Use blue smilies</label>' +
-                        '</p>' +
-                        
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_images">' +
-                            ' <label for="embed_images">Inline Images</label>' +
-
-                        '</p>' +
-                        
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_videos">' +
-                            ' <label for="embed_videos">Inline Videos</label>' +
-                            ' <span class="settingDesc">Converts videos links into videos</span>'+
-                        '</p>  ' +
-            
-                           '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_syntaxHighlight">' +
-                    ' <label for="display_syntaxHighlight">Syntax Highlighting for code blocks</label>' +
-                '</p> ' +
-                        
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedPosts">' +
-                            ' <label for="display_hideDeletedPosts">Hide deleted posts</label>' +
-                        '</p>  ' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedthreadsextra">' +
-                            ' <label for="watchedthreadsextra">Improved Watched Threads Page</label>' +
-                            ' <span class="settingDesc">Adds options such as "Open All Threads in Tabs", required for the option below</span><br>'+
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedthreadbuttonswap">' +
-                            ' <label for="watchedthreadbuttonswap">Reverse Buttons</label>' +
-                            ' <span class="settingDesc">Swaps "Marked checked as read" and "Stop watching checked" buttons</span>'+
-                        '</p>  ' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
-                                '<option value="default">None</option>' +
-                                '<option value="watched">Go to watched threads</option>' +
-                                '<option value="thread">Return to the thread</option>' +
-                            '</select>' +
                             
-                            ' <label for="watchedThreadsAlert">Action to perform when watching a thread</label>' +
-                        '</p> ' +
-                        
-                    '</div>' +
-                '</div>' +
-                
                 '<div class="subSettings">' +
                     '<p class="subSettings_heading description"><b>Avatars</b></p>' +
                     '<div class="subSettings_content">' +       
@@ -1584,39 +1344,335 @@ WhirlpoolPlus.settings = {
                         '<div id="hiddenUsers"></div>' +
                         
                     '</div>' +
+                '</div>' +           
+                    
+            '</div>' +
+
+            '<div class="menuDiv wpp_hideNotForum" id="menuDiv_wlr">' +
+            
+                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
+            
+                '<div class="subSettings">' +
+                    '<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
+                    '<div class="subSettings_content">' +
+                        '<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts<br /><b>You must have the tracker active on forum pages for it to work elsewhere on Whirlpool</b></p>' +
+                    
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled_forums">' +
+                            ' <label for="wlr_enabled_forums">Activate the WLR tracker on forum pages</label>' +
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled_profile">' +
+                            ' <label for="wlr_enabled_profile">Activate the WLR tracker on User Profile pages</label>' +
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled_watched">' +
+                            ' <label for="wlr_enabled_watched">Activate the WLR tracker on the Watched Threads page</label>' +
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadThreadColour">' +
+                            ' <label for="wlr_display_unreadThreadColour">Unread Posts Colour</label>' +
+                            ' <span class="settingDesc">Used to highlight threads containing posts you haven\'t read</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_readThreadColour">' +
+                            ' <label for="wlr_display_readThreadColour">No Unread Posts Colour</label>' +
+                            ' <span class="settingDesc">Used to highlight threads containing no unread posts</span>'+
+                        '</p>' +
+                                            
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadPostColour">' +
+                            ' <label for="wlr_display_unreadPostColour">Post Highlight Colour (Posts Pages)</label>' +
+                            ' <span class="settingDesc">Used to highlight posts (right most column) on posts pages</span>'+
+                        '</p>' +
+            
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_onlyEndSquare">' +
+                            ' <label for="wlr_display_onlyEndSquare">Colour end square </label>' +
+                            ' <span class="settingDesc">Just highlight the end square of tracked threads</span>'+
+                        '</p> ' +
+            
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_acrosscolumns">' +
+                            ' <label for="wlr_display_acrosscolumns">Colour across Reps/Reads Columns </label>' +
+                            ' <span class="settingDesc">Highlights the reps/reads columns as well</span>'+
+                        '</p> ' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_noTrackSticky">' +
+                            ' <label for="wlr_noTrackSticky">Don\'t highlight sticky threads</label>' +
+                            ' <span class="settingDesc">If the thread is a sticky, WLR will not highlight it</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_flipStyles">' +
+                            ' <label for="wlr_display_flipStyles">Highlight unread posts instead of read posts (Posts Pages)</label>' +
+                            ' <span class="settingDesc">Reverses the default highlighting</span>'+
+                        '</p>' +    
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_tempDisable">' +
+                            ' <label for="wlr_tempDisable">Add a button to temporarily disable the tracker (top right corner)</label>' +
+                            ' <span class="settingDesc">When clicked it will disable the tracker until another thread is loaded</span>'+
+                        '</p>' + 
+                        
+
+                    '</div>' +
+                    
+                '</div>' +
+            
+                '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
+                    '<div class="subSettings_content">' +
+                    
+                        '<p class="description">WLR data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a></p>' +
+                    
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
+                            '<label for="sync_enabled">Activate Synchronisation</label>' +
+                        '</p>' +
+                        
+                        '<p>' +
+                            // No wpp_setting class intentional
+                            '<input class="syncSetting wpp_forumSetting" type="text" id="sync_server"> ' +
+                            '<label for="sync_server">Server Address</label>' +
+                            ' <span class="settingDesc">The address of the server that you are syncing your data with</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_user"> ' +
+                            '<label for="sync_user">Whirlpool User ID</label>' +
+                            ' <span class="settingDesc">Your User ID Number must be keyed in</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_key"> ' +
+                            '<label for="sync_key">Access Key</label>' +
+                            ' <span class="settingDesc">Your access key as provided by the sync server</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            // No wpp_setting class intentional
+                            '<input class="syncSetting wpp_forumSetting" type="password" id="sync_encryptionKey"> ' +
+                            '<button type="button" id="showEncKey" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button> ' +
+                            '<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
+                            '<label for="sync_encryptionKey">Encryption Password</label>' +
+                            ' <span class="settingDesc">Must be the same for all of your WP+ installs</span>'+
+                        '</p>' + 
+                        
+                    '</div>' +
+                    
                 '</div>' +
                 
             '</div>' +
+            
+            '<div class="menuDiv wpp_hideNotForum" id="menuDiv_posts">' +
+                
+                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
+                
+                                
+                '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Thread Settings</b></p>' +
+                    '<div class="subSettings_content">' +
+                    
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="text" id="display_hideTheseForums">' +
+                            ' <label for="display_hideTheseForums">Forums to hide (on main forums page) </label>' +
+                            ' <span class="settingDesc">Enter the ID\'s of the forums you want to hide (eg. "35 92 137")</span>'+
+                        '</p> ' +
 
-            '<div class="menuDiv" id="menuDiv_help">' +
-            
-                '<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
-                '<p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features. </p>' +
-                '<p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus">wiki article<a>.</p>' +
-                '<p class="description">The script is maintained by <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>, so you can also whim him.</p>' +
-            
-                '<p class="description"><b>Privacy</b></p>' +
-                '<p class="description">As stated in the wiki article, a user script like Whirlpool Plus could possibly be used to steal user information.  To our knowledge, there is no such code in this script. </p>' +
-                '<p class="description">The script relies on an external server to run the avatars and synchronisation. This server (endorph.net) is operated by <a href="//forums.whirlpool.net.au/user/272563">tbwd</a>. Both these services use your API key to validate your identity, but do not store this key.</p>' +
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedThreads">' +
+                            '<label for="display_hideDeletedThreads">Hide Deleted Threads in forums</label>' +
+                            ' <span class="settingDesc">Prevents deleted threads from being seen</span>'+
+                        '</p>  ' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideMovedThreads">' +
+                            '<label for="display_hideMovedThreads">Hide Moved Threads in forums</label>' +
+                            ' <span class="settingDesc">Prevents moved threads from being seen</span>'+
+                        '</p> ' +
+                    
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_unanswered">' +
+                            ' <label for="links_unanswered">Link to Unanswered Threads</label>' +
+                            ' <span class="settingDesc">Adds a link to only display unanswered threads after the forum name</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="removeLinkToLastPage">' +
+                            '<label for="removeLinkToLastPage">Make the links on the main forums page go to the start of the thread</label>' +
+                            ' <span class="settingDesc">Links take you to the end by default</span>'+
+                        '</p>' + 
+                        
+                        '<p class="description tabDescription">These settings add links to display only posts from certain users</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_originalPoster">' +
+                            ' <label for="links_originalPoster">OP posts</label>' +
 
-                '<p class="description"><b>About Whirlpool Plus</b></p>' +
-                '<p class="description">Whirlpool Plus was created by various members of the Whirlpool community to add extra features to the Whirlpool Forums. Many people have contributed to the script- see the wiki article for credits.</p>' +
-            
-                '<p class="description"><b>Changelog</b></p>';
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_mod">' +
+                            ' <label for="links_mod">Mod posts</label>' +
 
-        for(key in WhirlpoolPlus.about.changelog){
-            WhirlpoolPlus.settings._html += '<p class="description">Version ' + key + WhirlpoolPlus.about.changelog[key] + '</p>';
-        }
-            
-        this._html += '<p class="description">Further changelogs can be viewed in the source of previous versions</p></div>' +
-            
-            '<button id="wppSettings_reset" style="float: left; margin-top:6px;">Reset Settings</button>'+
-            
-            '<div style="margin: 6px 10px 5px 197px; float: left; color: #fff;">Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</div>' +
-            
-            '<button id="wppSettings_save" style="float:right;margin-top:6px;">Save</button>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_rep">' +
+                            ' <label for="links_rep">Rep posts</label>' +
 
-            '<button id="wppSettings_cancel" class="simplemodal-close" style="float:right;margin-top:6px;">Cancel</button>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_archive">' +
+                            ' <label for="links_archive">Archive</label>' +
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_longThread">' +
+                            ' <label for="links_longThread">Single Page Version</label>' +
+                        '</p>' + 
+                    
+                    '</div>' +
+                '</div>' +
+            
+            '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Posting Tools</b></p>' +
+                    '<div class="subSettings_content">' +
+                    
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply">' +
+                            ' <label for="compose_quickReply">Quick Reply</label>' +
+                            ' <span class="settingDesc">Automatically open the inline reply box at the end of every thread</span>'+
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_emoticons">' +
+                            ' <label for="compose_quickReply_emoticons">Quick Reply Smilies</label>' +
+                            ' <span class="settingDesc">Display the available smilies under the whirlcode buttons</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickEdit">' +
+                            ' <label for="quickEdit">Quick Edit</label>' +
+                            ' <span class="settingDesc">Allows inline editing of posts</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoSubscribeToNewThread">' +
+                            ' <label for="autoSubscribeToNewThread">Automatically watch/mark as read when you post</label>' +
+                            ' <span class="settingDesc">When you reply to a thread, it will automatically be added to your watched threads</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting" type="checkbox" id="compose_enhancedEditor">' +
+                            ' <label for="compose_enhancedEditor">Add Whirlcode buttons to editors</label>' +
+                            ' <span class="settingDesc">Adds editing tools to new post, reply and wiki editors</span>'+
+                        '</p>' +
+                        
+                        '<p>' +
+                            '<input class="wpp_setting" type="checkbox" id="compose_movePreview">' +
+                            ' <label for="compose_movePreview">Move reply preview above inline reply box</label>' +
+                            ' <span class="settingDesc">Shows the inline reply preview at the end of the thread rather than below the reply field</span>'+
+                        '</p>' +
+                    
+                    '</div>' +
+                '</div>' +
+                
+                '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Display and Formatting Options</b></p>' +
+                    '<div class="subSettings_content">' +
+
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="userNotes_enabled">' +
+                            ' <label for="userNotes_enabled">User Notes</label>' +
+                            ' <span class="settingDesc">Keep notes on each user</span>'+
+                        '</p> ' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="whimLink">' +
+                            ' <label for="whimLink">Whim Links</label>' +
+                            ' <span class="settingDesc">Adds a Whim link next to a users post count on each post</span>'+
+                        '</p> ' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_penaltyBox">' +
+                            ' <label for="display_penaltyBox">Highlight when a user is in the penalty box</label>' +
+                            ' <span class="settingDesc">Shows a more noticeable visual indicator on previous posts made by users currently banned</span>'+
+                        '</p>' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_smallfont">' +
+                            ' <label for="display_smallfont">Use smaller font</label>' +
+                            ' <span class="settingDesc">Displays a smaller font for posts, like Whirlpool did in the past</span>'+
+                        '</p>' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_opeditlarge">' +
+                            ' <label for="display_opeditlarge">Increase Edited or OP Post Prominence</label>' +
+                            ' <span class="settingDesc">Uses larger font to indicate edited or OP posts</span>'+
+                        '</p>' +
+                    
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_enabled">' +
+                            ' <label for="display_emoticons_enabled">Display Image Emoticons (Smilies)</label>' +
+                            ' <span class="settingDesc">Converts text smilies on Whirlpool into images</span>'+
+                        '</p>' +
+                        
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_blue">' +
+                            ' <label for="display_emoticons_blue">Use blue smilies</label>' +
+                            ' <span class="settingDesc">Uses the original blue smilies instead of the default</span>'+
+                        '</p>' +
+                        
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_images">' +
+                            ' <label for="embed_images">Inline Images</label>' +
+                            ' <span class="settingDesc">Displays images inline in threads for WP+ users</span>'+
+
+                        '</p>' +
+                        
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_videos">' +
+                            ' <label for="embed_videos">Inline Videos</label>' +
+                            ' <span class="settingDesc">Displays videos inline in threads for WP+ users</span>'+
+                        '</p>  ' +
+            
+                           '<p class="wpp_hideNotForum">' +
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_syntaxHighlight">' +
+                    ' <label for="display_syntaxHighlight">Syntax Highlighting for code blocks</label>' +
+                            ' <span class="settingDesc">"Prettifies" data entered in "codeblock" Whirlcode</span>'+
+                '</p> ' +
+                        
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedPosts">' +
+                            ' <label for="display_hideDeletedPosts">Hide deleted posts</label>' +
+                            ' <span class="settingDesc">Hide any reference of deleted posts in threads</span>'+
+                        '</p>  ' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedthreadsextra">' +
+                            ' <label for="watchedthreadsextra">Improved Watched Threads Page</label>' +
+                            ' <span class="settingDesc">Adds options such as "Open All Threads in Tabs", required for the option below</span><br>'+
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedthreadbuttonswap">' +
+                            ' <label for="watchedthreadbuttonswap">Reverse Buttons</label>' +
+                            ' <span class="settingDesc">Swaps "Marked checked as read" and "Stop watching checked" buttons</span>'+
+                        '</p>  ' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
+                                '<option value="default">None</option>' +
+                                '<option value="watched">Go to watched threads</option>' +
+                                '<option value="thread">Return to the thread</option>' +
+                            '</select>' +
+                            
+                            ' <label for="watchedThreadsAlert">Action to perform when watching a thread</label>' +
+                        '</p> ' +
+                        
+                    '</div>' +
+                '</div>' +
+                
+            '</div>' +
+                       
+            '<button id="wppSettings_reset" style="float: left; margin-top:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset Settings</button>'+
+            
+            '<div style="margin: 6px 10px 5px 300px; float: left; color: #fff;">Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</div>' +
+            
+            '<button id="wppSettings_save" style="float:right;margin-top:6px;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button>' +
+
+            '<button id="wppSettings_cancel" class="simplemodal-close" style="float:right;margin-top:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button>' +
 
             '<br />' +
             
@@ -2536,7 +2592,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
         for(i in threads){
             unread = false;
             
-            if(WhirlpoolPlus.util.get('wlr_enabled')){
+            if(WhirlpoolPlus.util.get('wlr_enabled_forums')){
                 threadData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(threads[i].ID);
                 
                 if(threadData == false){
@@ -2656,6 +2712,7 @@ WhirlpoolPlus.feat.ignoreUser = {
     
         var tdBodyUser = trParent.find('.replyuser-inner');
         var uNum = WhirlpoolPlus.util.getReplyUserId(trParent);
+        var uName = trParent.find('.bu_name').text();
         
         //add hide smiley (X)
         if($('span[title="hide user"]',tdBodyUser).length == 0){
@@ -2675,7 +2732,7 @@ WhirlpoolPlus.feat.ignoreUser = {
                 if($.inArray(uNum,WhirlpoolPlus.util.get('hiddenUsers')) == -1){
                     //Not currently in array
                     var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
-                    hiddenUsers.push(uNum);
+                    hiddenUsers.push(uNum+' ('+uName+')');
                     WhirlpoolPlus.util.set('hiddenUsers',hiddenUsers);
                     
                     
@@ -2689,9 +2746,9 @@ WhirlpoolPlus.feat.ignoreUser = {
         
         //check if this post is by a user we want to hide
         //need uNum as a string
-        if($.inArray(uNum,WhirlpoolPlus.util.get('hiddenUsers')) != -1) {
+        if($.inArray(uNum+' ('+uName+')',WhirlpoolPlus.util.get('hiddenUsers')) != -1) {
             //hide this post
-            this.hideIgnoredPost(trParent,uNum);   
+            this.hideIgnoredPost(trParent,uNum+' ('+uName+')');   
         }
     },
     
@@ -3152,7 +3209,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
     
     runPosts : function(){
-        if(WhirlpoolPlus.util.get('wlr_enabled')){   
+        if(WhirlpoolPlus.util.get('wlr_enabled_forums')){   
             //scroll to the post that we were actually sent to
             if(window.location.hash){
                 $(unsafeWindow).load(function(){
@@ -3168,7 +3225,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
     
     runThreads : function(){
-        if(WhirlpoolPlus.util.get('wlr_enabled')){
+        if(WhirlpoolPlus.util.get('wlr_enabled_forums')){
             WhirlpoolPlus.feat.whirlpoolLastRead.forumPage();
         }
     }
@@ -3431,14 +3488,11 @@ WhirlpoolPlus.feat.quickEdit = {
         replyHTML.addClass('quickEdit');
 
         //Load the contents of the edit form into replyHTML
-        replyHTML.load(editUrl + ' .replyform', function(){
+        replyHTML.load(editUrl + ' #replyformBlock', function(){
             
             //Prevent errors from this undefined function
             $('#fm').removeAttr('onkeypress');
-            
-            //Add Whirlcode Block Eventually
-            $('#replylist div.quickEdit div.replyform div.editor').prepend($('<div id="wpp_whirlcode" style="display:none;">Placeholder for Whirlcode Once Implemented</div>'));
-                      
+                    
             //Add Cancel Button
             $('#fm #previewButton').next().after('<td><button class="wpp-c-edit" type="button">Cancel</button></td>');
             
@@ -3630,7 +3684,7 @@ WhirlpoolPlus.run = function(){
     }
     
     /** RUN: Threads Pages **/
-    if(WhirlpoolPlus.util.pageType.threads){
+    if(WhirlpoolPlus.util.pageType.threads != WhirlpoolPlus.util.pageType.watchedThreads){
         WhirlpoolPlus.feat.display.hideThreads();
         WhirlpoolPlus.feat.display.unansweredThreadsLink();
         WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
@@ -3639,7 +3693,9 @@ WhirlpoolPlus.run = function(){
     /** RUN: Profile Pages **/
     if(WhirlpoolPlus.util.pageType.profile){
         WhirlpoolPlus.feat.display.hideClosedThreads();
-        WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
+        if(WhirlpoolPlus.util.get('wlr_enabled_profile')){
+            WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
+        }
         WhirlpoolPlus.feat.postsPerDay();
         WhirlpoolPlus.feat.display.oldProfile();
         WhirlpoolPlus.feat.display.userPageInfoToggle();
@@ -3657,7 +3713,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.auraCount();
     }
     
-    /** RUN: Front page **/
+    /** RUN: Forums page **/
     if(document.location.href == 'http://forums.whirlpool.net.au/' || document.location.href == 'https://forums.whirlpool.net.au/' ){
         WhirlpoolPlus.feat.display.hideForums();
         WhirlpoolPlus.feat.removeLinkToLastPage();
@@ -3677,6 +3733,11 @@ WhirlpoolPlus.run = function(){
     /** RUN: Watched Threads **/
     if(WhirlpoolPlus.util.pageType.watchedThreads){
         WhirlpoolPlus.feat.openWatchedThreadsInTabs();
+        WhirlpoolPlus.feat.display.hideThreads();
+        WhirlpoolPlus.feat.display.unansweredThreadsLink();
+        if(WhirlpoolPlus.util.get('wlr_enabled_watched')){
+            WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
+        }
     }
     
     
@@ -3696,7 +3757,7 @@ WhirlpoolPlus.run = function(){
     }
     
     /** RUN: Wiki Edit **/
-    if(WhirlpoolPlus.util.pageType.wiki && WhirlpoolPlus.util.pageType.edit){
+    if(WhirlpoolPlus.util.pageType.wiki){
         WhirlpoolPlus.feat.editor.whirlcodify('#f_body');
     }
     
