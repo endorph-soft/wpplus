@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.7
+// @version         5.0.8
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.7',
+    version : '5.0.8',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 57,
+    storageVersion : 58,
     
     //Script changelog
     changelog : {
+        '5.0.8' : '<ul><li>Fixes settings menu bug on certain resolutions, miscellaneous code tweaks</li></ul>',
         '5.0.7' : '<ul><li>Adds username to hidden users view, toggles for enabling/disabling WLR on different pages, fixes Whirlcode block not appearing in Wiki after previewing updates & reworked settings menu</li></ul>',
         '5.0.6' : '<ul><li>Adds toggle for enhanced Watched Threads page & toggle to reverse mark as read/stop watching buttons, fixes floating top bar background, adds toggle for return to last page after sign-in, miscellaneous code tweaks</li></ul>',
         '5.0.5' : '<ul><li>Adds Super Profile option to show Watched Threads on your Profile Page, fixes bug causing random links to display as broken images, miscellaneous other fixes</li></ul>',
@@ -283,6 +284,8 @@ WhirlpoolPlus.install = {
         dialogHtml += '<br /><div style="text-align:left"><strong>New in this version: </strong>' + WhirlpoolPlus.about.changelog[WhirlpoolPlus.about.version] + '</div>';
         
         dialogHtml += '<br /><div>For an extended changelog, see WP+ Settings &gt; Info</div>';
+        
+        dialogHtml += '<br /><div>If you experience issues with this version of WP+ please check the latest WP+ thread under Feedback</div>';
         
         dialogHtml += '<br /><br /><button type="button" class="simplemodal-close">Close</button>';
         
@@ -659,10 +662,10 @@ WhirlpoolPlus.util = {
 WhirlpoolPlus.settings = {
 
     css : function(){
-        var styles = '#wppSettings { background-color:#999; border:1px solid #000; color:#333; padding:0 12px; height: 768px; width: 1024px; }' + 
+        var styles = '#wppSettings { background-color:#999; border:1px solid #000; color:#333; padding:0 12px; height: 60%; width: 50%; min-height: 580px; min-width: 900px; }' + 
         '#wppSettings #wppSettingsWrapper { overflow: hidden; width: 100%; height: 100%; }' + 
-        '#wppSettings #tabMenu { list-style:none; float:left; margin: 14px 0px 0px 32px; }' + 
-        '#wppSettings .menuTab { border:3px solid #777; border-width:3px 3px 1px; float:left; height:20px; margin-right:10px; padding:5px; width:140px; text-align:center; color:white; }' + 
+        '#wppSettings #tabMenu { list-style:none; width:100%; margin: 14px 0px 0px 32px; }' + 
+        '#wppSettings .menuTab { border:3px solid #777; border-width:3px 3px 1px; float:left; height:20px; margin-right:10px; padding:5px; width:120px; text-align:center; color:white; }' + 
         '#wppSettings .menuTab_active { background-color:orange; border:3px solid #555; border-width:3px 3px 1px; }' + 
         '#wppSettings .menuTab:hover { cursor:pointer; border:3px solid #555; border-width:3px 3px 1px; }' + 
         '#wppSettings p { border-bottom:1px dashed grey; margin-left:15px; margin-right:15px; padding-bottom:15px; }' + 
@@ -672,7 +675,7 @@ WhirlpoolPlus.settings = {
         '#wppSettings .subSettings_heading { cursor: pointer; margin: 5px 8px; text-align:center; }' + 
         '#wppSettings .subSettings_content { display: none; }' + 
         '#wppSettings .subSettings { border:1px solid #777; border-radius:5px; background-color: #bbb; margin: 5px; }' + 
-        '#wppSettings .menuDiv { width: 1020px; height:660px; display: none; overflow-y:scroll; float:left;border:3px solid #333;background-color:#EEEEEE;margin-bottom:5px; }' + 
+        '#wppSettings .menuDiv { width: 99.5%; height:85%; min-height:470px; min-width:894px; display: none; overflow-y:scroll; float:left;border:3px solid #333;background-color:#EEEEEE; }' + 
         '#wppSettings .menuDiv_active { display: block; }' + 
         '#wppSettings .tabDescription { text-align: center; font-style: italic; }' + 
         '#wppSettings .wpp_settingsMessage { text-align: center; font-weight: bold; padding: 5px 10px;}' + 
@@ -681,7 +684,8 @@ WhirlpoolPlus.settings = {
         '#wppSettings #currentAvatars:after { content: ""; display: table; clear: both; }' +
         '#wppSettings .avatar { background-image: url("' + WhirlpoolPlus.util.image('noavatar') + '"); background-repeat: no-repeat; height: 100px; width: 100px; margin: 0 auto; }' +
         '#wppSettings .avatarLabel { font-weight: bold; width: 100px; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
-        '#wppSettings .avatarLabel { font-weight: bold; width: 100px; margin: 0 auto; text-align: center; padding-top: 10px; }';
+        '#wppSettings .avatarLabel { font-weight: bold; width: 100px; margin: 0 auto; text-align: center; padding-top: 10px; }' +
+        '#wppSettings .bottomrow { width:98%;height:10px;bottom:4%;position:absolute;color:#fff;left:1%; }';
         
         
         if(!WhirlpoolPlus.util.pageType.forums){
@@ -1058,7 +1062,7 @@ WhirlpoolPlus.settings = {
                 '<div class="wpp_showNotForum wpp_settingsMessage">Setting made here will not apply to the forums.whirlpool.net.au subdomain</div>' +
             
                 '<div class="subSettings">' +
-                    '<p class="subSettings_heading description wpp_hide"><b>Script Configuration</b></p>' +
+                    '<p class="subSettings_heading description wpp_hide"><b>Script Configuration</b> (click to expand)</p>' +
                     '<div class="subSettings_content">' +
                         
                         '<p>' +
@@ -1665,14 +1669,8 @@ WhirlpoolPlus.settings = {
                 '</div>' +
                 
             '</div>' +
-                       
-            '<button id="wppSettings_reset" style="float: left; margin-top:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset Settings</button>'+
             
-            '<div style="margin: 6px 10px 5px 300px; float: left; color: #fff;">Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</div>' +
-            
-            '<button id="wppSettings_save" style="float:right;margin-top:6px;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button>' +
-
-            '<button id="wppSettings_cancel" class="simplemodal-close" style="float:right;margin-top:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button>' +
+            '<div class="bottomrow"><button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset Settings</button><button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button><button id="wppSettings_cancel" class="simplemodal-close" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button><center>Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</center></div>' +
 
             '<br />' +
             
@@ -2107,11 +2105,11 @@ editSearchLinks : function(){
 WhirlpoolPlus.feat.display = {
 
     _themes : {
-        classic : '@import url(https://phyco.name/wpplus/cssfeed.php?theme=classic);',
-        black : '@import url(https://phyco.name/wpplus/cssfeed.php?theme=black);',
-        wood : '@import url(https://phyco.name/wpplus/cssfeed.php?theme=wood);',
-        electrolize : '@import url(https://phyco.name/wpplus/cssfeed.php?theme=electrolize);',
-        teal : '@import url(https://phyco.name/wpplus/cssfeed.php?theme=teal);'
+        classic : '@import url(https://wpplus.phyco.name/cssfeed.php?theme=classic);',
+        black : '@import url(https://wpplus.phyco.name/cssfeed.php?theme=black);',
+        wood : '@import url(https://wpplus.phyco.name/cssfeed.php?theme=wood);',
+        electrolize : '@import url(https://wpplus.phyco.name/cssfeed.php?theme=electrolize);',
+        teal : '@import url(https://wpplus.phyco.name/cssfeed.php?theme=teal);'
     },
 
     //CSS that is included everywhere
@@ -2222,7 +2220,7 @@ WhirlpoolPlus.feat.display = {
     
     poweredby : function(){
         if (WhirlpoolPlus.util.get('display_poweredby')){
-            $('dl.bulletproof').append($('<br /><dd style="text-align:left;">').load('https://phyco.name/wpplus/rdmtext/rantex.php'));
+            $('dl.bulletproof').append($('<br /><dd style="text-align:left;">').load('https://wpplus.phyco.name/rdmtext/rantex.php'));
         }
     },
     
