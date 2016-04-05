@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.8
+// @version         5.0.9
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.8',
+    version : '5.0.9',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 58,
+    storageVersion : 59,
     
     //Script changelog
     changelog : {
+        '5.0.9' : '<ul><li>Adds toggle to hide image/video embed URLs and option to show only Unread Watched Threads on Super Profile page. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
         '5.0.8' : '<ul><li>Fixes settings menu bug on certain resolutions, miscellaneous code tweaks</li></ul>',
         '5.0.7' : '<ul><li>Adds username to hidden users view, toggles for enabling/disabling WLR on different pages, fixes Whirlcode block not appearing in Wiki after previewing updates & reworked settings menu</li></ul>',
         '5.0.6' : '<ul><li>Adds toggle for enhanced Watched Threads page & toggle to reverse mark as read/stop watching buttons, fixes floating top bar background, adds toggle for return to last page after sign-in, miscellaneous code tweaks</li></ul>',
@@ -160,11 +161,13 @@ WhirlpoolPlus.install = {
         display_oldProfile : false,
         display_userPageInfoToggle : false,
         display_superProfile : false,
+        display_superProfile_unread : false,
         avatar_static : true,
         avatar_animated : false,
         stats_postsPerDay : true,
         embed_videos : true,
         embed_images: true,
+        hideembedurl: false,
         recentActivityOverlay : false,
         recentActivityOverlay_days : '7',
         recentActivityOverlay_data : '',
@@ -1263,7 +1266,11 @@ WhirlpoolPlus.settings = {
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_superProfile">' +
                     '<label for="display_superProfile">Super Profile Page</label>' +
-                    ' <span class="settingDesc">Shows your Watched Threads on User Profile pages</span>'+
+                    ' <span class="settingDesc">Shows your Watched Threads on User Profile pages</span><br>'+
+
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_superProfile_unread">' +
+                    '<label for="display_superProfile_unread">Show Unread Watched Threads Only <b>(requires Super Profile Page)</b></label>' +
+                    ' <span class="settingDesc">Shows only your Watched Threads on User Profile pages</span>'+
                 '</p> ' +
                                        
                         '<p>' +
@@ -1632,6 +1639,12 @@ WhirlpoolPlus.settings = {
                             ' <label for="embed_videos">Inline Videos</label>' +
                             ' <span class="settingDesc">Displays videos inline in threads for WP+ users</span>'+
                         '</p>  ' +
+                        
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hideembedurl">' +
+                            ' <label for="hideembedurl">Hide Embed URL</label>' +
+                            ' <span class="settingDesc">Hides the URLs of embedded content</span>'+
+                        '</p>  ' +
             
                            '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_syntaxHighlight">' +
@@ -1909,7 +1922,9 @@ WhirlpoolPlus.feat = {
                 if (imageEnabled && imageMatchRegex.test(link)){
                     // Basic Image Match
                     linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="' + link + '" alt="' + link + '" class="wpp_img"></a></span><br />');
-                    linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                    if (WhirlpoolPlus.util.get('hideembedurl')){
+                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                    };
                 }else if(imageEnabled && imgurRegex.test(link)){
                     // Imgur Embed
                     var linkSegments = imgurRegex.exec(link);
@@ -1920,7 +1935,9 @@ WhirlpoolPlus.feat = {
                         //Check for album embeds
                         if(linkSegments[0] != 'a'){
                             linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="' + link + '" class="wpp_img"></a></span><br />');
-                            linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                            if (WhirlpoolPlus.util.get('hideembedurl')){
+                                linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                            }
                         }else{
                             linkObject.before('<br /><span class="wcrep1"><iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe></span><br />');
                         }
@@ -1931,7 +1948,9 @@ WhirlpoolPlus.feat = {
                     
                     if(linkSegments && linkSegments[1]){
                         linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
-                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                        if (WhirlpoolPlus.util.get('hideembedurl')){
+                            linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                        }
                     }
                 }else if(videoEnabled && youtubeShortRegex.test(link)){
                     // Youtube Embed (part 2 - short links)
@@ -1939,7 +1958,9 @@ WhirlpoolPlus.feat = {
                     
                     if(linkSegments && linkSegments[1]){
                         linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
-                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                        if (WhirlpoolPlus.util.get('hideembedurl')){
+                            linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                        }
                     }
                 }else if(videoEnabled && vimeoRegex.test(link)){
                     // Vimeo Embed
@@ -1947,7 +1968,9 @@ WhirlpoolPlus.feat = {
                     
                     if(linkSegments && linkSegments[3]){
                         linkObject.before('<br /><span class="wcrep1"><iframe src="https://player.vimeo.com/video/' + linkSegments[3] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
-                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                        if (WhirlpoolPlus.util.get('hideembedurl')){
+                            linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                        }
                     }
                 }
                 
@@ -2243,8 +2266,15 @@ WhirlpoolPlus.feat.display = {
     
     superProfile : function(){
         if (WhirlpoolPlus.util.get('display_superProfile')){
-            $('#threads').append('<p><h2>Watched Threads</h2>');
-            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #threads'));
+            if(WhirlpoolPlus.util.get('display_superProfile_unread')){
+                $('#threads').append('<p><h2>Unread Watched Threads</h2>');
+                $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #threads'));
+            }
+            
+            else {
+                $('#threads').append('<p><h2>All Watched Threads</h2>');
+                $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #threads'));
+            }
         }
     },
     
@@ -3615,6 +3645,7 @@ WhirlpoolPlus.run = function(){
         if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'thread' && document.referrer.indexOf('?action=watched') == -1) {
             history.go(-1);
         }
+        $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2>');
     }
     
     /** RUN: Deleted Thread Alert **/
