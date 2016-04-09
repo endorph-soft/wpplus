@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.0.9
+// @version         5.1.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -79,16 +79,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.0.9',
+    version : '5.1.0',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 59,
+    storageVersion : 60,
     
     //Script changelog
     changelog : {
+        '5.1.0' : '<ul><li>Changes to settings menu to reflect new options for Watched Threads. You can now find these under the "Threads & Posts" tab. The WLR settings have also changed and you may need to re-enable WLR if you notice it not working. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
         '5.0.9' : '<ul><li>Adds toggle to hide image/video embed URLs and option to show only Unread Watched Threads on Super Profile page. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
         '5.0.8' : '<ul><li>Fixes settings menu bug on certain resolutions, miscellaneous code tweaks</li></ul>',
         '5.0.7' : '<ul><li>Adds username to hidden users view, toggles for enabling/disabling WLR on different pages, fixes Whirlcode block not appearing in Wiki after previewing updates & reworked settings menu</li></ul>',
@@ -160,8 +161,7 @@ WhirlpoolPlus.install = {
         display_penaltyBox : false,
         display_oldProfile : false,
         display_userPageInfoToggle : false,
-        display_superProfile : false,
-        display_superProfile_unread : false,
+        display_superProfile : 'default',
         avatar_static : true,
         avatar_animated : false,
         stats_postsPerDay : true,
@@ -194,9 +194,7 @@ WhirlpoolPlus.install = {
         wlr_display_flipStyles : false,
         wlr_display_unreadPostColour : '#CFCBBC',
         wlr_tempDisable : true,
-        wlr_enabled_forums : true,
-        wlr_enabled_profile : true,
-        wlr_enabled_watched : true,
+        wlr_enabled : 'all',
         wlr_noTrackSticky : false,
         wlr_display_onlyEndSquare : false,
         wlr_display_acrosscolumns : false,
@@ -211,8 +209,7 @@ WhirlpoolPlus.install = {
         userNotes_enabled : false,
         userNotes : {},
         watchedThreadsAlert : 'default',
-        watchedthreadsextra : true,
-        watchedthreadbuttonswap : false,
+        watchedthreadsextra : 'improved',
         returnafterlogin : false,
         sync_server : '',
         sync_key : '',
@@ -1253,27 +1250,17 @@ WhirlpoolPlus.settings = {
 
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_oldProfile">' +
-                    '<label for="display_oldProfile">Reverts to old design on User Profile pages</label>' +
+                    '<label for="display_oldProfile">Use old User Profile page design</label>' +
                     ' <span class="settingDesc">Shows recent thread activity below user info as per the old site design</span>'+
                 '</p> ' +
             
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_userPageInfoToggle">' +
-                    '<label for="display_userPageInfoToggle">Toggle user info on or off on Profiles</label>' +
+                    '<label for="display_userPageInfoToggle">Toggle to show/hide user info on Profile pages</label>' +
                     ' <span class="settingDesc">Adds a toggle to show/hide the user info panel as required</span>'+
                 '</p> ' +
             
-                            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_superProfile">' +
-                    '<label for="display_superProfile">Super Profile Page</label>' +
-                    ' <span class="settingDesc">Shows your Watched Threads on User Profile pages</span><br>'+
-
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_superProfile_unread">' +
-                    '<label for="display_superProfile_unread">Show Unread Watched Threads Only <b>(requires Super Profile Page)</b></label>' +
-                    ' <span class="settingDesc">Shows only your Watched Threads on User Profile pages</span>'+
-                '</p> ' +
-                                       
-                        '<p>' +
+                            '<p>' +
                             '<select class="wpp_setting" id="defaultRecentActivityDays">' +
                                 '<option value="1">1 Day</option>' +
                                 '<option value="3">3 Days</option>' +
@@ -1366,17 +1353,17 @@ WhirlpoolPlus.settings = {
                 '<div class="subSettings">' +
                     '<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
                     '<div class="subSettings_content">' +
-                        '<p class="description">The thread tracker highlights threads you have viewed depending on whether there are new unread posts<br /><b>You must have the tracker active on forum pages for it to work elsewhere on Whirlpool</b></p>' +
                     
                         '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled_forums">' +
-                            ' <label for="wlr_enabled_forums">Activate the WLR tracker on forum pages</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled_profile">' +
-                            ' <label for="wlr_enabled_profile">Activate the WLR tracker on User Profile pages</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_enabled_watched">' +
-                            ' <label for="wlr_enabled_watched">Activate the WLR tracker on the Watched Threads page</label>' +
+                            '<select class="wpp_setting wpp_forumSetting" id="wlr_enabled">' +
+                    '<option value="none">Disabled</option>' +
+                    '<option value="all">Enabled Everywhere</option>' +
+                    '<option value="forums">Enabled on Forums pages only</option>' +
+                    '<option value="watched">Enabled on Forums & Watched Threads pages</option>' +
+                    '<option value="profile">Enabled on Forums & User Profile pages</option>' +
+                            '</select>' +
+                            ' <label for="wlr_enabled">Activate the WLR tracker</label>' +
+                            ' <span class="settingDesc">Tracks threads/posts on Whirlpool by highlighting their unread/read status</span>'+
                         '</p>' +
                         
                         '<p>' +
@@ -1436,7 +1423,7 @@ WhirlpoolPlus.settings = {
                     '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
                     '<div class="subSettings_content">' +
                     
-                        '<p class="description">WLR data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a></p>' +
+                        '<p class="description">WLR data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/">https://s.endorph.net/account/</a><br /><br /><b>Note: you must have entered your API key on the Info & Config tab for this feature to work</b></p>' +
                     
                         '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
@@ -1535,6 +1522,49 @@ WhirlpoolPlus.settings = {
                             ' <label for="links_longThread">Single Page Version</label>' +
                         '</p>' + 
                     
+                    '</div>' +
+                '</div>' +
+            
+            '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Watched Threads</b></p>' +
+                    '<div class="subSettings_content">' +
+            
+            '<p class="wpp_hideNotForum">' +
+                    '<select class="wpp_setting wpp_forumSetting" id="display_superProfile">' +
+                    '<option value="default">Disabled</option>' +
+                    '<option value="all">Enabled</option>' +
+                    '<option value="unread">Enabled (Unread Watched Threads Only)</option>' +
+                    '</select>' +
+                    ' <label for="display_superProfile">Super Profile Page</label>' +
+                    ' <span class="settingDesc">Shows your Watched Threads on your User Profile page</span><br>'+
+
+                '</p> ' +
+            
+            '<p class="wpp_hideNotForum">' +
+                            '<select class="wpp_setting wpp_forumSetting" id="watchedthreadsextra">' +
+                                '<option value="default">Disabled</option>' +
+                                '<option value="improved">Enabled</option>' +
+                                '<option value="improvedswap">Enabled with Reversed Button Layout</option>' +
+            '</select>' +
+                            ' <label for="watchedthreadsextra">Improved Watched Threads Page</label>' +
+                            ' <span class="settingDesc">Adds options such as "Open All Threads in Tabs" and other minor tweaks</span><br>'+
+
+                        '</p>  ' +
+            
+                        '<p class="wpp_hideNotForum">' +
+                            '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
+                                '<option value="default">None</option>' +
+                                '<option value="additional">Display Additional Links</option>' +
+                                '<option value="profile">Go to User Profile</option>' +
+                                '<option value="watched">Go to Watched Threads</option>' +
+                                '<option value="forum">Go to All Forums</option>' +
+                                '<option value="thread">Return to the thread</option>' +
+                            '</select>' +
+                            
+                            ' <label for="watchedThreadsAlert">Mark Thread as Read Actions</label>' +
+                            ' <span class="settingDesc">Choose an action to occur when you click "mark as read" at the bottom of a thread</span><br>'+
+                        '</p> ' +
+            
                     '</div>' +
                 '</div>' +
             
@@ -1657,27 +1687,7 @@ WhirlpoolPlus.settings = {
                             ' <label for="display_hideDeletedPosts">Hide deleted posts</label>' +
                             ' <span class="settingDesc">Hide any reference of deleted posts in threads</span>'+
                         '</p>  ' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedthreadsextra">' +
-                            ' <label for="watchedthreadsextra">Improved Watched Threads Page</label>' +
-                            ' <span class="settingDesc">Adds options such as "Open All Threads in Tabs", required for the option below</span><br>'+
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedthreadbuttonswap">' +
-                            ' <label for="watchedthreadbuttonswap">Reverse Buttons</label>' +
-                            ' <span class="settingDesc">Swaps "Marked checked as read" and "Stop watching checked" buttons</span>'+
-                        '</p>  ' +
-            
-                        '<p class="wpp_hideNotForum">' +
-                            '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
-                                '<option value="default">None</option>' +
-                                '<option value="watched">Go to watched threads</option>' +
-                                '<option value="thread">Return to the thread</option>' +
-                            '</select>' +
-                            
-                            ' <label for="watchedThreadsAlert">Action to perform when watching a thread</label>' +
-                        '</p> ' +
-                        
+                                    
                     '</div>' +
                 '</div>' +
                 
@@ -1719,7 +1729,7 @@ WhirlpoolPlus.feat = {
     },
     
     openWatchedThreadsInTabs : function(){
-        if(WhirlpoolPlus.util.get('watchedthreadsextra')){
+        if(WhirlpoolPlus.util.get('watchedthreadsextra') == 'improved' || WhirlpoolPlus.util.get('watchedthreadsextra') == 'improvedswap'){
             var openAllURInT = $('<a href="#" id="openInTabs">open unread in tabs</a>');
         
             $('a[href="/forum/?action=watched"]').after(openAllURInT); 
@@ -1744,7 +1754,7 @@ WhirlpoolPlus.feat = {
             $( "button[onclick*='selectold']" ).before( "&nbsp;&nbsp;&nbsp;" );
             $( "button[onclick*='selectall']" ).before( "&nbsp;&nbsp;&nbsp;" );
             
-            if(WhirlpoolPlus.util.get('watchedthreadbuttonswap')){
+            if(WhirlpoolPlus.util.get('watchedthreadsextra') == 'improvedswap'){
                 $( "input[name*='stopWatchingButton']" ).detach().insertBefore( "input[name*='markAsReadButton']" );
                 $( "input[name*='stopWatchingButton']" ).after( "&nbsp;&nbsp;&nbsp;" );
             }
@@ -2265,16 +2275,13 @@ WhirlpoolPlus.feat.display = {
     },
     
     superProfile : function(){
-        if (WhirlpoolPlus.util.get('display_superProfile')){
-            if(WhirlpoolPlus.util.get('display_superProfile_unread')){
-                $('#threads').append('<p><h2>Unread Watched Threads</h2>');
-                $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #threads'));
-            }
-            
-            else {
-                $('#threads').append('<p><h2>All Watched Threads</h2>');
-                $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #threads'));
-            }
+        if (WhirlpoolPlus.util.get('display_superProfile') == 'all'){
+            $('#threads').append('<p><h2>All Watched Threads</h2>');
+            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #threads'));
+        }            
+        else if (WhirlpoolPlus.util.get('display_superProfile') == 'unread'){
+            $('#threads').append('<p><h2>Unread Watched Threads</h2>');
+            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #threads'));
         }
     },
     
@@ -2620,7 +2627,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
         for(i in threads){
             unread = false;
             
-            if(WhirlpoolPlus.util.get('wlr_enabled_forums')){
+            if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){
                 threadData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(threads[i].ID);
                 
                 if(threadData == false){
@@ -3237,7 +3244,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
     
     runPosts : function(){
-        if(WhirlpoolPlus.util.get('wlr_enabled_forums')){   
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){   
             //scroll to the post that we were actually sent to
             if(window.location.hash){
                 $(unsafeWindow).load(function(){
@@ -3253,7 +3260,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
     
     runThreads : function(){
-        if(WhirlpoolPlus.util.get('wlr_enabled_forums')){
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){
             WhirlpoolPlus.feat.whirlpoolLastRead.forumPage();
         }
     }
@@ -3642,10 +3649,18 @@ WhirlpoolPlus.run = function(){
         if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'watched' || document.referrer.indexOf('?action=watched') >= 0) {
             document.location = '//forums.whirlpool.net.au/forum/?action=watched';
         }
+        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'profile' || document.referrer.indexOf('?action=watched') >= 0) {
+            document.location = '//forums.whirlpool.net.au/user';
+        }
+        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'forum' || document.referrer.indexOf('?action=watched') >= 0) {
+            document.location = '//forums.whirlpool.net.au/';
+        }
         if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'thread' && document.referrer.indexOf('?action=watched') == -1) {
             history.go(-1);
         }
-        $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2>');
+        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'additional' || document.referrer.indexOf('?action=watched') >= 0) {
+            $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2><h2><a href="//forums.whirlpool.net.au/">Or go to all forums</a></h2>');
+        }        
     }
     
     /** RUN: Deleted Thread Alert **/
@@ -3722,7 +3737,7 @@ WhirlpoolPlus.run = function(){
     /** RUN: Profile Pages **/
     if(WhirlpoolPlus.util.pageType.profile){
         WhirlpoolPlus.feat.display.hideClosedThreads();
-        if(WhirlpoolPlus.util.get('wlr_enabled_profile')){
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'profile'){
             WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
         }
         WhirlpoolPlus.feat.postsPerDay();
@@ -3764,7 +3779,7 @@ WhirlpoolPlus.run = function(){
         WhirlpoolPlus.feat.openWatchedThreadsInTabs();
         WhirlpoolPlus.feat.display.hideThreads();
         WhirlpoolPlus.feat.display.unansweredThreadsLink();
-        if(WhirlpoolPlus.util.get('wlr_enabled_watched')){
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){
             WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
         }
     }
