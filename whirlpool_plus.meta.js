@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.1.0
+// @version         5.1.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -10,20 +10,12 @@
 // @grant           GM_getResourceURL
 // @grant           GM_getResourceText
 // @grant           GM_openInTab
-// @include         http://forums.whirlpool.net.au/*
-// @include         https://forums.whirlpool.net.au/*
-// @include         http://forums.whirlpool.net.au/whim-send*
-// @include         https://forums.whirlpool.net.au/whim-send*
-// @include         http://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
-// @include         https://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
-// @include         http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
-// @include         https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
-// @include         http://forums.whirlpool.net.au/archive/*
-// @include         https://forums.whirlpool.net.au/archive/*
-// @include         http://whirlpool.net.au/*
-// @include         https://whirlpool.net.au/*
-// @exclude         http://whirlpool.net.au/blog/*
-// @exclude         https://whirlpool.net.au/blog/*
+// @match           *://forums.whirlpool.net.au/*
+// @match           *://bc.whirlpool.net.au/*
+// @match           *://whirlpool.net.au/*
+// @exclude         *://whirlpool.net.au/blog/*
+// @exclude         *://whirlpool.net.au/api/*
+// @exclude         *://forums.whirlpool.net.au/api/*
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.min.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
