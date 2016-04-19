@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.1.0
+// @version         5.1.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -10,20 +10,12 @@
 // @grant           GM_getResourceURL
 // @grant           GM_getResourceText
 // @grant           GM_openInTab
-// @include         http://forums.whirlpool.net.au/*
-// @include         https://forums.whirlpool.net.au/*
-// @include         http://forums.whirlpool.net.au/whim-send*
-// @include         https://forums.whirlpool.net.au/whim-send*
-// @include         http://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
-// @include         https://forums.whirlpool.net.au/forum-replies.cfm*p=-2*
-// @include         http://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
-// @include         https://forums.whirlpool.net.au/forum-replies.cfm*&ux* 
-// @include         http://forums.whirlpool.net.au/archive/*
-// @include         https://forums.whirlpool.net.au/archive/*
-// @include         http://whirlpool.net.au/*
-// @include         https://whirlpool.net.au/*
-// @exclude         http://whirlpool.net.au/blog/*
-// @exclude         https://whirlpool.net.au/blog/*
+// @match           *://forums.whirlpool.net.au/*
+// @match           *://bc.whirlpool.net.au/*
+// @match           *://whirlpool.net.au/*
+// @exclude         *://whirlpool.net.au/blog/*
+// @exclude         *://whirlpool.net.au/api/*
+// @exclude         *://forums.whirlpool.net.au/api/*
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.min.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
@@ -79,16 +71,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version : '5.1.0',
+    version : '5.1.1',
     
     //Prerelease version- 0 for a standard release
     prerelease : 0,
     
     //Meaningless value to force the script to upgrade
-    storageVersion : 60,
+    storageVersion : 61,
     
     //Script changelog
     changelog : {
+        '5.1.1' : '<ul><li>Tidied up code. Added function to elevate a specific forum section to the top of the Watched Threads list. Improvements to Super Profile functionality. Fixed imgur gallery and Watched Thread redirect bugs. If your WLR Tracking or Hidden Users are not working please see previous version release notes.</li></ul>',
         '5.1.0' : '<ul><li>Changes to settings menu to reflect new options for Watched Threads. You can now find these under the "Threads & Posts" tab. The WLR settings have also changed and you may need to re-enable WLR if you notice it not working. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
         '5.0.9' : '<ul><li>Adds toggle to hide image/video embed URLs and option to show only Unread Watched Threads on Super Profile page. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
         '5.0.8' : '<ul><li>Fixes settings menu bug on certain resolutions, miscellaneous code tweaks</li></ul>',
@@ -210,6 +203,7 @@ WhirlpoolPlus.install = {
         userNotes : {},
         watchedThreadsAlert : 'default',
         watchedthreadsextra : 'improved',
+        promoteWatchedForum : '',
         returnafterlogin : false,
         sync_server : '',
         sync_key : '',
@@ -1551,6 +1545,12 @@ WhirlpoolPlus.settings = {
 
                         '</p>  ' +
             
+                                    '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="text" id="promoteWatchedForum">' +
+                            ' <label for="promoteWatchedForum">Forum ID to move to the top of watched threads list</label>' +
+                            ' <span class="settingDesc">Enter the ID of the forum you want to move to the top (eg. "35")</span>'+
+                        '</p> ' +
+            
                         '<p class="wpp_hideNotForum">' +
                             '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
                                 '<option value="default">None</option>' +
@@ -1724,6 +1724,63 @@ WhirlpoolPlus.feat = {
             if(dU.match('//forums.whirlpool.net.au') && document.querySelector('#ub_name') && lSc){
                 location.href=lSc;
                 WhirlpoolPlus.util.rem('returnafterlogin_targetUrl');
+            }
+        }
+    },
+    
+    watchedThreadsAlert : function(){
+        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'watched' || document.referrer.indexOf('?action=watched') >= 0) {
+            document.location = '//forums.whirlpool.net.au/forum/?action=watched';
+        }
+        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'profile' ^ document.referrer.indexOf('?action=watched') >= 0) {
+            document.location = '//forums.whirlpool.net.au/user';
+        }
+        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'forum' ^ document.referrer.indexOf('?action=watched') >= 0) {
+            document.location = '//forums.whirlpool.net.au/';
+        }
+        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'thread' && document.referrer.indexOf('?action=watched') == -1) {
+            history.go(-1);
+        }
+        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'additional' ^ document.referrer.indexOf('?action=watched') >= 0) {
+            $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2><h2><a href="//forums.whirlpool.net.au/">Or go to all forums</a></h2>');
+        }
+    },
+    
+    promoteWatchedForum : function(){
+        var promoteThis = WhirlpoolPlus.util.get('promoteWatchedForum');
+        if (promoteThis != '') {
+            var promSecTitleLink = document.querySelector('#threads a[href="/forum/' + promoteThis + '"]');
+            if (promSecTitleLink != null) {
+                var threadsTR = document.querySelectorAll('#threads table tbody tr'),
+                    threadsTB = document.querySelector('#threads table tbody'),
+                    promSecTitleLink_p_p = promSecTitleLink.parentNode.parentNode,
+                    isPromSection = false;
+
+
+                [].forEach.call(threadsTR,function(item,index,arr){
+
+                    if(isPromSection){
+
+                        if(item.className !== 'section'){
+
+                            threadsTB.insertBefore(item, threadsTR[0]);
+        
+                        }
+                        else if(item.className === 'section'){
+
+                            isPromSection = false;
+        
+                        }
+    
+                    }
+                    if(item === promSecTitleLink_p_p){
+
+                        threadsTB.insertBefore(promSecTitleLink_p_p, threadsTR[0]);
+                        isPromSection = true;
+    
+                    }
+
+                });
             }
         }
     },
@@ -1942,14 +1999,14 @@ WhirlpoolPlus.feat = {
                     if(linkSegments[2]){
                         linkSegments = linkSegments[2].split('/');
                         
-                        //Check for album embeds
-                        if(linkSegments[0] != 'a'){
-                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="' + link + '" class="wpp_img"></a></span><br />');
-                            if (WhirlpoolPlus.util.get('hideembedurl')){
-                                linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
-                            }
-                        }else{
-                            linkObject.before('<br /><span class="wcrep1"><iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe></span><br />');
+                        //Check for album or gallery embeds
+                        if(linkSegments[0] = 'a'){
+                            linkObject.before('<br /><span class="wcrep1"><iframe class="imgur-album" width="100%" height="550" frameborder="0" src="https://imgur.com/a/' + linkSegments[linkSegments.length - 1] + '/embed"></iframe></span><br />');                            
+                        }
+                    }else{
+                        linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="' + link + '" class="wpp_img"></a></span><br />');
+                        if (WhirlpoolPlus.util.get('hideembedurl')){
+                            linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
                     }
                 }else if(videoEnabled && youtubeRegex.test(link)){
@@ -2277,11 +2334,13 @@ WhirlpoolPlus.feat.display = {
     superProfile : function(){
         if (WhirlpoolPlus.util.get('display_superProfile') == 'all'){
             $('#threads').append('<p><h2>All Watched Threads</h2>');
-            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #threads'));
+            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #content form'));
+            WhirlpoolPlus.util.css('ul.box {display:none;}');
         }            
         else if (WhirlpoolPlus.util.get('display_superProfile') == 'unread'){
             $('#threads').append('<p><h2>Unread Watched Threads</h2>');
-            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #threads'));
+            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
+            WhirlpoolPlus.util.css('ul.box {display:none;}');
         }
     },
     
@@ -3244,7 +3303,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
     
     runPosts : function(){
-        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){   
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){   
             //scroll to the post that we were actually sent to
             if(window.location.hash){
                 $(unsafeWindow).load(function(){
@@ -3260,7 +3319,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
     
     runThreads : function(){
-        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){
             WhirlpoolPlus.feat.whirlpoolLastRead.forumPage();
         }
     }
@@ -3646,21 +3705,7 @@ WhirlpoolPlus.run = function(){
     
     /** RUN: Watched Thread Alert **/
     if(WhirlpoolPlus.util.pageType.watchedThreadAlert){
-        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'watched' || document.referrer.indexOf('?action=watched') >= 0) {
-            document.location = '//forums.whirlpool.net.au/forum/?action=watched';
-        }
-        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'profile' || document.referrer.indexOf('?action=watched') >= 0) {
-            document.location = '//forums.whirlpool.net.au/user';
-        }
-        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'forum' || document.referrer.indexOf('?action=watched') >= 0) {
-            document.location = '//forums.whirlpool.net.au/';
-        }
-        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'thread' && document.referrer.indexOf('?action=watched') == -1) {
-            history.go(-1);
-        }
-        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'additional' || document.referrer.indexOf('?action=watched') >= 0) {
-            $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2><h2><a href="//forums.whirlpool.net.au/">Or go to all forums</a></h2>');
-        }        
+        WhirlpoolPlus.feat.watchedThreadsAlert();
     }
     
     /** RUN: Deleted Thread Alert **/
@@ -3737,7 +3782,7 @@ WhirlpoolPlus.run = function(){
     /** RUN: Profile Pages **/
     if(WhirlpoolPlus.util.pageType.profile){
         WhirlpoolPlus.feat.display.hideClosedThreads();
-        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'profile'){
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile'){
             WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
         }
         WhirlpoolPlus.feat.postsPerDay();
@@ -3777,9 +3822,10 @@ WhirlpoolPlus.run = function(){
     /** RUN: Watched Threads **/
     if(WhirlpoolPlus.util.pageType.watchedThreads){
         WhirlpoolPlus.feat.openWatchedThreadsInTabs();
+        WhirlpoolPlus.feat.promoteWatchedForum();
         WhirlpoolPlus.feat.display.hideThreads();
         WhirlpoolPlus.feat.display.unansweredThreadsLink();
-        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' ||WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){
+        if(WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched'){
             WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
         }
     }
