@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.1.2
+// @version         5.1.3
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -71,16 +71,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.1.2',
+    version: '5.1.3',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 62,
+    storageVersion: 63,
 
     //Script changelog
     changelog: {
+        '5.1.3': '<ul><li>Fixed avatar caching issue.</li></ul>',
         '5.1.2': '<ul><li>Fixed imgur issues (again). Fixed issues with the latest version of Tampermonkey. Fixed Unread Watched Threads Button opening Unread WHIMs. Added wider display for WHIMS when widescreen view is selected.</li></ul>',
         '5.1.1': '<ul><li>Tidied up code. Added function to elevate a specific forum section to the top of the Watched Threads list. Improvements to Super Profile functionality. Fixed imgur gallery and Watched Thread redirect bugs. If your WLR Tracking or Hidden Users are not working please see previous version release notes.</li></ul>',
         '5.1.0': '<ul><li>Changes to settings menu to reflect new options for Watched Threads. You can now find these under the "Threads & Posts" tab. The WLR settings have also changed and you may need to re-enable WLR if you notice it not working. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
@@ -2616,11 +2617,11 @@ WhirlpoolPlus.feat.avatar = {
 
     css: function () {
         if (WhirlpoolPlus.util.get('avatar_static')) {
-            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/avatar_lite.css);');
+            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/avatar_lite.css?'+new Date().getTime()+');');
         }
 
         if (WhirlpoolPlus.util.get('avatar_animated')) {
-            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css);');
+            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css?'+new Date().getTime()+');');
         }
 
         return '.wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;}';
