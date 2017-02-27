@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.1.5
+// @version         5.1.6
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -20,6 +20,7 @@
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/sha.js
 // @resource        emoticon_angry      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/angry.png
 // @resource        emoticon_blushing   https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/blushing.png
 // @resource        emoticon_confused   https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/confused.png
@@ -71,16 +72,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.1.5',
+    version: '5.1.6',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 65,
+    storageVersion: 66,
 
     //Script changelog
     changelog: {
+        '5.1.6': '<ul><li>Adds Whirlcode and Smilies to Quick Edit. Adds Identicons for users that do not have avatars.</li></ul>',
         '5.1.5': '<ul><li>Further refinements to new notification bar. Fixed Super Profile not displaying watched threads correctly. Fixed quick edit bug causing double posts.</li></ul>',
         '5.1.4': '<ul><li>Adds post count in threads. Fixed imgur album issue. Fixed forums powered by text not displaying after Bulletproof Hosting logo removal. Changed WP Plus notification system.</li></ul>',
         '5.1.3': '<ul><li>Fixed avatar caching issue.</li></ul>',
@@ -2649,11 +2651,35 @@ WhirlpoolPlus.feat.display = {
 
 WhirlpoolPlus.feat.avatar = {
 
+    css: function () {
+        if (WhirlpoolPlus.util.get('avatar_static')) {
+            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/avatar_lite.css?' + new Date().getTime() + ');');
+        }
+
+        if (WhirlpoolPlus.util.get('avatar_animated')) {
+            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css?' + new Date().getTime() + ');');
+        }
+
+        return '.wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;}';
+    },
+
     avatariseRow: function (replyTr) {
         if (WhirlpoolPlus.util.get('avatar_static') || WhirlpoolPlus.util.get('avatar_animated')) {
+            WhirlpoolPlus.util.css('div.reply { min-height: 170px !important; }');
             var userNumber = WhirlpoolPlus.util.getReplyUserId(replyTr);
+            var shaObj = new jsSHA("SHA-512", "TEXT");
+            shaObj.update("'" + userNumber + "'");
+            var hash = shaObj.getHash("HEX");
             replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
             replyTr.addClass('wpp_avatar_reply_' + userNumber);
+            setTimeout(function () {
+                var elem = document.querySelector(".wpp_avatar_" + userNumber + "");
+                var $elem = $(elem);
+                var style = $elem.css('height');
+                if (style == '0px') {
+                    replyTr.find('.replyuser-inner').prepend($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
+                };
+            }, 3000);
         }
     },
 
@@ -2664,18 +2690,6 @@ WhirlpoolPlus.feat.avatar = {
             replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
             replyTr.addClass('wpp_avatar_reply_' + userNumber);
         }
-    },
-
-    css: function () {
-        if (WhirlpoolPlus.util.get('avatar_static')) {
-            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/avatar_lite.css?' + new Date().getTime() + ');');
-        }
-
-        if (WhirlpoolPlus.util.get('avatar_animated')) {
-            WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css?' + new Date().getTime() + ');');
-        }
-
-        return '.wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;}';
     },
 
     getUserAvatar: function (id, type, callback) {
@@ -3681,9 +3695,13 @@ WhirlpoolPlus.feat.quickEdit = {
 
             //Prevent errors from this undefined function
             $('#fm').removeAttr('onkeypress');
+            $('#replyoptions').attr("style", "display:none");
 
-            //Prevent quick reply post double-up
+            //Prevent quick reply post double-up and setup for Whirlcode
             $('#body').prop('id', 'quickeditbody');
+
+            //Add Whirlcode Block
+            WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #quickeditbody');
 
             //Add Cancel Button
             $('#postbutton').after('<input type="button" name="wpp-c-edit" class="wpp-c-edit" value="Cancel" style="width:10em;font-size:14px;">');
