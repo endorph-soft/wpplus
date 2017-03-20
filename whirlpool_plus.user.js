@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.1.7
+// @version         5.1.8
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -72,16 +72,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.1.7',
+    version: '5.1.8',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 67,
+    storageVersion: 68,
 
     //Script changelog
     changelog: {
+        '5.1.8': '<ul><li>Small change to avatar layout based on feedback. Fixes Quick Edit toggle not appearing since latest WP changes.</li></ul>',
         '5.1.7': '<ul><li>Some code tidying. Revised avatar toggle options - for upgrade installs you will need to reset your avatar display preference!</li></ul>',
         '5.1.6': '<ul><li>Adds Whirlcode and Smilies to Quick Edit. Adds Identicons for users that do not have avatars.</li></ul>',
         '5.1.5': '<ul><li>Further refinements to new notification bar. Fixed Super Profile not displaying watched threads correctly. Fixed quick edit bug causing double posts.</li></ul>',
@@ -2638,7 +2639,6 @@ WhirlpoolPlus.feat.avatar = {
 
     avatariseRow: function (replyTr) {
         if (WhirlpoolPlus.util.get('avatars_enabled') == 'all' || WhirlpoolPlus.util.get('avatars_enabled') == 'both' || WhirlpoolPlus.util.get('avatars_enabled') == 'static' || WhirlpoolPlus.util.get('avatars_enabled') == 'animated') {
-            WhirlpoolPlus.util.css('div.reply { min-height: 175px !important; }');
             var userNumber = WhirlpoolPlus.util.getReplyUserId(replyTr);
             var shaObj = new jsSHA("SHA-512", "TEXT");
             shaObj.update("'" + userNumber + "'");
@@ -2646,6 +2646,7 @@ WhirlpoolPlus.feat.avatar = {
             replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
             replyTr.addClass('wpp_avatar_reply_' + userNumber);
             if (WhirlpoolPlus.util.get('avatars_enabled') == 'all') {
+                WhirlpoolPlus.util.css('div.reply { min-height: 175px !important; }');
                 setTimeout(function () {
                     var elem = document.querySelector(".wpp_avatar_" + userNumber + "");
                     var $elem = $(elem);
@@ -3633,7 +3634,7 @@ WhirlpoolPlus.feat.quickEdit = {
 
     run: function () {
         if (WhirlpoolPlus.util.get('quickEdit')) {
-            $('.actions a[href^="/forum/index.cfm?action=edit"]').after('<br><a class="wpp-edit">(quick edit)</a>');
+            $('.actions a[href^="/forum/?action=edit"]').after('<br><a class="wpp-edit">(quick edit)</a>');
             $('#replies .wpp-edit').click(this._onClick);
         }
     },
