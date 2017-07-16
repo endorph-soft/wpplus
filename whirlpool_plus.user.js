@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.1.8
+// @version         5.1.9
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -72,16 +72,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.1.8',
+    version: '5.1.9',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 68,
+    storageVersion: 69,
 
     //Script changelog
     changelog: {
+        '5.1.9': '<ul><li>Fixed layout of user profile page after wiki edit when Super Profile is enabled.</li></ul>',
         '5.1.8': '<ul><li>Small change to avatar layout based on feedback. Fixes Quick Edit toggle not appearing since latest WP changes.</li></ul>',
         '5.1.7': '<ul><li>Some code tidying. Revised avatar toggle options - for upgrade installs you will need to reset your avatar display preference!</li></ul>',
         '5.1.6': '<ul><li>Adds Whirlcode and Smilies to Quick Edit. Adds Identicons for users that do not have avatars.</li></ul>',
@@ -2368,7 +2369,7 @@ WhirlpoolPlus.feat.display = {
 
     oldProfile: function () {
         if (WhirlpoolPlus.util.get('display_oldProfile')) {
-            $('#threads').detach().insertBefore('#userprofile script:contains("keypress")');
+            $('[id=threads]').detach().insertBefore('#userprofile script:contains("keypress")');
             $('#userprofile h2:lt(1)').detach().insertBefore('#threads');
         }
     },
@@ -2390,8 +2391,8 @@ WhirlpoolPlus.feat.display = {
             WhirlpoolPlus.util.css('ul.box {display:none;}');
         }
         else if (WhirlpoolPlus.util.get('display_superProfile') == 'unread') {
-            $('#threads').append('<p><h2>Unread Watched Threads</h2>');
-            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
+            $('#userprofile').append('<p><h2>Unread Watched Threads</h2>');
+            $('#userprofile').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
             WhirlpoolPlus.util.css('ul.box {display:none;}');
         }
     },
