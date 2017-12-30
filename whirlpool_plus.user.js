@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.1.9
+// @version         5.2.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -16,8 +16,8 @@
 // @exclude         *://whirlpool.net.au/blog/*
 // @exclude         *://whirlpool.net.au/api/*
 // @exclude         *://forums.whirlpool.net.au/api/*
-// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.min.js
-// @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/jquery.simplemodal.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/sha.js
@@ -72,16 +72,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.1.9',
+    version: '5.2.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 69,
+    storageVersion: 70,
 
     //Script changelog
     changelog: {
+        '5.2.0': '<ul><li>Tidied code and updated to latest jQuery library.</li></ul>',
         '5.1.9': '<ul><li>Fixed layout of user profile page after wiki edit when Super Profile is enabled.</li></ul>',
         '5.1.8': '<ul><li>Small change to avatar layout based on feedback. Fixes Quick Edit toggle not appearing since latest WP changes.</li></ul>',
         '5.1.7': '<ul><li>Some code tidying. Revised avatar toggle options - for upgrade installs you will need to reset your avatar display preference!</li></ul>',
@@ -405,7 +406,7 @@ WhirlpoolPlus.util = {
             this._notified = true;
         }
         $('#ub_name').before('<span class="wpplus_notify">!!! ' + message + ' (hide) !!!    </span>');
-        $('.wpplus_notify').click(function (e) {
+        $('.wpplus_notify').on("click", function (e) {
             $(this).fadeOut();
             tb.removeClass('notifyfloat');
         });
@@ -723,7 +724,7 @@ WhirlpoolPlus.settings = {
         var settingsLink = $('<li id="menu_wpp" class="even"><a href="#"><span>WP+ Settings</span></a></li>');
         $('#menu_whim').after(settingsLink);
 
-        settingsLink.click(function () {
+        settingsLink.on("click", function () {
             WhirlpoolPlus.settings._launch();
             return false;
         });
@@ -775,7 +776,7 @@ WhirlpoolPlus.settings = {
         }
 
         //Set up events
-        $('#wppSettings .subSettings_heading').click(function () {
+        $('#wppSettings .subSettings_heading').on("click", function () {
             var content = $(this).parent().children('.subSettings_content');
 
             if (content.is(':visible')) {
@@ -786,7 +787,7 @@ WhirlpoolPlus.settings = {
             }
         });
 
-        $('#wppSettings .menuTab').click(function () {
+        $('#wppSettings .menuTab').on("click", function () {
             var theTab = $(this);
 
             $('.menuDiv').removeClass('menuDiv_active');
@@ -796,7 +797,7 @@ WhirlpoolPlus.settings = {
             $('#' + theTab.data('menudiv')).addClass('menuDiv_active');
         });
 
-        $('#wppSettings_save').click(function () {
+        $('#wppSettings_save').on("click", function () {
 
             var settings = WhirlpoolPlus.util.pageType.forums ? $('.wpp_setting') : $('.wpp_setting').not('.wpp_forumSetting');
 
@@ -889,7 +890,7 @@ WhirlpoolPlus.settings = {
             }
         });
 
-        $('#wppSettings_reset').click(function () {
+        $('#wppSettings_reset').on("click", function () {
 
             if (confirm('WP+: Do you really want to delete all data?')) {
                 unsafeWindow.localStorage.clear();
@@ -944,7 +945,7 @@ WhirlpoolPlus.settings = {
             refreshAvatars();
 
             //Avatar controls
-            $('#currentAvatar_removeStatic').click(function () {
+            $('#currentAvatar_removeStatic').on("click", function () {
                 $(this).prop('disabled', 'disabled');
 
                 var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
@@ -971,7 +972,7 @@ WhirlpoolPlus.settings = {
                 }
             });
 
-            $('#currentAvatar_removeAnimated').click(function () {
+            $('#currentAvatar_removeAnimated').on("click", function () {
                 $(this).prop('disabled', 'disabled');
 
                 var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
@@ -998,7 +999,7 @@ WhirlpoolPlus.settings = {
                 }
             });
 
-            $('#currentAvatar_add').click(function () {
+            $('#currentAvatar_add').on("click", function () {
                 $(this).prop('disabled', 'disabled');
 
                 var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
@@ -1037,7 +1038,7 @@ WhirlpoolPlus.settings = {
             });
 
 
-            $('.unhideUser').click(function () {
+            $('.unhideUser').on("click", function () {
                 var theButton = $(this);
                 var userID = theButton.data('userid');
                 var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
@@ -1828,7 +1829,7 @@ WhirlpoolPlus.feat = {
 
             openAllURInT.after('&nbsp;&nbsp;|');
 
-            openAllURInT.click(function () {
+            openAllURInT.on("click", function () {
                 $('td.unread a').each(function () {
                     if (typeof GM_openInTab == 'function') {
                         GM_openInTab(this.href);
@@ -1858,7 +1859,7 @@ WhirlpoolPlus.feat = {
 
             openAllInT.before('&nbsp;&nbsp;');
 
-            openAllInT.click(function () {
+            openAllInT.on("click", function () {
                 $('a.title').not(".section a.title").each(function () {
                     if (typeof GM_openInTab == 'function') {
                         GM_openInTab(this.href);
@@ -1873,7 +1874,7 @@ WhirlpoolPlus.feat = {
                 var openAllinSInT = $('<a href="#" id="openSectionInTabs" style="font-weight:bold;margin-left:35px;">open section in tabs</a>');
                 $(this).after(openAllinSInT);
 
-                openAllinSInT.click(function () {
+                openAllinSInT.on("click", function () {
                     $(this).parent().parent().nextUntil('.section').find('.unread a').each(function () {
                         if (typeof GM_openInTab == 'function') {
                             GM_openInTab(this.href);
@@ -2273,7 +2274,7 @@ WhirlpoolPlus.feat.display = {
 
             WhirlpoolPlus.util.css('#left.sidebarFloat { position: fixed; top: 0px; left: inherit; background-color: inherit;}');
 
-            $(window).scroll(function () {
+            $(window).on("scroll", function () {
                 if (floating) {
                     if (window.pageYOffset > 183) {
                         sidebarContent.addClass('sidebarFloat');
@@ -2281,11 +2282,11 @@ WhirlpoolPlus.feat.display = {
                         sidebarContent.removeClass('sidebarFloat');
                     }
                 }
-            }).scroll();
+            }).on(scroll);
 
             $('.selected ul[style~="dashed"]').append('<li id="wpplus_undock"><a href="javascript:;"> Unfloat Sidebar (temp)</a></li>');
 
-            $('#wpplus_undock a').click(function () {
+            $('#wpplus_undock a').on("click", function () {
                 floating = false;
                 sidebarContent.removeClass('sidebarFloat');
                 $(this).parent().remove();
@@ -2378,7 +2379,7 @@ WhirlpoolPlus.feat.display = {
         if (WhirlpoolPlus.util.get('display_userPageInfoToggle')) {
             var h2s = $('#userprofile h2:lt(2)');
             h2s.css('cursor', 'pointer').next('table').hide();
-            h2s.click(function () {
+            h2s.on("click", function () {
                 $(this).next('table').slideToggle();
             });
         }
@@ -2798,7 +2799,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
 
         var activityOpen = false;
         var activityArea = $('#recentActivity');
-        $('#recentActivityHandle').click(function () {
+        $('#recentActivityHandle').on("click", function () {
             if (activityOpen) {
                 activityArea.hide();
                 activityOpen = false;
@@ -2808,7 +2809,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
             }
         });
 
-        $('#recentActivityReload').click(function () {
+        $('#recentActivityReload').on("click", function () {
             $('#recentActivityContent').html('Loading...');
             WhirlpoolPlus.feat.recentActivityOverlay.updateData(function () {
                 WhirlpoolPlus.feat.recentActivityOverlay.formatData();
@@ -2897,7 +2898,7 @@ WhirlpoolPlus.feat.ignoreUser = {
                 tdBodyUser.append(voteblock);
             }
 
-            hideUser.click(function () {
+            hideUser.on("click", function () {
                 if ($.inArray(uNum, WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
                     //Not currently in array
                     var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
@@ -2937,7 +2938,7 @@ WhirlpoolPlus.feat.ignoreUser = {
 
             var hiddenPostNotice = $('<div class="notice" id="' + rowId + '"><div class="replyuser">User #' + uNum + ' &nbsp; <a style="color:black" href="//forums.whirlpool.net.au/user/' + uNum + '"><b>' + userName + '</b></a></div><div class="replytools">' + postDate + '</div><i>This users posts are hidden by you (WP+).</i> </div>');
 
-            var showLink = $('<a href="javascript:void(0)">Show post (temporary)</a>').click(function () {
+            var showLink = $('<a href="javascript:void(0)">Show post (temporary)</a>').on("click", function () {
                 trParent.show();
                 hiddenPostNotice.hide();
             });
@@ -3035,7 +3036,7 @@ WhirlpoolPlus.feat.spinnerMenu = {
             }
         });
 
-        this._menu.find('#menuSpinner').click(function () {
+        this._menu.find('#menuSpinner').on("click", function () {
             $(this).css({ 'height': 'auto', 'overflow': 'visible' });
             displayedMouseOver = false;
             displayedClick = true;
@@ -3043,7 +3044,7 @@ WhirlpoolPlus.feat.spinnerMenu = {
             return false;
         });
 
-        this._menu.find('a[href!="#"], a#settingsSpinnerLink').click(function () {
+        this._menu.find('a[href!="#"], a#settingsSpinnerLink').on("click", function () {
             $(WhirlpoolPlus.feat.spinnerMenu._menu).css({ 'height': '19px', 'overflow': 'hidden' });
             displayedMouseOver = false;
             displayedClick = false;
@@ -3058,12 +3059,12 @@ WhirlpoolPlus.feat.spinnerMenu = {
             return true;
         });
 
-        this._menu.find('a[href="#"]').click(function (event) {
+        this._menu.find('a[href="#"]').on("click", function (event) {
             event.stopPropagation();
             return false;
         });
 
-        $('html').click(function () {
+        $('html').on("click", function () {
             if (displayedClick) {
                 $(WhirlpoolPlus.feat.spinnerMenu._menu).css({ 'height': '19px', 'overflow': 'hidden' });
                 displayedClick = false;
@@ -3083,7 +3084,7 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
                 WhirlpoolPlus.feat.spinnerMenu._menu.remove();
                 $('body').prepend(WhirlpoolPlus.feat.spinnerMenu._menu);
-                $('#settingsSpinnerLink').click(function () { WhirlpoolPlus.settings._launch(); return false; })
+                $('#settingsSpinnerLink').on("click", function () { WhirlpoolPlus.settings._launch(); return false; })
                 $('#menuSpinner').remove();
                 WhirlpoolPlus.feat.spinnerMenu._menu[0].style.position = 'absolute';
                 WhirlpoolPlus.feat.spinnerMenu._menu[0].style.left = '' + e.pageX - 250 + 'px';
@@ -3107,7 +3108,7 @@ WhirlpoolPlus.feat.spinnerMenu = {
         this.generateMenu();
 
         $('body').prepend(this._menu);
-        $('#settingsSpinnerLink').click(function () { WhirlpoolPlus.settings._launch(); return false; })
+        $('#settingsSpinnerLink').on("click", function () { WhirlpoolPlus.settings._launch(); return false; })
         this._menu.css('margin', '95px 0 50px 6px');
 
     }
@@ -3176,7 +3177,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
             '<img class="wlr_disableTracker_img" id="wlr_disableTracker_disabled" src="' + WhirlpoolPlus.util.image('cross') + '" title="WLR Tracker Disabled" />' +
             '</div>');
 
-            $('#wlr_disableTracker').click(function () {
+            $('#wlr_disableTracker').on("click", function () {
 
                 $('.wlr_disableTracker_img').toggle();
 
@@ -3201,7 +3202,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
 
 
 
-        $(window).bind('unload', function () {
+        $(window).on('unload', function () {
 
             if (WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread == false) {
                 return;
@@ -3317,14 +3318,14 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         }
                     }
 
-                    thread.find('.whirlpoolLastRead_stopTracking').click(function () {
+                    thread.find('.whirlpoolLastRead_stopTracking').on("click", function () {
                         WhirlpoolPlus.feat.whirlpoolLastRead.stopTracking(threadNumber);
                         thread.children().removeClass('whirlpoolLastRead_unreadPosts whirlpoolLastRead_noUnreadPosts');
                         thread.find('.whirlpoolLastRead_controls').remove();
                         return false;
                     });
 
-                    thread.find('.whirlpoolLastRead_markAsRead').click(function () {
+                    thread.find('.whirlpoolLastRead_markAsRead').on("click", function () {
                         WhirlpoolPlus.feat.whirlpoolLastRead.markAsRead(threadNumber);
                         thread.children('.whirlpoolLastRead_unreadPosts').removeClass('whirlpoolLastRead_unreadPosts').addClass('whirlpoolLastRead_noUnreadPosts');
                         thread.find('.whirlpoolLastRead_controls .whirlpoolLastRead_markAsRead').remove();
@@ -3381,7 +3382,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
             //scroll to the post that we were actually sent to
             if (window.location.hash) {
-                $(unsafeWindow).load(function () {
+                $(unsafeWindow).on("load", function () {
                     var location = $(window.location.hash);
                     if (location.length > 0) {
                         $(unsafeWindow).scrollTop(location.offset().top);
@@ -3749,7 +3750,7 @@ WhirlpoolPlus.feat.userNotes = {
 
         reply.find('.userstats').append(userNotesButton);
 
-        userNotesButton.click(function () {
+        userNotesButton.on("click", function () {
             var notebox = $('<textarea id="userNotes_notes">');
             var dialog = $('<div class="userNotes_dialog">').append(notebox);
 
@@ -3948,13 +3949,6 @@ WhirlpoolPlus.run = function () {
 
 //Run the script
 try {
-
-    // Rebuild jQuery.browser
-    if (typeof $ != 'undefined') {
-        // From jQuery.migrate plugin https://code.jquery.com/jquery-migrate-1.1.1.js
-        var jQuery = $;
-        if (!jQuery.browser) { jQuery.uaMatch = function (e) { e = e.toLowerCase(); var t = /(chrome)[ \/]([\w.]+)/.exec(e) || /(webkit)[ \/]([\w.]+)/.exec(e) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(e) || /(msie) ([\w.]+)/.exec(e) || e.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(e) || []; return { browser: t[1] || "", version: t[2] || "0" } }; matched = jQuery.uaMatch(navigator.userAgent); browser = {}; if (matched.browser) { browser[matched.browser] = true; browser.version = matched.version } if (browser.chrome) { browser.webkit = true } else if (browser.webkit) { browser.safari = true } jQuery.browser = browser }
-    }
 
     // This needs to be late loaded, otherwise Tampermonkey gets upset
     loadSimpleModal($);
