@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.0
+// @version         5.2.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -72,16 +72,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.0',
+    version: '5.2.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 70,
+    storageVersion: 71,
 
     //Script changelog
     changelog: {
+        '5.2.1': '<ul><li>Bandaid fix for Recent Activity Overlay API Bug.</li></ul>',
         '5.2.0': '<ul><li>Tidied code and updated to latest jQuery library.</li></ul>',
         '5.1.9': '<ul><li>Fixed layout of user profile page after wiki edit when Super Profile is enabled.</li></ul>',
         '5.1.8': '<ul><li>Small change to avatar layout based on feedback. Fixes Quick Edit toggle not appearing since latest WP changes.</li></ul>',
@@ -2720,7 +2721,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
 
         $.ajax({
             type: 'GET',
-            url: 'https://whirlpool.net.au/api/?key=' + WhirlpoolPlus.util.get('whirlpoolAPIKey') + '&output=json&get=recent&recentdays=' + WhirlpoolPlus.util.get('recentActivityOverlay_days'),
+            url: 'https://forums.whirlpool.net.au/api/?key=' + WhirlpoolPlus.util.get('whirlpoolAPIKey') + '&output=json&get=recent&recentdays=' + WhirlpoolPlus.util.get('recentActivityOverlay_days'),
             success: function (data, textStatus, response) {
 
                 if (response.status == 200) {
