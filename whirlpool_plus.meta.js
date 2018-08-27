@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.1
+// @version         5.2.2
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -10,6 +10,9 @@
 // @grant           GM_getResourceURL
 // @grant           GM_getResourceText
 // @grant           GM_openInTab
+// @grant           GM.addStyle
+// @grant           GM.getResourceUrl
+// @grant           GM.openInTab
 // @match           *://forums.whirlpool.net.au/*
 // @match           *://bc.whirlpool.net.au/*
 // @match           *://whirlpool.net.au/*
@@ -21,39 +24,8 @@
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/sha.js
-// @resource        emoticon_angry      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/angry.png
-// @resource        emoticon_blushing   https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/blushing.png
-// @resource        emoticon_confused   https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/confused.png
-// @resource        emoticon_cool       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/cool.png
-// @resource        emoticon_cry        https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/crying.png
-// @resource        emoticon_frown      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/frown.png
-// @resource        emoticon_gasp       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/gasp.png
-// @resource        emoticon_grin       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/grin.png
-// @resource        emoticon_kiss       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/kiss.png
-// @resource        emoticon_lips       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/lips.png
-// @resource        emoticon_shout      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/shouting.png
-// @resource        emoticon_sleep      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/sleeping.png
-// @resource        emoticon_smile      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/smile.png
-// @resource        emoticon_smirk      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/smirk.png
-// @resource        emoticon_straight   https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/straight.png
-// @resource        emoticon_tongue     https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/tongue.png
-// @resource        emoticon_wink       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/wink.png
-// @resource        emoticon_star       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/star.png
-// @resource        old_blue_anxious    https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/anxious.gif
-// @resource        old_blue_clown      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/clown.gif
-// @resource        old_blue_cool       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/cool.gif
-// @resource        old_blue_eyes       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/eyes.gif
-// @resource        old_blue_grin       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/grin.gif
-// @resource        old_blue_happy      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/happy.gif
-// @resource        old_blue_happy2     https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/happy-2.gif
-// @resource        old_blue_neutral    https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/neutral.gif
-// @resource        old_blue_ninja      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/ninja.gif
-// @resource        old_blue_sad        https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/sad.gif
-// @resource        old_blue_sad2       https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/sad-2.gif
-// @resource        old_blue_smirk      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/smirk.gif
-// @resource        old_blue_tongue     https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/tongue.gif
+// @require         https://raw.githubusercontent.com/greasemonkey/gm4-polyfill/master/gm4-polyfill.js
 // @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/loader.gif
-// @resource        reload              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/reload.png
 // @resource        noavatar            https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/noavatar.png
 // @resource        waiting             https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/waiting.gif
 // @resource        light_gradient      https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/lightgradient.png
