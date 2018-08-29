@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.2
+// @version         5.2.3
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -44,16 +44,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.2',
+    version: '5.2.3',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 72,
+    storageVersion: 73,
 
     //Script changelog
     changelog: {
+        '5.2.3': '<ul><li>Fixes WLR bug on Watched Threads page when "only colour end square" is enabled. Adds warning for tinypic and non https hosted avatars to WP Plus settings menu.</li></ul>',
         '5.2.2': '<ul><li>Reworked to support Greasemonkey Webextension Builds 4.1 and later, whilst retaining compatibility with other script managers. Changed recommended Avatar host - if you have used tinypic in the past please consider migrating and updating your avatar.</li></ul>',
         '5.2.1': '<ul><li>Bandaid fix for Recent Activity Overlay API Bug.</li></ul>',
         '5.2.0': '<ul><li>Tidied code and updated to latest jQuery library.</li></ul>',
@@ -316,43 +317,43 @@ WhirlpoolPlus.util = {
         GM.addStyle(styles);
     },
 
-    image: function (resource) {
-        return GM.getResourceUrl(resource);
+image: function (resource) {
+    return GM.getResourceUrl(resource);
+},
+
+resource: function (resource) {
+    return GM_getResourceText(resource);
+},
+
+initPageType: function () {
+    for (i in WhirlpoolPlus.util.pageType) {
+        WhirlpoolPlus.util.pageType[i] = (document.location.href.indexOf(WhirlpoolPlus.util.pageType[i]) >= 0);
+    }
+},
+
+// Should not be accessed without calling initPageType
+pageType: {
+
+    'alert': '/forum/alert/',     // An alert page
+    'posts': 'forum-replies.cfm', // The page where you view posts
+    'threads': '/forum/',           // The page where you view threads
+    'profile': '/user/',            // User profile page
+    'whimArchive': 'action=archive',    // Whim archive page
+    'whimRead': 'action=read',       // Whim read page
+    'whimWrite': 'action=write',      // Whim write page
+    'deletedThread': 'a=priv-deleted',    // Deleted thread alert
+    'auraVotes': 'action=yourvotes',  // List of all aura votes
+    'newThread': 'action=newthread',  // Creating a new thread
+    'reply': 'action=reply',      // Posting a reply
+    'edit': 'action=edit',       // Editing a post
+    'search': 'action=search',     // Thread search
+    'forums': 'forums.whirlpool',  // forums.whirlpool.net.au
+    'wiki': '.net.au/wiki/',     // Wiki
+    'watchedThreads': 'action=watched',    // Watched threads page
+    'watchedThreadAlert': '?a=subs-',          // Alert on marking a thread as read
     },
 
-    resource: function (resource) {
-        return GM_getResourceText(resource);
-    },
-
-    initPageType: function () {
-        for (i in WhirlpoolPlus.util.pageType) {
-            WhirlpoolPlus.util.pageType[i] = (document.location.href.indexOf(WhirlpoolPlus.util.pageType[i]) >= 0);
-        }
-    },
-
-    // Should not be accessed without calling initPageType
-    pageType: {
-
-        'alert': '/forum/alert/',     // An alert page
-        'posts': 'forum-replies.cfm', // The page where you view posts
-        'threads': '/forum/',           // The page where you view threads
-        'profile': '/user/',            // User profile page
-        'whimArchive': 'action=archive',    // Whim archive page
-        'whimRead': 'action=read',       // Whim read page
-        'whimWrite': 'action=write',      // Whim write page
-        'deletedThread': 'a=priv-deleted',    // Deleted thread alert
-        'auraVotes': 'action=yourvotes',  // List of all aura votes
-        'newThread': 'action=newthread',  // Creating a new thread
-        'reply': 'action=reply',      // Posting a reply
-        'edit': 'action=edit',       // Editing a post
-        'search': 'action=search',     // Thread search
-        'forums': 'forums.whirlpool',  // forums.whirlpool.net.au
-        'wiki': '.net.au/wiki/',     // Wiki
-        'watchedThreads': 'action=watched',    // Watched threads page
-        'watchedThreadAlert': '?a=subs-',          // Alert on marking a thread as read
-    },
-
-    _notified: false,
+_notified: false,
 
     notify: function (message, important) {
         var color = '#fff';
@@ -386,34 +387,34 @@ WhirlpoolPlus.util = {
         });
     },
 
-    getReplyUserId: function (reply) {
-        var num = reply.find('a[href*="/user/"]:not([href*="online"])').prop('href').split('/user/')[1];
-        num = num.split('?');
-        return parseInt(num);
-    },
+getReplyUserId: function (reply) {
+    var num = reply.find('a[href*="/user/"]:not([href*="online"])').prop('href').split('/user/')[1];
+    num = num.split('?');
+    return parseInt(num);
+},
 
-    getReplyNumber: function (reply) {
-        var num = reply.find('a[href*="/forum-replies.cfm?t="]').prop('href').split('#r')[1];
-        num = num.split('?');
-        return parseInt(num);
-    },
+getReplyNumber: function (reply) {
+    var num = reply.find('a[href*="/forum-replies.cfm?t="]').prop('href').split('#r')[1];
+    num = num.split('?');
+    return parseInt(num);
+},
 
-    getThreadNumber: function () {
-        return (typeof unsafeWindow.thread_id != 'undefined') ? (unsafeWindow.thread_id) : (false);
-    },
+getThreadNumber: function () {
+    return (typeof unsafeWindow.thread_id != 'undefined') ? (unsafeWindow.thread_id) : (false);
+},
 
-    getUserId: function () {
-        var uID = $('#ub_name a').prop('href');
-        return uID.split('/').slice(-1)[0];
-    },
+getUserId: function () {
+    var uID = $('#ub_name a').prop('href');
+    return uID.split('/').slice(-1)[0];
+},
 
-    getUsername: function () {
-        return $('#ub_name a').text();
-    },
+getUsername: function () {
+    return $('#ub_name a').text();
+},
 
-    sync: {
+sync: {
 
-        // Initialised during init() call
+    // Initialised during init() call
         server: null,
         user: null,
         key: null,
@@ -646,7 +647,7 @@ WhirlpoolPlus.util = {
             });
 
         }
-    },
+},
 
 };
 
@@ -701,340 +702,368 @@ WhirlpoolPlus.settings = {
         });
     },
 
-    _launch: function () {
-        //If the settings box is in minimal mode, it will show far less settings
-        var minimalMode = !WhirlpoolPlus.util.pageType.forums;
+_launch: function () {
+    //If the settings box is in minimal mode, it will show far less settings
+    var minimalMode = !WhirlpoolPlus.util.pageType.forums;
 
-        var dialog = $(this._html);
+    var dialog = $(this._html);
 
-        var currentTheme = WhirlpoolPlus.util.get('display_theme');
-        var currentSyncServer = WhirlpoolPlus.util.get('sync_server');
-        var currentSyncEncryptionKey = WhirlpoolPlus.util.get('sync_encryptionKey');
+    var currentTheme = WhirlpoolPlus.util.get('display_theme');
+    var currentSyncServer = WhirlpoolPlus.util.get('sync_server');
+    var currentSyncEncryptionKey = WhirlpoolPlus.util.get('sync_encryptionKey');
 
-        dialog.modal({
-            close: true,
-            containerId: 'wppSettings',
-            overlayCss: { backgroundColor: '#000' },
-            onShow: function () {
-                var settings = WhirlpoolPlus.util.pageType.forums ? $('.wpp_setting') : $('.wpp_setting').not('.wpp_forumSetting');
-
-                settings.each(function () {
-                    var setting = $(this);
-                    var settingValue = WhirlpoolPlus.util.get(setting.prop('id'));
-
-                    if (setting.is('input[type="checkbox"]')) {
-                        setting.prop('checked', settingValue);
-                    } else {
-                        setting.val(settingValue);
-                    }
-                });
-            },
-        });
-
-
-        if (!minimalMode) {
-            $('#sync_server').val(currentSyncServer);
-            $('#sync_encryptionKey').val(currentSyncEncryptionKey);
-
-
-            var hiddenUsersHTML = '';
-            var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
-            for (i = 0; i < hiddenUsers.length; i++) {
-                var hurl = ("//forums.whirlpool.net.au/user/" + hiddenUsers[i]);
-                hiddenUsersHTML += '<p>User <a href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
-            }
-            $('#hiddenUsers').append(hiddenUsersHTML);
-        }
-
-        //Set up events
-        $('#wppSettings .subSettings_heading').on("click", function () {
-            var content = $(this).parent().children('.subSettings_content');
-
-            if (content.is(':visible')) {
-                $('.subSettings_content').hide();
-            } else {
-                $('.subSettings_content').hide();
-                content.show();
-            }
-        });
-
-        $('#wppSettings .menuTab').on("click", function () {
-            var theTab = $(this);
-
-            $('.menuDiv').removeClass('menuDiv_active');
-            $('.menuTab').removeClass('menuTab_active');
-
-            theTab.addClass('menuTab_active');
-            $('#' + theTab.data('menudiv')).addClass('menuDiv_active');
-        });
-
-        $('#wppSettings_save').on("click", function () {
-
+    dialog.modal({
+        close: true,
+        containerId: 'wppSettings',
+        overlayCss: { backgroundColor: '#000' },
+        onShow: function () {
             var settings = WhirlpoolPlus.util.pageType.forums ? $('.wpp_setting') : $('.wpp_setting').not('.wpp_forumSetting');
 
             settings.each(function () {
                 var setting = $(this);
-                var settingKey = setting.prop('id');
-                var settingValue;
+                var settingValue = WhirlpoolPlus.util.get(setting.prop('id'));
 
                 if (setting.is('input[type="checkbox"]')) {
-                    settingValue = setting.prop('checked');
+                    setting.prop('checked', settingValue);
                 } else {
-                    settingValue = setting.val();
+                    setting.val(settingValue);
                 }
-
-                WhirlpoolPlus.util.set(settingKey, settingValue);
             });
+        },
+    });
 
-            if (!minimalMode) {
-                var newSyncServer = $('#sync_server').val();
-                var newSyncEncryptionKey = $('#sync_encryptionKey').val();
 
-                if (newSyncServer != currentSyncServer) {
-                    WhirlpoolPlus.util.set('sync_server', newSyncServer);
-                    WhirlpoolPlus.util.set('sync_lastSync', 0);
-                }
+    if (!minimalMode) {
+        $('#sync_server').val(currentSyncServer);
+        $('#sync_encryptionKey').val(currentSyncEncryptionKey);
 
-                if (newSyncEncryptionKey != currentSyncEncryptionKey) {
-                    if (confirm('You\'ve changed your encryption password. For this to work, make sure that no other password has been used with this account. For more information, see the wiki article.')) {
-                        WhirlpoolPlus.util.set('sync_encryptionKey', newSyncEncryptionKey);
-                    } else {
-                        alert('Encryption Password reverted');
-                    }
-                }
 
-                var newTheme = WhirlpoolPlus.util.get('display_theme');
-                if (newTheme != currentTheme) {
-                    if (confirm('Would you like to load the suggested WLR highlight colours for your theme?')) {
-                        var newPostColour, noNewPostColour, postBackgroundColour;
+        var hiddenUsersHTML = '';
+        var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
+        for (i = 0; i < hiddenUsers.length; i++) {
+            var hurl = ("//forums.whirlpool.net.au/user/" + hiddenUsers[i]);
+            hiddenUsersHTML += '<p>User <a href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
+        }
+        $('#hiddenUsers').append(hiddenUsersHTML);
+    }
 
-                        switch (newTheme) {
-                            case 'classic':
-                                newPostColour = '#79A1FC';
-                                noNewPostColour = '#EAA53F';
-                                postBackgroundColour = '#DEE6FA';
-                                break;
+    //Set up events
+    $('#wppSettings .subSettings_heading').on("click", function () {
+        var content = $(this).parent().children('.subSettings_content');
 
-                            case 'black':
-                                newPostColour = '#FFFFFF';
-                                noNewPostColour = '#555555';
-                                postBackgroundColour = '#A1A1A1';
-                                break;
+        if (content.is(':visible')) {
+            $('.subSettings_content').hide();
+        } else {
+            $('.subSettings_content').hide();
+            content.show();
+        }
+    });
 
-                            case 'teal':
-                                newPostColour = '#B2F8F8';
-                                noNewPostColour = '#99C5CB';
-                                postBackgroundColour = '#D2E5E2';
-                                break;
+    $('#wppSettings .menuTab').on("click", function () {
+        var theTab = $(this);
 
-                            case 'electrolize':
-                                newPostColour = '#002F58';
-                                noNewPostColour = '#054C66';
-                                postBackgroundColour = '#0C3851';
-                                break;
+        $('.menuDiv').removeClass('menuDiv_active');
+        $('.menuTab').removeClass('menuTab_active');
 
-                            case 'wood':
-                                newPostColour = '#994C00';
-                                noNewPostColour = '#A4672B';
-                                postBackgroundColour = '#CFCBBC';
-                                break;
+        theTab.addClass('menuTab_active');
+        $('#' + theTab.data('menudiv')).addClass('menuDiv_active');
+    });
 
-                            case 'default':
-                            default:
-                                newPostColour = '#95B0CB';
-                                noNewPostColour = '#CBC095';
-                                postBackgroundColour = '#CFCBBC';
-                                break;
-                        }
+    $('#wppSettings_save').on("click", function () {
 
-                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', newPostColour);
-                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', noNewPostColour);
-                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', postBackgroundColour);
-                    }
-                }
+        var settings = WhirlpoolPlus.util.pageType.forums ? $('.wpp_setting') : $('.wpp_setting').not('.wpp_forumSetting');
 
-                $.modal.close();
-                document.location.reload();
+        settings.each(function () {
+            var setting = $(this);
+            var settingKey = setting.prop('id');
+            var settingValue;
+
+            if (setting.is('input[type="checkbox"]')) {
+                settingValue = setting.prop('checked');
             } else {
-                $.modal.close();
-                document.location.reload();
-            }
-        });
-
-        $('#wppSettings_reset').on("click", function () {
-
-            if (confirm('WP+: Do you really want to delete all data?')) {
-                unsafeWindow.localStorage.clear();
-                alert('WP+: Script data cleared');
-                window.location.reload();
-            } else {
-                alert('WP+: No data cleared');
+                settingValue = setting.val();
             }
 
+            WhirlpoolPlus.util.set(settingKey, settingValue);
         });
-
-        //Special events
-
 
         if (!minimalMode) {
-            //Sync Settings
-            $('#wppSettings #sync_enabled').change(function () {
-                if (this.checked) {
-                    $('.syncSetting').prop('disabled', '');
-                } else {
-                    $('.syncSetting').prop('disabled', 'disabled');
-                }
-            }).change();
+            var newSyncServer = $('#sync_server').val();
+            var newSyncEncryptionKey = $('#sync_encryptionKey').val();
 
-            function refreshAvatars() {
-                //Load the two avatars
-                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
-                    var url = r.responseText;
-
-                    if (url != '') {
-                        $('#currentAvatar_static').css('background-image', 'url("' + url + '")');
-                        $('#currentAvatar_removeStatic').prop('disabled', null);
-                    } else {
-                        $('#currentAvatar_static').css('background-image', '');
-                        $('#currentAvatar_removeStatic').prop('disabled', 'disabled');
-                    }
-                });
-
-                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
-                    var url = r.responseText;
-
-                    if (url != '') {
-                        $('#currentAvatar_animated').css('background-image', 'url("' + url + '")');
-                        $('#currentAvatar_removeAnimated').prop('disabled', null);
-                    } else {
-                        $('#currentAvatar_animated').css('background-image', '');
-                        $('#currentAvatar_removeAnimated').prop('disabled', 'disabled');
-                    }
-                });
+            if (newSyncServer != currentSyncServer) {
+                WhirlpoolPlus.util.set('sync_server', newSyncServer);
+                WhirlpoolPlus.util.set('sync_lastSync', 0);
             }
 
-            refreshAvatars();
-
-            //Avatar controls
-            $('#currentAvatar_removeStatic').on("click", function () {
-                $(this).prop('disabled', 'disabled');
-
-                var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
-
-                if (apiKey == '') {
-                    apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
-                }
-
-                if (apiKey != null) {
-                    WhirlpoolPlus.util.notify('Removing Avatar', true);
-                    WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'static', function (data, statusText, r) {
-                        if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
-                            alert('WP+: ' + r.responseText);
-                        } else {
-                            alert('WP+: Avatar Update Failed: ' + r.responseText)
-                        }
-
-                        //Will re-enable button
-                        refreshAvatars();
-                    });
+            if (newSyncEncryptionKey != currentSyncEncryptionKey) {
+                if (confirm('You\'ve changed your encryption password. For this to work, make sure that no other password has been used with this account. For more information, see the wiki article.')) {
+                    WhirlpoolPlus.util.set('sync_encryptionKey', newSyncEncryptionKey);
                 } else {
-                    $(this).prop('disabled', null);
-                    alert('WP+: Avatar not removed');
+                    alert('Encryption Password reverted');
                 }
-            });
+            }
 
-            $('#currentAvatar_removeAnimated').on("click", function () {
-                $(this).prop('disabled', 'disabled');
+            var newTheme = WhirlpoolPlus.util.get('display_theme');
+            if (newTheme != currentTheme) {
+                if (confirm('Would you like to load the suggested WLR highlight colours for your theme?')) {
+                    var newPostColour, noNewPostColour, postBackgroundColour;
 
-                var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
+                    switch (newTheme) {
+                        case 'classic':
+                            newPostColour = '#79A1FC';
+                            noNewPostColour = '#EAA53F';
+                            postBackgroundColour = '#DEE6FA';
+                            break;
 
-                if (apiKey == '') {
-                    apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
-                }
+                        case 'black':
+                            newPostColour = '#FFFFFF';
+                            noNewPostColour = '#555555';
+                            postBackgroundColour = '#A1A1A1';
+                            break;
 
-                if (apiKey != null) {
-                    WhirlpoolPlus.util.notify('Removing Avatar', true);
-                    WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'animated', function (data, statusText, r) {
-                        if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
-                            alert('WP+: ' + r.responseText);
-                        } else {
-                            alert('WP+: Avatar Update Failed: ' + r.responseText)
-                        }
+                        case 'teal':
+                            newPostColour = '#B2F8F8';
+                            noNewPostColour = '#99C5CB';
+                            postBackgroundColour = '#D2E5E2';
+                            break;
 
-                        //Will re-enable button
-                        refreshAvatars();
-                    });
-                } else {
-                    $(this).prop('disabled', null);
-                    alert('WP+: Avatar not removed');
-                }
-            });
+                        case 'electrolize':
+                            newPostColour = '#002F58';
+                            noNewPostColour = '#054C66';
+                            postBackgroundColour = '#0C3851';
+                            break;
 
-            $('#currentAvatar_add').on("click", function () {
-                $(this).prop('disabled', 'disabled');
+                        case 'wood':
+                            newPostColour = '#994C00';
+                            noNewPostColour = '#A4672B';
+                            postBackgroundColour = '#CFCBBC';
+                            break;
 
-                var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
-
-                if (apiKey == '') {
-                    apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
-                }
-
-                if (apiKey != null) {
-                    url = $('#currentAvatar_addUrl').val();
-
-                    if (url == '') {
-                        alert('WP+: Enter a url to add');
-                    } else {
-
-                        WhirlpoolPlus.util.notify('Adding Avatar', true);
-
-                        WhirlpoolPlus.feat.avatar.updateAvatar(apiKey, url, function (data, statusText, r) {
-                            if (r.status == 200 && (r.responseText == 'Avatar created/updated')) {
-                                alert('WP+: ' + r.responseText);
-                            } else {
-                                alert('WP+: Avatar Update Failed: ' + r.responseText)
-                            }
-
-                            $('#currentAvatar_addUrl').val('');
-                            refreshAvatars();
-
-                            $('#currentAvatar_add').prop('disabled', null);
-                        });
-
+                        case 'default':
+                        default:
+                            newPostColour = '#95B0CB';
+                            noNewPostColour = '#CBC095';
+                            postBackgroundColour = '#CFCBBC';
+                            break;
                     }
-                } else {
-                    $(this).prop('disabled', null);
-                    alert('WP+: Avatar not updated');
+
+                    WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', newPostColour);
+                    WhirlpoolPlus.util.set('wlr_display_readThreadColour', noNewPostColour);
+                    WhirlpoolPlus.util.set('wlr_display_unreadPostColour', postBackgroundColour);
                 }
+            }
+
+            $.modal.close();
+            document.location.reload();
+        } else {
+            $.modal.close();
+            document.location.reload();
+        }
+    });
+
+    $('#wppSettings_reset').on("click", function () {
+
+        if (confirm('WP+: Do you really want to delete all data?')) {
+            unsafeWindow.localStorage.clear();
+            alert('WP+: Script data cleared');
+            window.location.reload();
+        } else {
+            alert('WP+: No data cleared');
+        }
+
+    });
+
+    //Special events
+
+
+    if (!minimalMode) {
+        //Sync Settings
+        $('#wppSettings #sync_enabled').change(function () {
+            if (this.checked) {
+                $('.syncSetting').prop('disabled', '');
+            } else {
+                $('.syncSetting').prop('disabled', 'disabled');
+            }
+        }).change();
+
+        function checkAvatarHost() {
+            //Load the two avatars
+            WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
+                var url = r.responseText;
+                var bad = "tinypic";
+                var bad2 = "https";
+                if (url != '') {
+                    if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
+                        alert("Your avatar is hosted on tinypic or uses a URL without https, please consider updating it");
+                    }
+                };
             });
 
-
-            $('.unhideUser').on("click", function () {
-                var theButton = $(this);
-                var userID = theButton.data('userid');
-                var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
-                var idToDelete = -1;
-
-                for (i = 0; i < hiddenUsers.length; i++) {
-                    if (hiddenUsers[i] == userID) {
-                        idToDelete = i;
-                        break;
+            WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
+                var url = r.responseText;
+                var bad = "tinypic";
+                var bad2 = "https";
+                if (url != '') {
+                    if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
+                        alert("Your avatar is hosted on tinypic or uses a URL without https, please consider updating it");
                     }
-                }
-
-                if (idToDelete >= 0) {
-                    hiddenUsers.splice(idToDelete, 1);
-                }
-
-                WhirlpoolPlus.util.set('hiddenUsers', hiddenUsers);
-
-                theButton.parent().remove();
-
+                };
             });
         }
-    },
 
-    _html: '',
+        checkAvatarHost();
+
+        function refreshAvatars() {
+            //Load the two avatars
+            WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
+                var url = r.responseText;
+
+                if (url != '') {
+                    $('#currentAvatar_static').css('background-image', 'url("' + url + '")');
+                    $('#currentAvatar_removeStatic').prop('disabled', null);
+                } else {
+                    $('#currentAvatar_static').css('background-image', '');
+                    $('#currentAvatar_removeStatic').prop('disabled', 'disabled');
+                }
+
+            });
+
+            WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
+                var url = r.responseText;
+
+                if (url != '') {
+                    $('#currentAvatar_animated').css('background-image', 'url("' + url + '")');
+                    $('#currentAvatar_removeAnimated').prop('disabled', null);
+                } else {
+                    $('#currentAvatar_animated').css('background-image', '');
+                    $('#currentAvatar_removeAnimated').prop('disabled', 'disabled');
+                }
+            });
+        }
+
+        refreshAvatars();
+
+        //Avatar controls
+        $('#currentAvatar_removeStatic').on("click", function () {
+            $(this).prop('disabled', 'disabled');
+
+            var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
+
+            if (apiKey == '') {
+                apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
+            }
+
+            if (apiKey != null) {
+                WhirlpoolPlus.util.notify('Removing Avatar', true);
+                WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'static', function (data, statusText, r) {
+                    if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
+                        alert('WP+: ' + r.responseText);
+                    } else {
+                        alert('WP+: Avatar Update Failed: ' + r.responseText)
+                    }
+
+                    //Will re-enable button
+                    refreshAvatars();
+                });
+            } else {
+                $(this).prop('disabled', null);
+                alert('WP+: Avatar not removed');
+            }
+        });
+
+        $('#currentAvatar_removeAnimated').on("click", function () {
+            $(this).prop('disabled', 'disabled');
+
+            var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
+
+            if (apiKey == '') {
+                apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
+            }
+
+            if (apiKey != null) {
+                WhirlpoolPlus.util.notify('Removing Avatar', true);
+                WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'animated', function (data, statusText, r) {
+                    if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
+                        alert('WP+: ' + r.responseText);
+                    } else {
+                        alert('WP+: Avatar Update Failed: ' + r.responseText)
+                    }
+
+                    //Will re-enable button
+                    refreshAvatars();
+                });
+            } else {
+                $(this).prop('disabled', null);
+                alert('WP+: Avatar not removed');
+            }
+        });
+
+        $('#currentAvatar_add').on("click", function () {
+            $(this).prop('disabled', 'disabled');
+
+            var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
+
+            if (apiKey == '') {
+                apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
+            }
+
+            if (apiKey != null) {
+                url = $('#currentAvatar_addUrl').val();
+
+                if (url == '') {
+                    alert('WP+: Enter a url to add');
+                } else {
+
+                    WhirlpoolPlus.util.notify('Adding Avatar', true);
+
+                    WhirlpoolPlus.feat.avatar.updateAvatar(apiKey, url, function (data, statusText, r) {
+                        if (r.status == 200 && (r.responseText == 'Avatar created/updated')) {
+                            alert('WP+: ' + r.responseText);
+                        } else {
+                            alert('WP+: Avatar Update Failed: ' + r.responseText)
+                        }
+
+                        $('#currentAvatar_addUrl').val('');
+                        refreshAvatars();
+
+                        $('#currentAvatar_add').prop('disabled', null);
+                    });
+
+                }
+            } else {
+                $(this).prop('disabled', null);
+                alert('WP+: Avatar not updated');
+            }
+        });
+
+
+        $('.unhideUser').on("click", function () {
+            var theButton = $(this);
+            var userID = theButton.data('userid');
+            var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
+            var idToDelete = -1;
+
+            for (i = 0; i < hiddenUsers.length; i++) {
+                if (hiddenUsers[i] == userID) {
+                    idToDelete = i;
+                    break;
+                }
+            }
+
+            if (idToDelete >= 0) {
+                hiddenUsers.splice(idToDelete, 1);
+            }
+
+            WhirlpoolPlus.util.set('hiddenUsers', hiddenUsers);
+
+            theButton.parent().remove();
+
+        });
+    }
+},
+
+_html: '',
 
     _buildHtml: function () {
         this._html = '<div id="wppSettingsWrapper">' +
@@ -2057,126 +2086,126 @@ WhirlpoolPlus.feat = {
         WhirlpoolPlus.util.css('.penalty_box .replyuser { background-image:url(' + light_gradient + ')!important; background-repeat: repeat !important; background-color: #fff !important; } ');
     },
 
-    penaltyBoxHighlight: function (reply) {
-        var groupText = reply.find('.usergroup').text();
+penaltyBoxHighlight: function (reply) {
+    var groupText = reply.find('.usergroup').text();
 
-        if (groupText.indexOf('penalty box') >= 0 || groupText.indexOf('Banned') >= 0) {
-            reply.addClass('penalty_box');
-        }
-    },
+    if (groupText.indexOf('penalty box') >= 0 || groupText.indexOf('Banned') >= 0) {
+        reply.addClass('penalty_box');
+    }
+},
 
-    whimArchiveSort: function () {
-        if (WhirlpoolPlus.util.get('whimArchiveSort')) {
-            WhirlpoolPlus.util.css('#content > div > table > tbody > tr { background-color: #EEF0F8; } ');
-            $('tr[style="padding-right:10px; color:black;"]').css('display', 'none');
+whimArchiveSort: function () {
+    if (WhirlpoolPlus.util.get('whimArchiveSort')) {
+        WhirlpoolPlus.util.css('#content > div > table > tbody > tr { background-color: #EEF0F8; } ');
+        $('tr[style="padding-right:10px; color:black;"]').css('display', 'none');
 
-            var whimTRsParent = document.querySelector('#content>div>table>tbody');
-            var whimTRs = whimTRsParent.querySelectorAll('tr[bgcolor]');
+        var whimTRsParent = document.querySelector('#content>div>table>tbody');
+        var whimTRs = whimTRsParent.querySelectorAll('tr[bgcolor]');
 
-            var plainArr = [];
+        var plainArr = [];
 
-            var wt = whimTRs
-            for (var k in wt) {
-                if (!wt.hasOwnProperty(k)) continue;
-                var item = wt[k]
-                if (typeof item == "object") {
-                    var Name = {
-                        real: item.querySelector('b').textContent
-                    };
-                    Name.Sort = Name.real.toLowerCase().replace(/[^a-z,0-9]/gm, '');
-                    Name.tr = item;
-                    plainArr.push(Name);
-                }
-            }
-
-            plainArr.sort(function (a, b) {
-                return a.Sort < b.Sort ? -1 : 1;
-            });
-
-            plainArr.forEach(function (item, index, array) {
-                whimTRsParent.appendChild(item.tr);
-            });
-
-        }
-    },
-
-    changeLinks: function () {
-        $('a[href*="whirlpool.net.au/whim"]').each(function () {
-            var link = $(this);
-            var parts = /whirlpool.net.au\/(whim)\/(.*)/.exec(link.prop('href'));
-
-            link.prop('href', '//forums.whirlpool.net.au/' + parts[1] + '/' + parts[2]);
-        });
-
-        if (WhirlpoolPlus.util.get('defaultRecentActivityDays') != '7') {
-            //have to do this twice, because there are two different ways to link to user pages used
-            $('a[href*="forums.whirlpool.net.au/user/"]:not([href*="?"])').each(function () {
-                var link = $(this);
-                link.prop('href', link.prop('href') + '?days=' + WhirlpoolPlus.util.get('defaultRecentActivityDays'));
-            });
-            $('a[href^="/user/"]:not([href*="?"])').each(function () {
-                var link = $(this);
-                link.prop('href', link.prop('href') + '?days=' + WhirlpoolPlus.util.get('defaultRecentActivityDays'));
-            });
-        }
-    },
-
-    extraNavLinks: function () {
-        var topLinks = $('.btop');
-        var bottomLinks = $('.bfoot');
-        var threadNumber = WhirlpoolPlus.util.getThreadNumber();
-
-        if (WhirlpoolPlus.util.get('links_longThread')) {
-            topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&p=-2">Single Page Version</a>&nbsp;');
-            // Already a link on the bottom bar
-        }
-
-        if (WhirlpoolPlus.util.get('links_archive')) {
-            topLinks.prepend('<a href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Archive</a>&nbsp;');
-            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Archive</a>&nbsp;');
-        }
-
-        if (WhirlpoolPlus.util.get('links_originalPoster')) {
-            var opPost = $('.op:first').parent().parent();
-
-            if (opPost.length == 1) {
-                var opid = WhirlpoolPlus.util.getReplyUserId(opPost);
-                topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
-                bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
-            } else {
-
+        var wt = whimTRs
+        for (var k in wt) {
+            if (!wt.hasOwnProperty(k)) continue;
+            var item = wt[k]
+            if (typeof item == "object") {
+                var Name = {
+                    real: item.querySelector('b').textContent
+                };
+                Name.Sort = Name.real.toLowerCase().replace(/[^a-z,0-9]/gm, '');
+                Name.tr = item;
+                plainArr.push(Name);
             }
         }
 
-        if (WhirlpoolPlus.util.get('links_mod')) {
-            topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
-            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
-        }
-
-        if (WhirlpoolPlus.util.get('links_rep')) {
-            topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
-            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
-        }
-    },
-
-    removeLinkToLastPage: function () {
-        if (WhirlpoolPlus.util.get('removeLinkToLastPage')) {
-            $('.threads a').each(function () {
-                this.href = this.href.replace('&p=-1&#bottom', '');
-            });
-        }
-    },
-
-
-    editSearchLinks: function () {
-
-        $('.results .title a').each(function () {
-            var link = $(this);
-            link.prop('href', link.prop('href').replace('archive/', 'forum-replies.cfm?t='));
+        plainArr.sort(function (a, b) {
+            return a.Sort < b.Sort ? -1 : 1;
         });
 
+        plainArr.forEach(function (item, index, array) {
+            whimTRsParent.appendChild(item.tr);
+        });
 
     }
+},
+
+changeLinks: function () {
+    $('a[href*="whirlpool.net.au/whim"]').each(function () {
+        var link = $(this);
+        var parts = /whirlpool.net.au\/(whim)\/(.*)/.exec(link.prop('href'));
+
+        link.prop('href', '//forums.whirlpool.net.au/' + parts[1] + '/' + parts[2]);
+    });
+
+    if (WhirlpoolPlus.util.get('defaultRecentActivityDays') != '7') {
+        //have to do this twice, because there are two different ways to link to user pages used
+        $('a[href*="forums.whirlpool.net.au/user/"]:not([href*="?"])').each(function () {
+            var link = $(this);
+            link.prop('href', link.prop('href') + '?days=' + WhirlpoolPlus.util.get('defaultRecentActivityDays'));
+        });
+        $('a[href^="/user/"]:not([href*="?"])').each(function () {
+            var link = $(this);
+            link.prop('href', link.prop('href') + '?days=' + WhirlpoolPlus.util.get('defaultRecentActivityDays'));
+        });
+    }
+},
+
+extraNavLinks: function () {
+    var topLinks = $('.btop');
+    var bottomLinks = $('.bfoot');
+    var threadNumber = WhirlpoolPlus.util.getThreadNumber();
+
+    if (WhirlpoolPlus.util.get('links_longThread')) {
+        topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&p=-2">Single Page Version</a>&nbsp;');
+        // Already a link on the bottom bar
+    }
+
+    if (WhirlpoolPlus.util.get('links_archive')) {
+        topLinks.prepend('<a href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Archive</a>&nbsp;');
+        bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/archive/' + threadNumber + '">Archive</a>&nbsp;');
+    }
+
+    if (WhirlpoolPlus.util.get('links_originalPoster')) {
+        var opPost = $('.op:first').parent().parent();
+
+        if (opPost.length == 1) {
+            var opid = WhirlpoolPlus.util.getReplyUserId(opPost);
+            topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
+            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
+        } else {
+
+        }
+    }
+
+    if (WhirlpoolPlus.util.get('links_mod')) {
+        topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
+        bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
+    }
+
+    if (WhirlpoolPlus.util.get('links_rep')) {
+        topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
+        bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
+    }
+},
+
+removeLinkToLastPage: function () {
+    if (WhirlpoolPlus.util.get('removeLinkToLastPage')) {
+        $('.threads a').each(function () {
+            this.href = this.href.replace('&p=-1&#bottom', '');
+        });
+    }
+},
+
+
+editSearchLinks: function () {
+
+    $('.results .title a').each(function () {
+        var link = $(this);
+        link.prop('href', link.prop('href').replace('archive/', 'forum-replies.cfm?t='));
+    });
+
+
+}
 
 
 }
@@ -2333,130 +2362,130 @@ WhirlpoolPlus.feat.display = {
             + '<a href="//whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + WhirlpoolPlus.about.versionText() + '</a></dd>');
     },
 
-    poweredby: function () {
-        if (WhirlpoolPlus.util.get('display_poweredby')) {
-            $('#bignumbers').prepend($('<dl><dt>Powered By</dt><dd class="pwrdby"></dd></dl>'));
-            $('dd.pwrdby').load('https://wpplus.phyco.name/rdmtext/rantex.php');
-        }
-    },
+poweredby: function () {
+    if (WhirlpoolPlus.util.get('display_poweredby')) {
+        $('#bignumbers').prepend($('<dl><dt>Powered By</dt><dd class="pwrdby"></dd></dl>'));
+        $('dd.pwrdby').load('https://wpplus.phyco.name/rdmtext/rantex.php');
+    }
+},
 
-    oldProfile: function () {
-        if (WhirlpoolPlus.util.get('display_oldProfile')) {
-            $('[id=threads]').detach().insertBefore('#userprofile script:contains("keypress")');
-            $('#userprofile h2:lt(1)').detach().insertBefore('#threads');
-        }
-    },
+oldProfile: function () {
+    if (WhirlpoolPlus.util.get('display_oldProfile')) {
+        $('[id=threads]').detach().insertBefore('#userprofile script:contains("keypress")');
+        $('#userprofile h2:lt(1)').detach().insertBefore('#threads');
+    }
+},
 
-    userPageInfoToggle: function () {
-        if (WhirlpoolPlus.util.get('display_userPageInfoToggle')) {
-            var h2s = $('#userprofile h2:lt(2)');
-            h2s.css('cursor', 'pointer').next('table').hide();
-            h2s.on("click", function () {
-                $(this).next('table').slideToggle();
-            });
-        }
-    },
+userPageInfoToggle: function () {
+    if (WhirlpoolPlus.util.get('display_userPageInfoToggle')) {
+        var h2s = $('#userprofile h2:lt(2)');
+        h2s.css('cursor', 'pointer').next('table').hide();
+        h2s.on("click", function () {
+            $(this).next('table').slideToggle();
+        });
+    }
+},
 
-    superProfile: function () {
-        if (WhirlpoolPlus.util.get('display_superProfile') == 'all') {
-            $('#threads').append('<p><h2>All Watched Threads</h2>');
-            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #content form'));
-            WhirlpoolPlus.util.css('ul.box {display:none;}');
-        }
-        else if (WhirlpoolPlus.util.get('display_superProfile') == 'unread') {
-            $('#userprofile').append('<p><h2>Unread Watched Threads</h2>');
-            $('#userprofile').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
-            WhirlpoolPlus.util.css('ul.box {display:none;}');
-        }
-    },
+superProfile: function () {
+    if (WhirlpoolPlus.util.get('display_superProfile') == 'all') {
+        $('#threads').append('<p><h2>All Watched Threads</h2>');
+        $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #content form'));
+        WhirlpoolPlus.util.css('ul.box {display:none;}');
+    }
+    else if (WhirlpoolPlus.util.get('display_superProfile') == 'unread') {
+        $('#userprofile').append('<p><h2>Unread Watched Threads</h2>');
+        $('#userprofile').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
+        WhirlpoolPlus.util.css('ul.box {display:none;}');
+    }
+},
 
-    hideClosedThreads: function () {
-        if (WhirlpoolPlus.util.get('display_hideClosedThreadsOnProfile')) {
-            WhirlpoolPlus.util.css('.closed { display: none; }')
-        }
-    },
-    hideThreads: function () {
-        if (WhirlpoolPlus.util.get('display_hideDeletedThreads')) {
-            WhirlpoolPlus.util.css('.deleted {display:none;}');
-        }
+hideClosedThreads: function () {
+    if (WhirlpoolPlus.util.get('display_hideClosedThreadsOnProfile')) {
+        WhirlpoolPlus.util.css('.closed { display: none; }')
+    }
+},
+hideThreads: function () {
+    if (WhirlpoolPlus.util.get('display_hideDeletedThreads')) {
+        WhirlpoolPlus.util.css('.deleted {display:none;}');
+    }
 
-        if (WhirlpoolPlus.util.get('display_hideMovedThreads')) {
-            WhirlpoolPlus.util.css('.pointer {display:none;}');
-        }
+    if (WhirlpoolPlus.util.get('display_hideMovedThreads')) {
+        WhirlpoolPlus.util.css('.pointer {display:none;}');
+    }
 
-    },
+},
 
-    hidePosts: function () {
-        if (WhirlpoolPlus.util.get('display_hideDeletedPosts')) {
-            WhirlpoolPlus.util.css('.notice[id^="x"] {display: none;}');
-        }
-    },
+hidePosts: function () {
+    if (WhirlpoolPlus.util.get('display_hideDeletedPosts')) {
+        WhirlpoolPlus.util.css('.notice[id^="x"] {display: none;}');
+    }
+},
 
-    hideForums: function () {
-        var hideThese = WhirlpoolPlus.util.get('display_hideTheseForums');
+hideForums: function () {
+    var hideThese = WhirlpoolPlus.util.get('display_hideTheseForums');
 
-        if (hideThese != '') {
-            $('#forumindex tr div.title a').each(function () {
-                var url = $(this).prop('href').split('/forum/')[1];
+    if (hideThese != '') {
+        $('#forumindex tr div.title a').each(function () {
+            var url = $(this).prop('href').split('/forum/')[1];
 
-                if (hideThese.indexOf(url) >= 0) {
-                    $(this).parents('tr').eq(0).remove();
-                }
-            });
-
-            $('#index h3').each(function () {
-                if ($(this).next('table').height() == 0) {
-                    $(this).next('table').remove();
-                    $(this).remove();
-                }
-            });
-        }
-    },
-
-    unansweredThreadsLink: function () {
-        if (WhirlpoolPlus.util.get('links_unanswered')) {
-            if (window.location.href.match('nr=1')) {
-                var old_url = window.location.href.replace('&nr=1', '');
-                $('#breadcrumb li:last').html('<a href="' + old_url + '">' + $('#breadcrumb li:last').text() + '</a>');
-            } else {
-                var new_url = window.location.href + (window.location.href.indexOf('?') > -1 ? '&nr=1' : '?&nr=1');
-                $('#breadcrumb li:last').append(' <a href="' + new_url + '"><small class="showunanswered">(show unanswered only)</small></a> ');
+            if (hideThese.indexOf(url) >= 0) {
+                $(this).parents('tr').eq(0).remove();
             }
-        }
-    },
+        });
 
-    syntaxHighlight: async function () {
-        if (WhirlpoolPlus.util.get('display_syntaxHighlight')) {
-            $('pre').addClass("prettyprint");
-            let prettify = await WhirlpoolPlus.util.resource('prettify');
-            WhirlpoolPlus.util.css(prettify);
-            prettyPrint();
-        }
-    },
+        $('#index h3').each(function () {
+            if ($(this).next('table').height() == 0) {
+                $(this).next('table').remove();
+                $(this).remove();
+            }
+        });
+    }
+},
 
-    emoticons: {
+unansweredThreadsLink: function () {
+    if (WhirlpoolPlus.util.get('links_unanswered')) {
+        if (window.location.href.match('nr=1')) {
+            var old_url = window.location.href.replace('&nr=1', '');
+            $('#breadcrumb li:last').html('<a href="' + old_url + '">' + $('#breadcrumb li:last').text() + '</a>');
+        } else {
+            var new_url = window.location.href + (window.location.href.indexOf('?') > -1 ? '&nr=1' : '?&nr=1');
+            $('#breadcrumb li:last').append(' <a href="' + new_url + '"><small class="showunanswered">(show unanswered only)</small></a> ');
+        }
+    }
+},
+
+syntaxHighlight: async function () {
+    if (WhirlpoolPlus.util.get('display_syntaxHighlight')) {
+        $('pre').addClass("prettyprint");
+        let prettify = await WhirlpoolPlus.util.resource('prettify');
+        WhirlpoolPlus.util.css(prettify);
+        prettyPrint();
+    }
+},
+
+emoticons: {
         init: function () {
             if (WhirlpoolPlus.util.get('display_emoticons_enabled')) {
-            $(".reference a").each(function () {
-                var text = $(this).text().toString().replace(/\:/, "<span>:</span>");
-                $(this).html(text);
-            });
-            this.currentIconSet = this.getIconSet(true);
+                $(".reference a").each(function () {
+                    var text = $(this).text().toString().replace(/\:/, "<span>:</span>");
+                    $(this).html(text);
+                });
+                this.currentIconSet = this.getIconSet(true);
 
-            for (icon in this.currentIconSet) {
-                var regkey = icon;
-                regkey = regkey.replace(/</g, "&lt;");
-                regkey = regkey.replace(/>/g, "&gt;");
-                regkey = regkey.replace(/\(/g, "\\(");
-                regkey = regkey.replace(/\)/g, "\\)");
-                regkey = regkey.replace(/\[/g, "\\[");
-                regkey = regkey.replace(/\]/g, "\\]");
-                regkey = regkey.replace(/\|/g, "\\|");
+                for (icon in this.currentIconSet) {
+                    var regkey = icon;
+                    regkey = regkey.replace(/</g, "&lt;");
+                    regkey = regkey.replace(/>/g, "&gt;");
+                    regkey = regkey.replace(/\(/g, "\\(");
+                    regkey = regkey.replace(/\)/g, "\\)");
+                    regkey = regkey.replace(/\[/g, "\\[");
+                    regkey = regkey.replace(/\]/g, "\\]");
+                    regkey = regkey.replace(/\|/g, "\\|");
 
-                regkey = '(\\s|>)' + regkey;
+                    regkey = '(\\s|>)' + regkey;
 
-                this.regex[icon] = new RegExp(regkey, 'g');
-            }
+                    this.regex[icon] = new RegExp(regkey, 'g');
+                }
                 $('div.bodytext > p').each(this.runOnTextNode);
             }
         },
@@ -2495,78 +2524,78 @@ WhirlpoolPlus.feat.display = {
             let obsmirk = 'https://i.imgur.com/zpJKPcL.gif';
             let obtongue = 'https://i.imgur.com/SskWkSB.gif';
 
-         icons = {
-            ':angry:': angry,
-            ':glad:': glad,
-            ':confused:': confused,
-            ':cool:': cool,
-            ':cry:': cry,
-            ':(': frown,
-            ':gasp:': gasp,
-            ':D': grin,
-            '<3': kiss,
-            ':X': lips,
-            ':shout:': shout,
-            ':snore:': sleep,
-            ':)': smile,
-            ':\\\\': smirk,
-            ':|': straight,
-            ':P': tongue,
-            ';)': wink,
-            ':star:': star,
-        },
+            icons = {
+                ':angry:': angry,
+                ':glad:': glad,
+                ':confused:': confused,
+                ':cool:': cool,
+                ':cry:': cry,
+                ':(': frown,
+                ':gasp:': gasp,
+                ':D': grin,
+                '<3': kiss,
+                ':X': lips,
+                ':shout:': shout,
+                ':snore:': sleep,
+                ':)': smile,
+                ':\\\\': smirk,
+                ':|': straight,
+                ':P': tongue,
+                ';)': wink,
+                ':star:': star,
+            },
 
-        duplicates = {
-            ':-(': frown,
-            ':-D': grin,
-            ':X': lips,
-            '=)': smile,
-            ':-)': smile,
-            ':-|': straight,
-            ':-P': tongue,
-            '=P': tongue,
-            ';-)': wink,
-            ':;': wink,
-            ':-;': wink,
-            ':-\\\\': smirk,
-            '=\\\\': smirk,
-        },
+           duplicates = {
+               ':-(': frown,
+               ':-D': grin,
+               ':X': lips,
+               '=)': smile,
+               ':-)': smile,
+               ':-|': straight,
+               ':-P': tongue,
+               '=P': tongue,
+               ';-)': wink,
+               ':;': wink,
+               ':-;': wink,
+               ':-\\\\': smirk,
+               '=\\\\': smirk,
+           },
 
-        blue_icons = {
-            ':~': obanxious,
-            '(:': obcool,
-            '-o.o-': obeyes,
-            ':D': obgrin,
-            ':|)': obhappy2,
-            ':)': obhappy,
-            ':|(': obsad2,
-            ':(': obsad,
-            ':|': obneutral,
-            ':ninja:': obninja,
-            ':clown:': obclown,
-            ';)': obsmirk,
-            ':P': obtongue,
-            ':star:': star,
-        },
+           blue_icons = {
+               ':~': obanxious,
+               '(:': obcool,
+               '-o.o-': obeyes,
+               ':D': obgrin,
+               ':|)': obhappy2,
+               ':)': obhappy,
+               ':|(': obsad2,
+               ':(': obsad,
+               ':|': obneutral,
+               ':ninja:': obninja,
+               ':clown:': obclown,
+               ';)': obsmirk,
+               ':P': obtongue,
+               ':star:': star,
+           },
 
-        blue_duplicates = {
-            '(:': obcool,
-            '-oo-': obeyes,
-            ':-D': obgrin,
-            ':-)': obhappy,
-            '=)': obhappy,
-            ':-(': obsad,
-            ':-|': obneutral,
-            ':ninja:': obninja,
-            ':\\\\': obsmirk,
-            ':-\\\\': obsmirk,
-            '=\\\\': obsmirk,
-            ';-)': obsmirk,
-            ':-P': obtongue,
-            '=P': obtongue,
-        },
+           blue_duplicates = {
+               '(:': obcool,
+               '-oo-': obeyes,
+               ':-D': obgrin,
+               ':-)': obhappy,
+               '=)': obhappy,
+               ':-(': obsad,
+               ':-|': obneutral,
+               ':ninja:': obninja,
+               ':\\\\': obsmirk,
+               ':-\\\\': obsmirk,
+               '=\\\\': obsmirk,
+               ';-)': obsmirk,
+               ':-P': obtongue,
+               '=P': obtongue,
+           },
 
-            mainIcons = {};
+               mainIcons = {};
             duplicateIcons = {};
 
             if (WhirlpoolPlus.util.get('display_emoticons_blue')) {
@@ -2992,13 +3021,13 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
         switch (WhirlpoolPlus.util.get('spinnerMenu_settingsLocation')) {
             case "top":
-            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+                this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
                 break;
             case "underuser":
-            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
+                this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a href="#" id="settingsSpinnerLink">WP+ Settings</a></li>');
                 break;
             default:
-            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+                this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
         }
         var newUL2;
         $('.forumlist').each(function () {
@@ -3074,44 +3103,44 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
     },
 
-    rightClick: function () {
+rightClick: function () {
 
-        this.generateMenu();
+    this.generateMenu();
 
-        document.addEventListener('mouseup', function (e) {
+    document.addEventListener('mouseup', function (e) {
 
-            if (e.which == 3 && e.target.tagName != 'A' && e.target.tagName != 'TEXTAREA') {
+        if (e.which == 3 && e.target.tagName != 'A' && e.target.tagName != 'TEXTAREA') {
 
-                WhirlpoolPlus.feat.spinnerMenu._menu.remove();
-                $('body').prepend(WhirlpoolPlus.feat.spinnerMenu._menu);
-                $('#settingsSpinnerLink').on("click", function () { WhirlpoolPlus.settings._launch(); return false; })
-                $('#menuSpinner').remove();
-                WhirlpoolPlus.feat.spinnerMenu._menu[0].style.position = 'absolute';
-                WhirlpoolPlus.feat.spinnerMenu._menu[0].style.left = '' + e.pageX - 250 + 'px';
-                WhirlpoolPlus.feat.spinnerMenu._menu[0].style.top = '' + e.pageY + 'px';
-                WhirlpoolPlus.feat.spinnerMenu._menu[0].style.overflow = 'visible';
+            WhirlpoolPlus.feat.spinnerMenu._menu.remove();
+            $('body').prepend(WhirlpoolPlus.feat.spinnerMenu._menu);
+            $('#settingsSpinnerLink').on("click", function () { WhirlpoolPlus.settings._launch(); return false; })
+            $('#menuSpinner').remove();
+            WhirlpoolPlus.feat.spinnerMenu._menu[0].style.position = 'absolute';
+            WhirlpoolPlus.feat.spinnerMenu._menu[0].style.left = '' + e.pageX - 250 + 'px';
+            WhirlpoolPlus.feat.spinnerMenu._menu[0].style.top = '' + e.pageY + 'px';
+            WhirlpoolPlus.feat.spinnerMenu._menu[0].style.overflow = 'visible';
 
-            }
-            if (e.which == 1 && $('#pmenu')[0] && e.target.className != 'notarget') {
+        }
+        if (e.which == 1 && $('#pmenu')[0] && e.target.className != 'notarget') {
 
-                WhirlpoolPlus.feat.spinnerMenu._menu.remove();
+            WhirlpoolPlus.feat.spinnerMenu._menu.remove();
 
-            }
+        }
 
 
-        },
-        false);
     },
+    false);
+},
 
-    spinner: function () {
+spinner: function () {
 
-        this.generateMenu();
+    this.generateMenu();
 
-        $('body').prepend(this._menu);
-        $('#settingsSpinnerLink').on("click", function () { WhirlpoolPlus.settings._launch(); return false; })
-        this._menu.css('margin', '95px 0 50px 6px');
+    $('body').prepend(this._menu);
+    $('#settingsSpinnerLink').on("click", function () { WhirlpoolPlus.settings._launch(); return false; })
+    this._menu.css('margin', '95px 0 50px 6px');
 
-    }
+}
 
 };
 
@@ -3138,267 +3167,267 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         '#content a.whirlpoolLastRead_markAsRead { margin-top: -8px; } ');
     },
 
-    trackThisThread: true,
+trackThisThread: true,
 
     saveThreadData: function (threadNumber, threadReplyNumber, overallReplyNumber) {
         WhirlpoolPlus.util.sync.set(threadNumber, { t: threadReplyNumber, o: overallReplyNumber });
     },
 
-    loadThreadData: function (threadNumber) {
-        var raw = WhirlpoolPlus.util.sync.get(threadNumber);
-        if (raw !== null) {
-            return raw;
+loadThreadData: function (threadNumber) {
+    var raw = WhirlpoolPlus.util.sync.get(threadNumber);
+    if (raw !== null) {
+        return raw;
+    } else {
+        return false;
+    }
+},
+
+forumReplies: async function () {
+
+    var lastReadReplyNumber = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(WhirlpoolPlus.util.getThreadNumber())['t'];
+    $('div#replies .reply').not(':hidden').each(function () {
+        var reply = $(this);
+        var replyNumber = $(reply.prevAll('a[name!="bottom"]')[1]).prop('name').slice(1);
+
+        if (parseInt(replyNumber) <= parseInt(lastReadReplyNumber)) {
+            reply.addClass('whirlpoolLastRead_readReply');
         } else {
-            return false;
+            reply.addClass('whirlpoolLastRead_unreadReply');
         }
-    },
+    });
 
-    forumReplies: async function () {
+    // The "disable tracking" button
+    if (WhirlpoolPlus.util.get('wlr_tempDisable')) {
 
-        var lastReadReplyNumber = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(WhirlpoolPlus.util.getThreadNumber())['t'];
-        $('div#replies .reply').not(':hidden').each(function () {
-            var reply = $(this);
-            var replyNumber = $(reply.prevAll('a[name!="bottom"]')[1]).prop('name').slice(1);
+        let check = await WhirlpoolPlus.util.image('check');
+        let cross = await WhirlpoolPlus.util.image('cross');
+        $('body').append('<div id="wlr_disableTracker">' +
+        '<img class="wlr_disableTracker_img" id="wlr_disableTracker_enabled" src="' + check + '" title="WLR Tracker Enabled" />' +
+        '<img class="wlr_disableTracker_img" id="wlr_disableTracker_disabled" src="' + cross + '" title="WLR Tracker Disabled" />' +
+        '</div>');
 
-            if (parseInt(replyNumber) <= parseInt(lastReadReplyNumber)) {
-                reply.addClass('whirlpoolLastRead_readReply');
+        $('#wlr_disableTracker').on("click", function () {
+
+            $('.wlr_disableTracker_img').toggle();
+
+            if (WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread == true) {
+                WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread = false;
             } else {
-                reply.addClass('whirlpoolLastRead_unreadReply');
+                WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread = true;
             }
+
         });
+    }
 
-        // The "disable tracking" button
-        if (WhirlpoolPlus.util.get('wlr_tempDisable')) {
 
-            let check = await WhirlpoolPlus.util.image('check');
-            let cross = await WhirlpoolPlus.util.image('cross');
-            $('body').append('<div id="wlr_disableTracker">' +
-            '<img class="wlr_disableTracker_img" id="wlr_disableTracker_enabled" src="' + check + '" title="WLR Tracker Enabled" />' +
-            '<img class="wlr_disableTracker_img" id="wlr_disableTracker_disabled" src="' + cross + '" title="WLR Tracker Disabled" />' +
-            '</div>');
+    var lowestViewHeight = window.innerHeight + window.pageYOffset;
 
-            $('#wlr_disableTracker').on("click", function () {
-
-                $('.wlr_disableTracker_img').toggle();
-
-                if (WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread == true) {
-                    WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread = false;
-                } else {
-                    WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread = true;
-                }
-
-            });
+    $(window).scroll(function (e) {
+        var currentViewHeight = window.innerHeight + window.pageYOffset;
+        if (currentViewHeight > lowestViewHeight) {
+            lowestViewHeight = currentViewHeight;
         }
-
-
-        var lowestViewHeight = window.innerHeight + window.pageYOffset;
-
-        $(window).scroll(function (e) {
-            var currentViewHeight = window.innerHeight + window.pageYOffset;
-            if (currentViewHeight > lowestViewHeight) {
-                lowestViewHeight = currentViewHeight;
-            }
-        });
+    });
 
 
 
-        $(window).on('unload', function () {
+    $(window).on('unload', function () {
 
-            if (WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread == false) {
-                return;
-            }
-
-            //need to find the last read reply
-            var replies = $('div#replies .reply, div#replies .notice').not('.preview');
-
-            var lastReadReply;
-
-            replies.each(function () {
-                reply = $(this);
-
-                var positionOfBottom = reply.offset().top + reply.height();
-                if (positionOfBottom < lowestViewHeight) {
-                    lastReadReply = reply;
-                } else {
-                    return;
-                }
-            });
-
-            if (!lastReadReply) {
-                //no replies read, so nothing doing
-            } else {
-                //record information for last read reply
-                var replyNumberLinks = lastReadReply.prevAll('a[name!="bottom"]');
-
-                var threadReplyNumber = parseInt($(replyNumberLinks[1]).prop('name').slice(1));
-                var overallReplyNumber = $(replyNumberLinks[0]).prop('name').slice(1);
-
-                var currentData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(WhirlpoolPlus.util.getThreadNumber());
-
-                if (currentData == false || parseInt(currentData['t']) <= threadReplyNumber) {
-                    WhirlpoolPlus.feat.whirlpoolLastRead.saveThreadData(WhirlpoolPlus.util.getThreadNumber(), threadReplyNumber, overallReplyNumber);
-                }
-
-            }
-        });
-    },
-
-    forumPage: function () {
-        var threads = $('#threads > table > tbody > tr:not(.section)');
-
-        threads.each(function () {
-            var thread = $(this);
-
-            var threadNumber = parseInt(thread.find('a.title').prop('href').split('t=')[1]);
-
-            if (isNaN(threadNumber)) {
-                return;
-            }
-
-            if (thread.is('.deleted') || thread.is('.pointer')) {
-                //ignore this one
-                //Not deleted from database, as a thread may be undeleted in the future.
-                return true;
-            }
-
-            var threadData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(threadNumber);
-            if (WhirlpoolPlus.util.get('wlr_noTrackSticky') && thread.is('.sticky')) {
-                //leave the stickies alone
-            } else {
-                if (threadData) {
-                    //we are tracking this thread
-
-                    var numberOfReplies = parseInt(thread.find('td.reps').not(':has(a)').text()) + 1; //need to add one, as original post is not counted as a reply here
-
-                    //change the end link regardless, as there might have been replies since a refresh
-                    //build the link
-                    var link;
-
-                    //do we have the new reply method?
-                    if (threadData['o']) {
-                        link = '/forum-replies.cfm?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
-                    } else {
-                        //use the old page number method
-                        link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
-                    }
-
-
-                    //change the link
-                    thread.find('.goend > a').prop('href', link).prop('title', 'Jump to last read post');
-
-                    //add the controls
-                    thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
-
-                    if (threadData['t'] < numberOfReplies) {
-                        //there are unread posts
-
-                        //we need to apply the unread class
-                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')) {
-                            thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
-                        } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
-                            thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
-                        }
-                        else {
-                            thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_unreadPosts');
-                        }
-
-                        if (document.location.href.match('/forum/')) {
-                            thread.find('.whirlpoolLastRead_controls').append('<br /><a href="#" class="whirlpoolLastRead_markAsRead" title="Mark this thread as read">M</a>');
-                        }
-
-                    } else {
-                        //all posts have been read
-                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')) {
-                            thread.find('td.goend').addClass('whirlpoolLastRead_noUnreadPosts');
-                        } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
-                            thread.find('td').addClass('whirlpoolLastRead_noUnreadPosts');
-                        }
-                        else {
-                            thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_noUnreadPosts');
-                        }
-                    }
-
-                    thread.find('.whirlpoolLastRead_stopTracking').on("click", function () {
-                        WhirlpoolPlus.feat.whirlpoolLastRead.stopTracking(threadNumber);
-                        thread.children().removeClass('whirlpoolLastRead_unreadPosts whirlpoolLastRead_noUnreadPosts');
-                        thread.find('.whirlpoolLastRead_controls').remove();
-                        return false;
-                    });
-
-                    thread.find('.whirlpoolLastRead_markAsRead').on("click", function () {
-                        WhirlpoolPlus.feat.whirlpoolLastRead.markAsRead(threadNumber);
-                        thread.children('.whirlpoolLastRead_unreadPosts').removeClass('whirlpoolLastRead_unreadPosts').addClass('whirlpoolLastRead_noUnreadPosts');
-                        thread.find('.whirlpoolLastRead_controls .whirlpoolLastRead_markAsRead').remove();
-                        return false;
-                    });
-
-                }
-            }
-        });
-
-    },
-
-    stopTracking: function (threadNumber) {
-        WhirlpoolPlus.util.sync.remove(threadNumber);
-        WhirlpoolPlus.util.sync.run();
-    },
-
-    markAsRead: function (threadNumber) {
-        //only operates on forum replies page.
-        //have to use legacy pagenumber method
-
-        //go get the page number
-        var threadLink = $('a[href="/forum-replies.cfm?t=' + threadNumber + '"]');
-        if (threadLink.length <= 0) {
-            //thread not on this page
+        if (WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread == false) {
             return;
         }
 
-        var pageNumber;
+        //need to find the last read reply
+        var replies = $('div#replies .reply, div#replies .notice').not('.preview');
 
-        if (threadLink.parent().find('script').length <= 0) {
-            //no page link producing script, so only one page
-            pageNumber = '1';
+        var lastReadReply;
+
+        replies.each(function () {
+            reply = $(this);
+
+            var positionOfBottom = reply.offset().top + reply.height();
+            if (positionOfBottom < lowestViewHeight) {
+                lastReadReply = reply;
+            } else {
+                return;
+            }
+        });
+
+        if (!lastReadReply) {
+            //no replies read, so nothing doing
         } else {
-            pageNumber = (threadLink.parent().find('script').text().split(',')[1]).split(')')[0];
-        }
+            //record information for last read reply
+            var replyNumberLinks = lastReadReply.prevAll('a[name!="bottom"]');
 
-        //now we need to get the number of the last read reply.
-        var numberOfReplies = parseInt(threadLink.closest('tr').find('.reps').text().split('S')[0]) + 1; //need to add one, as original post is not counted as a reply here
+            var threadReplyNumber = parseInt($(replyNumberLinks[1]).prop('name').slice(1));
+            var overallReplyNumber = $(replyNumberLinks[0]).prop('name').slice(1);
 
-        //write data
-        WhirlpoolPlus.util.sync.set(threadNumber, { t: numberOfReplies, p: pageNumber })
+            var currentData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(WhirlpoolPlus.util.getThreadNumber());
 
-        //change the link
-        var link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;
-        threadLink.closest('tr').find('.goend > a').prop('href', link);
-
-        WhirlpoolPlus.util.sync.run();
-
-        return false;
-    },
-
-    runPosts: function () {
-        if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
-            //scroll to the post that we were actually sent to
-            if (window.location.hash) {
-                $(unsafeWindow).on("load", function () {
-                    var location = $(window.location.hash);
-                    if (location.length > 0) {
-                        $(unsafeWindow).scrollTop(location.offset().top);
-                    }
-                });
+            if (currentData == false || parseInt(currentData['t']) <= threadReplyNumber) {
+                WhirlpoolPlus.feat.whirlpoolLastRead.saveThreadData(WhirlpoolPlus.util.getThreadNumber(), threadReplyNumber, overallReplyNumber);
             }
 
-            this.forumReplies();
         }
-    },
+    });
+},
 
-    runThreads: function () {
-        if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
-            WhirlpoolPlus.feat.whirlpoolLastRead.forumPage();
+forumPage: function () {
+    var threads = $('#threads > table > tbody > tr:not(.section)');
+
+    threads.each(function () {
+        var thread = $(this);
+
+        var threadNumber = parseInt(thread.find('a.title').prop('href').split('t=')[1]);
+
+        if (isNaN(threadNumber)) {
+            return;
         }
+
+        if (thread.is('.deleted') || thread.is('.pointer')) {
+            //ignore this one
+            //Not deleted from database, as a thread may be undeleted in the future.
+            return true;
+        }
+
+        var threadData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(threadNumber);
+        if (WhirlpoolPlus.util.get('wlr_noTrackSticky') && thread.is('.sticky')) {
+            //leave the stickies alone
+        } else {
+            if (threadData) {
+                //we are tracking this thread
+
+                var numberOfReplies = parseInt(thread.find('td.reps').not(':has(a)').text()) + 1; //need to add one, as original post is not counted as a reply here
+
+                //change the end link regardless, as there might have been replies since a refresh
+                //build the link
+                var link;
+
+                //do we have the new reply method?
+                if (threadData['o']) {
+                    link = '/forum-replies.cfm?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
+                } else {
+                    //use the old page number method
+                    link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
+                }
+
+
+                //change the link
+                thread.find('.goend > a').prop('href', link).prop('title', 'Jump to last read post');
+
+                //add the controls
+                thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
+
+                if (threadData['t'] < numberOfReplies) {
+                    //there are unread posts
+
+                    //we need to apply the unread class
+                    if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare') && !WhirlpoolPlus.util.pageType.watchedThreads) {
+                        thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
+                    } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
+                        thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
+                    }
+                    else {
+                        thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_unreadPosts');
+                    }
+
+                    if (document.location.href.match('/forum/')) {
+                        thread.find('.whirlpoolLastRead_controls').append('<br /><a href="#" class="whirlpoolLastRead_markAsRead" title="Mark this thread as read">M</a>');
+                    }
+
+                } else {
+                    //all posts have been read
+                    if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare') && !WhirlpoolPlus.util.pageType.watchedThreads) {
+                        thread.find('td.goend').addClass('whirlpoolLastRead_noUnreadPosts');
+                    } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
+                        thread.find('td').addClass('whirlpoolLastRead_noUnreadPosts');
+                    }
+                    else {
+                        thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_noUnreadPosts');
+                    }
+                }
+
+                thread.find('.whirlpoolLastRead_stopTracking').on("click", function () {
+                    WhirlpoolPlus.feat.whirlpoolLastRead.stopTracking(threadNumber);
+                    thread.children().removeClass('whirlpoolLastRead_unreadPosts whirlpoolLastRead_noUnreadPosts');
+                    thread.find('.whirlpoolLastRead_controls').remove();
+                    return false;
+                });
+
+                thread.find('.whirlpoolLastRead_markAsRead').on("click", function () {
+                    WhirlpoolPlus.feat.whirlpoolLastRead.markAsRead(threadNumber);
+                    thread.children('.whirlpoolLastRead_unreadPosts').removeClass('whirlpoolLastRead_unreadPosts').addClass('whirlpoolLastRead_noUnreadPosts');
+                    thread.find('.whirlpoolLastRead_controls .whirlpoolLastRead_markAsRead').remove();
+                    return false;
+                });
+
+            }
+        }
+    });
+
+},
+
+stopTracking: function (threadNumber) {
+    WhirlpoolPlus.util.sync.remove(threadNumber);
+    WhirlpoolPlus.util.sync.run();
+},
+
+markAsRead: function (threadNumber) {
+    //only operates on forum replies page.
+    //have to use legacy pagenumber method
+
+    //go get the page number
+    var threadLink = $('a[href="/forum-replies.cfm?t=' + threadNumber + '"]');
+    if (threadLink.length <= 0) {
+        //thread not on this page
+        return;
     }
+
+    var pageNumber;
+
+    if (threadLink.parent().find('script').length <= 0) {
+        //no page link producing script, so only one page
+        pageNumber = '1';
+    } else {
+        pageNumber = (threadLink.parent().find('script').text().split(',')[1]).split(')')[0];
+    }
+
+    //now we need to get the number of the last read reply.
+    var numberOfReplies = parseInt(threadLink.closest('tr').find('.reps').text().split('S')[0]) + 1; //need to add one, as original post is not counted as a reply here
+
+    //write data
+    WhirlpoolPlus.util.sync.set(threadNumber, { t: numberOfReplies, p: pageNumber })
+
+    //change the link
+    var link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;
+    threadLink.closest('tr').find('.goend > a').prop('href', link);
+
+    WhirlpoolPlus.util.sync.run();
+
+    return false;
+},
+
+runPosts: function () {
+    if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
+        //scroll to the post that we were actually sent to
+        if (window.location.hash) {
+            $(unsafeWindow).on("load", function () {
+                var location = $(window.location.hash);
+                if (location.length > 0) {
+                    $(unsafeWindow).scrollTop(location.offset().top);
+                }
+            });
+        }
+
+        this.forumReplies();
+    }
+},
+
+runThreads: function () {
+    if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
+        WhirlpoolPlus.feat.whirlpoolLastRead.forumPage();
+    }
+}
 
 };
 
@@ -3736,55 +3765,55 @@ WhirlpoolPlus.feat.userNotes = {
             '.userNotes_close { width: 100%; text-align: right; padding-bottom: 5px; font-weight: bold; cursor: pointer; }');
     },
 
-    runOnReply: function (reply) {
-        if (!WhirlpoolPlus.util.get('userNotes_enabled')) {
-            return;
-        }
+runOnReply: function (reply) {
+    if (!WhirlpoolPlus.util.get('userNotes_enabled')) {
+        return;
+    }
 
-        var userNumber = WhirlpoolPlus.util.getReplyUserId(reply);
-        var userNotesClass = 'userNotes_button_noNotes';
+    var userNumber = WhirlpoolPlus.util.getReplyUserId(reply);
+    var userNotesClass = 'userNotes_button_noNotes';
 
-        if (userNumber in this._notes) {
-            userNotesClass = 'userNotes_button_notes';
-        }
+    if (userNumber in this._notes) {
+        userNotesClass = 'userNotes_button_notes';
+    }
 
-        var userNotesButton = $('<span class="userNotes_button ' + userNotesClass + '" data-userNumber="' + userNumber + '" data-replyID="' + reply.prop('id') + '"></div>');
-        reply.find('.userstats').append(userNotesButton);
+    var userNotesButton = $('<span class="userNotes_button ' + userNotesClass + '" data-userNumber="' + userNumber + '" data-replyID="' + reply.prop('id') + '"></div>');
+    reply.find('.userstats').append(userNotesButton);
 
-        userNotesButton.on("click", function () {
-            var notebox = $('<textarea id="userNotes_notes">');
-            var dialog = $('<div class="userNotes_dialog">').append(notebox);
+    userNotesButton.on("click", function () {
+        var notebox = $('<textarea id="userNotes_notes">');
+        var dialog = $('<div class="userNotes_dialog">').append(notebox);
 
-            dialog.modal({
-                close: true,
-                closeHTML: '<div class="userNotes_close">Close</div>',
-                containerCss: {
-                    height: '240px',
-                    width: '280px',
-                    'text-align': 'center',
-                    'background-color': '#ddd',
-                    'border': '1px solid #000',
-                    'padding': '20px',
-                },
-                onClose: function () {
-                    WhirlpoolPlus.feat.userNotes._setNotes(userNumber, notebox.val());
+        dialog.modal({
+            close: true,
+            closeHTML: '<div class="userNotes_close">Close</div>',
+            containerCss: {
+                height: '240px',
+                width: '280px',
+                'text-align': 'center',
+                'background-color': '#ddd',
+                'border': '1px solid #000',
+                'padding': '20px',
+            },
+            onClose: function () {
+                WhirlpoolPlus.feat.userNotes._setNotes(userNumber, notebox.val());
 
-                    if (notebox.val() == '') {
-                        userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
-                    } else {
-                        userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
-                    }
-
-                    $.modal.close();
+                if (notebox.val() == '') {
+                    userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
+                } else {
+                    userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
                 }
-            });
 
-            if (userNumber in WhirlpoolPlus.feat.userNotes._notes) {
-                notebox.val(WhirlpoolPlus.feat.userNotes._notes[userNumber]);
+                $.modal.close();
             }
         });
 
-    },
+        if (userNumber in WhirlpoolPlus.feat.userNotes._notes) {
+            notebox.val(WhirlpoolPlus.feat.userNotes._notes[userNumber]);
+        }
+    });
+
+},
 
 };
 
