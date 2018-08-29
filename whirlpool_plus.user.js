@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.2
+// @version         5.2.3
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -44,16 +44,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.2',
+    version: '5.2.3',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 72,
+    storageVersion: 73,
 
     //Script changelog
     changelog: {
+        '5.2.3': '<ul><li>Fixes WLR bug on Watched Threads page when "only colour end square" is enabled. Adds warning for tinypic and non https hosted avatars to WP Plus settings menu.</li></ul>',
         '5.2.2': '<ul><li>Reworked to support Greasemonkey Webextension Builds 4.1 and later, whilst retaining compatibility with other script managers. Changed recommended Avatar host - if you have used tinypic in the past please consider migrating and updating your avatar.</li></ul>',
         '5.2.1': '<ul><li>Bandaid fix for Recent Activity Overlay API Bug.</li></ul>',
         '5.2.0': '<ul><li>Tidied code and updated to latest jQuery library.</li></ul>',
@@ -886,6 +887,33 @@ WhirlpoolPlus.settings = {
                 }
             }).change();
 
+            function checkAvatarHost() {
+                //Load the two avatars
+                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
+                    var url = r.responseText;
+                    var bad = "tinypic";
+                    var bad2 = "https";
+                    if (url != '') {
+                    if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
+                        alert("Your avatar is hosted on tinypic or uses a URL without https, please consider updating it");
+                    }
+                    };
+                });
+
+                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
+                    var url = r.responseText;
+                    var bad = "tinypic";
+                    var bad2 = "https";
+                    if (url != '') {
+                    if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
+                        alert("Your avatar is hosted on tinypic or uses a URL without https, please consider updating it");
+                    }
+                    };
+                });
+            }
+
+            checkAvatarHost();
+
             function refreshAvatars() {
                 //Load the two avatars
                 WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
@@ -898,6 +926,7 @@ WhirlpoolPlus.settings = {
                         $('#currentAvatar_static').css('background-image', '');
                         $('#currentAvatar_removeStatic').prop('disabled', 'disabled');
                     }
+
                 });
 
                 WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
@@ -3293,7 +3322,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         //there are unread posts
 
                         //we need to apply the unread class
-                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')) {
+                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare') && !WhirlpoolPlus.util.pageType.watchedThreads) {
                             thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
                         } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
                             thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
@@ -3308,7 +3337,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
 
                     } else {
                         //all posts have been read
-                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')) {
+                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare') && !WhirlpoolPlus.util.pageType.watchedThreads) {
                             thread.find('td.goend').addClass('whirlpoolLastRead_noUnreadPosts');
                         } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
                             thread.find('td').addClass('whirlpoolLastRead_noUnreadPosts');
