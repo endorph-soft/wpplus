@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.3
+// @version         5.2.4
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -44,16 +44,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.3',
+    version: '5.2.4',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 73,
+    storageVersion: 74,
 
     //Script changelog
     changelog: {
+        '5.2.4': '<ul><li>Adds link in settings to display where current avatar(s) are hosted. Adds themed spinner menu images for each theme. Changed embedded images to load after page load has completed, to improve page load time.</li></ul>',
         '5.2.3': '<ul><li>Fixes WLR bug on Watched Threads page when "only colour end square" is enabled. Adds warning for tinypic and non https hosted avatars to WP Plus settings menu.</li></ul>',
         '5.2.2': '<ul><li>Reworked to support Greasemonkey Webextension Builds 4.1 and later, whilst retaining compatibility with other script managers. Changed recommended Avatar host - if you have used tinypic in the past please consider migrating and updating your avatar.</li></ul>',
         '5.2.1': '<ul><li>Bandaid fix for Recent Activity Overlay API Bug.</li></ul>',
@@ -671,10 +672,11 @@ WhirlpoolPlus.settings = {
         '#wppSettings .menuDiv_active { display: block; }' +
         '#wppSettings .tabDescription { text-align: center; font-style: italic; }' +
         '#wppSettings .wpp_settingsMessage { text-align: center; font-weight: bold; padding: 5px 10px;}' +
-        '#wppSettings #currentAvatars { width: 200px; margin: 0 auto; background: url("/img/forum/reply-e5e5e5.gif") repeat-x scroll center top #E5E5E5; padding: 5px 20px; border-radius: 4px; }' +
+        '#wppSettings #currentAvatars { width: 40%; margin: 0 auto; background: url("/img/forum/reply-e5e5e5.gif") repeat-x scroll center top #E5E5E5; padding: 5px 20px; border-radius: 4px; }' +
         '#wppSettings #currentAvatars:after { content: ""; display: table; clear: both; }' +
-        '#wppSettings .avatarLabel { font-weight: bold; width: 100px; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
-        '#wppSettings .avatarLabel { font-weight: bold; width: 100px; margin: 0 auto; text-align: center; padding-top: 10px; }' +
+        '#wppSettings .avatarLabelStatic { font-weight: bold; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
+        '#wppSettings .avatarLabelAnimated { font-weight: bold; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
+        '#wppSettings .avatarRemove { font-weight: bold; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
         '#wppSettings .bottomrow { width:98%;height:10px;bottom:4%;position:absolute;color:#fff;left:1%; }';
 
 
@@ -690,8 +692,8 @@ WhirlpoolPlus.settings = {
     init: async function () {
         this._buildHtml();
         let noavatar = await WhirlpoolPlus.util.image('noavatar');
-        WhirlpoolPlus.util.css('#wppSettings .avatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 100px; width: 100px; margin: 0 auto; }' +
-        '#currentUserAvatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 100px; width: 100px; margin: 0 auto; }');
+        WhirlpoolPlus.util.css('#wppSettings .avatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 80px; width: 80px; margin: 0 auto; }' +
+        '#currentUserAvatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 80px; width: 80px; margin: 0 auto; }');
         // Add settings link
         var settingsLink = $('<li id="menu_wpp" class="even"><a href="#"><span>WP+ Settings</span></a></li>');
         $('#menu_whim').after(settingsLink);
@@ -888,14 +890,15 @@ WhirlpoolPlus.settings = {
             }).change();
 
             function checkAvatarHost() {
-                //Load the two avatars
+                //Check the two avatars for bads
                 WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
                     var url = r.responseText;
                     var bad = "tinypic";
                     var bad2 = "https";
                     if (url != '') {
+                        $('#currentAvatar_static').after('<span>Link: ' + url + '</span>');
                     if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
-                        alert("Your avatar is hosted on tinypic or uses a URL without https, please consider updating it");
+                        alert("Your static avatar is hosted on tinypic or uses a URL without https, please consider updating it");
                     }
                     };
                 });
@@ -905,8 +908,9 @@ WhirlpoolPlus.settings = {
                     var bad = "tinypic";
                     var bad2 = "https";
                     if (url != '') {
+                         $('#currentAvatar_animated').after('<span>Link: ' + url + '</span>');
                     if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
-                        alert("Your avatar is hosted on tinypic or uses a URL without https, please consider updating it");
+                        alert("Your animated avatar is hosted on tinypic or uses a URL without https, please consider updating it");
                     }
                     };
                 });
@@ -1313,12 +1317,12 @@ WhirlpoolPlus.settings = {
 
                         '<div id="currentAvatars" class="wpp_hideNotForum">' +
                             '<div style="float: left;">' +
-                                '<div class="avatarLabel">Static</div>' +
+                                '<div class="avatarLabelStatic">Static</div>' +
                                 '<div id="currentAvatar_static" class="avatar wpp_hideNotForum"></div>' +
                                 '<div class="avatarRemove"><button type="button" id="currentAvatar_removeStatic">Remove</button></div>' +
                             '</div>' +
                             '<div style="float: right;">' +
-                                '<div class="avatarLabel">Animated</div>' +
+                                '<div class="avatarLabelAnimated">Animated</div>' +
                                 '<div id="currentAvatar_animated" class="avatar wpp_hideNotForum"></div>' +
                                 '<div class="avatarRemove"><button type="button" id="currentAvatar_removeAnimated">Remove</button></div>' +
                             '</div>' +
@@ -1996,7 +2000,7 @@ WhirlpoolPlus.feat = {
         var videoEnabled = WhirlpoolPlus.util.get('embed_videos');
         var maxContentWidth = $('.replytext').width();
 
-        var imageMatchRegex = /(?:jpe?g|gif|bmp|png)$/;
+        var imageMatchRegex = /(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpg|jpeg|gif|svg)$/;
         var imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
 
         var youtubeRegex = /http(s)?:\/\/(www.)?youtube\.com/i;
@@ -2023,7 +2027,7 @@ WhirlpoolPlus.feat = {
 
                 if (imageEnabled && imageMatchRegex.test(link)) {
                     // Basic Image Match
-                    linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="' + link + '" alt="' + link + '" class="wpp_img"></a></span><br />');
+                    linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="' + link + '" alt="WP Plus Embedded Image" class="wpp_img"></a></span><br />');
                     if (WhirlpoolPlus.util.get('hideembedurl')) {
                         linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                     };
@@ -2036,7 +2040,7 @@ WhirlpoolPlus.feat = {
 
                         //Check for album embeds
                         if ((linkSegments[0] != 'gallery') && (linkSegments[0] != 'a')) {
-                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="' + link + '" class="wpp_img"></a></span><br />');
+                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="WP Plus Embedded Imgur Image" class="wpp_img"></a></span><br />');
                             if (WhirlpoolPlus.util.get('hideembedurl')) {
                                 linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                             }
@@ -2079,6 +2083,14 @@ WhirlpoolPlus.feat = {
                 displayed[link] = true;
             }
         });
+        window.addEventListener('load', function(){
+    var allimages= document.getElementsByTagName('img');
+    for (var i=0; i<allimages.length; i++) {
+        if (allimages[i].getAttribute('data-src')) {
+            allimages[i].setAttribute('src', allimages[i].getAttribute('data-src'));
+        }
+    }
+}, false)
     },
 
     penaltyBoxCss: async function () {
@@ -2665,13 +2677,15 @@ WhirlpoolPlus.feat.avatar = {
     },
 
     avatariseRow: function (replyTr) {
-        if (WhirlpoolPlus.util.get('avatars_enabled') == 'all' || WhirlpoolPlus.util.get('avatars_enabled') == 'both' || WhirlpoolPlus.util.get('avatars_enabled') == 'static' || WhirlpoolPlus.util.get('avatars_enabled') == 'animated') {
+        if (WhirlpoolPlus.util.get('avatars_enabled') != 'none') {
             var userNumber = WhirlpoolPlus.util.getReplyUserId(replyTr);
             var shaObj = new jsSHA("SHA-512", "TEXT");
             shaObj.update("'" + userNumber + "'");
             var hash = shaObj.getHash("HEX");
+
             replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
             replyTr.addClass('wpp_avatar_reply_' + userNumber);
+
             if (WhirlpoolPlus.util.get('avatars_enabled') == 'all') {
                 WhirlpoolPlus.util.css('div.reply { min-height: 175px !important; }');
                 setTimeout(function () {
@@ -3016,8 +3030,34 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
         this._menu = $('<ul id="pmenu">');
 
-        let spinnerimage = await WhirlpoolPlus.util.image('small_whirl_logo');
+        let currentTheme = WhirlpoolPlus.util.get('display_theme');
+        let spinnerdefault = await WhirlpoolPlus.util.image('small_whirl_logo');
+        let spinnerteal = 'https://i.imgur.com/o6hb8vM.png';
+        let spinnerelec = 'https://i.imgur.com/rBxNjwy.png';
+        let spinnerwood = 'https://i.imgur.com/HQHaiME.png';
+        let spinnerblack = 'https://i.imgur.com/7F013zh.png';
         var uNumber = WhirlpoolPlus.util.getUserId();
+        var spinnerimage;
+        switch (currentTheme) {
+            case 'default':
+            spinnerimage = spinnerdefault;
+                break;
+            case 'classic':
+            spinnerimage = spinnerdefault;
+                break;
+            case 'teal':
+            spinnerimage = spinnerteal;
+                break;
+            case 'electrolize':
+            spinnerimage = spinnerelec;
+                break;
+            case 'wood':
+            spinnerimage = spinnerwood;
+                break;
+            case 'black':
+            spinnerimage = spinnerblack;
+                break;
+                        }
 
         switch (WhirlpoolPlus.util.get('spinnerMenu_settingsLocation')) {
             case "top":
