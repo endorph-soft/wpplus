@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.4
+// @version         5.2.5
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -44,16 +44,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.4',
+    version: '5.2.5',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 74,
+    storageVersion: 75,
 
     //Script changelog
     changelog: {
+        '5.2.5': '<ul><li>Adds check for bad avatar URLs when adding avatars. Adds loading image for image embeds. Fixes bad avatar links affecting page load completion.</li></ul>',
         '5.2.4': '<ul><li>Adds link in settings to display where current avatar(s) are hosted. Adds themed spinner menu images for each theme. Changed embedded images to load after page load has completed, to improve page load time.</li></ul>',
         '5.2.3': '<ul><li>Fixes WLR bug on Watched Threads page when "only colour end square" is enabled. Adds warning for tinypic and non https hosted avatars to WP Plus settings menu.</li></ul>',
         '5.2.2': '<ul><li>Reworked to support Greasemonkey Webextension Builds 4.1 and later, whilst retaining compatibility with other script managers. Changed recommended Avatar host - if you have used tinypic in the past please consider migrating and updating your avatar.</li></ul>',
@@ -1016,8 +1017,14 @@ WhirlpoolPlus.settings = {
                     url = $('#currentAvatar_addUrl').val();
 
                     if (url == '') {
-                        alert('WP+: Enter a url to add');
-                    } else {
+                        alert('WP+: Enter a valid url to add');
+                    }
+
+                    else if (!url.match(/^https:\/\/(.*)/)) {
+                        alert('WP+: Enter a valid https url to add');
+                    }
+
+                    else {
 
                         WhirlpoolPlus.util.notify('Adding Avatar', true);
 
@@ -1313,7 +1320,7 @@ WhirlpoolPlus.settings = {
                     '<p class="subSettings_heading description"><b>Avatars</b></p>' +
                     '<div class="subSettings_content">' +
 
-                        '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a>, <a href="//postimages.org" target="_blank">Postimage</a> or your preferred alternative, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.' +
+                        '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a>, <a href="//postimages.org" target="_blank">Postimage</a> or your preferred alternative, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below. Please ensure you use a host that supports https otherwise your avatar will not display correctly.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.' +
 
                         '<div id="currentAvatars" class="wpp_hideNotForum">' +
                             '<div style="float: left;">' +
@@ -1328,7 +1335,7 @@ WhirlpoolPlus.settings = {
                             '</div>' +
                         '</div>' +
 
-                        '<p class="description wpp_hideNotForum" style="text-align: center; border: none;"><input style="width: 250px;" id="currentAvatar_addUrl" /> <button type="button" id="currentAvatar_add">Add</button></p>' +
+                        '<p class="description wpp_hideNotForum" style="text-align: center; border: none;"><input type="url" placeholder="Enter URL Here" title="Paste or enter your avatar URL here. HTTPS URL Required" style="width: 250px;" id="currentAvatar_addUrl" /> <button type="button" id="currentAvatar_add">Add</button></p>' +
 
                         '<p style="border:none; padding:0;">' +
                     '<select class="wpp_setting" id="avatars_enabled">' +
@@ -1995,10 +2002,11 @@ WhirlpoolPlus.feat = {
         $('.grid').before(voteHtml);
     },
 
-    embed: function () {
+    embed: async function () {
         var imageEnabled = WhirlpoolPlus.util.get('embed_images');
         var videoEnabled = WhirlpoolPlus.util.get('embed_videos');
         var maxContentWidth = $('.replytext').width();
+        var loading = await WhirlpoolPlus.util.image('loader');
 
         var imageMatchRegex = /(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpg|jpeg|gif|svg)$/;
         var imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
@@ -2027,7 +2035,7 @@ WhirlpoolPlus.feat = {
 
                 if (imageEnabled && imageMatchRegex.test(link)) {
                     // Basic Image Match
-                    linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="' + link + '" alt="WP Plus Embedded Image" class="wpp_img"></a></span><br />');
+                    linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + loading + '" data-src="' + link + '" alt="WP Plus Embedded Image" class="wpp_img"></a></span><br />');
                     if (WhirlpoolPlus.util.get('hideembedurl')) {
                         linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                     };
@@ -2040,7 +2048,7 @@ WhirlpoolPlus.feat = {
 
                         //Check for album embeds
                         if ((linkSegments[0] != 'gallery') && (linkSegments[0] != 'a')) {
-                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="WP Plus Embedded Imgur Image" class="wpp_img"></a></span><br />');
+                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + loading + '" data-src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="WP Plus Embedded Imgur Image" class="wpp_img"></a></span><br />');
                             if (WhirlpoolPlus.util.get('hideembedurl')) {
                                 linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                             }
@@ -2673,7 +2681,7 @@ WhirlpoolPlus.feat.avatar = {
             WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css?' + new Date().getTime() + ');');
         }
 
-        return '.wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;}';
+        return ".wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_bad {display:block; background-repeat: no-repeat; margin:0 auto; height:80px; width:80px; background:url('https://i.imgur.com/Yfk1zI9.png');}";
     },
 
     avatariseRow: function (replyTr) {
@@ -2683,17 +2691,36 @@ WhirlpoolPlus.feat.avatar = {
             shaObj.update("'" + userNumber + "'");
             var hash = shaObj.getHash("HEX");
 
-            replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
+            replyTr.find('.replyuser-inner').prepend($('<div id="wpp_avatarbyreply_' + userNumber + '" data-avclass="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
             replyTr.addClass('wpp_avatar_reply_' + userNumber);
 
-            if (WhirlpoolPlus.util.get('avatars_enabled') == 'all') {
+            window.addEventListener('load', function(){//Prevent the bad avatars from loading
+                var allavatars= document.getElementsByTagName('div');
+                for (var i=0; i<allavatars.length; i++) {
+                    if (allavatars[i].getAttribute('data-avclass')) {
+                        allavatars[i].setAttribute('class', allavatars[i].getAttribute('data-avclass'));
+                    }
+                }
+            }, false)
+
+            setTimeout(function(){ //Replace the bad avatars with a naughty image
+            var allavatars = document.getElementsByClassName('wpp_avatar wpp_avatar_' + userNumber + '');
+            for (var i = 0; i < allavatars.length; i++) {
+            var imagebad1 = $(allavatars).css("background-image").toLowerCase().indexOf('tinypic') >=0;
+            if (imagebad1 == true) {
+                $(allavatars).removeClass().addClass('wpp_avatar_bad');
+            }
+            };
+        }, 2000);
+
+            if (WhirlpoolPlus.util.get('avatars_enabled') == 'all') { //Add the identicons
                 WhirlpoolPlus.util.css('div.reply { min-height: 175px !important; }');
                 setTimeout(function () {
                     var elem = document.querySelector(".wpp_avatar_" + userNumber + "");
                     var $elem = $(elem);
                     var style = $elem.css('height');
                     if (style == '0px') {
-                        replyTr.find('.replyuser-inner').prepend($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
+                        replyTr.find('.replyuser-inner').prepend($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
                     };
                 }, 3000);
             }
