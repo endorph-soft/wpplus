@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.5
+// @version         5.2.6
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -44,16 +44,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.5',
+    version: '5.2.6',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 75,
+    storageVersion: 76,
 
     //Script changelog
     changelog: {
+        '5.2.6': '<ul><li>Fixes imgur Gallery embed code. Fixes avatars not loading in some browser & script manager combinations after changes in the previous build.</li></ul>',
         '5.2.5': '<ul><li>Adds check for bad avatar URLs when adding avatars. Adds loading image for image embeds. Fixes bad avatar links affecting page load completion.</li></ul>',
         '5.2.4': '<ul><li>Adds link in settings to display where current avatar(s) are hosted. Adds themed spinner menu images for each theme. Changed embedded images to load after page load has completed, to improve page load time.</li></ul>',
         '5.2.3': '<ul><li>Fixes WLR bug on Watched Threads page when "only colour end square" is enabled. Adds warning for tinypic and non https hosted avatars to WP Plus settings menu.</li></ul>',
@@ -2047,12 +2048,12 @@ WhirlpoolPlus.feat = {
                         linkSegments = linkSegments[2].split('/');
 
                         //Check for album embeds
-                        if ((linkSegments[0] != 'gallery') && (linkSegments[0] != 'a')) {
+                        if (linkSegments[0] != 'a') {
                             linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + loading + '" data-src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="WP Plus Embedded Imgur Image" class="wpp_img"></a></span><br />');
                             if (WhirlpoolPlus.util.get('hideembedurl')) {
                                 linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                             }
-                        } else {
+                        } else if (linkSegments[0] == 'a') {
                             linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
                         }
                     }
@@ -2091,14 +2092,13 @@ WhirlpoolPlus.feat = {
                 displayed[link] = true;
             }
         });
-        window.addEventListener('load', function(){
-    var allimages= document.getElementsByTagName('img');
-    for (var i=0; i<allimages.length; i++) {
-        if (allimages[i].getAttribute('data-src')) {
-            allimages[i].setAttribute('src', allimages[i].getAttribute('data-src'));
-        }
-    }
-}, false)
+
+        [].forEach.call(document.querySelectorAll('img[data-src]'), function(img) {
+            img.setAttribute('src', img.getAttribute('data-src'));
+            img.onload = function() {
+                img.removeAttribute('data-src');
+            };
+        });
     },
 
     penaltyBoxCss: async function () {
@@ -2691,17 +2691,15 @@ WhirlpoolPlus.feat.avatar = {
             shaObj.update("'" + userNumber + "'");
             var hash = shaObj.getHash("HEX");
 
-            replyTr.find('.replyuser-inner').prepend($('<div id="wpp_avatarbyreply_' + userNumber + '" data-avclass="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
+            replyTr.find('.replyuser-inner').prepend($('<div id="wpp_avatarbyreply_' + userNumber + '" class="wpp_avprepare" data-avclass="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
             replyTr.addClass('wpp_avatar_reply_' + userNumber);
 
-            window.addEventListener('load', function(){//Prevent the bad avatars from loading
-                var allavatars= document.getElementsByTagName('div');
-                for (var i=0; i<allavatars.length; i++) {
-                    if (allavatars[i].getAttribute('data-avclass')) {
-                        allavatars[i].setAttribute('class', allavatars[i].getAttribute('data-avclass'));
-                    }
-                }
-            }, false)
+            [].forEach.call(document.querySelectorAll('div[data-avclass]'), function(avclass) { //Prevent the bad avatars from loading
+                avclass.setAttribute('class', avclass.getAttribute('data-avclass'));
+                avclass.onload = function() {
+                    avclass.removeAttribute('data-avclass');
+                };
+            });
 
             setTimeout(function(){ //Replace the bad avatars with a naughty image
             var allavatars = document.getElementsByClassName('wpp_avatar wpp_avatar_' + userNumber + '');
