@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.6
+// @version         5.2.7
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -25,6 +25,7 @@
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/sha.js
 // @require         https://raw.githubusercontent.com/greasemonkey/gm4-polyfill/master/gm4-polyfill.js
+// @require         https://cdn.jsdelivr.net/blazy/latest/blazy.min.js
 // @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/loader.gif
 // @resource        noavatar            https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/noavatar.png
 // @resource        waiting             https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/waiting.gif
@@ -44,16 +45,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.6',
+    version: '5.2.7',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 76,
+    storageVersion: 77,
 
     //Script changelog
     changelog: {
+        '5.2.7': '<ul><li>Reworked code to load avatars and images as efficiently as in v5.2.5, while maintaining compatibility. Also updated identicon code to prevent double ups. Special thanks to users Nukkels, Waz and Darkrider for testing.</li></ul>',
         '5.2.6': '<ul><li>Fixes imgur Gallery embed code. Fixes avatars not loading in some browser & script manager combinations after changes in the previous build.</li></ul>',
         '5.2.5': '<ul><li>Adds check for bad avatar URLs when adding avatars. Adds loading image for image embeds. Fixes bad avatar links affecting page load completion.</li></ul>',
         '5.2.4': '<ul><li>Adds link in settings to display where current avatar(s) are hosted. Adds themed spinner menu images for each theme. Changed embedded images to load after page load has completed, to improve page load time.</li></ul>',
@@ -2092,13 +2094,9 @@ WhirlpoolPlus.feat = {
                 displayed[link] = true;
             }
         });
-
-        [].forEach.call(document.querySelectorAll('img[data-src]'), function(img) {
-            img.setAttribute('src', img.getAttribute('data-src'));
-            img.onload = function() {
-                img.removeAttribute('data-src');
-            };
-        });
+            var bLazy = new Blazy({
+                selector: '.wpp_img'
+            });
     },
 
     penaltyBoxCss: async function () {
@@ -2691,15 +2689,17 @@ WhirlpoolPlus.feat.avatar = {
             shaObj.update("'" + userNumber + "'");
             var hash = shaObj.getHash("HEX");
 
-            replyTr.find('.replyuser-inner').prepend($('<div id="wpp_avatarbyreply_' + userNumber + '" class="wpp_avprepare" data-avclass="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
+            replyTr.find('.replyuser-inner').prepend($('<div id="wpp_avatarbyreply_' + userNumber + '" class="wpp_avatar_preload" data-avclass="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
             replyTr.addClass('wpp_avatar_reply_' + userNumber);
 
-            [].forEach.call(document.querySelectorAll('div[data-avclass]'), function(avclass) { //Prevent the bad avatars from loading
-                avclass.setAttribute('class', avclass.getAttribute('data-avclass'));
-                avclass.onload = function() {
-                    avclass.removeAttribute('data-avclass');
-                };
-            });
+            window.setTimeout(function(){ //Lazy load the avatars
+                var allavatars= document.getElementsByTagName('div');
+                for (var i=0; i<allavatars.length; i++) {
+                    if (allavatars[i].getAttribute('data-avclass')) {
+                        allavatars[i].setAttribute('class', allavatars[i].getAttribute('data-avclass'));
+                    }
+                }
+            }, 500);
 
             setTimeout(function(){ //Replace the bad avatars with a naughty image
             var allavatars = document.getElementsByClassName('wpp_avatar wpp_avatar_' + userNumber + '');
@@ -2709,24 +2709,24 @@ WhirlpoolPlus.feat.avatar = {
                 $(allavatars).removeClass().addClass('wpp_avatar_bad');
             }
             };
-        }, 2000);
+        }, 1500);
 
             if (WhirlpoolPlus.util.get('avatars_enabled') == 'all') { //Add the identicons
                 WhirlpoolPlus.util.css('div.reply { min-height: 175px !important; }');
                 setTimeout(function () {
                     var elem = document.querySelector(".wpp_avatar_" + userNumber + "");
                     var $elem = $(elem);
-                    var style = $elem.css('height');
-                    if (style == '0px') {
+                    var style = $elem.css('background-image');
+                    if (style == 'none') {
                         replyTr.find('.replyuser-inner').prepend($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
                     };
-                }, 3000);
+                }, 2000);
             }
         }
     },
 
     avatariseWhim: function () {
-        if (WhirlpoolPlus.util.get('avatars_enabled') == 'all' || WhirlpoolPlus.util.get('avatars_enabled') == 'both' || WhirlpoolPlus.util.get('avatars_enabled') == 'static' || WhirlpoolPlus.util.get('avatars_enabled') == 'animated') {
+        if (WhirlpoolPlus.util.get('avatars_enabled') != 'none') {
             replyTr = $(this);
             var userNumber = WhirlpoolPlus.util.getReplyUserId(replyTr);
             replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></div>'));
