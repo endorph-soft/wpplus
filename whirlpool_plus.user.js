@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.7
+// @version         5.2.8
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -25,7 +25,9 @@
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/sha.js
 // @require         https://raw.githubusercontent.com/greasemonkey/gm4-polyfill/master/gm4-polyfill.js
-// @require         https://cdn.jsdelivr.net/blazy/latest/blazy.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/blazy.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/emojify.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.leanModal.min.js
 // @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/loader.gif
 // @resource        noavatar            https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/noavatar.png
 // @resource        waiting             https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/waiting.gif
@@ -45,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.7',
+    version: '5.2.8',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 77,
+    storageVersion: 78,
 
     //Script changelog
     changelog: {
+        '5.2.8': '<ul><li>Updated Regex for inline images to prevent script errors on threads with long URLs in posts. Reworked emoticon code to add emoji selector. If you previously had Whirlcode on editors disabled, it is now enabled by default, and you will need to adjust in settings.</li></ul>',
         '5.2.7': '<ul><li>Reworked code to load avatars and images as efficiently as in v5.2.5, while maintaining compatibility. Also updated identicon code to prevent double ups. Special thanks to users Nukkels, Waz and Darkrider for testing.</li></ul>',
         '5.2.6': '<ul><li>Fixes imgur Gallery embed code. Fixes avatars not loading in some browser & script manager combinations after changes in the previous build.</li></ul>',
         '5.2.5': '<ul><li>Adds check for bad avatar URLs when adding avatars. Adds loading image for image embeds. Fixes bad avatar links affecting page load completion.</li></ul>',
@@ -131,7 +134,6 @@ WhirlpoolPlus.install = {
         display_floatSidebar: false,
         display_floatTopbar: false,
         display_emoticons_enabled: false,
-        display_emoticons_blue: false,
         display_hideTheseForums: '',
         display_hideClosedThreadsOnProfile: false,
         /*display_watchedAlert : false,*/
@@ -183,8 +185,7 @@ WhirlpoolPlus.install = {
         wlr_display_unreadThreadColour: '#95B0CB',
         wlr_display_readThreadColour: '#CBC095',
         compose_quickReply: true,
-        compose_quickReply_emoticons: false,
-        compose_enhancedEditor: true,
+        compose_enhancedEditorNew: 'default',
         compose_movePreview: true,
         autoSubscribeToNewThread: false,
         whimLink: true,
@@ -223,7 +224,7 @@ WhirlpoolPlus.install = {
         'spinnerMenu_settingsLocation',
         'whimArchiveSort',
         'defaultRecentActivityDays',
-        'compose_enhancedEditor',
+        'compose_enhancedEditorNew',
         'recentActivityOverlay',
         'recentActivityOverlay_days',
         'recentActivityOverlay_data',
@@ -1621,27 +1622,27 @@ WhirlpoolPlus.settings = {
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply_emoticons">' +
-                            ' <label for="compose_quickReply_emoticons">Quick Reply Smilies</label>' +
-                            ' <span class="settingDesc">Display the available smilies under the whirlcode buttons</span>' +
-                        '</p>' +
-
-                        '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickEdit">' +
                             ' <label for="quickEdit">Quick Edit</label>' +
                             ' <span class="settingDesc">Allows inline editing of posts</span>' +
                         '</p>' +
 
+            '<p class="wpp_hideNotForum">' +
+                    '<select class="wpp_setting wpp_forumSetting" id="compose_enhancedEditorNew">' +
+                    '<option value="default">Enabled (all)</option>' +
+                    '<option value="emojionly">Emoji Selector Only</option>' +
+                    '<option value="whirlonly">Whirlcode Only</option>' +
+                    '<option value="disabled">Disabled</option>' +
+                    '</select>' +
+                    ' <label for="compose_enhancedEditorNew">Enhanced Editor and Emoji</label>' +
+                    ' <span class="settingDesc">Appends the Whirlcode rows and emoji selector to new post, reply and wiki editors</span><br>' +
+
+                '</p> ' +
+
                         '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoSubscribeToNewThread">' +
                             ' <label for="autoSubscribeToNewThread">Automatically watch/mark as read when you post</label>' +
                             ' <span class="settingDesc">When you reply to a thread, it will automatically be added to your watched threads</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="compose_enhancedEditor">' +
-                            ' <label for="compose_enhancedEditor">Add Whirlcode buttons to editors</label>' +
-                            ' <span class="settingDesc">Adds editing tools to new post, reply and wiki editors</span>' +
                         '</p>' +
 
                         '<p>' +
@@ -1697,12 +1698,6 @@ WhirlpoolPlus.settings = {
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_enabled">' +
                             ' <label for="display_emoticons_enabled">Display Image Emoticons (Smilies)</label>' +
                             ' <span class="settingDesc">Converts text smilies on Whirlpool into images</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_blue">' +
-                            ' <label for="display_emoticons_blue">Use blue smilies</label>' +
-                            ' <span class="settingDesc">Uses the original blue smilies instead of the default</span>' +
                         '</p>' +
 
                         '<p class="wpp_hideNotForum">' +
@@ -2011,7 +2006,7 @@ WhirlpoolPlus.feat = {
         var maxContentWidth = $('.replytext').width();
         var loading = await WhirlpoolPlus.util.image('loader');
 
-        var imageMatchRegex = /(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpg|jpeg|gif|svg)$/;
+        var imageMatchRegex = /(?:jpe?g|gif|bmp|png)$/;
         var imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
 
         var youtubeRegex = /http(s)?:\/\/(www.)?youtube\.com/i;
@@ -2484,149 +2479,78 @@ WhirlpoolPlus.feat.display = {
     emoticons: {
         init: function () {
             if (WhirlpoolPlus.util.get('display_emoticons_enabled')) {
-            $(".reference a").each(function () {
-                var text = $(this).text().toString().replace(/\:/, "<span>:</span>");
-                $(this).html(text);
-            });
-            this.currentIconSet = this.getIconSet(true);
-
-            for (icon in this.currentIconSet) {
-                var regkey = icon;
-                regkey = regkey.replace(/</g, "&lt;");
-                regkey = regkey.replace(/>/g, "&gt;");
-                regkey = regkey.replace(/\(/g, "\\(");
-                regkey = regkey.replace(/\)/g, "\\)");
-                regkey = regkey.replace(/\[/g, "\\[");
-                regkey = regkey.replace(/\]/g, "\\]");
-                regkey = regkey.replace(/\|/g, "\\|");
-
-                regkey = '(\\s|>)' + regkey;
-
-                this.regex[icon] = new RegExp(regkey, 'g');
-            }
-                $('div.bodytext > p').each(this.runOnTextNode);
+                WhirlpoolPlus.util.css('.emoji{width:1.8em;height:1.8em;display:inline-block;background-size:contain}');
+                emojify.run();
+                setTimeout(function(){ //Fix up the class for quoting purposes
+                    $( ".emoji" ).wrap('<span class="wcrep1">');
+                }, 500);
             }
         },
 
-        getIconSet: function (useDuplicates) {
+        //Below is code emoji selector will call when required
+        getIconSet: function () {
 
-            let angry = 'https://i.imgur.com/70Ir4B2.png';
-            let glad = 'https://i.imgur.com/XsD5Vqm.png';
-            let confused = 'https://i.imgur.com/kEZzeb1.png';
-            let cool = 'https://i.imgur.com/bCdamqz.png';
-            let cry = 'https://i.imgur.com/O8uAKDw.png';
-            let frown = 'https://i.imgur.com/IBUwBwK.png';
-            let gasp = 'https://i.imgur.com/Hs05mVu.png';
-            let grin = 'https://i.imgur.com/kI488mT.png';
-            let kiss = 'https://i.imgur.com/jTNYQo2.png';
-            let lips = 'https://i.imgur.com/SZDymsz.png';
-            let shout = 'https://i.imgur.com/6YGJK2Z.png';
-            let sleep = 'https://i.imgur.com/TjgqLM0.png';
-            let smile = 'https://i.imgur.com/tzl2Us8.png';
-            let smirk = 'https://i.imgur.com/xQ290zj.png';
-            let straight = 'https://i.imgur.com/McrxrEr.png';
-            let tongue = 'https://i.imgur.com/Ybe38JC.png';
-            let wink = 'https://i.imgur.com/NIQKa4i.png';
-            let star = 'https://i.imgur.com/367pZYX.gif';
-            let obanxious = 'https://i.imgur.com/Tg3AAkk.gif';
-            let obcool = 'https://i.imgur.com/AiM3RF5.gif';
-            let obeyes = 'https://i.imgur.com/EypUkQg.gif';
-            let obgrin = 'https://i.imgur.com/H2ot0aj.gif';
-            let obhappy2 = 'https://i.imgur.com/fM1kPhR.gif';
-            let obhappy = 'https://i.imgur.com/uhcVdrk.gif';
-            let obsad2 = 'https://i.imgur.com/AZAroO9.gif';
-            let obsad = 'https://i.imgur.com/fioEf7W.gif';
-            let obneutral = 'https://i.imgur.com/xY6GMN9.gif';
-            let obninja = 'https://i.imgur.com/2nnRECe.gif';
-            let obclown = 'https://i.imgur.com/8XdnuSy.gif';
-            let obsmirk = 'https://i.imgur.com/zpJKPcL.gif';
-            let obtongue = 'https://i.imgur.com/SskWkSB.gif';
+            let angry = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/angry.png';
+            let confused = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/confused.png';
+            let cool = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/sunglasses.png';
+            let cry = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/cry.png';
+            let frown = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/frowning.png';
+            let grin = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/grin.png';
+            let heart = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/heart.png';
+            let lips = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/no_mouth.png';
+            let sleep = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/sleepy.png';
+            let smile = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/smile.png';
+            let smirk = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/smirk.png';
+            let tongue = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/stuck_out_tongue.png';
+            let wink = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/wink.png';
+            let star = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/star.png';
+            let brokenheart = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/broken_heart.png';
+            let mask = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/mask.png';
+            let grinning = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/grinning.png';
+            let openmouth = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/open_mouth.png';
+            let cheekykiss = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/kissing_heart.png';
+            let scream = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/scream.png';
+            let XD = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/stuck_out_tongue_closed_eyes.png';
+            let XP = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/stuck_out_tongue_winking_eye.png';
+            let rage = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/rage.png';
+            let pensive = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/pensive.png';
+            let confounded = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/confounded.png';
+            let flushed = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/flushed.png';
+            let thumbsup = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/thumbsup.png';
+            let thumbsdown = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/thumbsdown.png';
 
          icons = {
             ':angry:': angry,
-            ':glad:': glad,
             ':confused:': confused,
-            ':cool:': cool,
+            ':sunglasses:': cool,
             ':cry:': cry,
             ':(': frown,
-            ':gasp:': gasp,
             ':D': grin,
-            '<3': kiss,
-            ':X': lips,
-            ':shout:': shout,
-            ':snore:': sleep,
+            '<3': heart,
+            '</3': brokenheart,
+            ':no_mouth:': lips,
+            ':sleepy:': sleep,
             ':)': smile,
-            ':\\\\': smirk,
-            ':|': straight,
+            ':-]': smirk,
             ':P': tongue,
             ';)': wink,
             ':star:': star,
+            ':-x': mask,
+            ':-D': grinning,
+            ':o': openmouth,
+            ':-*': cheekykiss,
+            ':-o': scream,
+            'X-D': XD,
+            ';-p': XP,
+            ':-@': rage,
+            ':-/': pensive,
+            ':-s': confounded,
+            ':-|': flushed,
+            ':+1:': thumbsup,
+            ':-1:': thumbsdown,
         },
-
-        duplicates = {
-            ':-(': frown,
-            ':-D': grin,
-            ':X': lips,
-            '=)': smile,
-            ':-)': smile,
-            ':-|': straight,
-            ':-P': tongue,
-            '=P': tongue,
-            ';-)': wink,
-            ':;': wink,
-            ':-;': wink,
-            ':-\\\\': smirk,
-            '=\\\\': smirk,
-        },
-
-        blue_icons = {
-            ':~': obanxious,
-            '(:': obcool,
-            '-o.o-': obeyes,
-            ':D': obgrin,
-            ':|)': obhappy2,
-            ':)': obhappy,
-            ':|(': obsad2,
-            ':(': obsad,
-            ':|': obneutral,
-            ':ninja:': obninja,
-            ':clown:': obclown,
-            ';)': obsmirk,
-            ':P': obtongue,
-            ':star:': star,
-        },
-
-        blue_duplicates = {
-            '(:': obcool,
-            '-oo-': obeyes,
-            ':-D': obgrin,
-            ':-)': obhappy,
-            '=)': obhappy,
-            ':-(': obsad,
-            ':-|': obneutral,
-            ':ninja:': obninja,
-            ':\\\\': obsmirk,
-            ':-\\\\': obsmirk,
-            '=\\\\': obsmirk,
-            ';-)': obsmirk,
-            ':-P': obtongue,
-            '=P': obtongue,
-        },
-
-            mainIcons = {};
-            duplicateIcons = {};
-
-            if (WhirlpoolPlus.util.get('display_emoticons_blue')) {
-                $.extend(mainIcons, blue_icons);
-                $.extend(duplicateIcons, blue_duplicates);
-            } else {
-                $.extend(mainIcons, icons);
-                $.extend(duplicateIcons, duplicates);
-            }
-
-            if (useDuplicates) {
-                $.extend(mainIcons, duplicateIcons);
-            }
+             mainIcons = {};
+             $.extend(mainIcons, icons);
 
             return mainIcons;
 
@@ -2635,35 +2559,6 @@ WhirlpoolPlus.feat.display = {
         regex: {},
         currentIconSet: {},
 
-        runOnTextNode: function () {
-            node = $(this);
-
-            var nodeValue = node.html();
-            var smiley = WhirlpoolPlus.feat.display.emoticons.run(nodeValue)
-
-            if (smiley.length > 1 && smiley != nodeValue) {
-                node.html(smiley);
-            }
-        },
-
-        run: function (text) {
-            if (!WhirlpoolPlus.util.get('display_emoticons_enabled')) {
-                return text;
-            }
-
-            var smiley = ' ' + text;
-
-            for (icon in (WhirlpoolPlus.feat.display.emoticons.currentIconSet)) {
-                // There's a rather nasty hack here to stop emoticons messing with the inbuilt quote feature.
-                // We pack the original symbol into a hidden span- this will be stripped by the quote function, but the contents will be kept
-                // We then wrap span class="wcrep1" around the image, which will cause it to be omitted from the quote
-                smiley = smiley.replace(WhirlpoolPlus.feat.display.emoticons.regex[icon],
-                    '$1' + '<span style="display:none">' + icon + '</span><span class="wcrep1"><img src ="' + WhirlpoolPlus.feat.display.emoticons.currentIconSet[icon] + '" alt="' + icon + '" align="baseline" /></span>');
-            }
-
-            return smiley;
-
-        },
     },
 
 }
@@ -2679,7 +2574,7 @@ WhirlpoolPlus.feat.avatar = {
             WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css?' + new Date().getTime() + ');');
         }
 
-        return ".wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_bad {display:block; background-repeat: no-repeat; margin:0 auto; height:80px; width:80px; background:url('https://i.imgur.com/Yfk1zI9.png');}";
+        return ".wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_preload {display: block; background-repeat: no-repeat; margin:0 auto; background:url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');} .wpp_avatar_bad {display:block; background-repeat: no-repeat; margin:0 auto; height:80px; width:80px; background:url('https://i.imgur.com/Yfk1zI9.png');}";
     },
 
     avatariseRow: function (replyTr) {
@@ -2720,7 +2615,7 @@ WhirlpoolPlus.feat.avatar = {
                     if (style == 'none') {
                         replyTr.find('.replyuser-inner').prepend($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
                     };
-                }, 2000);
+                }, 3500);
             }
         }
     },
@@ -3505,7 +3400,7 @@ WhirlpoolPlus.feat.editor = {
     },
 
     whirlcodify: function (id) {
-        if (WhirlpoolPlus.util.get('compose_enhancedEditor')) {
+        if (WhirlpoolPlus.util.get('compose_enhancedEditorNew') != 'disabled') {
             var target = $(id)
 
             target.parent().before('<div id="wpp_whirlcode"></div>');
@@ -3625,7 +3520,7 @@ WhirlpoolPlus.feat.editor = {
 
     _addWhirlcodeControls: function (locationID, textarea) {
         var controls = '';
-
+        if (WhirlpoolPlus.util.get('compose_enhancedEditorNew') != 'emojionly') {
         //Generate first row - basic controls
         for (i in this._basicWhirlcode) {
             var code = this._basicWhirlcode[i];
@@ -3639,15 +3534,25 @@ WhirlpoolPlus.feat.editor = {
             var code = this._advancedWhirlcode[i];
             controls += '<button type="button" data-type="advanced" data-code="' + i + '" class="wpp_whirlcodeButton" title="' + code.name + '">' + code.name + '</button>';
         }
+        }
 
-        if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.get('compose_quickReply_emoticons')) {
+        //Generate third row - emoji picker
+        if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.get('compose_enhancedEditorNew') !='whirlonly') {
             controls += '<br/>';
+            WhirlpoolPlus.util.css('.quickReply_whirlcodeButton_emoticon img{width:1.8em;height:1.8em;display:inline-block;background-size:contain}');
+            WhirlpoolPlus.util.css('#lean_overlay {position:fixed;z-index:100;top:0px;left:0px;height:100%;width:100%;background:#000;display:none;}');
+            WhirlpoolPlus.util.css('.modal_close {position:absolute;top:12px;right:30px;display:block;width:14px;height:14px;z-index:2;}');
+            WhirlpoolPlus.util.css('#dialog {display:none;background:#FFF;width:20%;padding:30px;}');
 
-            //Generate third row - emoticons
+            $(function() {
+            $("#opener").leanModal({ top : 200, overlay : 0.1, closeButton: ".modal_close" });
+                });
+            controls += '<div id="dialog" title="Emoji Selector"><div id="selector_header"><h3>Emoji Selector</h3><p>Select emoji to be added to your post.<br /><i>These will only be displayed as an image for other users with WP Plus installed.</i></p></div>';
             icons = WhirlpoolPlus.feat.display.emoticons.getIconSet(false);
             for (icon in icons) {
-                controls += '<button type="button" data-type="emoticon" data-code="' + icon.replace('\\\\', '\\') + '" class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"><img src="' + icons[icon] + '"/></button>';
+                controls += '<button type="button" data-type="emoticon" data-code="' + icon.replace('\\\\', '\\') + '" title="' + icon.replace('\\\\', '\\') + '" class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"><img src="' + icons[icon] + '"/></button>';
             }
+            controls += '<a class="modal_close" href="#wpp_whirlcode"><b>Close</b></a></div><button type="button" title="Open Emoji Selector" class="wpp_whirlcodeButton" id="opener" href="#dialog"><img src="https://i.imgur.com/1pf0QKX.png" alt="Open Emoji Selector"></button>';
         }
 
         $(locationID).append(controls);
