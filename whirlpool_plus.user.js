@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.8
+// @version         5.2.9
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.8',
+    version: '5.2.9',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 78,
+    storageVersion: 79,
 
     //Script changelog
     changelog: {
+        '5.2.9': '<ul><li>Adjusted code to accomodate WP Jan changes, replacing references to old forum URLs. Prior versions of WP Plus will work erratically.</li></ul>',
         '5.2.8': '<ul><li>Updated Regex for inline images to prevent script errors on threads with long URLs in posts. Reworked emoticon code to add emoji selector. If you previously had Whirlcode on editors disabled, it is now enabled by default, and you will need to adjust in settings.</li></ul>',
         '5.2.7': '<ul><li>Reworked code to load avatars and images as efficiently as in v5.2.5, while maintaining compatibility. Also updated identicon code to prevent double ups. Special thanks to users Nukkels, Waz and Darkrider for testing.</li></ul>',
         '5.2.6': '<ul><li>Fixes imgur Gallery embed code. Fixes avatars not loading in some browser & script manager combinations after changes in the previous build.</li></ul>',
@@ -341,7 +342,7 @@ WhirlpoolPlus.util = {
     pageType: {
 
         'alert': '/forum/alert/',     // An alert page
-        'posts': 'forum-replies.cfm', // The page where you view posts
+        'posts': '/thread/', // The page where you view posts
         'threads': '/forum/',           // The page where you view threads
         'profile': '/user/',            // User profile page
         'whimArchive': 'action=archive',    // Whim archive page
@@ -400,7 +401,7 @@ WhirlpoolPlus.util = {
     },
 
     getReplyNumber: function (reply) {
-        var num = reply.find('a[href*="/forum-replies.cfm?t="]').prop('href').split('#r')[1];
+        var num = reply.find('a[href*="/thread/"]').prop('href').split('#r')[1];
         num = num.split('?');
         return parseInt(num);
     },
@@ -1024,7 +1025,7 @@ WhirlpoolPlus.settings = {
                         alert('WP+: Enter a valid url to add');
                     }
 
-                    else if (!url.match(/^https:\/\/(.*)/)) {
+                    else if (!url.match(/(?:https:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/)) {
                         alert('WP+: Enter a valid https url to add');
                     }
 
@@ -2169,7 +2170,7 @@ WhirlpoolPlus.feat = {
         var threadNumber = WhirlpoolPlus.util.getThreadNumber();
 
         if (WhirlpoolPlus.util.get('links_longThread')) {
-            topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&p=-2">Single Page Version</a>&nbsp;');
+            topLinks.prepend('<a href="//forums.whirlpool.net.au/thread/' + threadNumber + '&p=-2">Single Page Version</a>&nbsp;');
             // Already a link on the bottom bar
         }
 
@@ -2183,21 +2184,21 @@ WhirlpoolPlus.feat = {
 
             if (opPost.length == 1) {
                 var opid = WhirlpoolPlus.util.getReplyUserId(opPost);
-                topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
-                bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?t=' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
+                topLinks.prepend('<a href="//forums.whirlpool.net.au/thread/' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
+                bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/thread/' + threadNumber + '&ux=' + opid + '">OP</a>&nbsp;');
             } else {
 
             }
         }
 
         if (WhirlpoolPlus.util.get('links_mod')) {
-            topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
-            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?um=1&amp;t=' + threadNumber + '">Mods</a>&nbsp;');
+            topLinks.prepend('<a href="//forums.whirlpool.net.au/thread/' + threadNumber + '?um=1">Mods</a>&nbsp;');
+            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/thread/' + threadNumber + '?um=1">Mods</a>&nbsp;');
         }
 
         if (WhirlpoolPlus.util.get('links_rep')) {
-            topLinks.prepend('<a href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
-            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/forum-replies.cfm?ur=1&amp;t=' + threadNumber + '">Reps</a>&nbsp;');
+            topLinks.prepend('<a href="//forums.whirlpool.net.au/thread/' + threadNumber + '?ur=1">Reps</a>&nbsp;');
+            bottomLinks.prepend('<a class="blink" href="//forums.whirlpool.net.au/thread/' + threadNumber + '?ur=1">Reps</a>&nbsp;');
         }
     },
 
@@ -2214,7 +2215,7 @@ WhirlpoolPlus.feat = {
 
         $('.results .title a').each(function () {
             var link = $(this);
-            link.prop('href', link.prop('href').replace('archive/', 'forum-replies.cfm?t='));
+            link.prop('href', link.prop('href').replace('archive/', 'thread/'));
         });
 
 
@@ -2483,6 +2484,7 @@ WhirlpoolPlus.feat.display = {
                 emojify.run();
                 setTimeout(function(){ //Fix up the class for quoting purposes
                     $( ".emoji" ).wrap('<span class="wcrep1">');
+                    $( ".emoji" ).parent().before('<span style="display:none"></span>');
                 }, 500);
             }
         },
@@ -2717,7 +2719,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
                 threadData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(threads[i].ID);
 
                 if (threadData == false) {
-                    link = '/forum-replies.cfm?t=' + threads[i].ID;
+                    link = '/thread/' + threads[i].ID;
                 } else {
                     if (threads[i].REPLIES + 1 > threadData['t']) {
                         unread = true;
@@ -2726,11 +2728,11 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
                     if (threadData['o']) {
                         link = '/forum-replies.cfm?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
                     } else {
-                        link = '/forum-replies.cfm?t=' + threads[i].ID + '&p=' + threadData['p'] + '#r' + threadData['t'];
+                        link = '/thread/' + threads[i].ID + '&p=' + threadData['p'] + '#r' + threadData['t'];
                     }
                 }
             } else {
-                link = '/forum-replies.cfm?t=' + threads[i].ID;
+                link = '/thread/' + threads[i].ID;
             }
 
             if (unread) {
@@ -3238,7 +3240,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         threads.each(function () {
             var thread = $(this);
 
-            var threadNumber = parseInt(thread.find('a.title').prop('href').split('t=')[1]);
+            var threadNumber = parseInt(thread.find('a.title').prop('href').split('thread/')[1]);
 
             if (isNaN(threadNumber)) {
                 return;
@@ -3268,7 +3270,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         link = '/forum-replies.cfm?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
                     } else {
                         //use the old page number method
-                        link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
+                        link = '/thread/' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
                     }
 
 
@@ -3337,7 +3339,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         //have to use legacy pagenumber method
 
         //go get the page number
-        var threadLink = $('a[href="/forum-replies.cfm?t=' + threadNumber + '"]');
+        var threadLink = $('a[href="/thread/' + threadNumber + '"]');
         if (threadLink.length <= 0) {
             //thread not on this page
             return;
@@ -3359,7 +3361,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         WhirlpoolPlus.util.sync.set(threadNumber, { t: numberOfReplies, p: pageNumber })
 
         //change the link
-        var link = '/forum-replies.cfm?t=' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;
+        var link = '/thread/' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;
         threadLink.closest('tr').find('.goend > a').prop('href', link);
 
         WhirlpoolPlus.util.sync.run();
@@ -3804,7 +3806,7 @@ WhirlpoolPlus.run = async function () {
 
     /** RUN: Deleted Thread Alert **/
     if (WhirlpoolPlus.util.pageType.deletedThread) {
-        var deletedThreadNumber = document.location.href.split('t=')[1].split('&')[0];
+        var deletedThreadNumber = document.location.href.split('thread/')[1].split('&')[0];
         $('#alert').append('<br/><a href="//google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)</a>');
     }
 
