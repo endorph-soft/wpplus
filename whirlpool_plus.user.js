@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.2.9
+// @version         5.3.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.2.9',
+    version: '5.3.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 79,
+    storageVersion: 80,
 
     //Script changelog
     changelog: {
+        '5.3.0': '<ul><li>Further refinements for WP Jan changes ensuring backwards compatibility with old thread links. Adds option to hide posts from banned users. Clarification of requirements for avatar URLs.</li></ul>',
         '5.2.9': '<ul><li>Adjusted code to accomodate WP Jan changes, replacing references to old forum URLs. Prior versions of WP Plus will work erratically.</li></ul>',
         '5.2.8': '<ul><li>Updated Regex for inline images to prevent script errors on threads with long URLs in posts. Reworked emoticon code to add emoji selector. If you previously had Whirlcode on editors disabled, it is now enabled by default, and you will need to adjust in settings.</li></ul>',
         '5.2.7': '<ul><li>Reworked code to load avatars and images as efficiently as in v5.2.5, while maintaining compatibility. Also updated identicon code to prevent double ups. Special thanks to users Nukkels, Waz and Darkrider for testing.</li></ul>',
@@ -146,6 +147,7 @@ WhirlpoolPlus.install = {
         display_oldfont: false,
         display_customCSS: '',
         display_penaltyBox: false,
+        display_bannedPosts: false,
         display_oldProfile: false,
         display_userPageInfoToggle: false,
         display_superProfile: 'default',
@@ -343,6 +345,7 @@ WhirlpoolPlus.util = {
 
         'alert': '/forum/alert/',     // An alert page
         'posts': '/thread/', // The page where you view posts
+        'postsOld': 'forum-replies.cfm', // The old page where you view posts for backwards compatibility
         'threads': '/forum/',           // The page where you view threads
         'profile': '/user/',            // User profile page
         'whimArchive': 'action=archive',    // Whim archive page
@@ -1026,7 +1029,7 @@ WhirlpoolPlus.settings = {
                     }
 
                     else if (!url.match(/(?:https:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/)) {
-                        alert('WP+: Enter a valid https url to add');
+                        alert('WP+: Enter a valid https direct image url to add');
                     }
 
                     else {
@@ -1674,7 +1677,13 @@ WhirlpoolPlus.settings = {
                         '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_penaltyBox">' +
                             ' <label for="display_penaltyBox">Highlight when a user is in the penalty box</label>' +
-                            ' <span class="settingDesc">Shows a more noticeable visual indicator on previous posts made by users currently banned</span>' +
+                            ' <span class="settingDesc">Shows a more noticeable visual indicator on posts made by users currently in the penalty box or banned</span>' +
+                        '</p>' +
+
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_bannedPosts">' +
+                            ' <label for="display_bannedPosts">Hide any indication of posts from banned users</label>' +
+                            ' <span class="settingDesc">Removes posts from view that were created by users who are currently banned</span>' +
                         '</p>' +
 
                         '<p class="wpp_hideNotForum">' +
@@ -1750,7 +1759,7 @@ WhirlpoolPlus.feat = {
 
     returnafterlogin: function () {
         if (WhirlpoolPlus.util.get('returnafterlogin')) {
-            var sButton = document.querySelector('[href*="//whirlpool.net.au/profile/index.cfm?a=login"]');
+            var sButton = document.querySelector('[href*="//whirlpool.net.au/profile/?action=login"]');
             var dU = location.href;
             var lSc = WhirlpoolPlus.util.get('returnafterlogin_targetUrl');
 
@@ -1761,7 +1770,7 @@ WhirlpoolPlus.feat = {
                 false);
             }
 
-            if (document.referrer.indexOf("//whirlpool.net.au/profile/index.cfm?a=login") !== -1) {
+            if (document.referrer.indexOf("//whirlpool.net.au/profile/?action=login") !== -1) {
                 location.href = "//forums.whirlpool.net.au";
             };
 
@@ -2105,6 +2114,14 @@ WhirlpoolPlus.feat = {
 
         if (groupText.indexOf('penalty box') >= 0 || groupText.indexOf('Banned') >= 0) {
             reply.addClass('penalty_box');
+        }
+    },
+
+    bannedUserPostHide: function (reply) {
+        var groupText = reply.find('.usergroup').text();
+
+        if (groupText.indexOf('Banned') >= 0) {
+            reply.css('display','none');
         }
     },
 
@@ -2726,7 +2743,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
                     }
 
                     if (threadData['o']) {
-                        link = '/forum-replies.cfm?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
+                        link = '/thread/' + threads[i].ID + '?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
                     } else {
                         link = '/thread/' + threads[i].ID + '&p=' + threadData['p'] + '#r' + threadData['t'];
                     }
@@ -3267,7 +3284,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
 
                     //do we have the new reply method?
                     if (threadData['o']) {
-                        link = '/forum-replies.cfm?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
+                        link = '/thread/' + threadNumber + '?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
                     } else {
                         //use the old page number method
                         link = '/thread/' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
@@ -3840,7 +3857,7 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Posts Pages **/
-    if (WhirlpoolPlus.util.pageType.posts) {
+    if (WhirlpoolPlus.util.pageType.posts || WhirlpoolPlus.util.pageType.postsOld) {
         WhirlpoolPlus.feat.display.hidePosts();
         WhirlpoolPlus.feat.display.emoticons.init();
         WhirlpoolPlus.feat.embed();
@@ -3861,6 +3878,9 @@ WhirlpoolPlus.run = async function () {
             WhirlpoolPlus.feat.whimLink.WhimUser($this);
             WhirlpoolPlus.feat.numberPosts.NumberPost($this);
             WhirlpoolPlus.feat.userNotes.runOnReply($this);
+            if (WhirlpoolPlus.util.get('display_bannedPosts')) {
+            WhirlpoolPlus.feat.bannedUserPostHide($this);
+        }
             if (WhirlpoolPlus.util.get('display_penaltyBox')) {
                 WhirlpoolPlus.feat.penaltyBoxHighlight($this);
             }
