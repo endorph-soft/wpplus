@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.3.0
+// @version         5.3.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.3.0',
+    version: '5.3.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 80,
+    storageVersion: 81,
 
     //Script changelog
     changelog: {
+        '5.3.1': '<ul><li>Refinements to code for performance. Adjustment to imgur embed to attempt to prevent incorrect preview images. Fixes extra nav buttons in threads.</li></ul>',
         '5.3.0': '<ul><li>Further refinements for WP Jan changes ensuring backwards compatibility with old thread links. Adds option to hide posts from banned users. Clarification of requirements for avatar URLs.</li></ul>',
         '5.2.9': '<ul><li>Adjusted code to accomodate WP Jan changes, replacing references to old forum URLs. Prior versions of WP Plus will work erratically.</li></ul>',
         '5.2.8': '<ul><li>Updated Regex for inline images to prevent script errors on threads with long URLs in posts. Reworked emoticon code to add emoji selector. If you previously had Whirlcode on editors disabled, it is now enabled by default, and you will need to adjust in settings.</li></ul>',
@@ -195,7 +196,7 @@ WhirlpoolPlus.install = {
         numberPosts: false,
         userNotes_enabled: false,
         userNotes: {},
-        /* watchedThreadsUnread: '0',*/
+        /*watchedThreadsUnread: '0',*/
         watchedThreadsAlert: 'default',
         watchedthreadsextra: 'improved',
         promoteWatchedForum: '',
@@ -390,7 +391,7 @@ WhirlpoolPlus.util = {
             }).scroll();
             this._notified = true;
         }
-        $('#ub_name').before('<span class="wpplus_notify">!!! ' + message + ' (hide) !!!    </span>');
+        $('#ub_name').before('<span class="wpplus_notify"> ' + message + ' (hide)    </span>');
         $('.wpplus_notify').on("click", function (e) {
             $(this).fadeOut();
             tb.removeClass('notifyfloat');
@@ -1595,7 +1596,7 @@ WhirlpoolPlus.settings = {
             /*'<p>' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_watchedAlert">' +
                     '<label for="display_watchedAlert">Watched Thread Alert</label>' +
-                    ' <span class="settingDesc">Display a banner notification when you have unread Watched Threads (make sure you enter your API Key in the Script Configuration)</span>'+
+                    ' <span class="settingDesc">Display a banner notification when you have unread Watched Threads (API Key required in Script Configuration)</span>'+
             '</p> ' +*/
 
                         '<p class="wpp_hideNotForum">' +
@@ -1782,21 +1783,24 @@ WhirlpoolPlus.feat = {
     },
 
     watchedThreadsAlert: function () {
-        if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'watched' || document.referrer.indexOf('?action=watched') >= 0) {
-            document.location = '//forums.whirlpool.net.au/forum/?action=watched';
-        }
-        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'profile' ^ document.referrer.indexOf('?action=watched') >= 0) {
-            document.location = '//forums.whirlpool.net.au/user';
-        }
-        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'forum' ^ document.referrer.indexOf('?action=watched') >= 0) {
-            document.location = '//forums.whirlpool.net.au/';
-        }
-        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'thread' && document.referrer.indexOf('?action=watched') == -1) {
-            history.go(-1);
-        }
-        else if (WhirlpoolPlus.util.get('watchedThreadsAlert') == 'additional' ^ document.referrer.indexOf('?action=watched') >= 0) {
-            $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2><h2><a href="//forums.whirlpool.net.au/">Or go to all forums</a></h2>');
-        }
+        var alerttype = WhirlpoolPlus.util.get('watchedThreadsAlert');
+        switch(alerttype) {
+            case 'watched':
+                document.location = '//forums.whirlpool.net.au/forum/?action=watched';
+                break;
+            case 'profile':
+                document.location = '//forums.whirlpool.net.au/user';
+                break;
+            case 'forum':
+                document.location = '//forums.whirlpool.net.au/';
+                break;
+            case 'thread':
+                history.go(-1);
+                break;
+            case 'additional':
+                $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2><h2><a href="//forums.whirlpool.net.au/">Or go to all forums</a></h2>');
+                break;
+               }
     },
 
     promoteWatchedForum: function () {
@@ -1910,7 +1914,7 @@ WhirlpoolPlus.feat = {
     yourvoteslink: function () {
         var target = $('td:contains("Aura:"):first');
 
-        target.append('<br><a class="small" href="http://forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a>');
+        target.append('<br><a class="small" href="//forums.whirlpool.net.au/user/?action=yourvotes" target="_blank">(Your Aura Votes)</a>');
         target.parent().css({ "vertical-align": "top" });
     },
 
@@ -2055,12 +2059,14 @@ WhirlpoolPlus.feat = {
                         linkSegments = linkSegments[2].split('/');
 
                         //Check for album embeds
-                        if (linkSegments[0] != 'a') {
+                        if ((linkSegments[0] != 'gallery') && (linkSegments[0] != 'a')) {
                             linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + loading + '" data-src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="WP Plus Embedded Imgur Image" class="wpp_img"></a></span><br />');
                             if (WhirlpoolPlus.util.get('hideembedurl')) {
                                 linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                             }
                         } else if (linkSegments[0] == 'a') {
+                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
+                        } else if (linkSegments[0] == 'gallery') {
                             linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
                         }
                     }
@@ -2182,8 +2188,8 @@ WhirlpoolPlus.feat = {
     },
 
     extraNavLinks: function () {
-        var topLinks = $('.btop');
-        var bottomLinks = $('.bfoot');
+        var topLinks = $(".buttons:lt(0)");
+        var bottomLinks = $(".buttons:lt(3)");
         var threadNumber = WhirlpoolPlus.util.getThreadNumber();
 
         if (WhirlpoolPlus.util.get('links_longThread')) {
@@ -2349,17 +2355,16 @@ WhirlpoolPlus.feat.display = {
     },
 
     /*watchedAlert : function() {
-        var unreadCount = WhirlpoolPlus.util.get('watchedThreadsUnread');
-
+        var unreadThreads = WhirlpoolPlus.util.get('watchedThreadsUnread');
         $.ajax({
             type: 'GET',
-            url: 'https://whirlpool.net.au/api/?key=' + WhirlpoolPlus.util.get('whirlpoolAPIKey') + '&get=watched&watchedmode=0&output=json',
+            url: 'https://whirlpool.net.au/api/?key=' + WhirlpoolPlus.util.get('whirlpoolAPIKey') + '&output=json&get=watched&watchedmode=0',
             success: function (data, textStatus, response) {
 
                 if (response.status == 200) {
-                    var threads = JSON.parse(response.responseText)!='{"WATCHED":[]}';
+                    var threads = JSON.parse(response.responseText).WATCHED;
 
-                    WhirlpoolPlus.util.set('watchedThreadsUnread', 1);
+                    WhirlpoolPlus.util.set('watchedThreadsUnread', threads);
 
                     if (typeof callback == 'function') {
                         callback();
@@ -2374,11 +2379,10 @@ WhirlpoolPlus.feat.display = {
             }
             });
 
-        else {WhirlpoolPlus.util.set('watchedThreadsUnread', 0);
-
-        if (WhirlpoolPlus.util.get('display_watchedAlert') && unreadCount != '0') {
+        if (WhirlpoolPlus.util.get('display_watchedAlert') && unreadThreads.length > 0) {
             WhirlpoolPlus.util.notify('You have unread <a href="//forums.whirlpool.net.au/forum/?action=watched">watched threads</a>', true);
         }
+        //Needs something here to rate limit hitting the API
     },*/
 
     whimAlert: function () {
@@ -2732,7 +2736,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
         for (i in threads) {
             unread = false;
 
-            if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'forums' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
+            if (WhirlpoolPlus.util.get('wlr_enabled') != 'none') {
                 threadData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(threads[i].ID);
 
                 if (threadData == false) {
