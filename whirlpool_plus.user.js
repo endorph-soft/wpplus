@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.3.2
+// @version         5.3.3
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.3.2',
+    version: '5.3.3',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 82,
+    storageVersion: 83,
 
     //Script changelog
     changelog: {
+        '5.3.3': '<ul><li>Adds avatars on User Profile pages. Adds option to clear Watched Threads alert notification. Fixes inbuilt notifier to work as intended. Miscellaneous fixes.</li></ul>',
         '5.3.2': '<ul><li>Further refinements to code for performance. Adds feature to alert user when there are new unread watched threads. Fixes WP Plus menu links redirecting incorrectly. Adds WLR go to last post buttons to Watched Threads page.</li></ul>',
         '5.3.1': '<ul><li>Refinements to code for performance. Adjustment to imgur embed to attempt to prevent incorrect preview images. Fixes extra nav buttons in threads.</li></ul>',
         '5.3.0': '<ul><li>Further refinements for WP Jan changes ensuring backwards compatibility with old thread links. Adds option to hide posts from banned users. Clarification of requirements for avatar URLs.</li></ul>',
@@ -152,6 +153,7 @@ WhirlpoolPlus.install = {
         display_oldProfile: false,
         display_userPageInfoToggle: false,
         display_superProfile: 'default',
+        display_avatarsOnProfile: false,
         avatars_enabled: 'static',
         stats_postsPerDay: true,
         embed_videos: true,
@@ -370,34 +372,44 @@ WhirlpoolPlus.util = {
     _notified: false,
 
     notify: function (message, important) {
-        var color = '#fff';
+        var color = '#fff',
+            background = '',
+            opacity = '0.9';
 
         if (important === true) {
-            color = '#d87400';
+            color = '#fff';
+            background = '#d87400';
         }
 
         if (!this._notified) {
-            $('head').append('<style type="text/css">.wpplus_notify{ text-align: center; text-transform: capitalize; color: ' + color + ';} .wpplus_notify:hover{ cursor: pointer; }</style>');
+            $('head').append('<style type="text/css">.wpplus_notify{ text-align: center; text-transform: capitalize; color: ' + color + '; } .wpplus_notify:hover{ cursor: pointer; }</style>');
             var tb = $('#topbar');
+            tb.addClass('notify');
 
-            WhirlpoolPlus.util.css('#topbar.notifyfloat { position: fixed; width: 100% !important; max-width: none !important; top: 0px; z-index: 999; background-color:#d87400 !important;}');
+            WhirlpoolPlus.util.css('#topbar.notify { width: 100% !important; max-width: none !important; background-color: ' + background + ' !important; opacity: ' + opacity + '; }');
+            WhirlpoolPlus.util.css('#topbar.notifyfloat { width: 100% !important; max-width: none !important; position: fixed; top: 0px; z-index: 999; }');
 
-            $(window).scroll(function () {
+            var floatnotify = function () {
                 if (!this._notified) {
                     if (window.pageYOffset > 0) {
                         tb.addClass('notifyfloat');
-                        WhirlpoolPlus.util.css('.wpplus_notify{color:#fff !important;}');
-                    } else {
-                        tb.removeClass('notifyfloat');
                     }
+                    else if (window.pageYOffset == 0) {
+                        tb.removeClass('notifyfloat');
+                    };
                 }
-            }).scroll();
+            };
+
+            $(window).on('scroll', floatnotify );
+
             this._notified = true;
         }
-        $('#ub_name').before('<span class="wpplus_notify"> ' + message + ' (hide)    </span>');
-        $('.wpplus_notify').on("click", function (e) {
-            $(this).fadeOut();
+        $('#ub_name').before('<span class="wpplus_notify"> ' + message + ' <a class="hide">(hide)</a> |   </span>');
+        $('.hide').on("click", function (e) {
+            $('.wpplus_notify').fadeOut();
             tb.removeClass('notifyfloat');
+            tb.removeClass('notify');
+            $(window).off("scroll", floatnotify);
         });
     },
 
@@ -418,8 +430,10 @@ WhirlpoolPlus.util = {
     },
 
     getUserId: function () {
+        if (!WhirlpoolPlus.util.pageType.alert) {
         var uID = $('#ub_name a').prop('href');
         return uID.split('/').slice(-1)[0];
+        };
     },
 
     getUsername: function () {
@@ -1359,6 +1373,11 @@ WhirlpoolPlus.settings = {
                             '</select>' +
                             ' <label for="avatars_enabled">Toggle Avatar Display Modes</label>' +
                         '</p>' +
+                        '<p>' +
+                    '<input class="wpp_setting" type="checkbox" id="display_avatarsOnProfile">' +
+                    '<label for="display_avatarsOnProfile">Show Avatars on User Profile pages</label>' +
+                    ' <span class="settingDesc">Shows avatars on User Profiles</span>' +
+                '</p>' +
 
                     '</div>' +
                 '</div>' +
@@ -2408,7 +2427,7 @@ WhirlpoolPlus.feat.display = {
 
     hideClosedThreads: function () {
         if (WhirlpoolPlus.util.get('display_hideClosedThreadsOnProfile')) {
-            WhirlpoolPlus.util.css('.closed { display: none; }')
+            WhirlpoolPlus.util.css('.closed {display:none;}')
         }
     },
     hideThreads: function () {
@@ -2624,6 +2643,35 @@ WhirlpoolPlus.feat.avatar = {
         }
     },
 
+    avatariseProfile: function () {
+        if (WhirlpoolPlus.util.get('avatars_enabled') != 'none' && WhirlpoolPlus.util.get('display_avatarsOnProfile')) {
+            var userNumber = document.location.href.split('user/')[1];
+            if (userNumber.indexOf('?days')) {
+                userNumber = userNumber.split('?')[0];
+            }
+            else if (window.location.href == 'https://forums.whirlpool.net.au/user/') {
+                userNumber = WhirlpoolPlus.util.getUserId();
+            };
+            var userName = document.querySelectorAll('span[itemprop="name"]')[1];
+            $('#userprofile table tbody:contains("Status:")').prepend('<span style="margin:0;vertical-align:top;display:inline-block;" class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></span>&nbsp;<span style="font-weight:bold;font-size:1.5em;" id="avusername"></span>');
+            document.getElementById('avusername').innerHTML = userName.innerHTML;
+            if (WhirlpoolPlus.util.get('avatars_enabled') == 'all') { //Add the identicons
+            var shaObj = new jsSHA("SHA-512", "TEXT");
+            shaObj.update("'" + userNumber + "'");
+            var hash = shaObj.getHash("HEX");
+                WhirlpoolPlus.util.css('div.reply { min-height: 175px !important; }');
+                setTimeout(function () {
+                    var elem = document.querySelector(".wpp_avatar_" + userNumber + "");
+                    var $elem = $(elem);
+                    var style = $elem.css('background-image');
+                    if (style == 'none') {
+                        $('#userprofile table tbody:contains("Status:")').prepend($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
+                    };
+                }, 1500);
+            }
+        }
+    },
+
     getUserAvatar: function (id, type, callback) {
         $.ajax({
             type: 'GET',
@@ -2666,7 +2714,15 @@ WhirlpoolPlus.feat.watchedAlert = {
 
     alertDisplay: function () {
         if (WhirlpoolPlus.util.get('watchedAlert_data').length > 0) {
-            WhirlpoolPlus.util.notify('You have unread <a href="//forums.whirlpool.net.au/forum/?action=watched">watched threads</a>', true);
+            WhirlpoolPlus.util.notify('You have unread <a href="//forums.whirlpool.net.au/forum/?action=watched">watched threads</a> (<a class="clear">clear</a>)', false);
+            $('.clear').on("click", function (e) {
+                var tb = $('#topbar');
+                $('.wpplus_notify').fadeOut();
+                tb.removeClass('notifyfloat');
+                tb.removeClass('notify');
+                $(window).off("scroll", WhirlpoolPlus.util.notify.floatnotify);
+                WhirlpoolPlus.util.set('watchedAlert_data', 0);
+        });
         }
     },
 
@@ -3335,7 +3391,8 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                     //watched threads page go to end buttons
                     if (WhirlpoolPlus.util.pageType.watchedThreads && WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
                         var target = thread.find('td.newest');
-                        target.after('<td class="goend"><a>?</a></td>');
+                        var arrow = '\u2BC8';
+                        target.after('<td class="goend"><a>' + arrow + '</a></td>');
                         $('div.boxed').find('tr.section > td.title:has(a)').attr("colspan", "7");
                     }
 
@@ -3953,11 +4010,12 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.display.oldProfile();
         WhirlpoolPlus.feat.display.userPageInfoToggle();
         WhirlpoolPlus.feat.yourvoteslink();
+        $('#userprofile').each(WhirlpoolPlus.feat.avatar.avatariseProfile);
     }
 
     /** RUN: Own Profile **/
     var uNumber = WhirlpoolPlus.util.getUserId();
-    if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href == 'https://forums.whirlpool.net.au/user/' + uNumber + '') {
+    if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf(uNumber) >0) {
         WhirlpoolPlus.feat.display.superProfile();
     }
 
