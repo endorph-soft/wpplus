@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.3.4
+// @version         5.3.5
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.3.4',
+    version: '5.3.5',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 84,
+    storageVersion: 85,
 
     //Script changelog
     changelog: {
+        '5.3.5': '<ul><li>Fixes issues with avatar display for users without Identicions enabled. Fixes Quick Edit bug.</li></ul>',
         '5.3.4': '<ul><li>Adjustments to avatar & identicon code for performance and display on User Profiles. Expanded broken avatar image to cover all non-https avatar hosts except imgur.</li></ul>',
         '5.3.3': '<ul><li>Adds avatars on User Profile pages. Adds option to clear Watched Threads alert notification. Fixes inbuilt notifier to work as intended. Miscellaneous fixes.</li></ul>',
         '5.3.2': '<ul><li>Further refinements to code for performance. Adds feature to alert user when there are new unread watched threads. Fixes WP Plus menu links redirecting incorrectly. Adds WLR go to last post buttons to Watched Threads page.</li></ul>',
@@ -1048,7 +1049,7 @@ WhirlpoolPlus.settings = {
                     }
 
                     else if (!url.match(/(?:https:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/)) {
-                        alert('WP+: Enter a valid https direct image url to add');
+                        alert('WP+: Enter a valid https direct image URL to add');
                     }
 
                     else {
@@ -1347,7 +1348,7 @@ WhirlpoolPlus.settings = {
                     '<p class="subSettings_heading description"><b>Avatars</b></p>' +
                     '<div class="subSettings_content">' +
 
-                        '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a>, <a href="//postimages.org" target="_blank">Postimage</a> or your preferred alternative, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below. Please ensure you use a host that supports https otherwise your avatar will not display correctly.<br /><br />If you see the X image in place of your avatar, please ensure it is hosted on a working image host and the direct URL is <b>https</b>. In many cases you may be able to adjust the existing URL to https and re-upload your avatar, however please check that it works before doing so.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.' +
+                        '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a>, <a href="//postimages.org" target="_blank">Postimage</a> or your preferred alternative, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below. Please ensure you use a host that supports https otherwise your avatar will not display correctly.<br /><br />If you see the X image but have already uploaded an avatar, please ensure it is hosted on a working image host and the direct URL is <b>https</b>. In many cases you may be able to adjust the existing URL to https and re-upload your avatar, however please check that it works before doing so.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.' +
 
                         '<div id="currentAvatars" class="wpp_hideNotForum">' +
                             '<div style="float: left;">' +
@@ -1362,7 +1363,7 @@ WhirlpoolPlus.settings = {
                             '</div>' +
                         '</div>' +
 
-                        '<p class="description wpp_hideNotForum" style="text-align: center; border: none;"><input type="url" placeholder="Enter URL Here" title="Paste or enter your avatar URL here. HTTPS URL Required" style="width: 250px;" id="currentAvatar_addUrl" /> <button type="button" id="currentAvatar_add">Add</button></p>' +
+                        '<p class="description wpp_hideNotForum" style="text-align: center; border: none;"><input type="url" placeholder="Enter Direct Image URL Here" title="Paste or enter your avatar URL here. HTTPS URL Required" style="width: 250px;" id="currentAvatar_addUrl" /> <button type="button" id="currentAvatar_add">Add</button></p>' +
 
                         '<p style="border:none; padding:0;">' +
                     '<select class="wpp_setting" id="avatars_enabled">' +
@@ -2487,6 +2488,10 @@ WhirlpoolPlus.feat.display = {
             let prettify = await WhirlpoolPlus.util.resource('prettify');
             WhirlpoolPlus.util.css(prettify);
             prettyPrint();
+            setTimeout(function(){ //Fix up the class for quoting purposes
+                $( ".prettyprint" ).wrap('<span class="wcrep1">');
+                $( ".prettyprint" ).parent().before('<span style="display:none"></span>');
+            }, 500);
         }
     },
 
@@ -2617,7 +2622,8 @@ WhirlpoolPlus.feat.avatar = {
             var imagebad = $(allavatars).css("background-image").toLowerCase().indexOf('https') === -1;
             var imageident = document.querySelector('.wpp_avatar_ident_' + userNumber + '') !== null;
             var imgurhosted = $(allavatars).css("background-image").toLowerCase().indexOf('imgur') >=0;
-            if (imagebad == true && imageident == false && imgurhosted == false) {
+            var hasavatar = $(allavatars).css("background-image");
+            if (imagebad == true && imageident == false && imgurhosted == false && hasavatar !== 'none') {
                 $(allavatars).removeClass().addClass('wpp_avatar_bad');
             }
             };
@@ -2680,7 +2686,8 @@ WhirlpoolPlus.feat.avatar = {
             var imagebad = $(allavatars).css("background-image").toLowerCase().indexOf('https') === -1;
             var imageident = document.querySelector('.wpp_avatar_ident_' + userNumber + '') !== null;
             var imgurhosted = $(allavatars).css("background-image").toLowerCase().indexOf('imgur') >=0;
-            if (imagebad == true && imageident == false && imgurhosted == false) {
+            var hasavatar = $(allavatars).css("background-image");
+            if (imagebad == true && imageident == false && imgurhosted == false && hasavatar !== 'none') {
                 $(allavatars).removeClass().addClass('wpp_avatar_bad');
             }
             };
@@ -3814,6 +3821,7 @@ WhirlpoolPlus.feat.quickEdit = {
             //Prevent errors from this undefined function
             $('#fm').removeAttr('onkeypress');
             $('#replyoptions').attr("style", "display:none");
+            $('#replyformBlock').attr("style", "display:block");
 
             //Prevent quick reply post double-up and setup for Whirlcode
             $('#body').prop('id', 'quickeditbody');
