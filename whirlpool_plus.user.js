@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.3.5
+// @version         5.3.6
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.3.5',
+    version: '5.3.6',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 85,
+    storageVersion: 86,
 
     //Script changelog
     changelog: {
+        '5.3.6': '<ul><li>Adds support for User Notes on User Profiles. Changes YouTube video embeds to use Privacy-Enhanced mode.</li></ul>',
         '5.3.5': '<ul><li>Fixes issues with avatar display for users without Identicions enabled. Fixes Quick Edit bug.</li></ul>',
         '5.3.4': '<ul><li>Adjustments to avatar & identicon code for performance and display on User Profiles. Expanded broken avatar image to cover all non-https avatar hosts except imgur.</li></ul>',
         '5.3.3': '<ul><li>Adds avatars on User Profile pages. Adds option to clear Watched Threads alert notification. Fixes inbuilt notifier to work as intended. Miscellaneous fixes.</li></ul>',
@@ -1378,7 +1379,7 @@ WhirlpoolPlus.settings = {
                         '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_avatarsOnProfile">' +
                     '<label for="display_avatarsOnProfile">Show Avatars on User Profile pages</label>' +
-                    ' <span class="settingDesc">Shows avatars on User Profiles</span>' +
+                    ' <span class="settingDesc">Shows avatars on User Profiles, and User Notes if enabled</span>' +
                 '</p>' +
 
                     '</div>' +
@@ -2099,7 +2100,7 @@ WhirlpoolPlus.feat = {
                     var linkSegments = youtubeVidId.exec(link);
 
                     if (linkSegments && linkSegments[1]) {
-                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
@@ -2109,7 +2110,7 @@ WhirlpoolPlus.feat = {
                     var linkSegments = youtubeShortVidId.exec(link);
 
                     if (linkSegments && linkSegments[1]) {
-                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
@@ -3934,6 +3935,62 @@ WhirlpoolPlus.feat.userNotes = {
 
     },
 
+    runOnProfile: function () {
+        if (!WhirlpoolPlus.util.get('userNotes_enabled') && WhirlpoolPlus.util.get('display_avatarsOnProfile')) {
+            return;
+        }
+
+        var userNumber = document.location.href.split('user/')[1];
+            if (userNumber.indexOf('?days')) {
+                userNumber = userNumber.split('?')[0];
+            };
+            if (window.location.href == 'https://forums.whirlpool.net.au/user/') {
+                userNumber = WhirlpoolPlus.util.getUserId();
+            };
+        var userNotesClass = 'userNotes_button_noNotes';
+
+        if (userNumber in this._notes) {
+            userNotesClass = 'userNotes_button_notes';
+        }
+
+        var userNotesButton = $('<span class="userNotes_button ' + userNotesClass + '" data-userNumber="' + userNumber + '"></div>');
+        $('#avusername').after(userNotesButton);
+
+        userNotesButton.on("click", function () {
+            var notebox = $('<textarea id="userNotes_notes">');
+            var dialog = $('<div class="userNotes_dialog">').append(notebox);
+
+            dialog.modal({
+                close: true,
+                closeHTML: '<div class="userNotes_close">Close</div>',
+                containerCss: {
+                    height: '240px',
+                    width: '280px',
+                    'text-align': 'center',
+                    'background-color': '#ddd',
+                    'border': '1px solid #000',
+                    'padding': '20px',
+                },
+                onClose: function () {
+                    WhirlpoolPlus.feat.userNotes._setNotes(userNumber, notebox.val());
+
+                    if (notebox.val() == '') {
+                        userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
+                    } else {
+                        userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
+                    }
+
+                    $.modal.close();
+                }
+            });
+
+            if (userNumber in WhirlpoolPlus.feat.userNotes._notes) {
+                notebox.val(WhirlpoolPlus.feat.userNotes._notes[userNumber]);
+            }
+        });
+
+    },
+
 };
 
 WhirlpoolPlus.run = async function () {
@@ -4036,6 +4093,10 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.display.userPageInfoToggle();
         WhirlpoolPlus.feat.yourvoteslink();
         $('#userprofile').each(WhirlpoolPlus.feat.avatar.avatariseProfile);
+        $('#userprofile').each(async function () {
+            $this = $(this);
+            (WhirlpoolPlus.feat.userNotes.runOnProfile)($this);
+        });
     }
 
     /** RUN: Own Profile **/
