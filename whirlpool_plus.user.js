@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.3.6
+// @version         5.3.7
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,16 +47,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.3.6',
+    version: '5.3.7',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 86,
+    storageVersion: 87,
 
     //Script changelog
     changelog: {
+        '5.3.7': '<ul><li>Fix for WP thread number changes to allow WLR to work.</li></ul>',
         '5.3.6': '<ul><li>Adds support for User Notes on User Profiles. Changes YouTube video embeds to use Privacy-Enhanced mode.</li></ul>',
         '5.3.5': '<ul><li>Fixes issues with avatar display for users without Identicions enabled. Fixes Quick Edit bug.</li></ul>',
         '5.3.4': '<ul><li>Adjustments to avatar & identicon code for performance and display on User Profiles. Expanded broken avatar image to cover all non-https avatar hosts except imgur.</li></ul>',
@@ -3365,7 +3366,6 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                 var overallReplyNumber = $(replyNumberLinks[0]).prop('name').slice(1);
 
                 var currentData = WhirlpoolPlus.feat.whirlpoolLastRead.loadThreadData(WhirlpoolPlus.util.getThreadNumber());
-
                 if (currentData == false || parseInt(currentData['t']) <= threadReplyNumber) {
                     WhirlpoolPlus.feat.whirlpoolLastRead.saveThreadData(WhirlpoolPlus.util.getThreadNumber(), threadReplyNumber, overallReplyNumber);
                 }
@@ -3380,11 +3380,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         threads.each(function () {
             var thread = $(this);
 
-            var threadNumber = parseInt(thread.find('a.title').prop('href').split('thread/')[1]);
-
-            if (isNaN(threadNumber)) {
-                return;
-            }
+            var threadNumber = (thread.find('a.title').prop('href').split('thread/')[1]);
 
             if (thread.is('.deleted') || thread.is('.pointer')) {
                 //ignore this one
