@@ -66,7 +66,7 @@ WhirlpoolPlus.about = {
 
     //Script changelog
     changelog: {
-        '5.3.8': '<ul><li>Due to WP site changes some features such as avatars are currently not working. This build fixes themes, although due to it's image heavy nature the WP Wood theme has been removed at this time. Also fixed - Recent Activity Overlay and Forums Powered by text. Please check the latest posts in the WP Plus thread for ongoing updates.</li></ul>',
+        '5.3.8': '<ul><li>Due to WP site changes some features such as avatars are currently not working. This build fixes themes, although due to its image heavy nature the WP Wood theme has been removed at this time. Also fixed - Recent Activity Overlay and Forums Powered by text. Please check the latest posts in the WP Plus thread for ongoing updates.</li></ul>',
         '5.3.7': '<ul><li>Fix for WP thread number changes to allow WLR to work.</li></ul>',
         '5.3.6': '<ul><li>Adds support for User Notes on User Profiles. Changes YouTube video embeds to use Privacy-Enhanced mode.</li></ul>',
         '5.3.5': '<ul><li>Fixes issues with avatar display for users without Identicions enabled. Fixes Quick Edit bug.</li></ul>',
