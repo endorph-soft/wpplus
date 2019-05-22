@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.3.7
+// @version         5.3.8
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -28,6 +28,7 @@
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/blazy.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/emojify.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.leanModal.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jdenticon.min.js
 // @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/loader.gif
 // @resource        noavatar            https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/noavatar.png
 // @resource        waiting             https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/waiting.gif
@@ -41,22 +42,31 @@
 // @resource        small_whirl_logo    https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/png/whirlpool.png
 // @resource        prettify            https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/css/prettify.css
 // @resource        oldfont             https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/css/wpoldfontfix.css
+// @resource        wpclassiclogo       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewhead.png
+// @resource        wpclassicnews       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewsimage.gif
+// @resource        blacklogo           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/blackwpnewhead.png
+// @resource        teallogo            https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/tealwpnewhead.png
+// @resource        electrolizelogo     https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolizewpnewhead.png
+// @resource        spinner_black       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_black.png
+// @resource        spinner_elec        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_elec.png
+// @resource        spinner_teal        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_teal.png
 // ==/UserScript==
 
 var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.3.7',
+    version: '5.3.8',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 87,
+    storageVersion: 88,
 
     //Script changelog
     changelog: {
+        '5.3.8': '<ul><li>Due to WP site changes some features such as avatars are currently not working. This build fixes themes, although due to it's image heavy nature the WP Wood theme has been removed at this time. Also fixed - Recent Activity Overlay and Forums Powered by text. Please check the latest posts in the WP Plus thread for ongoing updates.</li></ul>',
         '5.3.7': '<ul><li>Fix for WP thread number changes to allow WLR to work.</li></ul>',
         '5.3.6': '<ul><li>Adds support for User Notes on User Profiles. Changes YouTube video embeds to use Privacy-Enhanced mode.</li></ul>',
         '5.3.5': '<ul><li>Fixes issues with avatar display for users without Identicions enabled. Fixes Quick Edit bug.</li></ul>',
@@ -65,36 +75,6 @@ WhirlpoolPlus.about = {
         '5.3.2': '<ul><li>Further refinements to code for performance. Adds feature to alert user when there are new unread watched threads. Fixes WP Plus menu links redirecting incorrectly. Adds WLR go to last post buttons to Watched Threads page.</li></ul>',
         '5.3.1': '<ul><li>Refinements to code for performance. Adjustment to imgur embed to attempt to prevent incorrect preview images. Fixes extra nav buttons in threads.</li></ul>',
         '5.3.0': '<ul><li>Further refinements for WP Jan changes ensuring backwards compatibility with old thread links. Adds option to hide posts from banned users. Clarification of requirements for avatar URLs.</li></ul>',
-        '5.2.9': '<ul><li>Adjusted code to accomodate WP Jan changes, replacing references to old forum URLs. Prior versions of WP Plus will work erratically.</li></ul>',
-        '5.2.8': '<ul><li>Updated Regex for inline images to prevent script errors on threads with long URLs in posts. Reworked emoticon code to add emoji selector. If you previously had Whirlcode on editors disabled, it is now enabled by default, and you will need to adjust in settings.</li></ul>',
-        '5.2.7': '<ul><li>Reworked code to load avatars and images as efficiently as in v5.2.5, while maintaining compatibility. Also updated identicon code to prevent double ups. Special thanks to users Nukkels, Waz and Darkrider for testing.</li></ul>',
-        '5.2.6': '<ul><li>Fixes imgur Gallery embed code. Fixes avatars not loading in some browser & script manager combinations after changes in the previous build.</li></ul>',
-        '5.2.5': '<ul><li>Adds check for bad avatar URLs when adding avatars. Adds loading image for image embeds. Fixes bad avatar links affecting page load completion.</li></ul>',
-        '5.2.4': '<ul><li>Adds link in settings to display where current avatar(s) are hosted. Adds themed spinner menu images for each theme. Changed embedded images to load after page load has completed, to improve page load time.</li></ul>',
-        '5.2.3': '<ul><li>Fixes WLR bug on Watched Threads page when "only colour end square" is enabled. Adds warning for tinypic and non https hosted avatars to WP Plus settings menu.</li></ul>',
-        '5.2.2': '<ul><li>Reworked to support Greasemonkey Webextension Builds 4.1 and later, whilst retaining compatibility with other script managers. Changed recommended Avatar host - if you have used tinypic in the past please consider migrating and updating your avatar.</li></ul>',
-        '5.2.1': '<ul><li>Bandaid fix for Recent Activity Overlay API Bug.</li></ul>',
-        '5.2.0': '<ul><li>Tidied code and updated to latest jQuery library.</li></ul>',
-        '5.1.9': '<ul><li>Fixed layout of user profile page after wiki edit when Super Profile is enabled.</li></ul>',
-        '5.1.8': '<ul><li>Small change to avatar layout based on feedback. Fixes Quick Edit toggle not appearing since latest WP changes.</li></ul>',
-        '5.1.7': '<ul><li>Some code tidying. Revised avatar toggle options - for upgrade installs you will need to reset your avatar display preference!</li></ul>',
-        '5.1.6': '<ul><li>Adds Whirlcode and Smilies to Quick Edit. Adds Identicons for users that do not have avatars.</li></ul>',
-        '5.1.5': '<ul><li>Further refinements to new notification bar. Fixed Super Profile not displaying watched threads correctly. Fixed quick edit bug causing double posts.</li></ul>',
-        '5.1.4': '<ul><li>Adds post count in threads. Fixed imgur album issue. Fixed forums powered by text not displaying after Bulletproof Hosting logo removal. Changed WP Plus notification system.</li></ul>',
-        '5.1.3': '<ul><li>Fixed avatar caching issue.</li></ul>',
-        '5.1.2': '<ul><li>Fixed imgur issues (again). Fixed issues with the latest version of Tampermonkey. Fixed Unread Watched Threads Button opening Unread WHIMs. Added wider display for WHIMS when widescreen view is selected.</li></ul>',
-        '5.1.1': '<ul><li>Tidied up code. Added function to elevate a specific forum section to the top of the Watched Threads list. Improvements to Super Profile functionality. Fixed imgur gallery and Watched Thread redirect bugs. If your WLR Tracking or Hidden Users are not working please see previous version release notes.</li></ul>',
-        '5.1.0': '<ul><li>Changes to settings menu to reflect new options for Watched Threads. You can now find these under the "Threads & Posts" tab. The WLR settings have also changed and you may need to re-enable WLR if you notice it not working. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
-        '5.0.9': '<ul><li>Adds toggle to hide image/video embed URLs and option to show only Unread Watched Threads on Super Profile page. Please note if you are upgrading from a version prior to 5.0.7 you will need to delete and re-add any hidden users.</li></ul>',
-        '5.0.8': '<ul><li>Fixes settings menu bug on certain resolutions, miscellaneous code tweaks</li></ul>',
-        '5.0.7': '<ul><li>Adds username to hidden users view, toggles for enabling/disabling WLR on different pages, fixes Whirlcode block not appearing in Wiki after previewing updates & reworked settings menu</li></ul>',
-        '5.0.6': '<ul><li>Adds toggle for enhanced Watched Threads page & toggle to reverse mark as read/stop watching buttons, fixes floating top bar background, adds toggle for return to last page after sign-in, miscellaneous code tweaks</li></ul>',
-        '5.0.5': '<ul><li>Adds Super Profile option to show Watched Threads on your Profile Page, fixes bug causing random links to display as broken images, miscellaneous other fixes</li></ul>',
-        '5.0.4': '<ul><li>New toggle for old user profile page layout, option to open all watched threads in tabs instead of unread only, moved whim link to correct original location</li></ul>',
-        '5.0.3': '<ul><li>New toggles added for powered by text, OP/Edited text prominence in threads and reps/reads colouring, adjustments to embedded content link display, miscellaneous other fixes</li></ul>',
-        '5.0.2': '<ul><li>Fixes WLR running through reps/reads columns, returns Whirlcode in Wiki, miscellaneous other fixes</li></ul>',
-        '5.0.1': '<ul><li>Adds old font toggle, changes to whim link and image embeds, fixes to aura votes page</li></ul>',
-        '5.0.0': '<ul><li>New version for new Whirlpool</li></ul>',
     },
 
     versionText: function () {
@@ -867,12 +847,6 @@ WhirlpoolPlus.settings = {
                                 postBackgroundColour = '#0C3851';
                                 break;
 
-                            case 'wood':
-                                newPostColour = '#994C00';
-                                noNewPostColour = '#A4672B';
-                                postBackgroundColour = '#CFCBBC';
-                                break;
-
                             case 'default':
                             default:
                                 newPostColour = '#95B0CB';
@@ -1171,7 +1145,6 @@ WhirlpoolPlus.settings = {
                                 '<option value="black">WP Black (by =CHRIS=)</option>' +
                                 '<option value="teal">WP Teal (by =CHRIS=)</option>' +
                                 '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
-                                '<option value="wood">WP Wood (by =CHRIS=)</option>' +
                             '</select>' +
                             ' <label for="display_theme">Custom Theme<br>To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a></label>' +
                             ' <span class="settingDesc">A collection of styles provided by members of Whirlpool</span>' +
@@ -2278,7 +2251,6 @@ WhirlpoolPlus.feat.display = {
     _themes: {
         classic: '@import url(https://wpplus.phyco.name/cssfeed.php?theme=classic);',
         black: '@import url(https://wpplus.phyco.name/cssfeed.php?theme=black);',
-        wood: '@import url(https://wpplus.phyco.name/cssfeed.php?theme=wood);',
         electrolize: '@import url(https://wpplus.phyco.name/cssfeed.php?theme=electrolize);',
         teal: '@import url(https://wpplus.phyco.name/cssfeed.php?theme=teal);'
     },
@@ -2329,6 +2301,36 @@ WhirlpoolPlus.feat.display = {
         }
 
         return styles;
+    },
+
+    themefix: async function () {
+
+        let currentTheme = WhirlpoolPlus.util.get('display_theme');
+        let classiclogo = await WhirlpoolPlus.util.image('wpclassiclogo');
+        let classicnews = await WhirlpoolPlus.util.image('wpclassicnews');
+        let teallogo = await WhirlpoolPlus.util.image('teallogo');
+        let electrolizelogo = await WhirlpoolPlus.util.image('electrolizelogo');
+        let electrolize_1 = await WhirlpoolPlus.util.image('electrolize_1');
+        let blacklogo = await WhirlpoolPlus.util.image('blacklogo');
+
+        switch (currentTheme) {
+            case 'default':
+                break;
+            case 'classic':
+            WhirlpoolPlus.util.css('#logo h1 {background: transparent url("' + classiclogo + '") no-repeat scroll center top / 82% 165px;}');
+            WhirlpoolPlus.util.css('#leftcol #news .article {background: #EEE url("' + classicnews + '") top left no-repeat;}');
+                break;
+            case 'teal':
+            WhirlpoolPlus.util.css('#logo h1 {background: url("' + teallogo + '");}');
+                break;
+            case 'electrolize':
+            WhirlpoolPlus.util.css('#logo h1 {background: url("' + electrolizelogo + '");}');
+            WhirlpoolPlus.util.css('#content .bodytext a.internal {background: transparent url("' + electrolize_1 + '")  no-repeat scroll right top;}');
+                break;
+            case 'black':
+            WhirlpoolPlus.util.css('#logo h1 {background: url("' + blacklogo + '");}');
+                break;
+                        }
     },
 
     floatSidebar: function () {
@@ -2394,8 +2396,230 @@ WhirlpoolPlus.feat.display = {
 
     poweredby: function () {
         if (WhirlpoolPlus.util.get('display_poweredby')) {
+            var quoteArray = [
+"Forums powered by 20 cent pieces",
+"Forums powered by the souls of the damned",
+"Forums powered by a zx speccy",
+"Forums powered by 240v mains electricity",
+"Forums powered by 42",
+"Forums powered by a fat guy on a bike",
+"Forums powered by a glitch in the Matrix",
+"Forums powered by a good idea at the time",
+"Forums powered by a little man in a box",
+"Forums powered by a series of mirrors",
+"Forums powered by a talking horse",
+"Forums powered by a three-eyed fish",
+"Forums powered by alkaline batteries",
+"Forums powered by an Atari 800",
+"Forums powered by AOL CD-ROMs",
+"Forums powered by ARP packets",
+"Forums powered by bad puns",
+"Forums powered by bottled human farts",
+"Forums powered by butterfly sneezes ",
+"Forums powered by candy!",
+"Forums powered by charmed quarks",
+"Forums powered by Chicken McNuggets",
+"Forums powered by chinese whispers",
+"Forums powered by closed captioning",
+"Forums powered by cold air",
+"Forums powered by Commodore 64",
+"Forums powered by Commodore VIC20",
+"Forums powered by cynicism",
+"Forums powered by Darwin Award winners",
+"Forums powered by DOS 6.22",
+"Forums powered by effervescence",
+"Forums powered by eight cyan geese",
+"Forums powered by eight sweet midgets",
+"Forums powered by eight ugly elves",
+"Forums powered by eighteen dumb batteries",
+"Forums powered by eighteen penguins on bicycles",
+"Forums powered by eighty blue rubber ban",
+"Forums powered by eighty nine grey butterflies",
+"Forums powered by eighty nine orange midgets",
+"Forums powered by eighty nine sweet dogs",
+"Forums powered by eighty one cute cheesees",
+"Forums powered by eighty one white penguins",
+"Forums powered by eighty six black elves",
+"Forums powered by eighty six green CD-ROMs",
+"Forums powered by eighty two joyful hamsters",
+"Forums powered by eighty white moons",
+"Forums powered by electromagnetic cheese",
+"Forums powered by elves with guns",
+"Forums powered by the Emergency Medical Hologram",
+"Forums powered by fifteen silly butterflies",
+"Forums powered by fifty blue midgets",
+"Forums powered by fifty one cute chickens",
+"Forums powered by fifty five yellow herring",
+"Forums powered by fifty six joyful cats",
+"Forums powered by fifty six ugly penguins",
+"Forums powered by fifty three green elves",
+"Forums powered by fifty three grey moons",
+"Forums powered by fifty three magenta candies",
+"Forums powered by fifty three silly fish",
+"Forums powered by fifty seven ugly elves",
+"Forums powered by first posts",
+"Forums powered by five cute dogs",
+"Forums powered by floccinaucinihilipilification",
+"Forums powered by forty eight green chickens",
+"Forums powered by forty eight white midgets",
+"Forums powered by forty five dumb moons",
+"Forums powered by forty five grey cats",
+"Forums powered by forty five nasty chickens",
+"Forums powered by forty five orange geese",
+"Forums powered by forty four black dogs",
+"Forums powered by forty four happy cheesees",
+"Forums powered by forty green geese",
+"Forums powered by forty magenta dogs",
+"Forums powered by forty one dumb penguins",
+"Forums powered by forty red penguins",
+"Forums powered by forty seven cyan herring",
+"Forums powered by forty six sweet grunka-lunkas",
+"Forums Powered by forty six grey cats",
+"Forums powered by forty three blue candies",
+"Forums powered by forty three cyan penguins",
+"Forums powered by fossil fuels",
+"Forums powered by four hamsters in a wheel",
+"Forums powered by four happy candies",
+"Forums powered by fourteen happy chickens",
+"Forums powered by fourteen grey butterflies",
+"Forums powered by free horse manure",
+"Forums powered by fresh air",
+"Forums powered by government conspiracies",
+"Forums powered by gravity",
+"Forums powered by herring",
+"Forums powered by halitosis",
+"Forums powered by hot air",
+"Forums powered by human stupidity",
+"Forums powered by irrational arguments",
+"Forums powered by less than fourteen bits",
+"Forums powered by less than nineteen bits",
+"Forums powered by less than seven bits",
+"Forums powered by less than seventeen bits",
+"Forums powered by luke-warm nuclear fusion",
+"Forums powered by ME",
+"Forums powered by midgets in grunka-lunka costumes",
+"Forums powered by modulating the Warp core",
+"Forums powered by navel lint",
+"Forums powered by Never giving you up",
+"Forums powered by Never letting you down",
+"Forums powered by Never running around or deserting you",
+"Forums powered by Never making you cry",
+"Forums powered by Never saying goodbye",
+"Forums powered by Never telling a lie or hurting you",
+"Forums powered by ninety cyan candies",
+"Forums powered by ninety four blue hamsters",
+"Forums powered by ninety one ugly midgets",
+"Forums powered by ninety one white dogs",
+"Forums powered by ninety seven magenta fish",
+"Forums powered by ninety seven silly herring ",
+"Forums powered by ninety seven smart midgets",
+"Forums powered by ninety three happy tyres",
+"Forums powered by ninety two orange elves",
+"Forums powered by ninety two ugly CD-ROMs",
+"Forums powered by ninety seven green elves",
+"Forums powered by nothing",
+"Forums powered by one hundred ugly penguins",
+"Forums powered by ones and zeros (and twos)",
+"Forums powered by perpetual motion",
+"Forums powered by pools of blue-green algae",
+"Forums powered by powdered water",
+"Forums powered by power itself",
+"Forums powered by protons neutrons and electrons",
+"Forums powered by public transport",
+"Forums powered by QBASIC",
+"Forums powered by recycled tyres",
+"Forums powered by rubber bands",
+"Forums powered by scooby snacks",
+"Forums powered by seven cute dogs",
+"Forums powered by seven penguins on bicycles",
+"Forums powered by seventeen silly elves",
+"Forums powered by seventeen different things",
+"Forums powered by seventy four cute humans",
+"Forums powered by seventy four nasty chickens",
+"Forums powered by seventy four white elves",
+"Forums powered by seventy three blue fish",
+"Forums powered by seventy two dumb rubber bands",
+"Forums powered by seventy six grey geese",
+"Forums powered by six different things",
+"Forums powered by six penguins on bicycles",
+"Forums powered by six smart dogs",
+"Forums powered by sixteen hamsters in a wheel",
+"Forums powered by sixty eight cute midgets",
+"Forums powered by sixty five red midgets",
+"Forums powered by sixty four smart CD-ROMs",
+"Forums powered by sixty four sweet humans",
+"Forums powered by sixty nine cute humans",
+"Forums powered by sixty nine dumb herring",
+"Forums powered by sixty nine green herring",
+"Forums powered by sixty nine silly midgets",
+"Forums powered by sixty nine white butterflies",
+"Forums powered by sixty one happy dogs",
+"Forums powered by sixty orange moons",
+"Forums powered by sleep deprivation",
+"Forums powered by soy milk",
+"Forums powered by spontaneous combustion",
+"Forums powered by stale air",
+"Forums powered by ten different things",
+"Forums powered by ten joyful elves",
+"Forums powered by ten lords a-leaping",
+"Forums powered by The Department of Redundancy Department",
+"Forums powered by the Emergency Medical Hologram",
+"Forums powered by the force",
+"Forums powered by the moons of Jupiter",
+"Forums powered by thirteen blue elves",
+"Forums powered by thirty eight green fish",
+"Forums powered by thirty eight silly elves",
+"Forums powered by thirty eight silly geese",
+"Forums powered by thirty eight silly humans",
+"Forums powered by thirty five cyan hamsters",
+"Forums powered by thirty five happy hamsters",
+"Forums powered by thirty four nasty dogs",
+"Forums powered by thirty seven ugly herring",
+"Forums powered by thirty seven yellow humans",
+"Forums powered by thirty six cyan humans",
+"Forums powered by thirty two sweet fish ",
+"Forums powered by thirty one dumb moons",
+"Forums powered by thirty two smart chickens",
+"Forums powered by thirty two stupid geese",
+"Forums powered by those little blue crunchy things!",
+"Forums powered by three blind mice",
+"Forums powered by three magenta penguins",
+"Forums powered by three red butterflies",
+"Forums powered by tinfoil hats",
+"Forums powered by toenail clippings",
+"Forums powered by twelve different things",
+"Forums powered by twelve dumb chickens",
+"Forums powered by twelve hamsters in a wheel",
+"Forums powered by twelve stupid fish",
+"Forums powered by twenty eight happy chickens",
+"Forums powered by twenty eight stupid penguins",
+"Forums powered by twenty four green cats ",
+"Forums powered by twenty five smart humans",
+"Forums powered by twenty green herring",
+"Forums powered by twenty joyful cats",
+"Forums powered by twenty nasty hamsters",
+"Forums powered by twenty nine nasty midgets",
+"Forums powered by twenty one dumb herring",
+"Forums powered by twenty smart CD-ROMs",
+"Forums powered by twenty two stupid hamsters",
+"Forums powered by two blue penguins",
+"Forums powered by two Little Green Men",
+"Forums powered by two penguins on bicycles",
+"Forums powered by underpaid sweatshop workers",
+"Forums powered by vBullshit 2.1.4a",
+"Forums powered by Windows 1.0",
+"Forums powered by WebTV",
+"Forums powered by your mind",
+"Forums powered by three eskimos",
+"Forums powered by nothing",
+"Forums powered by Russian Mafia",
+"Forums powered by free horse manure ",
+"Forums powered by twenty four nasty chickens",
+"Forums powered by ninety nine bottles of beer on the wall",
+            ];
+            var randomItem = quoteArray[Math.floor(Math.random()*quoteArray.length)];
             $('#bignumbers').prepend($('<dl><dt>Powered By</dt><dd class="pwrdby"></dd></dl>'));
-            $('dd.pwrdby').load('https://wpplus.phyco.name/rdmtext/rantex.php');
+            $('dd.pwrdby').html(''+ randomItem +'');
         }
     },
 
@@ -2512,34 +2736,34 @@ WhirlpoolPlus.feat.display = {
         //Below is code emoji selector will call when required
         getIconSet: function () {
 
-            let angry = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/angry.png';
-            let confused = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/confused.png';
-            let cool = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/sunglasses.png';
-            let cry = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/cry.png';
-            let frown = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/frowning.png';
-            let grin = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/grin.png';
-            let heart = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/heart.png';
-            let lips = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/no_mouth.png';
-            let sleep = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/sleepy.png';
-            let smile = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/smile.png';
-            let smirk = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/smirk.png';
-            let tongue = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/stuck_out_tongue.png';
-            let wink = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/wink.png';
-            let star = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/star.png';
-            let brokenheart = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/broken_heart.png';
-            let mask = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/mask.png';
-            let grinning = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/grinning.png';
-            let openmouth = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/open_mouth.png';
-            let cheekykiss = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/kissing_heart.png';
-            let scream = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/scream.png';
-            let XD = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/stuck_out_tongue_closed_eyes.png';
-            let XP = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/stuck_out_tongue_winking_eye.png';
-            let rage = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/rage.png';
-            let pensive = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/pensive.png';
-            let confounded = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/confounded.png';
-            let flushed = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/flushed.png';
-            let thumbsup = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/thumbsup.png';
-            let thumbsdown = 'https://cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/images/basic/thumbsdown.png';
+            let angry = '\uD83D\uDE20';
+            let confused = '\uD83D\uDE15';
+            let cool = '\uD83D\uDE0E';
+            let cry = '\uD83D\uDE2D';
+            let frown = '\uD83D\uDE41';
+            let grin = '\uD83D\uDE01';
+            let heart = '\u2764';
+            let lips = '\uD83E\uDD2B';
+            let sleep = '\uD83D\uDE2A';
+            let smile = '\uD83D\uDE42';
+            let smirk = '\uD83D\uDE0F';
+            let tongue = '\uD83D\uDE1B';
+            let wink = '\uD83D\uDE09';
+            let star = '\u2B50';
+            let brokenheart = '\uD83D\uDC94';
+            let mask = '\uD83D\uDE37';
+            let grinning = '\uD83D\uDE00';
+            let openmouth = '\uD83D\uDE2E';
+            let cheekykiss = '\uD83D\uDE18';
+            let scream = '\uD83D\uDE31';
+            let XD = '\uD83D\uDE1D';
+            let XP = '\uD83D\uDE1C';
+            let rage = '\uD83D\uDE21';
+            let pensive = '\uD83D\uDE14';
+            let confounded = '\uD83D\uDE16';
+            let flushed = '\uD83D\uDE33';
+            let thumbsup = '\uD83D\uDC4D';
+            let thumbsdown = '\uD83D\uDC4E';
 
          icons = {
             ':angry:': angry,
@@ -2596,7 +2820,7 @@ WhirlpoolPlus.feat.avatar = {
             WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css?' + new Date().getTime() + ');');
         }
 
-        return ".wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_preload {display: block; background-repeat: no-repeat; margin:0 auto; background:url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');} .wpp_avatar_bad {display:block; background-repeat: no-repeat; margin:0 auto; height:80px; width:80px; background:url('https://i.imgur.com/Yfk1zI9.png');}";
+        return ".wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_preload {display: block; background-repeat: no-repeat; margin:0 auto; background:url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');} .wpp_avatar_bad {display:block; background-repeat: no-repeat; margin:0 auto; height:80px; width:80px; background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAAH5FsI7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAxdJREFUeNpiLC8v/89ABGBBYjPiU8iEpOg/MQoJKmZC4+NUzIRFDKtibAoZOjo6MBQz4XE/imImAsEHV8xERFiDFQMEECOxMcP4//9/hoqKCryKgJ4jymoGYt1II4XMP378IKhoz549A+lGgABCjhlGBioAJqTkx0Ao2xAC2GKaYoOZ8KRUsgwmJr+QZDDYQEK5AGQwKHwIGQwyh4lEHxF0MROZYY/TYCYKkx2GwUwM1AFwgwECiOgyjFjAQs1sB3IhEwOVwaiBowaOGjhq4KiBNDIQIAAzdpACMAgDUdSK9z+zG6FSKo31J5kcQN5Cx1H8TqGnvdT+S8h333mjCiG1k5jh4dtm9KZOh1pPXRoUb9cquRUGxdu/avK7QfF3/AQl1uMfJ3TgV+c97vZvIQONAv6GRgO3oVlAMzQb+AlVAS6h7RGux2P4J9wJ+9IFYNZebgCEYSCIoum/aJQDCBCfkNjJuIInuHi90WcSFvlEH/ZCf6/1C54WDcw4G/B2RcOMswBfl1vMuNnAqliAGTcL+CtQYcaNBjZFUcy4UcCuEI8Zlw0MOX9gxmUBQ5sCzLhoYErHQiSunN62fsMETG2nMON6gUN6Pcy4VuDQRhQz7i9wSpeMGVcLnNrCY8Z9ARXvFzDjnoCqlx+YcVegDncEKnFlQnuSwI5kn1WAdu5oh0EQhsLwaPb+z7xk2ZLFoBPa0r8At959EvXQWnydhL6eNdTN8vflevoUxLSUgeGuqzi0JkIa3DH043sHaTuuN46sBNnUxobvvaTC9QLOCKlqnMT3rlLhrAAzQtr/cmuZbMCQHj3ObgU6EqQLnDcgAdIVbhRgBOQQuNGAIyCHwkUBekCGwEUDWkCGwlEAeyARcDTAO5AoOCpgDRIJRwf84pXHjVleoXf6UFQqILjWaxEf6dWiEmHHvdfv8fmnJFlgkJj/Mlp3f5p5CvTIlWbeAz1ypZlHQY9caeZl0CNXmnke9MiVZt4IPXK5QcrkcO6QsgicG6QsBmcOKYvCmUHK4nBqSNlwOkjZcDpI2XA6yN2ln+gwYcr1Am6h1l283PhYAAAAAElFTkSuQmCC');}";
     },
 
     avatariseRow: function (replyTr) {
@@ -2638,7 +2862,7 @@ WhirlpoolPlus.feat.avatar = {
                     var $elem = $(elem);
                     var style = $elem.css('background-image');
                     if (style == 'none') {
-                        replyTr.find('.replyuser-inner').prepend($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
+                        replyTr.find('.replyuser-inner').prepend($('<div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
                     };
                 }, 2500);
             }
@@ -2677,7 +2901,7 @@ WhirlpoolPlus.feat.avatar = {
                     var $elem = $(elem);
                     var style = $elem.css('background-image');
                     if (style == 'none') {
-                        $("#userprofile table tbody span:contains(" + userNumber + ")").append($('<script type="text/javascript" src="https://cdn.jsdelivr.net/jdenticon/1.4.0/jdenticon.min.js"></script><div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
+                        $("#userprofile table tbody span:contains(" + userNumber + ")").append($('<div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
                     };
                 }, 1000);
             }
@@ -2896,9 +3120,9 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
     },
 
     displayOverlay: function () {
-        let reload = 'https://i.imgur.com/sLvbVnR.png';
-        let star = 'https://i.imgur.com/367pZYX.gif';
-        $('body').append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><img id="recentActivityReload" alt="Reload" src="' + reload + '" /></div><div id="recentActivityHandle">Recent Activity <img src="' + star + '" alt="Unread threads" id="recentActivityUnreadThreads" /></div></div>');
+        let reload = '\u21BB';
+        let star = '\u2B50';
+        $('body').append('<div id="recentActivityDropdownContainer"><div id="recentActivity"><div id="recentActivityContent">Loading...</div><span id="recentActivityReload">'+ reload + '</span></div><div id="recentActivityHandle">Recent Activity <span id="recentActivityUnreadThreads">' + star + '</span></div></div>');
 
 
         var activityOpen = false;
@@ -3095,10 +3319,9 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
         let currentTheme = WhirlpoolPlus.util.get('display_theme');
         let spinnerdefault = await WhirlpoolPlus.util.image('small_whirl_logo');
-        let spinnerteal = 'https://i.imgur.com/o6hb8vM.png';
-        let spinnerelec = 'https://i.imgur.com/rBxNjwy.png';
-        let spinnerwood = 'https://i.imgur.com/HQHaiME.png';
-        let spinnerblack = 'https://i.imgur.com/7F013zh.png';
+        let spinnerteal = await WhirlpoolPlus.util.image('spinner_teal');
+        let spinnerelec = await WhirlpoolPlus.util.image('spinner_elec');
+        let spinnerblack = await WhirlpoolPlus.util.image('spinner_black');
         var uNumber = WhirlpoolPlus.util.getUserId();
         var spinnerimage;
         switch (currentTheme) {
@@ -3113,9 +3336,6 @@ WhirlpoolPlus.feat.spinnerMenu = {
                 break;
             case 'electrolize':
             spinnerimage = spinnerelec;
-                break;
-            case 'wood':
-            spinnerimage = spinnerwood;
                 break;
             case 'black':
             spinnerimage = spinnerblack;
@@ -3695,9 +3915,9 @@ WhirlpoolPlus.feat.editor = {
             controls += '<div id="dialog" title="Emoji Selector"><div id="selector_header"><h3>Emoji Selector</h3><p>Select emoji to be added to your post.<br /><i>These will only be displayed as an image for other users with WP Plus installed.</i></p></div>';
             icons = WhirlpoolPlus.feat.display.emoticons.getIconSet(false);
             for (icon in icons) {
-                controls += '<button type="button" data-type="emoticon" data-code="' + icon.replace('\\\\', '\\') + '" title="' + icon.replace('\\\\', '\\') + '" class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"><img src="' + icons[icon] + '"/></button>';
+                controls += '<button type="button" data-type="emoticon" data-code="' + icon.replace('\\\\', '\\') + '" title="' + icon.replace('\\\\', '\\') + '" class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"><span>' + icons[icon] + '</span></button>';
             }
-            controls += '<a class="modal_close"><b>Close</b></a></div><button type="button" title="Open Emoji Selector" class="wpp_whirlcodeButton" id="opener" href="#dialog"><img src="https://i.imgur.com/1pf0QKX.png" alt="Open Emoji Selector"></button>';
+            controls += '<a class="modal_close"><b>Close</b></a></div><button type="button" title="Open Emoji Selector" class="wpp_whirlcodeButton" id="opener" href="#dialog">\uD83D\uDE42</button>';
         }
 
         $(locationID).append(controls);
@@ -4021,7 +4241,8 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.whirlpoolLastRead.css() +
         WhirlpoolPlus.feat.editor.css() +
         WhirlpoolPlus.feat.userNotes.css() +
-        WhirlpoolPlus.feat.penaltyBoxCss()
+        WhirlpoolPlus.feat.penaltyBoxCss() +
+        WhirlpoolPlus.feat.display.themefix()
     );
 
     /** RUN: Not Alerts **/
