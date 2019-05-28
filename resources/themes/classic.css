@@ -1,0 +1,526 @@
+/**
+Title: Whirlpool Forums Custom CSS Theme
+URL: http://forums.whirlpool.net.au/
+Theme: WP Classic (2015 Rewrite Rev 1.01 22nd May 2019)
+Changes in this Revision: Adjustments to logos due to WP changes
+Author: Phyco (User #105852)
+Credits: Whirlpoolian, User #38161, User #44690, Foonly
+**/
+
+/**Body & Sitewide CSS Modifications**/
+
+body {
+	background-color: rgb(63, 67, 94);
+}
+
+#logo h1 {
+	padding: 0px;
+	position: relative;
+	margin: -23px 0px 0px;
+	width: 100%;
+	height: 165px;
+}
+
+#footer {
+	background: none repeat scroll 0% 0% rgb(63, 67, 94);
+}
+
+#footer dl dt {
+	color: #dfdfdf !important;
+	font-family: "Helvetica Neue",Arial,sans-serif !important;
+}
+
+#footer dl dd {
+	color: #dfdfdf !important;
+	font-family: "Helvetica Neue",Arial,sans-serif !important;
+}
+
+#footer dl dd a {
+	color: #b2b5cc !important;
+	text-decoration: none !important;
+}
+
+#footer dl dd a:hover {
+	color: #dfdfdf !important;
+}
+
+#topbar {
+	background: #3F435E !important;
+}
+
+#topbar #userbar {
+	font: 1.3em Trebuchet MS !important;
+}
+
+#topbar #userbar a {
+	color: rgb(178, 181, 204) !important;
+}
+
+#topbar #userbar #ub_settings a:hover {
+	background-color: #525D94;
+}
+
+#topbar #userbar #ub_settings.opened a {
+	background-color: #525D94;
+}
+
+#topbar #userbar #ub_menu.opened {
+	background-color: #616CA3;
+}
+
+#topbar #userbar #ub_menu.opened ul li a {
+	background-color: #525D94;
+}
+
+#topbar #userbar #ub_menu.opened ul li a:hover {
+	background-color: #616CA3;
+}
+
+#upperbar ul.breadcrumb li span {
+	font: .55em "Lucida Grande",Verdana,Arial,Helvetica !important;
+	color: rgb(223, 223, 223);
+}
+
+#lowerbar ul.breadcrumb li span {
+	font: .65em "Lucida Grande",Verdana,Arial,Helvetica !important;
+	color: rgb(223, 223, 223);
+}
+
+#lowerbar ul.breadcrumb li a {
+	font: .65em "Lucida Grande",Verdana,Arial,Helvetica !important;
+	color: rgb(223, 223, 223);
+}
+
+#upperbar ul.breadcrumb li a {
+	font: normal 78%/78% "Lucida Grande",Verdana,Arial,Helvetica !important;
+	color: rgb(223, 223, 223);
+}
+
+#left.sidebar {
+	font: 12px/18px "Helvetica Neue",Arial,sans-serif !important;
+}
+
+#left ul#menu > li.odd {
+	background: transparent !important;
+}
+
+#left ul#menu > li#menu_whim.unread {
+	background: #D87400 !important;
+}
+
+#left ul#menu > li.even {
+	background: #616CA3 !important;
+}
+
+#left ul#menu > li.even selected {
+	background: #616CA3;
+}
+
+#left ul#menu > li.selected {
+	background: #616CA3;
+}
+
+#left ul#menu > li.selected > a {
+	color: rgb(223, 223, 223) !important;
+}
+
+#left ul#menu > li.selected > ul > li {
+	color: #b2b5cc !important;
+}
+
+#left ul#menu > li.selected > ul > li > a {
+	color: rgb(178, 181, 204) !important;
+	text-decoration: none !important;
+}
+
+#left ul#menu > li.selected > ul > li > a:hover {
+	color: #dfdfdf !important;
+}
+
+#left ul#menu > li > a {
+	text-transform: uppercase !important;
+	font: 1.25em "Lucida Grande",Verdana,Arial,Helvetica,trebuchet;
+	color: #D3DEFF;
+}
+
+#left ul#menu > li > a:hover {
+	background-color: #2a3266;
+}
+
+#content a.inter, #content a.internal {
+	color: #239 !important;
+	border-bottom-color: #CFD5E1 !important;
+}
+
+/* Local Time, Membership & Big Numbers Font Fix */
+
+#left dl dd {
+	color: #b2b5cc !important;
+	text-transform: capitalize !important;
+}
+
+#left dl dd a {
+	color: #dfdfdf !important;
+	text-decoration: none;
+	border-bottom: none solid #DFDFDF !important;
+}
+
+#left dl dt {
+	border-bottom: none solid #DFDFDF !important;
+	color: #b2b5cc !important;
+	text-transform: capitalize !important;
+}
+
+/* forum index page & thread view */
+
+#innershadow {
+	background: none repeat scroll 0% 0% rgb(130, 141, 187);
+}
+
+#forumindex {
+	background: none repeat scroll 0% 0% rgb(130, 141, 187);
+}
+
+#forumindex h3 {
+	font: 1.2em "Lucida Grande",Verdana,Arial,Helvetica,trebuchet !important;
+	text-transform: uppercase !important;
+}
+
+#innerpage {
+	background: none repeat scroll 0% 0% rgb(130, 141, 187) !important;
+}
+
+#watch_button.bactive {
+	background-color: #d87400 !important;
+	background-image: none !important;
+}
+
+#content div.buttons a:link, #content div.buttons a:visited {
+	background-color: #525d94;
+	background-image: none !important;
+}
+
+#content div.buttons a:active, #content div.buttons a:hover {
+	background-color: #525d94 !important;
+	background-image: none !important;
+}
+
+#content div.buttons a.blink {
+	border: 0px !important;
+	background-color: #525d94 !important;
+}
+
+#content div.buttons a.blink:link, #content div.buttons a.blink:visited {
+	color: #fff;
+}
+
+#content ul.pagination,
+#content ul#breadcrumb li,
+#content ul#breadcrumb li a,
+#content ul#breadcrumb_footer li,
+#content ul#breadcrumb_footer li a {
+	font-family: 'Lucida Grande',Verdana,Arial,Helvetica,trebuchet !important;
+}
+
+#content ul#breadcrumb li,
+body.webkit #content ul#breadcrumb li,
+#content ul#breadcrumb_footer li,
+body.webkit #content ul#breadcrumb_footer li {
+	font-size: 1.2em !important;
+}
+
+#threads table tbody tr td {
+	border-top: 0px !important;
+	border-bottom: 1px solid #cfcfcf !important;
+}
+
+#threads table tbody tr.sticky td.title a.title {
+	color: #000 !important;
+}
+
+#replies div.notebar.public {
+	background: none repeat scroll 0% 0% rgb(216, 116, 0) !important;
+	color: #fff !important;
+}
+
+/* Page Number CSS Fixes */
+
+#content ul.pagination,
+body.webkit #content ul.pagination {
+	font-size: 1.1em !important;
+}
+
+#content ul.pagination li,
+#content div.footbar ul.pagination li {
+	border-right-color: #6671AA !important;
+}
+
+#content ul.pagination li.user a,
+#content div.footbar ul.pagination li.user a {
+	background-color: #7882B4 !important;
+	color: #ff9105 !important;
+}
+
+#content ul.pagination li.current a,
+#content div.footbar ul.pagination li.current a {
+	background-color: #D87400 !important;
+	color: #dfdfdf !important;
+}
+
+#content ul.pagination li a {
+	color: #dfdfdf !important;
+}
+
+#content ul.pagination li a:hover,
+#content div.footbar ul.pagination li a:hover {
+	text-decoration-style: solid !important;
+	text-decoration-color: #fff !important;
+}
+
+#content ul.pagination li.user a:hover,
+#content div.footbar ul.pagination li.user a:hover {
+	text-decoration-style: solid !important;
+	text-decoration-color: #fff !important;
+	background-color: #828dbb !important;
+}
+
+#content ul.pagination li.current a:hover,
+#content div.footbar ul.pagination li.current a:hover {
+	background-color: #FF9922 !important;
+}
+
+#content ul.pagination li.first a,
+#content ul.pagination li.last a {
+	color: #B7BCD7 !important;
+	white-space: nowrap;
+} 
+
+#content ul.pagination li.last a,
+#content div.footbar ul.pagination li.last a {
+	color: #B7BCD7 !important;
+	white-space: nowrap;
+}
+
+#replies div.notebar.parts {
+	color: #B7BCD7;
+}
+
+#replies div.notebar.parts a {
+	background-color: #525d94;
+}
+
+#replies div.notebar.parts a.current {
+	background-color: #D87400 !important;
+}
+
+/* Replies & Reads Header CSS Fix */
+
+#threads table thead tr td.reps,
+#threads table thead tr td.reads,
+#threads table thead tr td.oldest,
+#threads table thead tr td.newest,
+#threads table thead tr td.goend,
+#threads table thead tr td.unread {
+	background-color: #3a437b !important;
+}
+
+#threads table tbody tr.sticky td.reps,
+#threads table tbody tr.sticky td.reads {
+	background-image: url(https://forums.whirlpool.net.au/img/forum/grad-grey.gif) !important;
+}
+
+#threads table tbody tr.recent td.tint9, #threads table tbody tr td.tint9{
+  background: #979EC4;
+  background: -webkit-linear-gradient(top, #979EC4 0, #979EC4 25px);
+  background: linear-gradient(to bottom, #979EC4 0, #979EC4 25px);
+}
+
+#threads table tbody tr.recent td.tint8, #threads table tbody tr td.tint8 {
+  background: #A5ABCB;
+  background: -webkit-linear-gradient(top, #A5ABCB 0, #A5ABCB 25px);
+  background: linear-gradient(to bottom, #A5ABCB 0, #A5ABCB 25px);
+}
+
+#threads table tbody tr.recent td.tint7, #threads table tbody tr td.tint7 {
+  background: #B2B7D1;
+  background: -webkit-linear-gradient(top, #B2B7D1 0, #B2B7D1 25px);
+  background: linear-gradient(to bottom, #B2B7D1 0, #B2B7D1 25px);
+}
+
+#threads table tbody tr.recent td.tint6, #threads table tbody tr td.tint6 {
+  background: #C0C4D8;
+  background: -webkit-linear-gradient(top, #C0C4D8 0, #C0C4D8 25px);
+  background: linear-gradient(to bottom, #C0C4D8 0, #C0C4D8 25px);
+}
+
+#threads table tbody tr.recent td.tint5, #threads table tbody tr td.tint5 {
+  background: #C7CADB;
+  background: -webkit-linear-gradient(top, #C7CADB 0, #C7CADB 25px);
+  background: linear-gradient(to bottom, #C7CADB 0, #C7CADB 25px);
+}
+
+#threads table tbody tr.recent td.tint4, #threads table tbody tr td.tint4 {
+  background: #CED0DF;
+  background: -webkit-linear-gradient(top, #CED0DF 0, #CED0DF 25px);
+  background: linear-gradient(to bottom, #CED0DF 0, #CED0DF 25px);
+}
+
+#threads table tbody tr.recent td.tint3, #threads table tbody tr td.tint3 {
+  background: #D4D7E2;
+  background: -webkit-linear-gradient(top, #D4D7E2 0, #D4D7E2 25px);
+  background: linear-gradient(to bottom, #D4D7E2 0, #D4D7E2 25px);
+}
+
+#threads table tbody tr.recent td.tint2, #threads table tbody tr td.tint2 {
+  background: #DBDDE5;
+  background: -webkit-linear-gradient(top, #DBDDE5 0, #DBDDE5 25px);
+  background: linear-gradient(to bottom, #DBDDE5 0, #DBDDE5 25px);
+}
+
+#threads table tbody tr.recent td.tint1, #threads table tbody tr td.tint1 {
+  background: #E2E3E9;
+  background: -webkit-linear-gradient(top, #E2E3E9 0, #E2E3E9 25px);
+  background: linear-gradient(to bottom, #E2E3E9 0, #E2E3E9 25px);
+}
+
+#threads table tbody tr.recent td.tint0, #threads table tbody tr td.tint0 {
+  background: #E9E9EC;
+  background: -webkit-linear-gradient(top, #E9E9EC 0, #E9E9EC 25px);
+  background: linear-gradient(to bottom, #E9E9EC 0, #E9E9EC 25px);
+}
+
+/* Alert Page CSS Fix */
+
+#alert {
+	background: linear-gradient(to bottom, #525D94 0px, #3A437B 100%) repeat scroll 0% 0% #525D94 !important;
+	font: 14px "Helvetica Neue",Verdana,Arial,sans-serif !important;
+}
+
+#alert h1 {
+	font: 1.5em "Helvetica Neue",Verdana,Arial,sans-serif !important;
+	text-transform: uppercase !important;
+}
+
+body.brown {
+	background: rgb(63, 67, 94) !important;
+}
+
+body.error {
+	background: rgb(63, 67, 94) !important;
+}
+
+/* User Profile Page Colour & Font Formatting */
+
+#userprofile h2 {
+	font: bold !important;
+	color: #FFFFFF !important;
+	text-transform: capitalize !important;
+}
+
+#userprofile table {
+	background-color: #EEE !important;
+	border: 1px solid silver !important;
+}
+
+#userprofile #threads table {
+	background-color: transparent !important;
+	border-width: 0px !important;
+}
+
+#userprofile #threads table thead tr td.reps,
+#userprofile #threads table thead tr td.reads {
+	color: #fff !important;
+}
+
+#userprofile #threads table thead tr td.newest,
+#userprofile #threads table thead tr td.oldest {
+    color: #fff !important;
+    text-align: center;
+}
+
+/* Watched Threads Page Font Fix */
+
+#threads.boxed table thead tr td {
+	color: #fff !important;
+}
+
+/* Preferences Page tab background & hover colour */
+
+#navlist a:link, #navlist a:visited  {
+  background-color: #616ca2 !important;
+}
+
+#navlist a:hover {
+  background-color: #3a437b !important;
+}
+
+/* Front News Page CSS & Background Image Fix */
+
+#leftcol #news .article h1 {
+	font-family: sans-serif;
+}
+
+#news .article.roundup h4 span.publisher {
+	color: #000 !important;
+}
+
+#latestjobs .job,
+#latestforum .forum {
+	border-bottom-color: #CFD5E1 !important;
+}
+
+#latestjobs .job em {
+	color: #3A437B !important;
+}
+
+/* Broadband Choice CSS Fix */
+
+#bc_body td.title h1 {
+	color: #000 !important;
+	font-weight: bold !important;
+}
+
+/* Wiki CSS Fix */
+
+#wiki div.bodytext h3 {
+	color: #000 !important;
+}
+
+#wiki box {
+	background: #EEE !important;
+}
+
+#content a.wiki {
+	color: #239 !important;
+	border-bottom-color: #CFD5E1 !important;
+}
+
+/* Job Board CSS Fix */
+	
+#box > h1,
+#box > h3 {
+	color: #000 !important;
+}
+
+#jobs h4 {
+	border-bottom-color: #CFD5E1 !important;
+}
+
+/* Search Page Background Fix */
+
+#searchbox {
+	background-color: #EEE !important;
+}
+
+/**WP Plus Modifications**/
+
+/* Recent Activity Overlay - Font Fix */
+
+#recentActivityHandle {
+	font-family: Trebuchet MS !important;
+}
+
+/* Spinner Menu Colours */
+
+#pmenu>li>ul>li>a{background:#616ca3 !important;color:#fff !important;}
+#pmenu li:hover > a {background:#dfd7ca !important; color:#EAA53F !important;}
