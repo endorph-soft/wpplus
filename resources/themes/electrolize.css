@@ -1,0 +1,496 @@
+/*menu+spinner*/
+#pmenu > li > ul > li > a {
+    background: #1a475e !important;
+    color: 1a475e !important;
+}
+#pmenu a {
+    border: 1px solid #020e14 !important;
+    background: #1a475e !important;
+}
+#pmenu li:hover>a{
+    background: #848484 !important;
+    color: #1a475e !important;
+}
+/*threadnumber-expand*/
+#content ul.pagination li.expand a:active, #content ul.pagination li.expand a:hover {
+    background-color: #1b4858;
+    color: #1a1a1a;
+}
+#content ul.pagination li.expand a:active, #content ul.pagination li.expand {
+    background-color: #1b4858;
+}
+#content ul.pagination li.expand a {
+    background-color: #123547;
+    color: #1a1a1a;
+}
+/*threadPart-number-colours*/
+#replies div.notebar.parts a {
+    background-color: #1f3e49;
+}
+#replies div.notebar.parts a:active, #replies div.notebar.parts a:hover {
+    background-color: #2e5969;
+}
+#replies div.notebar.parts a.current {
+    background-color: #020e14;
+}
+/*sidebar-colour*/
+#left ul#menu > li.selected {
+    background: linear-gradient(to right, #0e171f 0%, #111b25 4%, #13212d 100%);
+}
+body {
+    background-color: #061E2B;
+}
+#pmenu a{
+	background:#061E2B !important; border-color:#007aa6 !important;color:#007aa6 !important;
+}
+#pmenu>li>ul>li>a{
+	background:#073c56 !important;color:#007aa6 !important;
+}
+#send {
+    background: #073c56 none repeat scroll 0 0 !important;
+    border-color: #073c56;
+}
+#upperbar div.up_icon {
+    border: 1px solid #007aa6;
+}
+#left.sidebar {
+    background-color: #020e14;
+}
+#page #upperbar {
+	background-color: #020e14;
+}
+#page {
+    background: none repeat scroll 0 0 #020e14;
+    border-bottom: 1px solid #020e14;
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+ul.breadcrumb li::before {
+    color: #007aa6 !important;
+}
+ul.breadcrumb li span {
+    color: #007aa6;
+}
+#left ul#menu > li.selected {
+	background: linear-gradient(to right, #0D1821 0%, #13202C 4%, #13202C 100%) repeat scroll 0 0 rgba(0, 0, 0, 0) !important;
+}
+#page #innerpage {
+    background-color: #13212D;
+}
+#innershadow {
+    background: linear-gradient(to bottom, #101C26 0px, #111f2b 10px, #111f2b 100px) repeat scroll 0 0 rgba(0, 0, 0, 0)
+}
+#threads.boxed table thead tr td {
+	background-color: #0b5586;
+}
+#forumindex h3 {
+    background-color: #020e14;
+	color: #06a0d3;
+}
+#forumindex table td.title {
+    background: linear-gradient(to bottom, #0d2937 0px, #0d2937 40px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#forumindex table td.threads {
+     background: linear-gradient(to bottom, #0f2e3d 0px, #0f2e3d 40px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    color: #00384c;
+}
+#threads table tbody tr td {
+    background: linear-gradient(to bottom, #0b202b 0px, #0b202b 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.pointer td.title a.title {
+    color: #0f4a66;
+}
+#threads table tbody tr td.goend.user-sub {
+    background: linear-gradient(to bottom, #0e435b 0px, #0e435b 25px) repeat scroll 0 0 #0e435b;
+}
+#userprofile div table {
+background: #0C2735 !important;
+}
+#forumindex table td.title, #forumindex table td.threads {
+	border-bottom: 1px solid #020e14;
+}
+#threads table tbody tr.closed td.title a.title {
+    color: #525F66 !important;
+}
+#threads table tbody tr td.point {
+    color: #007aa6;
+}
+#content a:link {
+    color: #007aa6;
+	text-shadow: none;
+}
+#content a {
+	color: #06a0d3;
+}
+#content a:visited {
+	color: #007aa6 !important;
+}
+#content .wcspoil {
+    background-color: #08212d !important;
+    color: #08212d !important;
+}
+#content .wcspoil:hover {
+	color: #4b666f !important;
+}
+#forumindex table td.threads a {
+	color: #0077a2;
+	text-shadow: none;
+}
+#forumindex table td.threads {
+	color: #2c4f5b;
+	text-shadow: none;
+}
+#left dl dd a {
+    border-bottom: 1px solid #0077a2;
+    color: #0077a2;
+}
+#left dl dd {
+    color: #0077a2;
+}
+#left dl dt {
+    border-bottom: 1px solid #0f2f3e;
+    color: #06a0d3;
+}
+#left ul#menu > li > a {
+    color: #06a0d3;
+}
+#forumindex table td.title div.subtitle {
+    color: #0077a2;
+    text-shadow: none;
+}
+#left ul#menu > li > a:hover {
+    background-color: #173A49;
+}
+#left ul#menu {
+    background: none repeat scroll 0 0 #092533;
+	box-shadow: 0 0 4px #061C26
+}
+#left ul#menu > li.odd {
+    background: none repeat scroll 0 0 #0f303f;
+}
+#left ul#menu > li.selected > a {
+	color: #518396 !important;
+	text-shadow: none;
+}
+#left ul#menu > li.selected > ul > li {
+	color: #518396;
+}
+#left ul#menu > li.selected > ul > li > a {
+	color: #518396;
+}
+#footer {
+    background: radial-gradient(ellipse farthest-side at 50% 0 , #031319 10%, #061d26 50%, #061E2B 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#footer dl {
+    border-left: 1px solid rgba(76, 103, 112, 0.4);
+}
+#footer dl:nth-last-child(2) {
+	border-right: 1px solid rgba(76, 103, 112, 0.4);
+}
+#footer dl dd a {
+	color: #2c4f5b;
+	-moz-text-decoration-color: #29424f;
+}
+#footer dl dt {
+    color: #4c6770;
+}
+#footer dl dd {
+    color: #4c6770;
+}
+#menu_forum>ul:nth-of-type(2){
+	border:none !important;
+	margin-top:-11px !important;
+	padding-top:0 !important;
+}
+ul.breadcrumb li a {
+    color: #23addb !important;
+}
+ul.breadcrumb li a:hover {
+	color: #DDF4FF !important;
+}
+#content .topbar, #content .footbar {
+    background-color: #020e14;
+}
+#content div.buttons a:link, #content div.buttons a:visited, #content div.buttons a.blink:link, #content div.buttons a.blink:visited {
+    background: linear-gradient(to top, #1f3e49 0px, #1f3e49 20px) repeat scroll 0 0 #7b7164;
+	color: #ccc;
+}
+#content div.buttons a.blink {
+    border: 1px solid #1f3e49;
+}
+#content ul.pagination li.first a, #content ul.pagination li.last a, #content ul.pagination li a {
+    color: #007aa6;
+}
+#content #replies.threadclosed .topbar, #content #replies.threadclosed .footbar {
+    background-color: #2f383d;
+}
+#content ul.pagination li.user a {
+    background-color: #1f3e49;
+}
+#content #replies.threadclosed ul.pagination li.user a {
+    background-color: #38464f;
+}
+#content ul.pagination li.user a:hover {
+	background-color: #2C5563;
+}
+#content ul.pagination li.current a {
+    background-color: #ccc;
+}
+#content #replies.threadclosed ul.pagination li.current a {
+    background-color: #b4b4b4 !important;
+}
+#content ul.pagination li.current a:hover {
+	color: #ccc;
+}
+#content ul.pagination li a:active, #content ul.pagination li a:hover {
+    background-color: #007aa6;
+}
+#content ul.pagination li {
+    border-right: 1px solid #4c6770;
+}
+#replylist div.notice {
+    background: linear-gradient(to bottom, #1f3e49 0px, #1f3e49 30px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border-bottom: 1px solid #13333f;
+}
+#replylist div.reply div.replymeta div.replyuser, #replylist div.reply div.replymeta div.replytools {
+    background: linear-gradient(to bottom, #061e2b 0px, #061e2b 30px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#replylist div.reply {
+    background: linear-gradient(to top, #041721 0px, #041721 30px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border-bottom: 1px solid #13333f;
+    border-top: 1px solid #020e14;
+}
+#content div.buttons a.breply:link, #content div.buttons a.breply:visited {
+    background: none repeat scroll 0 0 #1f3e49;
+}
+#content div.buttons a.bactive:link, #content div.buttons a.bactive:visited {
+    background: linear-gradient(to bottom, #b77f3e 0px, #b77f3e 25px) repeat scroll 0 0 #ab763a;
+}
+#replies div.notebar.public {
+    background: linear-gradient(to bottom, #b77f3e 0px, #b77f3e 25px) repeat scroll 0 0 #4c6770;
+}
+div.notebar.public  > a {
+	color: #ccc !important;
+}
+#replies div.notebar {
+    border-bottom: 1px solid #476068;
+    color: #020e14;
+}
+#content a.inter:link, #content a.internal:link, #content a.inter:visited, #content a.internal:visited {
+    color: #ccc;
+}
+#content .bodytext p.reference a:link, #content .bodytext p.reference a:visited {
+    color: #06a0d3 !important;
+}
+#content .bodytext p.reference a:hover {
+    color: #09BFF7 !important;
+}
+#content .bodytext p.reference {
+    border-bottom: 1px dotted #4d7d8c;
+}
+#content .wcrep1 {
+    color: #06a0d3;
+}
+#content {
+    color: #4d7d8c;
+}
+#replylist div.reply div.replymeta div.replyuser div.voteblock span.vote {
+    background-color: #1f3e49;
+    border: 1px solid #0F2933;
+    color: #ccc;
+}
+#replylist div.reply div.replymeta div.replyuser div.voteblock.voted1 span.vote1, #replylist div.reply div.replymeta div.replyuser div.voteblock.voted2 span.vote2, #replylist div.reply div.replymeta div.replyuser div.voteblock.voted4 span.vote4, #replylist div.reply div.replymeta div.replyuser div.voteblock.voted5 span.vote5 {
+    background-color: #0075a0;
+    border: 1px solid #0f2933;
+}
+#replylist div.reply div.replymeta div.replytools div.shortcode, #content a.greylink:link, #content a.greylink:visited {
+    color: #4b666f;
+}
+div.usergroup {
+    color: #4b666f !important;
+}
+div.replymeta div.replytools div.replytools-inner div.date a {
+	color: #06a0d3 !important;
+}
+.penalty_box .replyuser {
+    background-color: #061E2B !important;
+}
+#replylist div.replyform div.title h4 {
+    color: #4c6770;
+}
+#replylist div.replyform {
+    background: linear-gradient(to bottom, #13333f 0px, #13333f 90px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border-bottom: 1px solid #13333F;
+}
+#replylist div.replyform {
+    border-left: 2px solid #13333F;
+    border-right: 2px solid #13333F;
+	border-top: 1px solid #020E14;
+}
+#replylist div.reply.preview div.replymeta div.replyuser, #replylist div.reply.preview div.replymeta div.replytools {
+    background: linear-gradient(to bottom, #2d4b56 0px, #2d4b56 30px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#replylist div.reply.preview {
+    background: linear-gradient(to top, #345560 0px, #345560 30px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads div.buttons input[type="button"], #threads div.buttons input[type="submit"], #threads div.buttons button {
+    background-color: #041C28;
+    border-color: #041C28;
+    color: #007aa6;
+}
+#threads table tbody tr.recent td {
+    background: linear-gradient(to bottom, #0f2f3e 0px, #0f2f3e 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr td {
+	border-top: 1px solid #020e14;
+}
+#threads table tbody tr.section td {
+    background: linear-gradient(to bottom, #0c2735 0px, #0c2735 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.sticky td {
+    background: linear-gradient(to bottom, #1e3a47 0px, #1e3a47 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.sticky td.title a.title {
+    color: #020e14;
+}
+.small {
+	color: #06a0d3 !important;
+}
+#threads table tbody tr.section td.title a.title {
+    color: #06a0d3;
+}
+#threads.boxed table thead tr td {
+    background-color: #0c2735;
+}
+.oldest, .newest, .reps, .unread {
+	color: #06a0d3 !important;
+}
+#threads table thead tr td.reps, #threads table thead tr td.reads, #threads table thead tr td.unread {
+    background-color: #020e14;
+	color: #06a0d3;
+}
+#threads table tbody tr.deleted td.title a, #threads table tbody tr.deleted td.title, #threads table tbody tr.deleted td.title span a {
+    color: #363a42;
+}
+ul#tabs.box li.picked a {
+    background: linear-gradient(to bottom, #092533 0px, #092533 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    color: #06a0d3;
+}
+ul#tabs.box li a {
+	border-color: #020e14 #020e14 -moz-use-text-color;
+	background-color: #0f303f;
+	color: #007aa6;
+}
+#threads table tbody tr td.title a.group {
+    background: none repeat scroll 0 0 #007aa6;
+    color: #020e14 !important;
+}
+#threads table tbody tr td.title a.group:active, #threads table tbody tr td.title a.group:hover {
+    background-color: #04B8EF;
+    color: #020e14;
+}
+#threads.boxed {
+    background: none repeat scroll 0 0 #0c2735;
+	border: 1px solid #020e14;
+}
+#rightcol h2 {
+    background: none repeat scroll 0 0 #020e14;
+}
+#news .article {
+    background: linear-gradient(to bottom, #0f303f 0px, #0f303f 70px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#news .article.roundup p {
+    color: #06a0d3;
+}
+#news .article.roundup h4 span.publisher {
+    color:#518396;
+}
+#rightcol .block {
+	background: none repeat scroll 0 0 #0f303f;
+}
+#latestjobs .job {
+    border-bottom: 1px solid #020e14;
+}
+#latestjobs .job em, #latestforum .forum .thread {
+    color: #518396;
+}
+#bc {
+    background: none repeat scroll 0 0 #0f303f !important;
+    border: 1px solid #020e14 !important;
+}
+#threads table tbody tr.recent td.tint9, #threads table tbody tr td.tint9, #threads table tbody tr.sticky td.tint9 {
+	background: linear-gradient(to bottom, #041C28 0px, #041C28 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint8, #threads table tbody tr td.tint8, #threads table tbody tr.sticky td.tint8 {
+	background: linear-gradient(to bottom, #042130 0px, #042130 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint7, #threads table tbody tr td.tint7, #threads table tbody tr.sticky td.tint7{
+	background: linear-gradient(to bottom, #052535 0px, #052535 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint6, #threads table tbody tr td.tint6, #threads table tbody tr.sticky td.tint6{
+	background: linear-gradient(to bottom, #052C3F 0px, #052C3F 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint5, #threads table tbody tr td.tint5, #threads table tbody tr.sticky td.tint5 {
+	background: linear-gradient(to bottom, #063147 0px, #063147 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint4, #threads table tbody tr td.tint4 , #threads table tbody tr.sticky td.tint4 {
+	background: linear-gradient(to bottom, #06354C 0px, #06354C 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint3, #threads table tbody tr td.tint3 , #threads table tbody tr.sticky td.tint3{
+	background: linear-gradient(to bottom, #073C56 0px, #073C56 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint2, #threads table tbody tr td.tint2, #threads table tbody tr.sticky td.tint2 {
+	background: linear-gradient(to bottom, #094360 0px, #094360 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint1, #threads table tbody tr td.tint1, #threads table tbody tr.sticky td.tint1 {
+	background: linear-gradient(to bottom, #0B4968 0px, #0B4968 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#threads table tbody tr.recent td.tint0, #threads table tbody tr td.tint0, #threads table tbody tr.sticky td.tint0 {
+	background: linear-gradient(to bottom, #115272 0px, #115272 25px) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+#topbar #userbar #ub_name a {
+    color: #007aa6;
+}
+#topbar #userbar #ub_name a:hover {
+	color: #0fc3ff;
+}
+#topbar #userbar #ub_menu.opened {
+	background-color: #020E14;
+}
+#topbar #userbar #ub_settings.opened > a {
+	background-color: #007aa6;
+}
+#topbar #userbar #ub_menu.opened ul li a {
+	background-color: #007aa6;
+	color: #BCD4D6;
+}
+#topbar #userbar #ub_menu.opened ul li a:hover {
+	color: #BCD4D6;
+    background-color: #007aa6;
+}
+#topbar #userbar #ub_settings > a:active, #topbar #userbar #ub_settings > a:hover {
+	background-color: #007aa6;
+}
+
+/*Extras*/
+#threads table tbody tr td.reps>a,
+#threads table tbody tr td.reads>a,
+#threads table tbody tr.recent td.tint0>a,
+#threads table tbody tr.recent td.tint1>a,
+#threads table tbody tr.recent td.tint2>a,
+#threads table tbody tr.recent td.tint3>a,
+#threads table tbody tr.recent td.tint4>a,
+#threads table tbody tr.recent td.tint5>a,
+#threads table tbody tr.recent td.tint6>a,
+#threads table tbody tr.recent td.tint7>a,
+#threads table tbody tr.recent td.tint8>a,
+#threads table tbody tr.recent td.tint9>a {
+    display: block;
+    width: 100%;
+    height:100%;
+}
+
+#menu_forum>ul:nth-of-type(2){
+	border:none !important;
+	margin-top:-11px !important;
+	padding-top:0 !important;
+}
