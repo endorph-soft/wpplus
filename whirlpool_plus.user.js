@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.4.0
+// @version         5.4.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -54,23 +54,23 @@
 // @resource        spinner_elec        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_elec.png
 // @resource        spinner_teal        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_teal.png
 // @resource        wppimage            https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/png/wppimage.png
-// @resource        wppvideo            https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/png/wppvideo.png
 // ==/UserScript==
 
 var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.4.0',
+    version: '5.4.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 90,
+    storageVersion: 91,
 
     //Script changelog
     changelog: {
+        '5.4.1': '<ul><li>Resolves all issues related to Whirlpool Content Security Policy.</li></ul>',
         '5.4.0': '<ul><li>Fixes issues with theme display for Greasemonkey users by integrating themes into the script. Limitation of uploading avatars to those hosted on imgur only. Changed behaviour of replacing bad avatars to hide them completely or replace with Identicon depending on user settings. Other various CSS fixes.</li></ul>',
         '5.3.9': '<ul><li>Adds Identicon to WP Plus Avatar settings menu. Changes functionality of image and video embeds due to impact of WP Content Security Policy. Changes emoji functionality to be unicode based so external images are not required. Fixes Identicons.</li></ul>',
         '5.3.8': '<ul><li>Due to WP site changes some features such as avatars are currently not working. This build fixes themes, although due to its image heavy nature the WP Wood theme has been removed at this time. Also fixed - Recent Activity Overlay and Forums Powered by text. Please check the latest posts in the WP Plus thread for ongoing updates.</li></ul>',
@@ -335,6 +335,14 @@ WhirlpoolPlus.util = {
         for (i in WhirlpoolPlus.util.pageType) {
             WhirlpoolPlus.util.pageType[i] = (document.location.href.indexOf(WhirlpoolPlus.util.pageType[i]) >= 0);
         }
+    },
+
+    bypassCSP: function setCookie() {
+        var date = new Date();
+        var expire = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+        var dateString = date.toISOString().substr(0,10);
+        var cookieString = "disablecsp=" + dateString + "; expires=" + expire + "";
+        document.cookie = cookieString;
     },
 
     // Should not be accessed without calling initPageType
@@ -2039,7 +2047,6 @@ WhirlpoolPlus.feat = {
         var maxContentWidth = $('.replytext').width();
         var loading = await WhirlpoolPlus.util.image('loader');
         var imagecontent = await WhirlpoolPlus.util.image('wppimage');
-        var videocontent = await WhirlpoolPlus.util.image('wppvideo');
 
         var imageMatchRegex = /(?:jpe?g|gif|bmp|png)$/;
         var imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
@@ -2086,9 +2093,9 @@ WhirlpoolPlus.feat = {
                                 linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                             }
                         } else if (linkSegments[0] == 'a') {
-                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + imagecontent + '"></a><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
+                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
                         } else if (linkSegments[0] == 'gallery') {
-                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + imagecontent + '"></a><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
+                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
                         }
                     }
                 } else if (videoEnabled && youtubeRegex.test(link)) {
@@ -2096,7 +2103,7 @@ WhirlpoolPlus.feat = {
                     var linkSegments = youtubeVidId.exec(link);
 
                     if (linkSegments && linkSegments[1]) {
-                        linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + videocontent + '"></a></span><br />');
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
@@ -2106,7 +2113,7 @@ WhirlpoolPlus.feat = {
                     var linkSegments = youtubeShortVidId.exec(link);
 
                     if (linkSegments && linkSegments[1]) {
-                        linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + videocontent + '"></a></span><br />');
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
@@ -2116,7 +2123,7 @@ WhirlpoolPlus.feat = {
                     var linkSegments = vimeoRegex.exec(link);
 
                     if (linkSegments && linkSegments[3]) {
-                        linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + videocontent + '"></a></span><br />');
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://player.vimeo.com/video/' + linkSegments[3] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
@@ -2270,21 +2277,9 @@ WhirlpoolPlus.feat = {
 
 WhirlpoolPlus.feat.display = {
 
-    _themes: {
-        classic: WhirlpoolPlus.util.resource('classictheme'),
-        black: WhirlpoolPlus.util.resource('blacktheme'),
-        electrolize: WhirlpoolPlus.util.resource('electrolizetheme'),
-        teal: WhirlpoolPlus.util.resource('tealtheme')
-    },
-
     //CSS that is included everywhere
     css: function () {
         var styles = '';
-
-        var theTheme = WhirlpoolPlus.util.get('display_theme');
-        if (theTheme != 'default' && theTheme in this._themes) {
-            styles += this._themes[theTheme];
-        }
 
         //Custom CSS
         styles += WhirlpoolPlus.util.get('display_customCSS');
@@ -2325,9 +2320,19 @@ WhirlpoolPlus.feat.display = {
         return styles;
     },
 
-    themeimages: async function () {
+    themes: async function () {
 
-        let currentTheme = WhirlpoolPlus.util.get('display_theme');
+            const themelist = {
+        classic: await WhirlpoolPlus.util.resource('classictheme'),
+        black: await WhirlpoolPlus.util.resource('blacktheme'),
+        electrolize: await WhirlpoolPlus.util.resource('electrolizetheme'),
+        teal: await WhirlpoolPlus.util.resource('tealtheme')
+    }
+        var currentTheme = WhirlpoolPlus.util.get('display_theme');
+        if (currentTheme != 'default' && currentTheme in themelist) {
+            WhirlpoolPlus.util.css(themelist[currentTheme]);
+        }
+
         let classiclogo = await WhirlpoolPlus.util.image('wpclassiclogo');
         let classicnews = await WhirlpoolPlus.util.image('wpclassicnews');
         let teallogo = await WhirlpoolPlus.util.image('teallogo');
@@ -2891,7 +2896,7 @@ WhirlpoolPlus.feat.avatar = {
             WhirlpoolPlus.util.css('@import url(https://wpplus.endorph.net/avatars/animatedavatar_lite.css?' + new Date().getTime() + ');');
         }
 
-        return ".wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_preload {display: block; background-repeat: no-repeat; margin:0 auto; background:url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');}";
+        return ".wpp_avatar_link { margin:0 auto; display: block; width: 100%; height: 100%; } .wpp_avatar {display: block; background-repeat: no-repeat; margin:0 auto;} .wpp_avatar_ident {display: block; background-repeat: no-repeat; margin:0 auto; height:80px; width:80px;} .wpp_avatar_preload {display: block; background-repeat: no-repeat; margin:0 auto; background:url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');}";
     },
 
     avatariseRow: function (replyTr) {
@@ -2913,13 +2918,14 @@ WhirlpoolPlus.feat.avatar = {
                 }
             }, 500);
 
-            setTimeout(function(){ //Replace the bad avatars with a naughty image
+            setTimeout(function(){ //Hide any non-compliant avatars
             var allavatars = document.getElementsByClassName('wpp_avatar wpp_avatar_' + userNumber + '');
             for (var i = 0; i < allavatars.length; i++) {
             var imageident = document.querySelector('.wpp_avatar_ident_' + userNumber + '') !== null;
             var imgurhosted = $(allavatars).css("background-image").toLowerCase().indexOf('imgur') >=0;
+            var postimg = $(allavatars).css("background-image").toLowerCase().indexOf('postimg.cc') >=0;
             var hasavatar = $(allavatars).css("background-image");
-            if (imageident == false && imgurhosted == false && hasavatar !== 'none') {
+            if (imageident == false && imgurhosted == false && postimg == false && hasavatar !== 'none') {
                 $(allavatars).css("background", "none");
                 $(allavatars).css("height", "0px");
                 $(allavatars).css("width", "0px");
@@ -2974,19 +2980,20 @@ WhirlpoolPlus.feat.avatar = {
                     var $elem = $(elem);
                     var style = $elem.css('background-image');
                     if (style == 'none') {
-                        $(document.querySelector(".wpp_avatar_" + userNumber + "")).append($('<div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
+                        $(document.querySelector(".wpp_avatar_" + userNumber + "")).prepend($('<div class="wpp_avatar_ident_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '"><canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas></a></div>'));
                         jdenticon();
                     };
                 }, 1500);
             }
 
-            setTimeout(function(){ //Replace the bad avatars with a naughty image
+            setTimeout(function(){ //Hide any non-compliant avatars
             var allavatars = document.getElementsByClassName('wpp_avatar wpp_avatar_' + userNumber + '');
             for (var i = 0; i < allavatars.length; i++) {
             var imageident = document.querySelector('.wpp_avatar_ident_' + userNumber + '') !== null;
             var imgurhosted = $(allavatars).css("background-image").toLowerCase().indexOf('imgur') >=0;
+            var postimg = $(allavatars).css("background-image").toLowerCase().indexOf('postimg.cc') >=0;
             var hasavatar = $(allavatars).css("background-image");
-            if (imageident == false && imgurhosted == false && hasavatar !== 'none') {
+            if (imageident == false && imgurhosted == false && postimg == false && hasavatar !== 'none') {
                 $(allavatars).css("background", "none");
             }
             };
@@ -4283,7 +4290,10 @@ WhirlpoolPlus.feat.userNotes = {
 };
 
 WhirlpoolPlus.run = async function () {
+    //Run Everywhere
+    WhirlpoolPlus.util.bypassCSP();
     WhirlpoolPlus.feat.returnafterlogin();
+
     //Set up pageType
     WhirlpoolPlus.util.initPageType();
 
@@ -4315,7 +4325,7 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.editor.css() +
         WhirlpoolPlus.feat.userNotes.css() +
         WhirlpoolPlus.feat.penaltyBoxCss() +
-        WhirlpoolPlus.feat.display.themeimages()
+        WhirlpoolPlus.feat.display.themes()
     );
 
     /** RUN: Not Alerts **/
