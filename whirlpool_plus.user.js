@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.4.1
+// @version         5.4.2
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -28,6 +28,7 @@
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/blazy.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.leanModal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jdenticon.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/poweredby.js
 // @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/loader.gif
 // @resource        noavatar            https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/png/noavatar.png
 // @resource        waiting             https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/waiting.gif
@@ -45,11 +46,6 @@
 // @resource        electrolizetheme    https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolize.css
 // @resource        tealtheme           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/teal.css
 // @resource        oldfont             https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/css/wpoldfontfix.css
-// @resource        wpclassiclogo       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewhead.png
-// @resource        wpclassicnews       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewsimage.gif
-// @resource        blacklogo           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/blackwpnewhead.png
-// @resource        teallogo            https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/tealwpnewhead.png
-// @resource        electrolizelogo     https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolizewpnewhead.png
 // @resource        spinner_black       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_black.png
 // @resource        spinner_elec        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_elec.png
 // @resource        spinner_teal        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_teal.png
@@ -60,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.4.1',
+    version: '5.4.2',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 91,
+    storageVersion: 92,
 
     //Script changelog
     changelog: {
+        '5.4.2': '<ul><li>Various code tidying. Adjustments to avatar and themes code to alleviate issues for some combinations of browser and script manager.</li></ul>',
         '5.4.1': '<ul><li>Resolves all issues related to Whirlpool Content Security Policy.</li></ul>',
         '5.4.0': '<ul><li>Fixes issues with theme display for Greasemonkey users by integrating themes into the script. Limitation of uploading avatars to those hosted on imgur only. Changed behaviour of replacing bad avatars to hide them completely or replace with Identicon depending on user settings. Other various CSS fixes.</li></ul>',
         '5.3.9': '<ul><li>Adds Identicon to WP Plus Avatar settings menu. Changes functionality of image and video embeds due to impact of WP Content Security Policy. Changes emoji functionality to be unicode based so external images are not required. Fixes Identicons.</li></ul>',
@@ -339,7 +336,7 @@ WhirlpoolPlus.util = {
 
     bypassCSP: function setCookie() {
         var date = new Date();
-        var expire = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+        var expire = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000);
         var dateString = date.toISOString().substr(0,10);
         var cookieString = "disablecsp=" + dateString + "; expires=" + expire + "";
         document.cookie = cookieString;
@@ -911,60 +908,46 @@ WhirlpoolPlus.settings = {
                 }
             }).change();
 
-            function checkAvatarHost() {
-                //Check the two avatars for bads
-                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
-                    var url = r.responseText;
-                    var bad = "tinypic";
-                    var bad2 = "https";
-                    if (url != '') {
-                        $('#currentAvatar_static').after('<span>Link: ' + url + '</span>');
-                    if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
-                        alert("Your static avatar is hosted on tinypic or uses a URL without https, please consider updating it");
-                    }
-                    };
-                });
-
-                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
-                    var url = r.responseText;
-                    var bad = "tinypic";
-                    var bad2 = "https";
-                    if (url != '') {
-                         $('#currentAvatar_animated').after('<span>Link: ' + url + '</span>');
-                    if( url.indexOf( bad ) != -1  || url.indexOf( bad2 ) === -1 ){
-                        alert("Your animated avatar is hosted on tinypic or uses a URL without https, please consider updating it");
-                    }
-                    };
-                });
-            }
-
-            checkAvatarHost();
-
             function refreshAvatars() {
-                //Load the avatars
+                //Load the avatars & check them for bads
                 WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
                     var url = r.responseText;
+                    var imgurhosted = url.indexOf('imgur') >=0;
+                    var postimg = url.indexOf('postimg.cc') >=0;
 
                     if (url != '') {
                         $('#currentAvatar_static').css('background-image', 'url("' + url + '")');
                         $('#currentAvatar_removeStatic').prop('disabled', null);
+                        $('#currentAvatar_static').after('<span>Link: ' + url + '</span>');
                     } else {
                         $('#currentAvatar_static').css('background-image', '');
                         $('#currentAvatar_removeStatic').prop('disabled', 'disabled');
                     }
-
+                    if (url != '') {
+                    if(imgurhosted == false && postimg == false){
+                        alert("Your static avatar was setup on a non-working or unsupported host, please consider updating it");
+                    }
+                    };
                 });
 
                 WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
                     var url = r.responseText;
+                    var imgurhosted = url.indexOf('imgur') >=0;
+                    var postimg = url.indexOf('postimg.cc') >=0;
 
                     if (url != '') {
                         $('#currentAvatar_animated').css('background-image', 'url("' + url + '")');
                         $('#currentAvatar_removeAnimated').prop('disabled', null);
+                        $('#currentAvatar_animated').after('<span>Link: ' + url + '</span>');
                     } else {
                         $('#currentAvatar_animated').css('background-image', '');
                         $('#currentAvatar_removeAnimated').prop('disabled', 'disabled');
                     }
+                    if (url != '') {
+                    if(imgurhosted == false && postimg == false){
+                        alert("Your animated avatar was setup on a non-working or unsupported host, please consider updating it");
+                    }
+                    };
                 });
             }
 
@@ -2278,8 +2261,46 @@ WhirlpoolPlus.feat = {
 WhirlpoolPlus.feat.display = {
 
     //CSS that is included everywhere
-    css: function () {
+    css: async function () {
         var styles = '';
+
+        //Themes
+                    const themelist = {
+        classic: await WhirlpoolPlus.util.resource('classictheme'),
+        black: await WhirlpoolPlus.util.resource('blacktheme'),
+        electrolize: await WhirlpoolPlus.util.resource('electrolizetheme'),
+        teal: await WhirlpoolPlus.util.resource('tealtheme')
+    }
+        var currentTheme = WhirlpoolPlus.util.get('display_theme');
+        if (currentTheme != 'default' && currentTheme in themelist) {
+            styles += themelist[currentTheme];
+        }
+        //Theme Images - Cannot use utility here due to Greasemonkey & Firefox
+        let classiclogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewhead.png';
+        let classicnews = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewsimage.gif';
+        let teallogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/tealwpnewhead.png';
+        let electrolizelogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolizewpnewhead.png';
+        let electrolize_1 = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolize_1.png';
+        let blacklogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/blackwpnewhead.png';
+
+        switch (currentTheme) {
+            case 'default':
+                break;
+            case 'classic':
+            styles += '#logo h1 {background: transparent url("' + await classiclogo + '") no-repeat scroll center top / 82% 165px; z-index:999;}';
+            styles += '#leftcol #news .article {background: #EEE url("' + await classicnews + '") top left no-repeat;}';
+                break;
+            case 'teal':
+            styles += '#logo h1 {background: transparent url("' + await teallogo + '") no-repeat scroll center top / 200px 160px; z-index:999;}';
+                break;
+            case 'electrolize':
+            styles += '#logo h1 {background: url("' + await electrolizelogo + '"); z-index:999;}';
+            styles += '#content .bodytext a.internal {background: transparent url("' + await electrolize_1 + '")  no-repeat scroll right top;}';
+                break;
+            case 'black':
+            styles += '#logo h1 {background: url("' + await blacklogo + '"); z-index:999;}';
+                break;
+                        };
 
         //Custom CSS
         styles += WhirlpoolPlus.util.get('display_customCSS');
@@ -2318,46 +2339,6 @@ WhirlpoolPlus.feat.display = {
         }
 
         return styles;
-    },
-
-    themes: async function () {
-
-            const themelist = {
-        classic: await WhirlpoolPlus.util.resource('classictheme'),
-        black: await WhirlpoolPlus.util.resource('blacktheme'),
-        electrolize: await WhirlpoolPlus.util.resource('electrolizetheme'),
-        teal: await WhirlpoolPlus.util.resource('tealtheme')
-    }
-        var currentTheme = WhirlpoolPlus.util.get('display_theme');
-        if (currentTheme != 'default' && currentTheme in themelist) {
-            WhirlpoolPlus.util.css(themelist[currentTheme]);
-        }
-
-        let classiclogo = await WhirlpoolPlus.util.image('wpclassiclogo');
-        let classicnews = await WhirlpoolPlus.util.image('wpclassicnews');
-        let teallogo = await WhirlpoolPlus.util.image('teallogo');
-        let electrolizelogo = await WhirlpoolPlus.util.image('electrolizelogo');
-        let electrolize_1 = await WhirlpoolPlus.util.image('electrolize_1');
-        let blacklogo = await WhirlpoolPlus.util.image('blacklogo');
-
-        switch (currentTheme) {
-            case 'default':
-                break;
-            case 'classic':
-            WhirlpoolPlus.util.css('#logo h1 {background: transparent url("' + classiclogo + '") no-repeat scroll center top / 82% 165px;}');
-            WhirlpoolPlus.util.css('#leftcol #news .article {background: #EEE url("' + classicnews + '") top left no-repeat;}');
-                break;
-            case 'teal':
-            WhirlpoolPlus.util.css('#logo h1 {background: transparent url("' + teallogo + '") no-repeat scroll center top / 200px 160px;}');
-                break;
-            case 'electrolize':
-            WhirlpoolPlus.util.css('#logo h1 {background: url("' + electrolizelogo + '");}');
-            WhirlpoolPlus.util.css('#content .bodytext a.internal {background: transparent url("' + electrolize_1 + '")  no-repeat scroll right top;}');
-                break;
-            case 'black':
-            WhirlpoolPlus.util.css('#logo h1 {background: url("' + blacklogo + '");}');
-                break;
-                        }
     },
 
     floatSidebar: function () {
@@ -2421,229 +2402,9 @@ WhirlpoolPlus.feat.display = {
             + '<a href="//whirlpool.net.au/wiki/whirlpool_plus">Whirlpool Plus ' + WhirlpoolPlus.about.versionText() + '</a></dd>');
     },
 
-    poweredby: function () {
+    poweredby: async function () {
         if (WhirlpoolPlus.util.get('display_poweredby')) {
-            var quoteArray = [
-"Forums powered by 20 cent pieces",
-"Forums powered by the souls of the damned",
-"Forums powered by a zx speccy",
-"Forums powered by 240v mains electricity",
-"Forums powered by 42",
-"Forums powered by a fat guy on a bike",
-"Forums powered by a glitch in the Matrix",
-"Forums powered by a good idea at the time",
-"Forums powered by a little man in a box",
-"Forums powered by a series of mirrors",
-"Forums powered by a talking horse",
-"Forums powered by a three-eyed fish",
-"Forums powered by alkaline batteries",
-"Forums powered by an Atari 800",
-"Forums powered by AOL CD-ROMs",
-"Forums powered by ARP packets",
-"Forums powered by bad puns",
-"Forums powered by bottled human farts",
-"Forums powered by butterfly sneezes ",
-"Forums powered by candy!",
-"Forums powered by charmed quarks",
-"Forums powered by Chicken McNuggets",
-"Forums powered by chinese whispers",
-"Forums powered by closed captioning",
-"Forums powered by cold air",
-"Forums powered by Commodore 64",
-"Forums powered by Commodore VIC20",
-"Forums powered by cynicism",
-"Forums powered by Darwin Award winners",
-"Forums powered by DOS 6.22",
-"Forums powered by effervescence",
-"Forums powered by eight cyan geese",
-"Forums powered by eight sweet midgets",
-"Forums powered by eight ugly elves",
-"Forums powered by eighteen dumb batteries",
-"Forums powered by eighteen penguins on bicycles",
-"Forums powered by eighty blue rubber ban",
-"Forums powered by eighty nine grey butterflies",
-"Forums powered by eighty nine orange midgets",
-"Forums powered by eighty nine sweet dogs",
-"Forums powered by eighty one cute cheesees",
-"Forums powered by eighty one white penguins",
-"Forums powered by eighty six black elves",
-"Forums powered by eighty six green CD-ROMs",
-"Forums powered by eighty two joyful hamsters",
-"Forums powered by eighty white moons",
-"Forums powered by electromagnetic cheese",
-"Forums powered by elves with guns",
-"Forums powered by the Emergency Medical Hologram",
-"Forums powered by fifteen silly butterflies",
-"Forums powered by fifty blue midgets",
-"Forums powered by fifty one cute chickens",
-"Forums powered by fifty five yellow herring",
-"Forums powered by fifty six joyful cats",
-"Forums powered by fifty six ugly penguins",
-"Forums powered by fifty three green elves",
-"Forums powered by fifty three grey moons",
-"Forums powered by fifty three magenta candies",
-"Forums powered by fifty three silly fish",
-"Forums powered by fifty seven ugly elves",
-"Forums powered by first posts",
-"Forums powered by five cute dogs",
-"Forums powered by floccinaucinihilipilification",
-"Forums powered by forty eight green chickens",
-"Forums powered by forty eight white midgets",
-"Forums powered by forty five dumb moons",
-"Forums powered by forty five grey cats",
-"Forums powered by forty five nasty chickens",
-"Forums powered by forty five orange geese",
-"Forums powered by forty four black dogs",
-"Forums powered by forty four happy cheesees",
-"Forums powered by forty green geese",
-"Forums powered by forty magenta dogs",
-"Forums powered by forty one dumb penguins",
-"Forums powered by forty red penguins",
-"Forums powered by forty seven cyan herring",
-"Forums powered by forty six sweet grunka-lunkas",
-"Forums Powered by forty six grey cats",
-"Forums powered by forty three blue candies",
-"Forums powered by forty three cyan penguins",
-"Forums powered by fossil fuels",
-"Forums powered by four hamsters in a wheel",
-"Forums powered by four happy candies",
-"Forums powered by fourteen happy chickens",
-"Forums powered by fourteen grey butterflies",
-"Forums powered by free horse manure",
-"Forums powered by fresh air",
-"Forums powered by government conspiracies",
-"Forums powered by gravity",
-"Forums powered by herring",
-"Forums powered by halitosis",
-"Forums powered by hot air",
-"Forums powered by human stupidity",
-"Forums powered by irrational arguments",
-"Forums powered by less than fourteen bits",
-"Forums powered by less than nineteen bits",
-"Forums powered by less than seven bits",
-"Forums powered by less than seventeen bits",
-"Forums powered by luke-warm nuclear fusion",
-"Forums powered by ME",
-"Forums powered by midgets in grunka-lunka costumes",
-"Forums powered by modulating the Warp core",
-"Forums powered by navel lint",
-"Forums powered by Never giving you up",
-"Forums powered by Never letting you down",
-"Forums powered by Never running around or deserting you",
-"Forums powered by Never making you cry",
-"Forums powered by Never saying goodbye",
-"Forums powered by Never telling a lie or hurting you",
-"Forums powered by ninety cyan candies",
-"Forums powered by ninety four blue hamsters",
-"Forums powered by ninety one ugly midgets",
-"Forums powered by ninety one white dogs",
-"Forums powered by ninety seven magenta fish",
-"Forums powered by ninety seven silly herring ",
-"Forums powered by ninety seven smart midgets",
-"Forums powered by ninety three happy tyres",
-"Forums powered by ninety two orange elves",
-"Forums powered by ninety two ugly CD-ROMs",
-"Forums powered by ninety seven green elves",
-"Forums powered by nothing",
-"Forums powered by one hundred ugly penguins",
-"Forums powered by ones and zeros (and twos)",
-"Forums powered by perpetual motion",
-"Forums powered by pools of blue-green algae",
-"Forums powered by powdered water",
-"Forums powered by power itself",
-"Forums powered by protons neutrons and electrons",
-"Forums powered by public transport",
-"Forums powered by QBASIC",
-"Forums powered by recycled tyres",
-"Forums powered by rubber bands",
-"Forums powered by scooby snacks",
-"Forums powered by seven cute dogs",
-"Forums powered by seven penguins on bicycles",
-"Forums powered by seventeen silly elves",
-"Forums powered by seventeen different things",
-"Forums powered by seventy four cute humans",
-"Forums powered by seventy four nasty chickens",
-"Forums powered by seventy four white elves",
-"Forums powered by seventy three blue fish",
-"Forums powered by seventy two dumb rubber bands",
-"Forums powered by seventy six grey geese",
-"Forums powered by six different things",
-"Forums powered by six penguins on bicycles",
-"Forums powered by six smart dogs",
-"Forums powered by sixteen hamsters in a wheel",
-"Forums powered by sixty eight cute midgets",
-"Forums powered by sixty five red midgets",
-"Forums powered by sixty four smart CD-ROMs",
-"Forums powered by sixty four sweet humans",
-"Forums powered by sixty nine cute humans",
-"Forums powered by sixty nine dumb herring",
-"Forums powered by sixty nine green herring",
-"Forums powered by sixty nine silly midgets",
-"Forums powered by sixty nine white butterflies",
-"Forums powered by sixty one happy dogs",
-"Forums powered by sixty orange moons",
-"Forums powered by sleep deprivation",
-"Forums powered by soy milk",
-"Forums powered by spontaneous combustion",
-"Forums powered by stale air",
-"Forums powered by ten different things",
-"Forums powered by ten joyful elves",
-"Forums powered by ten lords a-leaping",
-"Forums powered by The Department of Redundancy Department",
-"Forums powered by the Emergency Medical Hologram",
-"Forums powered by the force",
-"Forums powered by the moons of Jupiter",
-"Forums powered by thirteen blue elves",
-"Forums powered by thirty eight green fish",
-"Forums powered by thirty eight silly elves",
-"Forums powered by thirty eight silly geese",
-"Forums powered by thirty eight silly humans",
-"Forums powered by thirty five cyan hamsters",
-"Forums powered by thirty five happy hamsters",
-"Forums powered by thirty four nasty dogs",
-"Forums powered by thirty seven ugly herring",
-"Forums powered by thirty seven yellow humans",
-"Forums powered by thirty six cyan humans",
-"Forums powered by thirty two sweet fish ",
-"Forums powered by thirty one dumb moons",
-"Forums powered by thirty two smart chickens",
-"Forums powered by thirty two stupid geese",
-"Forums powered by those little blue crunchy things!",
-"Forums powered by three blind mice",
-"Forums powered by three magenta penguins",
-"Forums powered by three red butterflies",
-"Forums powered by tinfoil hats",
-"Forums powered by toenail clippings",
-"Forums powered by twelve different things",
-"Forums powered by twelve dumb chickens",
-"Forums powered by twelve hamsters in a wheel",
-"Forums powered by twelve stupid fish",
-"Forums powered by twenty eight happy chickens",
-"Forums powered by twenty eight stupid penguins",
-"Forums powered by twenty four green cats ",
-"Forums powered by twenty five smart humans",
-"Forums powered by twenty green herring",
-"Forums powered by twenty joyful cats",
-"Forums powered by twenty nasty hamsters",
-"Forums powered by twenty nine nasty midgets",
-"Forums powered by twenty one dumb herring",
-"Forums powered by twenty smart CD-ROMs",
-"Forums powered by twenty two stupid hamsters",
-"Forums powered by two blue penguins",
-"Forums powered by two Little Green Men",
-"Forums powered by two penguins on bicycles",
-"Forums powered by underpaid sweatshop workers",
-"Forums powered by vBullshit 2.1.4a",
-"Forums powered by Windows 1.0",
-"Forums powered by WebTV",
-"Forums powered by your mind",
-"Forums powered by three eskimos",
-"Forums powered by nothing",
-"Forums powered by Russian Mafia",
-"Forums powered by free horse manure ",
-"Forums powered by twenty four nasty chickens",
-"Forums powered by ninety nine bottles of beer on the wall",
-            ];
+            quoteArray;
             var randomItem = quoteArray[Math.floor(Math.random()*quoteArray.length)];
             $('#bignumbers').prepend($('<dl><dt>Powered By</dt><dd class="pwrdby"></dd></dl>'));
             $('dd.pwrdby').html(''+ randomItem +'');
@@ -4315,7 +4076,7 @@ WhirlpoolPlus.run = async function () {
 
     //Dump CSS as early as possible
     WhirlpoolPlus.util.css(
-        WhirlpoolPlus.feat.display.css() +
+        await WhirlpoolPlus.feat.display.css() +
         WhirlpoolPlus.settings.css() +
         WhirlpoolPlus.feat.avatar.css() +
         WhirlpoolPlus.feat.spinnerMenu.css() +
@@ -4324,8 +4085,7 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.whirlpoolLastRead.css() +
         WhirlpoolPlus.feat.editor.css() +
         WhirlpoolPlus.feat.userNotes.css() +
-        WhirlpoolPlus.feat.penaltyBoxCss() +
-        WhirlpoolPlus.feat.display.themes()
+        WhirlpoolPlus.feat.penaltyBoxCss()
     );
 
     /** RUN: Not Alerts **/
