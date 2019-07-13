@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.4.2
+// @version         5.4.3
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.4.2',
+    version: '5.4.3',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 92,
+    storageVersion: 93,
 
     //Script changelog
     changelog: {
+        '5.4.3': '<ul><li>Fixes Thread Activity DIV missing on User Profile page when Old Profile layout option is enabled. Fixes Hide Forum feature from unintentionally hiding additional forums with similar IDs. Changes display layout for avatars on User Profile pages. Changes Whim User link next to posts to use new Private Message system.</li></ul>',
         '5.4.2': '<ul><li>Various code tidying. Adjustments to avatar and themes code to alleviate issues for some combinations of browser and script manager.</li></ul>',
         '5.4.1': '<ul><li>Resolves all issues related to Whirlpool Content Security Policy.</li></ul>',
         '5.4.0': '<ul><li>Fixes issues with theme display for Greasemonkey users by integrating themes into the script. Limitation of uploading avatars to those hosted on imgur only. Changed behaviour of replacing bad avatars to hide them completely or replace with Identicon depending on user settings. Other various CSS fixes.</li></ul>',
@@ -2413,7 +2414,8 @@ WhirlpoolPlus.feat.display = {
 
     oldProfile: function () {
         if (WhirlpoolPlus.util.get('display_oldProfile')) {
-            $('[id=threads]').detach().insertBefore('#userprofile script:contains("keypress")');
+            let threaddiv = $('[id=threads]').detach();
+            $('#userprofile').append(threaddiv);
             $('#userprofile h2:lt(1)').detach().insertBefore('#threads');
         }
     },
@@ -2465,20 +2467,13 @@ WhirlpoolPlus.feat.display = {
 
     hideForums: function () {
         var hideThese = WhirlpoolPlus.util.get('display_hideTheseForums');
+        let forumstohide = hideThese.split(" ");
 
-        if (hideThese != '') {
+        if (forumstohide != '') {
             $('#forumindex tr div.title a').each(function () {
                 var url = $(this).prop('href').split('/forum/')[1];
-
-                if (hideThese.indexOf(url) >= 0) {
-                    $(this).parents('tr').eq(0).remove();
-                }
-            });
-
-            $('#index h3').each(function () {
-                if ($(this).next('table').height() == 0) {
-                    $(this).next('table').remove();
-                    $(this).remove();
+                if (forumstohide.includes(url)) {
+                    $(this).parents('tr').eq(0).css("display", "none");
                 }
             });
         }
@@ -2728,7 +2723,7 @@ WhirlpoolPlus.feat.avatar = {
                 userNumber = WhirlpoolPlus.util.getUserId();
             };
             var userName = document.querySelectorAll('span[itemprop="name"]')[1];
-            $('#userprofile table tbody:contains("Status:")').prepend('<span style="font-weight:bold;font-size:1.5em;" id="avusername"></span><br /><span style="margin:0;vertical-align:top;display:inline-block;" class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></span>');
+            $('#userprofile table:contains("Status")').before('<div style="margin: 0 auto;padding-bottom:5px;width:100%;background:#e1e1e1;text-align:center;"><span style="display:inline-block;text-align:center;font-weight:bold;font-size:1.5em;" id="avusername"></span><br /><span style="margin: 0 auto;vertical-align:top;display:inline-block;" class="wpp_avatar wpp_avatar_' + userNumber + '"><a class="wpp_avatar_link" href="/user/' + userNumber + '" /></span></div>');
             document.getElementById('avusername').innerHTML = userName.innerHTML;
 
             if (WhirlpoolPlus.util.get('avatars_enabled') == 'all') { //Add the identicons
@@ -3024,7 +3019,7 @@ WhirlpoolPlus.feat.whimLink = {
     WhimUser: function (reply) {
         if (WhirlpoolPlus.util.get('whimLink')) {
             var userNumber = WhirlpoolPlus.util.getReplyUserId(reply);
-            reply.find('.actions').append($(' <span class="bar"> |</span> <a title="whim this user" href="//forums.whirlpool.net.au/whim/?action=write&to=' + userNumber + '" target="_blank">Whim user</a>'));
+            reply.find('.actions').append($(' <span class="bar"> |</span> <a title="whim this user" href="//forums.whirlpool.net.au/forum/?action=newthread&u=' + userNumber + '" target="_blank">Whim user</a>'));
         }
     }
 },
