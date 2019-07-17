@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.4.3
+// @version         5.4.4
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.4.3',
+    version: '5.4.4',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 93,
+    storageVersion: 94,
 
     //Script changelog
     changelog: {
+        '5.4.4': '<ul><li>Adds options for Whim textbox on User Profile pages and hide Whim activity on User Profile pages. Removes Whim Archive sort due to redundancy.</li></ul>',
         '5.4.3': '<ul><li>Fixes Thread Activity DIV missing on User Profile page when Old Profile layout option is enabled. Fixes Hide Forum feature from unintentionally hiding additional forums with similar IDs. Changes display layout for avatars on User Profile pages. Changes Whim User link next to posts to use new Private Message system.</li></ul>',
         '5.4.2': '<ul><li>Various code tidying. Adjustments to avatar and themes code to alleviate issues for some combinations of browser and script manager.</li></ul>',
         '5.4.1': '<ul><li>Resolves all issues related to Whirlpool Content Security Policy.</li></ul>',
@@ -169,11 +170,11 @@ WhirlpoolPlus.install = {
         links_mod: true,
         links_rep: true,
         links_unanswered: true,
-        whimArchiveSort: true,
         spinnerMenu: 'none',
         spinnerMenu_settingsLocation: 'top',
         defaultRecentActivityDays: '7',
         quickEdit: true,
+        quickWhim: true,
         wlr_display_flipStyles: false,
         wlr_display_unreadPostColour: '#CFCBBC',
         wlr_tempDisable: true,
@@ -188,6 +189,7 @@ WhirlpoolPlus.install = {
         compose_movePreview: true,
         autoSubscribeToNewThread: false,
         whimLink: true,
+        hideWhimActivity: false,
         numberPosts: false,
         userNotes_enabled: false,
         userNotes: {},
@@ -220,7 +222,6 @@ WhirlpoolPlus.install = {
         'avatars_enabled',
         'spinnerMenu',
         'spinnerMenu_settingsLocation',
-        'whimArchiveSort',
         'defaultRecentActivityDays',
         'compose_enhancedEditorNew',
         'recentActivityOverlay',
@@ -351,7 +352,6 @@ WhirlpoolPlus.util = {
         'postsOld': 'forum-replies.cfm', // The old page where you view posts for backwards compatibility
         'threads': '/forum/',           // The page where you view threads
         'profile': '/user/',            // User profile page
-        'whimArchive': 'action=archive',    // Whim archive page
         'whimRead': 'action=read',       // Whim read page
         'whimWrite': 'action=write',      // Whim write page
         'deletedThread': 'a=priv-deleted',    // Deleted thread alert
@@ -1206,7 +1206,7 @@ WhirlpoolPlus.settings = {
             '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_whimAlert">' +
                     '<label for="display_whimAlert">Whim Notification</label>' +
-                    ' <span class="settingDesc">Display a banner notification when you receive a new WHIM, in addition to Whirlpool\'s inbuilt notification</span>' +
+                    ' <span class="settingDesc">Display a banner notification when you receive a new private message (previously WHIM), in addition to Whirlpool\'s inbuilt notification</span>' +
 '</p> ' +
 
                                     '<p>' +
@@ -1297,6 +1297,18 @@ WhirlpoolPlus.settings = {
                 '</p> ' +
 
                             '<p class="wpp_hideNotForum">' +
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickWhim">' +
+                    '<label for="quickWhim">Quick Whim</label>' +
+                    ' <span class="settingDesc">Adds a Whim box to User Profile pages</span>' +
+                '</p> ' +
+
+                            '<p class="wpp_hideNotForum">' +
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hideWhimActivity">' +
+                    '<label for="hideWhimActivity">Hide Whim Activity on User Profile page</label>' +
+                    ' <span class="settingDesc">Hides your recent private messages from the User Profile page</span>' +
+                '</p> ' +
+
+                            '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_userPageInfoToggle">' +
                     '<label for="display_userPageInfoToggle">Toggle to show/hide user info on Profile pages</label>' +
                     ' <span class="settingDesc">Adds a toggle to show/hide the user info panel as required</span>' +
@@ -1317,12 +1329,6 @@ WhirlpoolPlus.settings = {
                             ' <label for="defaultRecentActivityDays">Default amount of recent activity to display on a user page</label>' +
                             ' <span class="settingDesc">Adjusts the default variable</span>' +
                         '</p>' +
-
-                           '<p>' +
-                    '<input class="wpp_setting" type="checkbox" id="whimArchiveSort">' +
-                    '<label for="whimArchiveSort">Sort Whim archives in alphabetical order</label>' +
-                            ' <span class="settingDesc">Sorts the page alphabetically instead of by time</span>' +
-                '</p>' +
 
                     '</div>' +
                 '</div>' +
@@ -1922,6 +1928,46 @@ WhirlpoolPlus.feat = {
         }
     },
 
+    hideWhimActivity: function () {
+        if (WhirlpoolPlus.util.get('hideWhimActivity')) {
+            let hideSection = document.querySelector('#threads a[href="/forum/1"]');
+            if (hideSection != null) {
+                var threadsTR = document.querySelectorAll('#threads table tbody tr'),
+                    threadsTB = document.querySelector('#threads table tbody'),
+                    hideSection_p_p = hideSection.parentNode.parentNode,
+                    isHideSection = false;
+
+
+                [].forEach.call(threadsTR, function (item, index, arr) {
+
+                    if (isHideSection) {
+
+                        if (item.className !== 'section') {
+
+                            threadsTB.insertBefore(item, threadsTR[0]);
+                            $(item).remove();
+
+                        }
+                        else if (item.className === 'section') {
+
+                            isHideSection = false;
+
+                        }
+
+                    }
+                    if (item === hideSection_p_p) {
+
+                        threadsTB.insertBefore(hideSection_p_p, threadsTR[0]);
+                        $(item).remove();
+                        isHideSection = true;
+
+                    }
+
+                });
+            }
+        }
+    },
+
     yourvoteslink: function () {
         var target = $('td:contains("Aura:"):first');
 
@@ -2143,41 +2189,6 @@ WhirlpoolPlus.feat = {
         }
     },
 
-    whimArchiveSort: function () {
-        if (WhirlpoolPlus.util.get('whimArchiveSort')) {
-            WhirlpoolPlus.util.css('#content > div > table > tbody > tr { background-color: #EEF0F8; } ');
-            $('tr[style="padding-right:10px; color:black;"]').css('display', 'none');
-
-            var whimTRsParent = document.querySelector('#content>div>table>tbody');
-            var whimTRs = whimTRsParent.querySelectorAll('tr[bgcolor]');
-
-            var plainArr = [];
-
-            var wt = whimTRs
-            for (var k in wt) {
-                if (!wt.hasOwnProperty(k)) continue;
-                var item = wt[k]
-                if (typeof item == "object") {
-                    var Name = {
-                        real: item.querySelector('b').textContent
-                    };
-                    Name.Sort = Name.real.toLowerCase().replace(/[^a-z,0-9]/gm, '');
-                    Name.tr = item;
-                    plainArr.push(Name);
-                }
-            }
-
-            plainArr.sort(function (a, b) {
-                return a.Sort < b.Sort ? -1 : 1;
-            });
-
-            plainArr.forEach(function (item, index, array) {
-                whimTRsParent.appendChild(item.tr);
-            });
-
-        }
-    },
-
     changeLinks: function () {
         $('a[href*="whirlpool.net.au/whim"]').each(function () {
             var link = $(this);
@@ -2393,7 +2404,7 @@ WhirlpoolPlus.feat.display = {
 
     whimAlert: function () {
         if (WhirlpoolPlus.util.get('display_whimAlert') && $('#menu_whim.unread').text()) {
-            WhirlpoolPlus.util.notify('You have an unread <a href="//whirlpool.net.au/whim/">whim</a>', true);
+            WhirlpoolPlus.util.notify('You have an unread <a href="//forums.whirlpool.net.au/forum/1">private message</a>', true);
         }
     },
 
@@ -3913,6 +3924,94 @@ WhirlpoolPlus.feat.quickEdit = {
 
 };
 
+WhirlpoolPlus.feat.quickWhim = {
+
+    run: function () {
+        if (WhirlpoolPlus.util.get('quickWhim')) {
+            $('#userprofile a:contains("Send message"):lt(1)').after('<br /><a class="wpp-whim">(Quick whim)</a>');
+            $('#userprofile .wpp-whim').click(this._onClick);
+        }
+    },
+
+    css: function () {
+        //Everyone loves CSS hackery, right?
+        return '.wpp-whim, .wpp-c-whim { cursor: pointer; }' +
+            '.quickWhim #quickwhimbody { width:100%; }' +
+            '.quickWhim { font-size:100% !important; }' +
+            '.quickWhim > table > tbody > tr:nth-child(1), .quickWhim #reply > table > tbody > tr:nth-child(2), .quickWhim #reply tbody th, .quickWhim #reply tbody .right { display: none; }' +
+            '.quickWhim > table > tbody > tr:nth-child(4) table > tbody > tr:nth-child(1) td { width: 50%; text-align: center; }' +
+            '.quickWhim > table > tbody > tr:nth-child(4) table > tbody > tr:nth-child(2) { display: none; }' +
+            '.quickWhim { margin: 0; }' +
+            '.quickWhim #previewButton { display: none; }' +
+            '.quickWhim button { width:150px; font:16px Arial; }' +
+            '.quickWhim colgroup col { width: auto !important; }' +
+            '.quickWhim textarea#body { min-height: 200px; width: 100%; }' +
+            '.quickWhim td { background-color: transparent !important; padding: 0; }' +
+            '.quickWhim * { box-shadow: none !important; }';
+    },
+
+    _onClick: function () {
+        $(this).hide();
+
+        var whimUrl = 'https://forums.whirlpool.net.au/forum/?action=newthread&u='; //The 'Whim' link url
+        var userNumber = document.location.href.split('user/')[1]; //The User ID
+            if (userNumber.indexOf('?days')) {
+                userNumber = userNumber.split('?')[0];
+            };
+            if (window.location.href == 'https://forums.whirlpool.net.au/user/') {
+                userNumber = WhirlpoolPlus.util.getUserId();
+            };
+        var whimUrlFull = whimUrl + userNumber;
+        var pmHTML = $('.wpp-whim').parent(); //PM block
+        var original = pmHTML.html().toString(); //Original HTML
+
+        //Activate the CSS hacks
+        pmHTML.addClass('quickWhim');
+
+        //Load the contents of the new thread form into the PM block
+        pmHTML.load(whimUrlFull + ' #replyformBlock', function () {
+
+            //Prevent errors from this undefined function
+            $('#fm').removeAttr('onkeypress');
+            $('#replyoptions').attr("style", "display:none");
+            $('#replyformBlock').attr("style", "display:block");
+
+            //Setup for Whirlcode
+            $('#body').prop('id', 'quickwhimbody');
+
+            //Add Whirlcode Block
+            WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #quickwhimbody');
+
+            //Add Cancel Button
+            $('#postbutton').after('<input type="button" name="wpp-c-whim" class="wpp-c-whim" value="Cancel" style="width:10em;font-size:14px;">');
+
+            //On cancel
+            $('.wpp-c-whim').on('click', function (e) {
+                pmHTML.html(original);
+                $('.wpp-c-whim').remove();
+                $('.wpp-whim').show();
+            });
+
+            //On save
+            $('input').on('click', function (e) {
+                $('input[id=postbutton]').value('Edit My Post');
+                var data = $('#fm').serialize();
+
+                $.post($('#fm').prop('action'), data, function (text) {
+                    if (text.indexOf('Opening your') >= 0) {
+                        document.location.reload();
+                    } else {
+                        alert('WP+: Something went wrong while sending your whim. Try using the normal private message function instead. Please report this bug in the WP+ thread (in Feedback).');
+                    }
+                });
+
+                return false;
+            });
+        });
+    }
+
+};
+
 WhirlpoolPlus.feat.userNotes = {
 
     _notes: WhirlpoolPlus.util.get('userNotes'),
@@ -4077,6 +4176,7 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.spinnerMenu.css() +
         WhirlpoolPlus.feat.recentActivityOverlay.css() +
         WhirlpoolPlus.feat.quickEdit.css() +
+        WhirlpoolPlus.feat.quickWhim.css() +
         WhirlpoolPlus.feat.whirlpoolLastRead.css() +
         WhirlpoolPlus.feat.editor.css() +
         WhirlpoolPlus.feat.userNotes.css() +
@@ -4096,6 +4196,7 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.spinnerMenu.run();
         WhirlpoolPlus.feat.changeLinks();
         WhirlpoolPlus.util.sync.init();
+        var uNumber = WhirlpoolPlus.util.getUserId();
     }
 
     /** RUN: Posts Pages **/
@@ -4142,7 +4243,10 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.display.hideClosedThreads();
         if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile') {
             WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
-        }
+        };
+        if (window.location.href !== 'https://forums.whirlpool.net.au/user/' && window.location.href.indexOf(uNumber) ===-1) {
+        WhirlpoolPlus.feat.quickWhim.run();
+        };
         WhirlpoolPlus.feat.postsPerDay();
         WhirlpoolPlus.feat.display.oldProfile();
         WhirlpoolPlus.feat.display.userPageInfoToggle();
@@ -4155,9 +4259,9 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Own Profile **/
-    var uNumber = WhirlpoolPlus.util.getUserId();
     if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf(uNumber) >0) {
         WhirlpoolPlus.feat.display.superProfile();
+        WhirlpoolPlus.feat.hideWhimActivity();
     }
 
     /** RUN: Aura Votes Page **/
@@ -4201,11 +4305,6 @@ WhirlpoolPlus.run = async function () {
     /** RUN: Whim Reading **/
     if (WhirlpoolPlus.util.pageType.whimRead) {
         $('#replies .reply').each(WhirlpoolPlus.feat.avatar.avatariseWhim);
-    }
-
-    /** RUN: Whim Archive **/
-    if (WhirlpoolPlus.util.pageType.whimArchive) {
-        WhirlpoolPlus.feat.whimArchiveSort();
     }
 
     /** RUN: Wiki Edit **/
