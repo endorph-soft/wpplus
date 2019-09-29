@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.4.5
+// @version         5.4.6
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.4.5',
+    version: '5.4.6',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 96,
+    storageVersion: 97,
 
     //Script changelog
     changelog: {
+        '5.4.6': '<ul><li>Adds option to import WP Plus Data. Changes to WP Plus Settings menu. Fixes issue with certain script features not running while logged out of WP.</li></ul>',
         '5.4.5': '<ul><li>Tidy redundant whim code. Adds option to backup WP Plus Data to file. Fixes API issue with Watched Thread Alert.</li></ul>',
         '5.4.4': '<ul><li>Adds options for Whim textbox on User Profile pages and hide Whim activity on User Profile pages. Removes Whim Archive sort due to redundancy.</li></ul>',
         '5.4.3': '<ul><li>Fixes Thread Activity DIV missing on User Profile page when Old Profile layout option is enabled. Fixes Hide Forum feature from unintentionally hiding additional forums with similar IDs. Changes display layout for avatars on User Profile pages. Changes Whim User link next to posts to use new Private Message system.</li></ul>',
@@ -680,7 +681,7 @@ WhirlpoolPlus.settings = {
     css: function () {
         var styles = '#wppSettings { background-color:#999; border:1px solid #000; color:#333; padding:0 12px; height: 60%; width: 50%; min-height: 580px; min-width: 900px; }' +
         '#wppSettings #wppSettingsWrapper { overflow: hidden; width: 100%; height: 100%; }' +
-        '#wppSettings #tabMenu { list-style:none; width:100%; margin: 14px 0px 0px 32px; }' +
+        '#wppSettings #tabMenu { list-style:none; width:100%; margin: 10px 0px 0px 10px; }' +
         '#wppSettings .menuTab { border:3px solid #777; border-width:3px 3px 1px; float:left; height:20px; margin-right:10px; padding:5px; width:120px; text-align:center; color:white; }' +
         '#wppSettings .menuTab_active { background-color:orange; border:3px solid #555; border-width:3px 3px 1px; }' +
         '#wppSettings .menuTab:hover { cursor:pointer; border:3px solid #555; border-width:3px 3px 1px; }' +
@@ -895,6 +896,38 @@ WhirlpoolPlus.settings = {
 
         });
 
+            function download(filename, output) {
+                var element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+
+            document.getElementById("wpp_dwn-btn").addEventListener("click", function(){
+                var output = JSON.stringify(localStorage);
+                var filename = "WP-Plus-Data.txt";
+                download(filename, output);
+            }, false);
+
+            document.getElementById("wpp_upl-btn").addEventListener("click", function(){
+            var input = document.getElementById('importWPPData').value;
+            var wppdata = '';
+            if (input == '') {
+                alert('WP+: Enter a valid JSON String');
+                }
+                else {
+                    wppdata = JSON.parse(input);
+                Object.keys(wppdata).forEach(function (k) {
+                    localStorage.setItem(k, wppdata[k]);
+                });
+                alert('WP+: Script data imported');
+                window.location.reload();
+                };
+            }, false);
+
         //Special events
 
 
@@ -907,26 +940,6 @@ WhirlpoolPlus.settings = {
                     $('.syncSetting').prop('disabled', 'disabled');
                 }
             }).change();
-
-            function download(filename, output) {
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
-    element.setAttribute('download', filename);
-
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
-}
-
-        document.getElementById("dwn-btn").addEventListener("click", function(){
-    var output = JSON.stringify(localStorage);
-    var filename = "WP-Plus-Data.txt";
-
-    download(filename, output);
-}, false);
 
             function refreshAvatars() {
                 //Load the avatars & check them for bads
@@ -1110,32 +1123,19 @@ WhirlpoolPlus.settings = {
     _buildHtml: function () {
         this._html = '<div id="wppSettingsWrapper">' +
             '<ul id="tabMenu">' +
-                '<li class="menuTab menuTab_active" data-menudiv="menuDiv_help">Info & Config</li>' +
+                '<li class="menuTab menuTab_active" data-menudiv="menuDiv_help">Script Info</li>' +
                 '<li class="menuTab" data-menudiv="menuDiv_display">Display</li>' +
                 '<li class="menuTab" data-menudiv="menuDiv_users">Users</li>' +
                 '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_wlr">WLR & Sync</li>' +
                 '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_posts">Threads & Posts</li>' +
+                '<li class="menuTab" data-menudiv="menuDiv_config">Script Config</li>' +
             '</ul>' +
 
             '<div class="menuDiv menuDiv_active" id="menuDiv_help">' +
 
                 '<p class="description"><center><h1>Whirlpool Plus</h1></center></p>' +
 
-                '<div class="wpp_showNotForum wpp_settingsMessage">Setting made here will not apply to the forums.whirlpool.net.au subdomain</div>' +
-
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description wpp_hide"><b>Script Configuration</b> (click to expand)</p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
-                            ' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
-                            ' <span class="settingDesc">Used for features like the Recent Activity Overlay, Avatars and WLR Synchronisation</span>' +
-                        '</p>' +
-
-                    '</div>' +
-
-                '</div>' +
+                '<div class="wpp_showNotForum wpp_settingsMessage">Settings made here will not apply to the forums.whirlpool.net.au subdomain</div>' +
 
                 '<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
                 '<p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features. </p>' +
@@ -1780,10 +1780,31 @@ WhirlpoolPlus.settings = {
 
                     '</div>' +
                 '</div>' +
-
             '</div>' +
 
-            '<div class="bottomrow"><button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset Settings</button><input type="button" id="dwn-btn" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;" value="Backup WP Plus Data"/><button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button><button id="wppSettings_cancel" class="simplemodal-close" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button><center>Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</center></div>' +
+            '<div class="menuDiv" id="menuDiv_config">' +
+                '<div class="subSettings">' +
+                    '<p class="subSettings_heading description"><b>Script Configuration</b> (click to expand)</p>' +
+                    '<div class="subSettings_content">' +
+
+                        '<p>' +
+                            '<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
+                            ' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
+                            ' <span class="settingDesc">Used for features like the Recent Activity Overlay, Avatars and WLR Synchronisation</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_import" type="text" id="importWPPData">' +
+                            ' <label for="importWPPData">Data to Import</label>' +
+                            ' <span class="settingDesc"><button id="wpp_dwn-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Export Settings & Data</button><button id="wpp_upl-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Import Settings & Data</button></span><br />' +
+                        '</p>' +
+
+                    '</div>' +
+
+                '</div>' +
+                '</div>' +
+
+            '<div class="bottomrow"><button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset Settings & Data</button><button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button><button id="wppSettings_cancel" class="simplemodal-close" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button><center>Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</center></div>' +
 
             '<br />' +
 
@@ -4241,15 +4262,12 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Profile Pages **/
-        let uNumber = WhirlpoolPlus.util.getUserId();
     if (WhirlpoolPlus.util.pageType.profile) {
         WhirlpoolPlus.feat.display.hideClosedThreads();
         if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'profile') {
             WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
         };
-        if (window.location.href !== 'https://forums.whirlpool.net.au/user/' && window.location.href.indexOf(uNumber) ===-1) {
         WhirlpoolPlus.feat.quickWhim.run();
-        };
         WhirlpoolPlus.feat.postsPerDay();
         WhirlpoolPlus.feat.display.oldProfile();
         WhirlpoolPlus.feat.display.userPageInfoToggle();
@@ -4262,9 +4280,11 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Own Profile **/
+    let uNumber = WhirlpoolPlus.util.getUserId();
     if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf(uNumber) >0) {
         WhirlpoolPlus.feat.display.superProfile();
         WhirlpoolPlus.feat.hideWhimActivity();
+        $('.wpp-whim').css('display', 'none');
     }
 
     /** RUN: Aura Votes Page **/
