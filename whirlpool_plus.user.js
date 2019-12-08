@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.4.6
+// @version         5.4.7
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.4.6',
+    version: '5.4.7',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 97,
+    storageVersion: 98,
 
     //Script changelog
     changelog: {
+        '5.4.7': '<ul><li>Adds option to set custom colours for themeing. WP Plus Notification bar will now conform to theme colours. Tidied Script Configuration tab in WP Plus Settings.</li></ul>',
         '5.4.6': '<ul><li>Adds option to import WP Plus Data. Changes to WP Plus Settings menu. Fixes issue with certain script features not running while logged out of WP.</li></ul>',
         '5.4.5': '<ul><li>Tidy redundant whim code. Adds option to backup WP Plus Data to file. Fixes API issue with Watched Thread Alert.</li></ul>',
         '5.4.4': '<ul><li>Adds options for Whim textbox on User Profile pages and hide Whim activity on User Profile pages. Removes Whim Archive sort due to redundancy.</li></ul>',
@@ -123,6 +124,10 @@ WhirlpoolPlus.install = {
 
     _defaults: {
         display_theme: 'default',
+        display_usertheme_bgcolour: '',
+        display_usertheme_fgcolour: '',
+        display_usertheme_fgcolour2: '',
+        display_usertheme_fgcolour3: '',
         display_hideDeletedThreads: false,
         display_hideMovedThreads: false,
         display_hideDeletedPosts: false,
@@ -146,6 +151,7 @@ WhirlpoolPlus.install = {
         display_userPageInfoToggle: false,
         display_superProfile: 'default',
         display_avatarsOnProfile: false,
+        display_notify_background: '#3a332a',
         avatars_enabled: 'static',
         stats_postsPerDay: true,
         embed_videos: true,
@@ -370,7 +376,7 @@ WhirlpoolPlus.util = {
 
     notify: function (message, important) {
         var color = '#fff',
-            background = '#3F435E',
+            background = WhirlpoolPlus.util.get('display_notify_background'),
             opacity = '0.9';
 
         if (important === true) {
@@ -834,32 +840,44 @@ WhirlpoolPlus.settings = {
 
                 var newTheme = WhirlpoolPlus.util.get('display_theme');
                 if (newTheme != currentTheme) {
-                    if (confirm('Would you like to load the suggested WLR highlight colours for your theme?')) {
-                        var newPostColour, noNewPostColour, postBackgroundColour;
+                    if (confirm('Would you like to load the suggested WLR highlight & Notification bar colours for your theme?')) {
+                        var newPostColour, noNewPostColour, postBackgroundColour, notifybackground;
 
                         switch (newTheme) {
                             case 'classic':
                                 newPostColour = '#79A1FC';
                                 noNewPostColour = '#EAA53F';
                                 postBackgroundColour = '#DEE6FA';
+                                notifybackground = '#3F435E';
                                 break;
 
                             case 'black':
                                 newPostColour = '#FFFFFF';
                                 noNewPostColour = '#555555';
                                 postBackgroundColour = '#A1A1A1';
+                                notifybackground = '#323232';
                                 break;
 
                             case 'teal':
                                 newPostColour = '#B2F8F8';
                                 noNewPostColour = '#99C5CB';
                                 postBackgroundColour = '#D2E5E2';
+                                notifybackground = '#567377';
                                 break;
 
                             case 'electrolize':
                                 newPostColour = '#002F58';
                                 noNewPostColour = '#054C66';
                                 postBackgroundColour = '#0C3851';
+                                notifybackground = '#061E2B';
+                                break;
+
+                            case 'userset':
+                            userset:
+                                newPostColour = '#95B0CB';
+                                noNewPostColour = '#CBC095';
+                                postBackgroundColour = '#CFCBBC';
+                                notifybackground = '#000';
                                 break;
 
                             case 'default':
@@ -867,12 +885,14 @@ WhirlpoolPlus.settings = {
                                 newPostColour = '#95B0CB';
                                 noNewPostColour = '#CBC095';
                                 postBackgroundColour = '#CFCBBC';
+                                notifybackground = '#3a332a';
                                 break;
                         }
 
                         WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', newPostColour);
                         WhirlpoolPlus.util.set('wlr_display_readThreadColour', noNewPostColour);
                         WhirlpoolPlus.util.set('wlr_display_unreadPostColour', postBackgroundColour);
+                        WhirlpoolPlus.util.set('display_notify_background', notifybackground);
                     }
                 }
 
@@ -1172,9 +1192,40 @@ WhirlpoolPlus.settings = {
                                 '<option value="black">WP Black (by =CHRIS=)</option>' +
                                 '<option value="teal">WP Teal (by =CHRIS=)</option>' +
                                 '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
+                                '<option value="userset">User Set</option>' +
                             '</select>' +
-                            ' <label for="display_theme">Custom Theme<br>To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a></label>' +
-                            ' <span class="settingDesc">A collection of styles provided by members of Whirlpool</span>' +
+                            ' <label for="display_theme">Custom Theme<br />To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a><br /><a href="https://www.rapidtables.com/web/color/RGB_Color.html" target="_blank">Colour Code Picker</a></label>' +
+                            ' <span class="settingDesc">A collection of styles provided by members of Whirlpool, or the option to set your own theme colours below</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_notify_background" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            ' <label for="display_notify_background">Notification Bar Colour - All Themes</label>' +
+                            ' <span class="settingDesc">Sets the notification strip background colour</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_bgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            ' <label for="display_usertheme_bgcolour">Primary Background Colour - User Set Theme</label>' +
+                            ' <span class="settingDesc">Sets the primary colour for the background</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_fgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            ' <label for="display_usertheme_fgcolour">Primary Foreground Colour - User Set Theme</label>' +
+                            ' <span class="settingDesc">Sets the primary colour for the foreground</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_fgcolour2" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            ' <label for="display_usertheme_fgcolour2">Secondary Foreground Colour - User Set Theme</label>' +
+                            ' <span class="settingDesc">Sets the secondary colour for the foreground</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_fgcolour3" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            ' <label for="display_usertheme_fgcolour3">Third Foreground Colour - User Set Theme</label>' +
+                            ' <span class="settingDesc">Sets the third colour for the foreground</span>' +
                         '</p>' +
 
                         '<p>' +
@@ -1784,19 +1835,20 @@ WhirlpoolPlus.settings = {
 
             '<div class="menuDiv" id="menuDiv_config">' +
                 '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Script Configuration</b> (click to expand)</p>' +
-                    '<div class="subSettings_content">' +
+                    '<p class="subSettings_heading description"><b>Script Configuration</b></p>' +
+                    '<div>' +
 
                         '<p>' +
                             '<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
                             ' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
-                            ' <span class="settingDesc">Used for features like the Recent Activity Overlay, Avatars and WLR Synchronisation</span>' +
+                            ' <span class="settingDesc">Required for features like the Recent Activity Overlay, Avatars and WLR Synchronisation</span>' +
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_import" type="text" id="importWPPData">' +
-                            ' <label for="importWPPData">Data to Import</label>' +
-                            ' <span class="settingDesc"><button id="wpp_dwn-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Export Settings & Data</button><button id="wpp_upl-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Import Settings & Data</button></span><br />' +
+                            '<span>Data to Import</span>' +
+                            ' <span class="settingDesc">Paste a valid JSON string or prior exported data here to import into your browser</span>' +
+                            '<br /><textarea id="importWPPData" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
+                            '<br /><button id="wpp_dwn-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Export WP+ Config</button><button id="wpp_upl-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Import WP+ Config</button><br /><br />' +
                         '</p>' +
 
                     '</div>' +
@@ -1804,7 +1856,7 @@ WhirlpoolPlus.settings = {
                 '</div>' +
                 '</div>' +
 
-            '<div class="bottomrow"><button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset Settings & Data</button><button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button><button id="wppSettings_cancel" class="simplemodal-close" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button><center>Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</center></div>' +
+            '<div class="bottomrow"><button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset WP+ Config</button><button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button><button id="wppSettings_cancel" class="simplemodal-close" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button><center>Installed Script Version: ' + WhirlpoolPlus.about.versionText() + '</center></div>' +
 
             '<br />' +
 
@@ -2333,9 +2385,20 @@ WhirlpoolPlus.feat.display = {
         let electrolizelogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolizewpnewhead.png';
         let electrolize_1 = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolize_1.png';
         let blacklogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/blackwpnewhead.png';
+        //User Set Theme Parameters
+        let bgcolour = WhirlpoolPlus.util.get('display_usertheme_bgcolour');
+        let fgcolour = WhirlpoolPlus.util.get('display_usertheme_fgcolour');
+        let fgcolour2 = WhirlpoolPlus.util.get('display_usertheme_fgcolour2');
+        let fgcolour3 = WhirlpoolPlus.util.get('display_usertheme_fgcolour3');
 
         switch (currentTheme) {
             case 'default':
+                break;
+            case 'userset':
+            styles += 'body {background-color:' + bgcolour + ';}#footer {background:' + bgcolour + ';}#left ul#menu {background:' + bgcolour + ';}ul#tabs.box li.picked a {background:' + bgcolour + ';}#forumindex table td.title {background:' + bgcolour + ';}';
+            styles += '#left.sidebar {background-color:' + fgcolour + ';}#page #upperbar {background-color:' + fgcolour + ';}#page {background: none repeat scroll 0 0 ' + fgcolour + ';}#forumindex h3 {background-color:' + fgcolour + ';}#content .topbar, #content .footbar {background-color:' + fgcolour + ';}#threads table thead tr td.reps, #threads table thead tr td.reads, #threads table thead tr td.unread {background-color:' + fgcolour + ';}#rightcol h2 {background: none repeat scroll 0 0 ' + fgcolour + ';}#topbar #userbar #ub_menu.opened {background-color:' + fgcolour + ';}';
+            styles += '#innershadow {background:' + fgcolour2 + ';}#left ul#menu > li.selected {background:' + fgcolour2 + ';}#page #innerpage {background-color:' + fgcolour2 + ';}';
+            styles += '#forumindex table td.threads {background:' + fgcolour3 + ';}#left ul#menu > li.odd {background:' + fgcolour3 + ';}ul#tabs.box li a {background-color:' + fgcolour3 + ';}#news .article {background:' + fgcolour3 + ';}#rightcol .block {background:' + fgcolour3 + ';}#bc {background:' + fgcolour3 + ' !important;}';
                 break;
             case 'classic':
             styles += '#logo h1 {background: transparent url("' + await classiclogo + '") no-repeat scroll center top / 82% 165px; z-index:999;}';
@@ -3200,6 +3263,9 @@ WhirlpoolPlus.feat.spinnerMenu = {
         var spinnerimage;
         switch (currentTheme) {
             case 'default':
+            spinnerimage = spinnerdefault;
+                break;
+            case 'userset':
             spinnerimage = spinnerdefault;
                 break;
             case 'classic':
