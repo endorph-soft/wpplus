@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         5.4.7
+// @version         2020.9.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,34 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '5.4.7',
+    version: '2020.9.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 98,
+    storageVersion: 99,
 
     //Script changelog
     changelog: {
-        '5.4.7': '<ul><li>Adds option to set custom colours for themeing. WP Plus Notification bar will now conform to theme colours. Tidied Script Configuration tab in WP Plus Settings.</li></ul>',
-        '5.4.6': '<ul><li>Adds option to import WP Plus Data. Changes to WP Plus Settings menu. Fixes issue with certain script features not running while logged out of WP.</li></ul>',
-        '5.4.5': '<ul><li>Tidy redundant whim code. Adds option to backup WP Plus Data to file. Fixes API issue with Watched Thread Alert.</li></ul>',
-        '5.4.4': '<ul><li>Adds options for Whim textbox on User Profile pages and hide Whim activity on User Profile pages. Removes Whim Archive sort due to redundancy.</li></ul>',
-        '5.4.3': '<ul><li>Fixes Thread Activity DIV missing on User Profile page when Old Profile layout option is enabled. Fixes Hide Forum feature from unintentionally hiding additional forums with similar IDs. Changes display layout for avatars on User Profile pages. Changes Whim User link next to posts to use new Private Message system.</li></ul>',
-        '5.4.2': '<ul><li>Various code tidying. Adjustments to avatar and themes code to alleviate issues for some combinations of browser and script manager.</li></ul>',
-        '5.4.1': '<ul><li>Resolves all issues related to Whirlpool Content Security Policy.</li></ul>',
-        '5.4.0': '<ul><li>Fixes issues with theme display for Greasemonkey users by integrating themes into the script. Limitation of uploading avatars to those hosted on imgur only. Changed behaviour of replacing bad avatars to hide them completely or replace with Identicon depending on user settings. Other various CSS fixes.</li></ul>',
-        '5.3.9': '<ul><li>Adds Identicon to WP Plus Avatar settings menu. Changes functionality of image and video embeds due to impact of WP Content Security Policy. Changes emoji functionality to be unicode based so external images are not required. Fixes Identicons.</li></ul>',
-        '5.3.8': '<ul><li>Due to WP site changes some features such as avatars are currently not working. This build fixes themes, although due to its image heavy nature the WP Wood theme has been removed at this time. Also fixed - Recent Activity Overlay and Forums Powered by text. Please check the latest posts in the WP Plus thread for ongoing updates.</li></ul>',
-        '5.3.7': '<ul><li>Fix for WP thread number changes to allow WLR to work.</li></ul>',
-        '5.3.6': '<ul><li>Adds support for User Notes on User Profiles. Changes YouTube video embeds to use Privacy-Enhanced mode.</li></ul>',
-        '5.3.5': '<ul><li>Fixes issues with avatar display for users without Identicions enabled. Fixes Quick Edit bug.</li></ul>',
-        '5.3.4': '<ul><li>Adjustments to avatar & identicon code for performance and display on User Profiles. Expanded broken avatar image to cover all non-https avatar hosts except imgur.</li></ul>',
-        '5.3.3': '<ul><li>Adds avatars on User Profile pages. Adds option to clear Watched Threads alert notification. Fixes inbuilt notifier to work as intended. Miscellaneous fixes.</li></ul>',
-        '5.3.2': '<ul><li>Further refinements to code for performance. Adds feature to alert user when there are new unread watched threads. Fixes WP Plus menu links redirecting incorrectly. Adds WLR go to last post buttons to Watched Threads page.</li></ul>',
-        '5.3.1': '<ul><li>Refinements to code for performance. Adjustment to imgur embed to attempt to prevent incorrect preview images. Fixes extra nav buttons in threads.</li></ul>',
-        '5.3.0': '<ul><li>Further refinements for WP Jan changes ensuring backwards compatibility with old thread links. Adds option to hide posts from banned users. Clarification of requirements for avatar URLs.</li></ul>',
+        '2020.9.0': '<ul><li>Changes to version numbers - WP Plus will use date versioning moving forwards, formatted as Year.Month.Release<br />Added new functionality to Hidden Users submenu, you can now add a users ID from the menu screen.</li></ul>',
     },
 
     versionText: function () {
@@ -777,8 +760,23 @@ WhirlpoolPlus.settings = {
             for (i = 0; i < hiddenUsers.length; i++) {
                 var hurl = ("//forums.whirlpool.net.au/user/" + hiddenUsers[i]);
                 hiddenUsersHTML += '<p>User <a href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
-            }
+            };
+
+            hiddenUsersHTML += '<p><input type="text" placeholder="Enter User ID Here" title="Paste or enter the User ID you would like to block here." style="width: 125px;" id="UIDHide" /> <button type="button" id="UIDHide_add">Add</button></p>';
             $('#hiddenUsers').append(hiddenUsersHTML);
+                        $('#UIDHide_add').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            var UID = $('#UIDHide').val();
+                            console.log(UID);
+                if ($.inArray(UID, WhirlpoolPlus.util.get('hiddenUsers') == -1 && (UID !== ''))) {
+                    //Not currently in array
+                                WhirlpoolPlus.util.notify('Blocking User', true);
+                                hiddenUsers.push(UID);
+                                WhirlpoolPlus.util.set('hiddenUsers', hiddenUsers);
+                                $('#UIDHide').val('');
+			}
+                    });
+
         }
 
         //Set up events
@@ -1160,7 +1158,7 @@ WhirlpoolPlus.settings = {
                 '<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
                 '<p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features. </p>' +
                 '<p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus" target="_blank">wiki article<a>.</p>' +
-                '<p class="description">The script is currently maintained by <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>, so you can also whim him.</p>' +
+                '<p class="description">The script is currently maintained by <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>, so you can also private message him.</p>' +
 
                 '<p class="description"><b>Privacy</b></p>' +
                 '<p class="description">As stated in the wiki article, a user script like Whirlpool Plus could possibly be used to steal user information.  To our knowledge, there is no such code in this script. </p>' +
@@ -1276,7 +1274,7 @@ WhirlpoolPlus.settings = {
             '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_whimAlert">' +
                     '<label for="display_whimAlert">Whim Notification</label>' +
-                    ' <span class="settingDesc">Display a banner notification when you receive a new private message (previously WHIM), in addition to Whirlpool\'s inbuilt notification</span>' +
+                    ' <span class="settingDesc">Display a banner notification when you receive a new private message (WHIM), in addition to Whirlpool\'s inbuilt notification</span>' +
 '</p> ' +
 
                                     '<p>' +
@@ -1448,7 +1446,7 @@ WhirlpoolPlus.settings = {
                 '</div>' +
 
                 '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Hide Users</b></p>' +
+                    '<p class="subSettings_heading description"><b>Hidden Users</b></p>' +
                     '<div class="subSettings_content">' +
 
                         '<p>' +
@@ -2036,7 +2034,7 @@ WhirlpoolPlus.feat = {
 
                         if (item.className !== 'section') {
 
-                            threadsTB.insertBefore(item, threadsTR[0]);
+                            /*threadsTB.insertBefore(item, threadsTR[0]);*/
                             $(item).remove();
 
                         }
@@ -3152,7 +3150,6 @@ WhirlpoolPlus.feat.ignoreUser = {
         //add hide smiley (X)
         if ($('span[title="hide user"]', tdBodyUser).length == 0) {
             var hideUser = $('<span title="hide user" class="vote">X</span>');
-
             if ($('.voteblock', tdBodyUser).length != 0) {
                 //normal forum
                 tdBodyUser.find('.voteblock').prepend(hideUser);
@@ -3162,12 +3159,11 @@ WhirlpoolPlus.feat.ignoreUser = {
                 voteblock.append(hideUser);
                 tdBodyUser.append(voteblock);
             }
-
             hideUser.on("click", function () {
-                if ($.inArray(uNum, WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
+                if ($.inArray(uNum,WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
                     //Not currently in array
                     var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
-                    hiddenUsers.push(uNum + ' (' + uName + ')');
+                    hiddenUsers.push([uNum, uName]);
                     WhirlpoolPlus.util.set('hiddenUsers', hiddenUsers);
 
 
@@ -3181,9 +3177,12 @@ WhirlpoolPlus.feat.ignoreUser = {
 
         //check if this post is by a user we want to hide
         //need uNum as a string
-        if ($.inArray(uNum + ' (' + uName + ')', WhirlpoolPlus.util.get('hiddenUsers')) != -1) {
-            //hide this post
-            this.hideIgnoredPost(trParent, uNum + ' (' + uName + ')');
+        var userArray = WhirlpoolPlus.util.get('hiddenUsers');
+        for (var i = 0; i < userArray.length; i++) {
+            if (userArray[i].includes(uNum)) {
+                this.hideIgnoredPost(trParent, uNum);
+                break;
+            }
         }
     },
 
