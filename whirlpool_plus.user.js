@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2020.9.0
+// @version         2020.11.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,18 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2020.9.0',
+    version: '2020.11.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 99,
+    storageVersion: 100,
 
     //Script changelog
     changelog: {
+        '2020.11.0': '<ul><li>Small fix to navigation bar theming for WP Plus Settings Menu<br />Fix to Hidden User menu input from bug introduced in previous version. If you find this feature is working erratically please clear and re-enter your list of hidden user IDs.</li></ul>',
+    },
         '2020.9.0': '<ul><li>Changes to version numbers - WP Plus will use date versioning moving forwards, formatted as Year.Month.Release<br />Added new functionality to Hidden Users submenu, you can now add a users ID from the menu screen.</li></ul>',
     },
 
@@ -710,7 +712,7 @@ WhirlpoolPlus.settings = {
         '#currentUserAvatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 80px; width: 80px; margin: 0 auto; }' +
         '#wppSettings .identicon { height: 80px; width: 80px; margin: 0 auto; }');
         // Add settings link
-        var settingsLink = $('<li id="menu_wpp" class="even"><a href="#"><span>WP+ Settings</span></a></li>');
+        var settingsLink = $('<li id="menu_wpp" class="odd"><a href="#"><span>WP+ Settings</span></a></li>');
         $('#menu_whim').after(settingsLink);
 
         settingsLink.on("click", function () {
@@ -766,12 +768,12 @@ WhirlpoolPlus.settings = {
             $('#hiddenUsers').append(hiddenUsersHTML);
                         $('#UIDHide_add').on("click", function () {
                             $(this).prop('disabled', 'disabled');
-                            var UID = $('#UIDHide').val();
-                            console.log(UID);
-                if ($.inArray(UID, WhirlpoolPlus.util.get('hiddenUsers') == -1 && (UID !== ''))) {
+                            var UID = JSON.parse($('#UIDHide').val());
+                            var UID2 = 'WP User';
+                if ($.inArray(UID,WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
                     //Not currently in array
-                                WhirlpoolPlus.util.notify('Blocking User', true);
-                                hiddenUsers.push(UID);
+                                alert("Blocking User");
+                                hiddenUsers.push([UID, UID2]);
                                 WhirlpoolPlus.util.set('hiddenUsers', hiddenUsers);
                                 $('#UIDHide').val('');
 			}
@@ -3160,6 +3162,7 @@ WhirlpoolPlus.feat.ignoreUser = {
                 tdBodyUser.append(voteblock);
             }
             hideUser.on("click", function () {
+                console.log(uNum);
                 if ($.inArray(uNum,WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
                     //Not currently in array
                     var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
