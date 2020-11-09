@@ -56,18 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2020.11.0',
+    version: '2020.11.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 100,
+    storageVersion: 101,
 
     //Script changelog
     changelog: {
         '2020.11.0': '<ul><li>Small fix to navigation bar theming for WP Plus Settings Menu<br />Fix to Hidden User menu input from bug introduced in previous version. If you find this feature is working erratically please clear and re-enter your list of hidden user IDs.</li></ul>',
-    },
         '2020.9.0': '<ul><li>Changes to version numbers - WP Plus will use date versioning moving forwards, formatted as Year.Month.Release<br />Added new functionality to Hidden Users submenu, you can now add a users ID from the menu screen.</li></ul>',
     },
 
