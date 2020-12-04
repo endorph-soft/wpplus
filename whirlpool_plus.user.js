@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2020.11.0
+// @version         2020.12.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2020.11.1',
+    version: '2020.12.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 101,
+    storageVersion: 102,
 
     //Script changelog
     changelog: {
+        '2020.12.0': '<ul><li>Fix to notification bar settings menu being hidden underneath page objects when clicked.<br />Adds postimages.org as a supported avatar host.<br />Adds colour pickers to WP Plus Settings Menu for applicable settings entries.</li></ul>',
         '2020.11.0': '<ul><li>Small fix to navigation bar theming for WP Plus Settings Menu<br />Fix to Hidden User menu input from bug introduced in previous version. If you find this feature is working erratically please clear and re-enter your list of hidden user IDs.</li></ul>',
         '2020.9.0': '<ul><li>Changes to version numbers - WP Plus will use date versioning moving forwards, formatted as Year.Month.Release<br />Added new functionality to Hidden Users submenu, you can now add a users ID from the menu screen.</li></ul>',
     },
@@ -373,8 +374,8 @@ WhirlpoolPlus.util = {
             var tb = $('#topbar');
             tb.addClass('notify');
 
-            WhirlpoolPlus.util.css('#topbar.notify { width: 100% !important; max-width: none !important; background-color: ' + background + ' !important; opacity: ' + opacity + '; }');
-            WhirlpoolPlus.util.css('#topbar.notifyfloat { width: 100% !important; max-width: none !important; position: fixed; top: 0px; z-index: 999; }');
+            WhirlpoolPlus.util.css('#topbar.notify { width: 100% !important; max-width: none !important; background-color: ' + background + ' !important; }');
+            WhirlpoolPlus.util.css('#topbar.notifyfloat { width: 100% !important; max-width: none !important; position: fixed; top: 0px; z-index: 999; opacity: ' + opacity + '; }');
 
             var floatnotify = function () {
                 if (!this._notified) {
@@ -391,7 +392,7 @@ WhirlpoolPlus.util = {
 
             this._notified = true;
         }
-        $('#ub_name').before('<span class="wpplus_notify"> ' + message + ' <a class="hide">(hide)</a> |   </span>');
+        $('#userbar').prepend('<span class="wpplus_notify"> ' + message + ' <a class="hide">(hide)</a> |   </span>');
         $('.hide').on("click", function (e) {
             $('.wpplus_notify').fadeOut();
             tb.removeClass('notifyfloat');
@@ -1083,7 +1084,7 @@ WhirlpoolPlus.settings = {
                         alert('WP+: Enter a valid url to add');
                     }
 
-                    else if (!url.match(/(?:https:\/\/)?(\w+\.)(imgur\.com\/)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/)) {
+                    else if (!url.match(/(?:https:\/\/)?(\w+\.)(imgur\.com\/)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/) && !url.match(/(?:https:\/\/)?(\w+\.)(postimg\.cc\/)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/)) {
                         alert('WP+: Enter a valid https direct image URL to add');
                     }
 
@@ -1198,31 +1199,31 @@ WhirlpoolPlus.settings = {
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_notify_background" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            '<input class="wpp_setting" type="color" id="display_notify_background" placeholder="Enter HTML Colour Code" maxlength="7">' +
                             ' <label for="display_notify_background">Notification Bar Colour - All Themes</label>' +
                             ' <span class="settingDesc">Sets the notification strip background colour</span>' +
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_bgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            '<input class="wpp_setting" type="color" id="display_usertheme_bgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
                             ' <label for="display_usertheme_bgcolour">Primary Background Colour - User Set Theme</label>' +
                             ' <span class="settingDesc">Sets the primary colour for the background</span>' +
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_fgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            '<input class="wpp_setting" type="color" id="display_usertheme_fgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
                             ' <label for="display_usertheme_fgcolour">Primary Foreground Colour - User Set Theme</label>' +
                             ' <span class="settingDesc">Sets the primary colour for the foreground</span>' +
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_fgcolour2" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            '<input class="wpp_setting" type="color" id="display_usertheme_fgcolour2" placeholder="Enter HTML Colour Code" maxlength="7">' +
                             ' <label for="display_usertheme_fgcolour2">Secondary Foreground Colour - User Set Theme</label>' +
                             ' <span class="settingDesc">Sets the secondary colour for the foreground</span>' +
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting" pattern="/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i" type="text" id="display_usertheme_fgcolour3" placeholder="Enter HTML Colour Code" maxlength="7">' +
+                            '<input class="wpp_setting" type="color" id="display_usertheme_fgcolour3" placeholder="Enter HTML Colour Code" maxlength="7">' +
                             ' <label for="display_usertheme_fgcolour3">Third Foreground Colour - User Set Theme</label>' +
                             ' <span class="settingDesc">Sets the third colour for the foreground</span>' +
                         '</p>' +
@@ -1406,7 +1407,7 @@ WhirlpoolPlus.settings = {
                     '<p class="subSettings_heading description"><b>Avatars</b></p>' +
                     '<div class="subSettings_content">' +
 
-                        '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a>, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below.<br /><br />If you see the X image but have previously uploaded an avatar, it may be prevented from working due to WP site changes.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.' +
+                        '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a> or <a href="//postimages.org">postimage</a>, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below.<br /><br />If you see the X image but have previously uploaded an avatar, it may be prevented from working due to WP site changes.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.' +
 
                         '<div id="currentAvatars" class="wpp_hideNotForum">' +
                             '<div>' +
@@ -1489,19 +1490,19 @@ WhirlpoolPlus.settings = {
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadThreadColour">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="color" id="wlr_display_unreadThreadColour">' +
                             ' <label for="wlr_display_unreadThreadColour">Unread Posts Colour</label>' +
                             ' <span class="settingDesc">Used to highlight threads containing posts you haven\'t read</span>' +
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_readThreadColour">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="color" id="wlr_display_readThreadColour">' +
                             ' <label for="wlr_display_readThreadColour">No Unread Posts Colour</label>' +
                             ' <span class="settingDesc">Used to highlight threads containing no unread posts</span>' +
                         '</p>' +
 
                         '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="wlr_display_unreadPostColour">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="color" id="wlr_display_unreadPostColour">' +
                             ' <label for="wlr_display_unreadPostColour">Post Highlight Colour (Posts Pages)</label>' +
                             ' <span class="settingDesc">Used to highlight posts (right most column) on posts pages</span>' +
                         '</p>' +
