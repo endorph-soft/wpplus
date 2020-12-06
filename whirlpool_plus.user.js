@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2020.12.0
+// @version         2020.12.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2020.12.0',
+    version: '2020.12.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 102,
+    storageVersion: 103,
 
     //Script changelog
     changelog: {
+        '2020.12.1': '<ul><li>Fix to notification bar text not respecting non-widescreen theme<br />Adds Custom Links to WP Plus Dynamic Menu<br />Tidied Redundant Code</li></ul>',
         '2020.12.0': '<ul><li>Fix to notification bar settings menu being hidden underneath page objects when clicked.<br />Adds postimages.org as a supported avatar host.<br />Adds colour pickers to WP Plus Settings Menu for applicable settings entries.</li></ul>',
         '2020.11.0': '<ul><li>Small fix to navigation bar theming for WP Plus Settings Menu<br />Fix to Hidden User menu input from bug introduced in previous version. If you find this feature is working erratically please clear and re-enter your list of hidden user IDs.</li></ul>',
         '2020.9.0': '<ul><li>Changes to version numbers - WP Plus will use date versioning moving forwards, formatted as Year.Month.Release<br />Added new functionality to Hidden Users submenu, you can now add a users ID from the menu screen.</li></ul>',
@@ -153,6 +154,7 @@ WhirlpoolPlus.install = {
         recentActivityOverlay_updateInterval: 15,
         recentActivityOverlay_lastUpdated: 0,
         whirlpoolAPIKey: '',
+        customLinks: [],
         hiddenUsers_enabled: false,
         hiddenUsers: [],
         hiddenUsers_remove: false,
@@ -374,7 +376,7 @@ WhirlpoolPlus.util = {
             var tb = $('#topbar');
             tb.addClass('notify');
 
-            WhirlpoolPlus.util.css('#topbar.notify { width: 100% !important; max-width: none !important; background-color: ' + background + ' !important; }');
+            WhirlpoolPlus.util.css('#topbar.notify { width: 100% !important; background-color: ' + background + ' !important; }');
             WhirlpoolPlus.util.css('#topbar.notifyfloat { width: 100% !important; max-width: none !important; position: fixed; top: 0px; z-index: 999; opacity: ' + opacity + '; }');
 
             var floatnotify = function () {
@@ -756,7 +758,54 @@ WhirlpoolPlus.settings = {
             $('#sync_server').val(currentSyncServer);
             $('#sync_encryptionKey').val(currentSyncEncryptionKey);
 
+        //Set up Custom Links section for settings menu
 
+            var customLinksHTML = '';
+            var customLinks = WhirlpoolPlus.util.get('customLinks');
+            for (i = 0; i <customLinks.length; i++) {
+                customLinksHTML += '<p>URL <a href="' + customLinks[i] + '">' + customLinks[i] + '</a> <button type="button" class="removeLink" data-customlink="' + customLinks[i] + '">Remove</button></p>';
+            };
+
+            customLinksHTML += '<p><input type="text" placeholder="Enter Custom Link Here" title="Paste or enter the Custom Link you would like to add here." style="width: 125px;" id="customLinkText" /> <button type="button" id="customLinkText_add">Add</button></p>';
+            $('#customLinks').append(customLinksHTML);
+                        $('#customLinkText_add').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            var Link = $('#customLinkText').val();
+                if (Link.match(/^(http|https):\/\//)) {
+                                alert("Adding Custom Link");
+                                customLinks.push(Link);
+                                WhirlpoolPlus.util.set('customLinks', customLinks);
+                                $('#customLinkText').val('');
+			}
+                            else {
+                                alert("Your link is missing required elements, please ensure it includes the http or https prefix");
+                            }
+                    });
+
+            $('.removeLink').on("click", function () {
+                var theButton = $(this);
+                var linkID = theButton.data('customlink');
+                var customLinks = WhirlpoolPlus.util.get('customLinks');
+                var linkToDelete = -1;
+
+                for (i = 0; i < customLinks.length; i++) {
+                    if (customLinks[i] == linkID) {
+                        linkToDelete = i;
+                        break;
+                    }
+                }
+
+                if (linkToDelete >= 0) {
+                    customLinks.splice(linkToDelete, 1);
+                }
+
+                WhirlpoolPlus.util.set('customLinks', customLinks);
+
+                theButton.parent().remove();
+
+            });
+
+        //Set up Hidden Users section for settings menu
             var hiddenUsersHTML = '';
             var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
             for (i = 0; i < hiddenUsers.length; i++) {
@@ -1194,7 +1243,7 @@ WhirlpoolPlus.settings = {
                                 '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
                                 '<option value="userset">User Set</option>' +
                             '</select>' +
-                            ' <label for="display_theme">Custom Theme<br />To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a><br /><a href="https://www.rapidtables.com/web/color/RGB_Color.html" target="_blank">Colour Code Picker</a></label>' +
+                            ' <label for="display_theme">Custom Theme<br />To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a></label>' +
                             ' <span class="settingDesc">A collection of styles provided by members of Whirlpool, or the option to set your own theme colours below</span>' +
                         '</p>' +
 
@@ -1273,6 +1322,13 @@ WhirlpoolPlus.settings = {
                     '<label for="display_hideFooter">Hide the forum footer</label>' +
                     ' <span class="settingDesc">Hides the footer navigation on each page</span>' +
                 '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting" type="checkbox" id="display_poweredby">' +
+                            '<label for="display_poweredby">Display random "forums powered by" text</label>' +
+                            ' <span class="settingDesc">An original Whirlpool feature resurrected, because why not?</span>' +
+                        '</p>' +
+
             '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_whimAlert">' +
                     '<label for="display_whimAlert">Whim Notification</label>' +
@@ -1321,12 +1377,8 @@ WhirlpoolPlus.settings = {
                     ' <label for="spinnerMenu_settingsLocation">Location of settings link in dynamic menu</label>' +
                             ' <span class="settingDesc">Adjusts where this will appear</span>' +
                 '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_poweredby">' +
-                            '<label for="display_poweredby">Display random "forums powered by" text</label>' +
-                            ' <span class="settingDesc">An original Whirlpool feature resurrected, because why not?</span>' +
-                        '</p>' +
+                        '<p class="description">Custom Links: </p>' +
+                        '<div id="customLinks"></div>' +
 
                     '</div>' +
 
@@ -3244,7 +3296,7 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
         return "#pmenu {padding:0;list-style-type: none; position:fixed;z-index:50;height:19px;overflow:hidden;width:18px;left:" + whereMenu + ";}" +
             "#pmenu img{margin;0;padding:0;border:none;background:transparent;width:16px;} #pmenu ul {padding:0; margin:0; list-style-type: none; width:101px;}" +
-            "#pmenu li {position:relative;z-index:51;}" + "#pmenu a{display:block;width:140px;font-weight:bold;font-size:12px; color:#FFFFFF; height:26px; line-height:26px; " +
+            "#pmenu li {position:relative;z-index:51;}" +"#pmenu a{display:block;width:140px;font-weight:bold;font-size:12px; color:#FFFFFF; height:26px; line-height:26px; " +
             "text-decoration:none; text-indent:5px; background:#616CA3; border:1px solid orange;white-space: nowrap; }" + "#pmenu>li>ul>li>a{background:#EDEDED;color:#000;}" +
             "#pmenu li:hover > a {background:#dfd7ca; color:#c00;}" + "#pmenu li ul {display: none;} " +
             "#pmenu li:hover > ul {display:block; position:absolute; top:0; z-index:52;margin-left:140px;}";
@@ -3256,6 +3308,8 @@ WhirlpoolPlus.feat.spinnerMenu = {
 
         this._menu = $('<ul id="pmenu">');
 
+        var customLinksMenuHTML = '';
+        var customLinks = WhirlpoolPlus.util.get('customLinks');
         let currentTheme = WhirlpoolPlus.util.get('display_theme');
         let spinnerdefault = await WhirlpoolPlus.util.image('small_whirl_logo');
         let spinnerteal = await WhirlpoolPlus.util.image('spinner_teal');
@@ -3284,15 +3338,19 @@ WhirlpoolPlus.feat.spinnerMenu = {
                 break;
                         }
 
+            for (i = 0; i <customLinks.length; i++) {
+                customLinksMenuHTML += '<li><a title="' + customLinks[i] + '" style="max-width:140px;overflow:hidden;" href="' + customLinks[i] + '">' + customLinks[i] + '</a></li>';
+            };
+
         switch (WhirlpoolPlus.util.get('spinnerMenu_settingsLocation')) {
             case "top":
-            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a id="settingsSpinnerLink">WP+ Settings</a></li><li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a>Custom Links</a>' + '<ul>' + customLinksMenuHTML + '</ul>' + '</li>');
                 break;
             case "underuser":
-            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a id="settingsSpinnerLink">WP+ Settings</a></li>');
+            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a id="settingsSpinnerLink">WP+ Settings</a></li><li><a>Custom Links</a>' + '<ul>' + customLinksMenuHTML + '</ul>' + '</li>');
                 break;
             default:
-            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li> ');
+            this._menu.html('<img id="menuSpinner" src="' + spinnerimage + '" />' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">WP User</a>' + '<ul> ' + '<li><a href="//forums.whirlpool.net.au/user/' + uNumber + '">Your Posts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/user/?action=online">Notable Identities</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=inbox">Inbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=outbox">Outbox</a></li> ' + '<li><a href="//forums.whirlpool.net.au/whim/?action=contacts">Contacts</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=watched">Watched Threads</a></li> ' + '<li><a href="//forums.whirlpool.net.au/forum/?action=threads_search">Thread Search</a></li> ' + '<li><a href="//whirlpool.net.au/profile/">Account Settings</a></li> ' + '<li><a href="//whirlpool.net.au/profile/?a=logout&logout=' + uNumber + '">Log out</a></li> ' + '</ul> ' + '</li><li><a>Custom Links</a>' + '<ul>' + customLinksMenuHTML + '</ul>' + '</li>');
         }
         var newUL2;
         $('.forumlist').each(function () {
@@ -4361,7 +4419,7 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Forums page **/
-    if (document.location.href == 'http://forums.whirlpool.net.au/' || document.location.href == 'https://forums.whirlpool.net.au/') {
+    if (document.location.href == 'https://forums.whirlpool.net.au/') {
         WhirlpoolPlus.feat.display.hideForums();
         WhirlpoolPlus.feat.removeLinkToLastPage();
     }
