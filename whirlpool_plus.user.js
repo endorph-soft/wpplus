@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2020.12.1
+// @version         2021.2.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2020.12.1',
+    version: '2021.2.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 103,
+    storageVersion: 104,
 
     //Script changelog
     changelog: {
+        '2021.2.0': '<ul><li>Adds Experimental Image Uploader functionality to posts. Minor changes to cookie setting method for CSP Bypass. Tidied spacing in Settings Menu. Removed redundant code. Unified insertion method on Super Profile feature.</li></ul>',
         '2020.12.1': '<ul><li>Fix to notification bar text not respecting non-widescreen theme<br />Adds Custom Links to WP Plus Dynamic Menu<br />Tidied Redundant Code</li></ul>',
         '2020.12.0': '<ul><li>Fix to notification bar settings menu being hidden underneath page objects when clicked.<br />Adds postimages.org as a supported avatar host.<br />Adds colour pickers to WP Plus Settings Menu for applicable settings entries.</li></ul>',
         '2020.11.0': '<ul><li>Small fix to navigation bar theming for WP Plus Settings Menu<br />Fix to Hidden User menu input from bug introduced in previous version. If you find this feature is working erratically please clear and re-enter your list of hidden user IDs.</li></ul>',
@@ -182,6 +183,7 @@ WhirlpoolPlus.install = {
         compose_quickReply: true,
         compose_enhancedEditorNew: 'default',
         compose_movePreview: true,
+        compose_image_uploader: false,
         autoSubscribeToNewThread: false,
         whimLink: true,
         hideWhimActivity: false,
@@ -335,7 +337,7 @@ WhirlpoolPlus.util = {
         var date = new Date();
         var expire = new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000);
         var dateString = date.toISOString().substr(0,10);
-        var cookieString = "disablecsp=" + dateString + "; expires=" + expire + "";
+        var cookieString = "disablecsp=" + dateString + "; expires=" + expire + ";SameSite=None; Secure";
         document.cookie = cookieString;
     },
 
@@ -1396,44 +1398,44 @@ WhirlpoolPlus.settings = {
 
                         '<p>' +
                             '<input class="wpp_setting" type="checkbox" id="returnafterlogin">' +
-                            ' <label for="returnafterlogin">Return to previous page after logging in<br /><b>Must be enabled on both the whirlpool.net.au and forums.whirlpool.net.au domains to work correctly</b></label>' +
-                            ' <span class="settingDesc">Redirects you to the last thread viewed before login</span>' +
+                            '<label for="returnafterlogin">Return to previous page after logging in<br /><b>Must be enabled on both the whirlpool.net.au and forums.whirlpool.net.au domains to work correctly</b></label>' +
+                            '<span class="settingDesc">Redirects you to the last thread viewed before login</span>' +
                         '</p>' +
 
                         '<p class="wpp_hideNotForum">' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideClosedThreadsOnProfile">' +
-                            ' <label for="display_hideClosedThreadsOnProfile">Hide closed threads on user profiles</label>' +
-                            ' <span class="settingDesc">Prevents closed threads from appearing on user pages</span>' +
+                            '<label for="display_hideClosedThreadsOnProfile">Hide closed threads on user profiles</label>' +
+                            '<span class="settingDesc">Prevents closed threads from appearing on user pages</span>' +
                         '</p>' +
 
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="stats_postsPerDay">' +
-                    ' <label for="stats_postsPerDay">Enable "Posts per day" statistic</label>' +
-                            ' <span class="settingDesc">Calculates a statistic on user pages</span>' +
+                    '<label for="stats_postsPerDay">Enable "Posts per day" statistic</label>' +
+                            '<span class="settingDesc">Calculates a statistic on user pages</span>' +
                 '</p>' +
 
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_oldProfile">' +
                     '<label for="display_oldProfile">Use old User Profile page design</label>' +
-                    ' <span class="settingDesc">Shows recent thread activity below user info as per the old site design</span>' +
+                    '<span class="settingDesc">Shows recent thread activity below user info as per the old site design</span>' +
                 '</p> ' +
 
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickWhim">' +
                     '<label for="quickWhim">Quick Whim</label>' +
-                    ' <span class="settingDesc">Adds a Whim box to User Profile pages</span>' +
+                    '<span class="settingDesc">Adds a Whim box to User Profile pages</span>' +
                 '</p> ' +
 
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hideWhimActivity">' +
                     '<label for="hideWhimActivity">Hide Whim Activity on User Profile page</label>' +
-                    ' <span class="settingDesc">Hides your recent private messages from the User Profile page</span>' +
+                    '<span class="settingDesc">Hides your recent private messages from the User Profile page</span>' +
                 '</p> ' +
 
                             '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_userPageInfoToggle">' +
                     '<label for="display_userPageInfoToggle">Toggle to show/hide user info on Profile pages</label>' +
-                    ' <span class="settingDesc">Adds a toggle to show/hide the user info panel as required</span>' +
+                    '<span class="settingDesc">Adds a toggle to show/hide the user info panel as required</span>' +
                 '</p> ' +
 
                             '<p>' +
@@ -1784,6 +1786,12 @@ WhirlpoolPlus.settings = {
                 '</p> ' +
 
                         '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_image_uploader">' +
+                            ' <label for="compose_image_uploader">Enable postimage uploader integration - <b>experimental</b></label>' +
+                            ' <span class="settingDesc">Adds integration with postimage.org for uploading images and including in posts</span>' +
+                        '</p>' +
+
+                        '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoSubscribeToNewThread">' +
                             ' <label for="autoSubscribeToNewThread">Automatically watch/mark as read when you post</label>' +
                             ' <span class="settingDesc">When you reply to a thread, it will automatically be added to your watched threads</span>' +
@@ -2088,7 +2096,6 @@ WhirlpoolPlus.feat = {
 
                         if (item.className !== 'section') {
 
-                            /*threadsTB.insertBefore(item, threadsTR[0]);*/
                             $(item).remove();
 
                         }
@@ -2599,8 +2606,8 @@ WhirlpoolPlus.feat.display = {
             WhirlpoolPlus.util.css('ul.box {display:none;}');
         }
         else if (WhirlpoolPlus.util.get('display_superProfile') == 'unread') {
-            $('#userprofile').append('<p><h2>Unread Watched Threads</h2>');
-            $('#userprofile').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
+            $('#threads').append('<p><h2>Unread Watched Threads</h2>');
+            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
             WhirlpoolPlus.util.css('ul.box {display:none;}');
         }
     },
@@ -3767,7 +3774,6 @@ WhirlpoolPlus.feat.editor = {
     whirlcodify: function (id) {
         if (WhirlpoolPlus.util.get('compose_enhancedEditorNew') != 'disabled') {
             var target = $(id)
-
             target.parent().before('<div id="wpp_whirlcode"></div>');
 
             this._addWhirlcodeControls('#wpp_whirlcode', target);
@@ -3783,6 +3789,14 @@ WhirlpoolPlus.feat.editor = {
             $('#replyformBlock replyform textarea').prop('overflow', 'auto !important');
         }
 
+    },
+
+    image_uploader: function () {
+        if (WhirlpoolPlus.util.get('compose_image_uploader')) {
+        var script = document.createElement("script");
+        script.src = "https://wpplus.phyco.name/postimgtest.js";
+        document.getElementsByTagName("head")[0].appendChild(script);
+        }
     },
 
     autoSubscribe: function () {
@@ -4360,6 +4374,7 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.editor.showInlineReply();
         WhirlpoolPlus.feat.editor.autoSubscribe();
         WhirlpoolPlus.feat.editor.movePreview();
+        WhirlpoolPlus.feat.editor.image_uploader();
         WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
 
         //Loop through each reply
@@ -4427,6 +4442,7 @@ WhirlpoolPlus.run = async function () {
     /** RUN: Posting (new thread, reply) **/
     if (WhirlpoolPlus.util.pageType.newThread || WhirlpoolPlus.util.pageType.reply) {
         WhirlpoolPlus.feat.editor.autoSubscribe();
+        WhirlpoolPlus.feat.editor.image_uploader();
         WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
     }
 
