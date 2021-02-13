@@ -190,6 +190,30 @@ postimage.upload = function (areaid) {
         }
     }, 200);
 };
+postimage.render = function (i) {
+    var link = document.createElement('a');
+    link.innerHTML = postimage.text;
+    console.log(i);
+    link.href = "javascript:" + "postimage.upload(" + i + ");";
+    postimage.style.apply(link, postimage.style.link);
+    var icon = document.createElement('img');
+    icon.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAADBQTFRFjLXzydz5d6fx1uX7SYns4Ov8+vz/pcX1VpLt6vL9uNL4ZZvvPoLq8vf+////OoDqiMZ5LgAAAmRJREFUeNrs2dlu3DAMBVCK2lf//982kxRFRpIX2vQYBXifkxxEpiiZhuWhgMACCyywwAILLLDAAvcxIWcEwJyD+Rhs0CcdXfuOizp5NPfDBlVtQ2LCciscfGwrsT7cBofk2kYqhSbAxte2kwqGH0bbDkQjM2xUO5hkOOFs2+HowAfn2AixgQsOtpGiDQ9sdCNGFRY4NXI8Bwzzv/3VpJX617L74HU41Gl/xFBeMQHTrPKiuQxPFlq/NygDlr7YuzAe6YvGDyvu8jV4rOh5fxgb6k5lA7Wy1vrSuNfxClz6Fh1Xu1LuizBdgbM7/uT6aqjhAuwptdrXP5yH+5Xe3p39jk/lNBwiaXMmwim1DefuCQdSRTg8DQPt0Cn2+EMGSm3tnjmEnwfKQ0Nif02n4fd+6XYvFt1DPg9b2lHXbyjFBNvdC023/bjg+BRcn1pqt3tfzu2W4vrgdiJ0It4G0sFqD9ZcLdNSjnbOQ8K2h45FS7rN9PckX9jgzTodLoa48MFb9QKktxgqXFevmehIBUGFW1yRsdLeYcjwigzDO6VamOEWx98pwPzStjL7UO/1WnAyq0jLDfDrDTn/1Gwx2c9GJHtN7iz8WnGt1GsWMZ9TXBxFEMdMhHPsJjgtz8AHxly3wOrIGJV05+Ic31Jg5XmGenR4gd1/2vIMynt4we35sfNMnwbsUKxhY1LvUub6GGInuwTntFPA+PnHTrfn2J2rpqkn4a+jIUPSMdYao9UJkKqehv8eTCEEU5ZzuQBfi8ACCyywwAL/d7D7nQ/CCL+Dy8fgGyOwwAILLLDAAgv8+fwRYADFLTINcMpJIgAAAABJRU5ErkJggg==";
+    icon.width = "16";
+    icon.height = "16";
+    postimage.style.apply(icon, postimage.style.icon);
+    var container = document.createElement('div');
+    postimage.style.apply(container, postimage.style.container);
+    container.appendChild(icon);
+    container.appendChild(link);
+    var params = {
+        "mode": postimage.opt.mode,
+        "lang": postimage.opt.lang,
+        "code": postimage.opt.code,
+        "content": postimage.opt.content,
+        "forumurl": encodeURIComponent(document.location.href)
+    };
+    return container;
+};
 postimage.output = postimage.output || function (i, res, co) {
     opener.focus();
     window.close();
