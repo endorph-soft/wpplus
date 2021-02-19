@@ -3838,9 +3838,9 @@ WhirlpoolPlus.feat.editor = {
                     return;
                 }
 
-                var urlPrompt = window.prompt('Enter URL:', 'http://');
+                var urlPrompt = window.prompt('Enter URL:', 'https://');
 
-                if ((urlPrompt !== 'http://') && (urlPrompt != '') & (urlPrompt != null)) {
+                if ((urlPrompt !== 'https://') && (urlPrompt != '') & (urlPrompt != null)) {
                     WhirlpoolPlus.feat.editor._insert(textarea, '<a href="' + urlPrompt + '">' + selection + '</a>', start, end);
                 }
             },
@@ -3856,8 +3856,8 @@ WhirlpoolPlus.feat.editor = {
                 var linkPrompt = window.prompt('Enter Text:', '');
 
                 if ((linkPrompt != '') & (linkPrompt != null)) {
-                    if (selection.indexOf('http://') < 0 && selection.indexOf('https://') < 0) {
-                        selection = 'http://' + selection;
+                    if (selection.indexOf('http://') < 0 && selection.indexOf('https://') < 0 && selection.indexOf('//') < 0 && selection.indexOf('mailto:') < 0) {
+                        selection = 'https://' + selection;
                     }
 
                     WhirlpoolPlus.feat.editor._insert(textarea, '<a href="' + selection + '">' + linkPrompt + '</a>', start, end);
