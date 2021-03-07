@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.2.0
+// @version         2021.3.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.2.0',
+    version: '2021.3.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 104,
+    storageVersion: 105,
 
     //Script changelog
     changelog: {
+        '2021.3.0': '<ul><li>Adds new options for Watched Threads functionality changes in Whirlpool. Fix to Super Profile feature not working with some layouts. Whirlcode URL prompt now supports mailto and enforces https - credit to <a href="https://github.com/fowl2" target="_blank">fowl2 on Github</a></li></ul>',
         '2021.2.0': '<ul><li>Adds Experimental Image Uploader functionality to posts. Minor changes to cookie setting method for CSP Bypass. Tidied spacing in Settings Menu. Removed redundant code. Unified insertion method on Super Profile feature.</li></ul>',
         '2020.12.1': '<ul><li>Fix to notification bar text not respecting non-widescreen theme<br />Adds Custom Links to WP Plus Dynamic Menu<br />Tidied Redundant Code</li></ul>',
         '2020.12.0': '<ul><li>Fix to notification bar settings menu being hidden underneath page objects when clicked.<br />Adds postimages.org as a supported avatar host.<br />Adds colour pickers to WP Plus Settings Menu for applicable settings entries.</li></ul>',
@@ -192,6 +193,8 @@ WhirlpoolPlus.install = {
         userNotes: {},
         watchedThreadsAlert: 'default',
         watchedthreadsextra: 'improved',
+        watchedThreadsForumBarHide: false,
+        watchedThreadsOldMarkAsRead: false,
         promoteWatchedForum: '',
         returnafterlogin: false,
         sync_server: '',
@@ -1740,6 +1743,18 @@ WhirlpoolPlus.settings = {
                     ' <span class="settingDesc">Display a banner notification when you have unread Watched Threads (API Key required in Script Configuration)</span>'+
             '</p> ' +
 
+            '<p>' +
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedThreadsForumBarHide">' +
+                    '<label for="watchedThreadsForumBarHide">Watched Thread Bar Hide</label>' +
+                    ' <span class="settingDesc">Hide the horizontal alert bar that Whirlpool inserts to indicate which post you have read up to in a thread</span>'+
+            '</p> ' +
+
+            '<p>' +
+                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedThreadsOldMarkAsRead">' +
+                    '<label for="watchedThreadsOldMarkAsRead">Mark thread as read Old Behaviour</label>' +
+                    ' <span class="settingDesc">Adds button to do this via the old method, which will only work as long as Whirlpool supports it. Also permanently shows the Go to Watched Threads button</span>'+
+            '</p> ' +
+
                         '<p class="wpp_hideNotForum">' +
                             '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
                                 '<option value="default">None</option>' +
@@ -1948,6 +1963,21 @@ WhirlpoolPlus.feat = {
                 location.href = lSc;
                 WhirlpoolPlus.util.rem('returnafterlogin_targetUrl');
             }
+        }
+    },
+
+    watchedThreadsForumBarHide : function () {
+        if (WhirlpoolPlus.util.get('watchedThreadsForumBarHide')) {
+            WhirlpoolPlus.util.css('#watchbar {display:none !important;}');
+        }
+    },
+
+    watchedThreadsOldMarkAsRead : function () {
+        if (WhirlpoolPlus.util.get('watchedThreadsOldMarkAsRead')) {
+            var replyLink = $(".breply");
+            var threadNumber = WhirlpoolPlus.util.getThreadNumber();
+            WhirlpoolPlus.util.css('#goto_watched {display:inherit !important;}');
+            replyLink.before('<a class="blink" href="//forums.whirlpool.net.au/forum/?action=watched&markreadt=' + threadNumber + '">Mark thread as read</a>&nbsp;');
         }
     },
 
@@ -2600,14 +2630,24 @@ WhirlpoolPlus.feat.display = {
     },
 
     superProfile: function () {
-        if (WhirlpoolPlus.util.get('display_superProfile') == 'all') {
-            $('#threads').append('<p><h2>All Watched Threads</h2>');
-            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #content form'));
+        if (WhirlpoolPlus.util.get('display_superProfile') == 'all' && !WhirlpoolPlus.util.get('display_oldProfile')) {
+            $('#threads').after('<span class="watchedprofile"><h2>All Watched Threads</h2></span>');
+            $('.watchedprofile').after($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #content form'));
             WhirlpoolPlus.util.css('ul.box {display:none;}');
         }
-        else if (WhirlpoolPlus.util.get('display_superProfile') == 'unread') {
-            $('#threads').append('<p><h2>Unread Watched Threads</h2>');
-            $('#threads').append($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
+        if (WhirlpoolPlus.util.get('display_superProfile') == 'all' && WhirlpoolPlus.util.get('display_oldProfile')) {
+            $('#threads div:last-child').after('<span class="watchedprofile"><h2>All Watched Threads</h2></span>');
+            $('.watchedprofile').after($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched&showall=1 #content form'));
+            WhirlpoolPlus.util.css('ul.box {display:none;}');
+        }
+        if (WhirlpoolPlus.util.get('display_superProfile') == 'unread' && !WhirlpoolPlus.util.get('display_oldProfile')) {
+            $('#threads').after('<span class="watchedprofile"><h2>Unread Watched Threads</h2></span>');
+            $('.watchedprofile').after($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
+            WhirlpoolPlus.util.css('ul.box {display:none;}');
+        }
+        if (WhirlpoolPlus.util.get('display_superProfile') == 'unread' && WhirlpoolPlus.util.get('display_oldProfile')) {
+            $('#threads:last-child').after('<span class="watchedprofile"><h2>Unread Watched Threads</h2></span>');
+            $('.watchedprofile').after($('<div id="watchedthreads">').load('https://forums.whirlpool.net.au/forum/?action=watched #content form'));
             WhirlpoolPlus.util.css('ul.box {display:none;}');
         }
     },
@@ -3838,9 +3878,9 @@ WhirlpoolPlus.feat.editor = {
                     return;
                 }
 
-                var urlPrompt = window.prompt('Enter URL:', 'http://');
+                var urlPrompt = window.prompt('Enter URL:', 'https://');
 
-                if ((urlPrompt !== 'http://') && (urlPrompt != '') & (urlPrompt != null)) {
+                if ((urlPrompt !== 'https://') && (urlPrompt != '') & (urlPrompt != null)) {
                     WhirlpoolPlus.feat.editor._insert(textarea, '<a href="' + urlPrompt + '">' + selection + '</a>', start, end);
                 }
             },
@@ -3856,8 +3896,8 @@ WhirlpoolPlus.feat.editor = {
                 var linkPrompt = window.prompt('Enter Text:', '');
 
                 if ((linkPrompt != '') & (linkPrompt != null)) {
-                    if (selection.indexOf('http://') < 0 && selection.indexOf('https://') < 0) {
-                        selection = 'http://' + selection;
+                    if (selection.indexOf('http://') < 0 && selection.indexOf('https://') < 0 && selection.indexOf('//') < 0 && selection.indexOf('mailto:') < 0) {
+                        selection = 'https://' + selection;
                     }
 
                     WhirlpoolPlus.feat.editor._insert(textarea, '<a href="' + selection + '">' + linkPrompt + '</a>', start, end);
@@ -4368,9 +4408,11 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.display.emoticons.init();
         WhirlpoolPlus.feat.embed();
         WhirlpoolPlus.feat.display.syntaxHighlight();
-        WhirlpoolPlus.feat.extraNavLinks();
         WhirlpoolPlus.feat.quickEdit.run();
         WhirlpoolPlus.feat.whirlpoolLastRead.runPosts();
+        WhirlpoolPlus.feat.watchedThreadsOldMarkAsRead();
+        WhirlpoolPlus.feat.watchedThreadsForumBarHide();
+        WhirlpoolPlus.feat.extraNavLinks();
         WhirlpoolPlus.feat.editor.showInlineReply();
         WhirlpoolPlus.feat.editor.autoSubscribe();
         WhirlpoolPlus.feat.editor.movePreview();
