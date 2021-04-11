@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.3.0
+// @version         2021.4.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.3.0',
+    version: '2021.4.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 105,
+    storageVersion: 106,
 
     //Script changelog
     changelog: {
+        '2021.4.0': '<ul><li>Updated WLR highlighting for compatibility with changes to how reply numbers are displayed on Whirlpool. Removed functionality to insert go to end arrow buttons on Watched Threads page as this functionality now exists by default.</li></ul>',
         '2021.3.0': '<ul><li>Adds new options for Watched Threads functionality changes in Whirlpool. Fix to Super Profile feature not working with some layouts. Whirlcode URL prompt now supports mailto and enforces https - credit to <a href="https://github.com/fowl2" target="_blank">fowl2 on Github</a></li></ul>',
         '2021.2.0': '<ul><li>Adds Experimental Image Uploader functionality to posts. Minor changes to cookie setting method for CSP Bypass. Tidied spacing in Settings Menu. Removed redundant code. Unified insertion method on Super Profile feature.</li></ul>',
         '2020.12.1': '<ul><li>Fix to notification bar text not respecting non-widescreen theme<br />Adds Custom Links to WP Plus Dynamic Menu<br />Tidied Redundant Code</li></ul>',
@@ -3261,7 +3262,6 @@ WhirlpoolPlus.feat.ignoreUser = {
                 tdBodyUser.append(voteblock);
             }
             hideUser.on("click", function () {
-                console.log(uNum);
                 if ($.inArray(uNum,WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
                     //Not currently in array
                     var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
@@ -3662,8 +3662,8 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                 if (threadData) {
                     //we are tracking this thread
 
-                    var numberOfReplies = parseInt(thread.find('td.reps').not(':has(a)').text()) + 1; //need to add one, as original post is not counted as a reply here
-
+                    var replyCountsNew = (thread.find('td.reps').not(':has(a)').attr('title'));
+                    var numberOfReplies = parseInt(replyCountsNew.replace(/,/g, '')) + 1; //need to add one, as original post is not counted as a reply here
                     //change the end link regardless, as there might have been replies since a refresh
                     //build the link
                     var link;
@@ -3676,16 +3676,8 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         link = '/thread/' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
                     }
 
-                    //watched threads page go to end buttons
-                    if (WhirlpoolPlus.util.pageType.watchedThreads && WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
-                        var target = thread.find('td.newest');
-                        var arrow = '\u2BC8';
-                        target.after('<td class="goend"><a>' + arrow + '</a></td>');
-                        $('div.boxed').find('tr.section > td.title:has(a)').attr("colspan", "7");
-                    }
-
                     //change the go to end link
-                    thread.find('.goend > a').prop('href', link).prop('title', 'Jump to last read post');
+                    thread.find('.goend > a').prop('href', link).prop('title', 'Jump to last read post \(WLR\)');
 
                     //add the controls
                     thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
