@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.4.0
+// @version         2021.4.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.4.0',
+    version: '2021.4.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 106,
+    storageVersion: 107,
 
     //Script changelog
     changelog: {
+        '2021.4.1': '<ul><li>Removes old Mark as Read method for Watched Threads. Integrated previous actions when hitting Mark as Read button into new method. Updates WLR go to end arrow button text so as not to replace existing Whirlpool tooltip. Adds tooltips for WLR read and unread colouring. Updates storage prefix for WLR Sync Data - if you are using multiple installations of Whirlpool Plus ensure they are all updated as this breaks backwards compatibility with previous versions.</li></ul>',
         '2021.4.0': '<ul><li>Updated WLR highlighting for compatibility with changes to how reply numbers are displayed on Whirlpool. Removed functionality to insert go to end arrow buttons on Watched Threads page as this functionality now exists by default.</li></ul>',
         '2021.3.0': '<ul><li>Adds new options for Watched Threads functionality changes in Whirlpool. Fix to Super Profile feature not working with some layouts. Whirlcode URL prompt now supports mailto and enforces https - credit to <a href="https://github.com/fowl2" target="_blank">fowl2 on Github</a></li></ul>',
         '2021.2.0': '<ul><li>Adds Experimental Image Uploader functionality to posts. Minor changes to cookie setting method for CSP Bypass. Tidied spacing in Settings Menu. Removed redundant code. Unified insertion method on Super Profile feature.</li></ul>',
@@ -362,7 +363,6 @@ WhirlpoolPlus.util = {
         'forums': 'forums.whirlpool',  // forums.whirlpool.net.au
         'wiki': '.net.au/wiki/',     // Wiki
         'watchedThreads': 'action=watched',    // Watched threads page
-        'watchedThreadAlert': '?a=subs-',          // Alert on marking a thread as read
     },
 
     _notified: false,
@@ -423,6 +423,14 @@ WhirlpoolPlus.util = {
 
     getThreadNumber: function () {
         return (typeof unsafeWindow.thread_id != 'undefined') ? (unsafeWindow.thread_id) : (false);
+    },
+
+    getCurrentPageNumber: function () {
+        return (typeof unsafeWindow.thread_page != 'undefined') ? (unsafeWindow.thread_page) : (false);
+    },
+
+    getTotalPageNumber: function () {
+        return (typeof unsafeWindow.thread_pages != 'undefined') ? (unsafeWindow.thread_pages) : (false);
     },
 
     getUserId: function () {
@@ -1744,30 +1752,26 @@ WhirlpoolPlus.settings = {
                     ' <span class="settingDesc">Display a banner notification when you have unread Watched Threads (API Key required in Script Configuration)</span>'+
             '</p> ' +
 
-            '<p>' +
+            '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedThreadsForumBarHide">' +
                     '<label for="watchedThreadsForumBarHide">Watched Thread Bar Hide</label>' +
                     ' <span class="settingDesc">Hide the horizontal alert bar that Whirlpool inserts to indicate which post you have read up to in a thread</span>'+
             '</p> ' +
 
-            '<p>' +
+            '<p class="wpp_hideNotForum">' +
                     '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedThreadsOldMarkAsRead">' +
-                    '<label for="watchedThreadsOldMarkAsRead">Mark thread as read Old Behaviour</label>' +
-                    ' <span class="settingDesc">Adds button to do this via the old method, which will only work as long as Whirlpool supports it. Also permanently shows the Go to Watched Threads button</span>'+
-            '</p> ' +
+                    '<label for="watchedThreadsOldMarkAsRead">Mark as Read button enhancer</label>' +
+                    ' <span class="settingDesc">Clicking the Mark as Read button at the bottom of a watched thread will complete an action of your choosing. Also permanently shows the Go to Watched Threads button</span><br /><br />'+
 
-                        '<p class="wpp_hideNotForum">' +
                             '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
                                 '<option value="default">None</option>' +
-                                '<option value="additional">Display Additional Links</option>' +
                                 '<option value="profile">Go to User Profile</option>' +
                                 '<option value="watched">Go to Watched Threads</option>' +
                                 '<option value="forum">Go to All Forums</option>' +
-                                '<option value="thread">Return to the thread</option>' +
                             '</select>' +
 
-                            ' <label for="watchedThreadsAlert">Mark Thread as Read Actions</label>' +
-                            ' <span class="settingDesc">Choose an action to occur when you click "mark as read" at the bottom of a thread</span><br>' +
+                            ' <label for="watchedThreadsAlert">Mark as Read Button Actions</label>' +
+                            ' <span class="settingDesc">Choose an action to occur when you click "mark page as read" on the last page of a thread</span><br>' +
                         '</p> ' +
 
                     '</div>' +
@@ -1975,32 +1979,33 @@ WhirlpoolPlus.feat = {
 
     watchedThreadsOldMarkAsRead : function () {
         if (WhirlpoolPlus.util.get('watchedThreadsOldMarkAsRead')) {
-            var replyLink = $(".breply");
-            var threadNumber = WhirlpoolPlus.util.getThreadNumber();
             WhirlpoolPlus.util.css('#goto_watched {display:inherit !important;}');
-            replyLink.before('<a class="blink" href="//forums.whirlpool.net.au/forum/?action=watched&markreadt=' + threadNumber + '">Mark thread as read</a>&nbsp;');
-        }
-    },
+            /*new method*/
+            var currentPage = WhirlpoolPlus.util.getCurrentPageNumber();
+            var totalPages = WhirlpoolPlus.util.getTotalPageNumber();
+            var markreadButton = document.getElementById("read_button");
+            var alerttype = WhirlpoolPlus.util.get('watchedThreadsAlert');
+            if (currentPage == totalPages) {
+                markreadButton.addEventListener("click", function(){
+                    setTimeout( function () {
+                        switch(alerttype) {
+                            case 'watched':
+                                window.location.href = '//forums.whirlpool.net.au/forum/?action=watched';
+                                break;
+                            case 'profile':
+                                window.location.href = '//forums.whirlpool.net.au/user';
+                                break;
+                            case 'forum':
+                                window.location.href = '//forums.whirlpool.net.au/';
+                                break;
+                            case 'default':
+                                break;
+                        }
+                    }, 500);
+                });
+                };
 
-    watchedThreadsAlert: function () {
-        var alerttype = WhirlpoolPlus.util.get('watchedThreadsAlert');
-        switch(alerttype) {
-            case 'watched':
-                document.location = '//forums.whirlpool.net.au/forum/?action=watched';
-                break;
-            case 'profile':
-                document.location = '//forums.whirlpool.net.au/user';
-                break;
-            case 'forum':
-                document.location = '//forums.whirlpool.net.au/';
-                break;
-            case 'thread':
-                history.go(-1);
-                break;
-            case 'additional':
-                $('#alert').append('<h2><a href="/user">Or go to your user profile page</a></h2><h2><a href="//forums.whirlpool.net.au/">Or go to all forums</a></h2>');
-                break;
-               }
+        }
     },
 
     promoteWatchedForum: function () {
@@ -3540,11 +3545,16 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     trackThisThread: true,
 
     saveThreadData: function (threadNumber, threadReplyNumber, overallReplyNumber) {
-        WhirlpoolPlus.util.sync.set(threadNumber, { t: threadReplyNumber, o: overallReplyNumber });
+        WhirlpoolPlus.util.sync.set('wlr_' + threadNumber, { t: threadReplyNumber, o: overallReplyNumber });
+        //WLR data was previously stored without any prefix, check for pre-existing data and nullify it
+        var oldDataExists = WhirlpoolPlus.util.sync.get(threadNumber);
+        if (oldDataExists !== null) {
+            WhirlpoolPlus.util.sync.set(threadNumber, null);
+            };
     },
 
     loadThreadData: function (threadNumber) {
-        var raw = WhirlpoolPlus.util.sync.get(threadNumber);
+        var raw = WhirlpoolPlus.util.sync.get(threadNumber) || WhirlpoolPlus.util.sync.get('wlr_' + threadNumber);
         if (raw !== null) {
             return raw;
         } else {
@@ -3677,7 +3687,8 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                     }
 
                     //change the go to end link
-                    thread.find('.goend > a').prop('href', link).prop('title', 'Jump to last read post \(WLR\)');
+                    var threadURL = thread.find('.goend > a').prop('href', link);
+                    threadURL.attr('title', threadURL.attr('title') + ' WLR Enabled - Jumps to last marker');
 
                     //add the controls
                     thread.find('.reps').not(':has(a)').append('<span class="whirlpoolLastRead_controls small"><a href="#" class="whirlpoolLastRead_stopTracking" title="Stop tracking this thread">S</a></span>');
@@ -3686,13 +3697,16 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                         //there are unread posts
 
                         //we need to apply the unread class
-                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare') && !WhirlpoolPlus.util.pageType.watchedThreads) {
+                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')) {
                             thread.find('td.goend').addClass('whirlpoolLastRead_unreadPosts');
+                            thread.find('td.goend').attr('title', 'WLR - There are unread posts');
                         } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
                             thread.find('td').addClass('whirlpoolLastRead_unreadPosts');
+                            thread.find('td').attr('title', 'WLR - There are unread posts');
                         }
                         else {
                             thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_unreadPosts');
+                            thread.find('td:not(.reps):not(.reads):not(.unread)').attr('title', 'WLR - There are unread posts');
                         }
 
                         if (document.location.href.match('/forum/')) {
@@ -3701,13 +3715,16 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
 
                     } else {
                         //all posts have been read
-                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare') && !WhirlpoolPlus.util.pageType.watchedThreads) {
+                        if (WhirlpoolPlus.util.get('wlr_display_onlyEndSquare')) {
                             thread.find('td.goend').addClass('whirlpoolLastRead_noUnreadPosts');
+                            thread.find('td.goend').attr('title', 'WLR - There are no unread posts');
                         } else if (WhirlpoolPlus.util.get('wlr_display_acrosscolumns')) {
                             thread.find('td').addClass('whirlpoolLastRead_noUnreadPosts');
+                            thread.find('td').attr('title', 'WLR - There are no unread posts');
                         }
                         else {
                             thread.find('td:not(.reps):not(.reads):not(.unread)').addClass('whirlpoolLastRead_noUnreadPosts');
+                            thread.find('td:not(.reps):not(.reads):not(.unread)').attr('title', 'WLR - There are no unread posts');
                         }
                     }
 
@@ -4351,11 +4368,6 @@ WhirlpoolPlus.run = async function () {
     //Upgrade the script if necessary
     if (!WhirlpoolPlus.util.exists('storageVersion') || WhirlpoolPlus.about.storageVersion > WhirlpoolPlus.util.get('storageVersion')) {
         WhirlpoolPlus.install.run();
-    }
-
-    /** RUN: Watched Thread Alert **/
-    if (WhirlpoolPlus.util.pageType.watchedThreadAlert) {
-        WhirlpoolPlus.feat.watchedThreadsAlert();
     }
 
     /** RUN: Deleted Thread Alert **/
