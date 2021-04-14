@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.4.1
+// @version         2021.4.2
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -56,16 +56,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.4.1',
+    version: '2021.4.2',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 107,
+    storageVersion: 108,
 
     //Script changelog
     changelog: {
+        '2021.4.2': '<ul><li>Minor tweaks to fix two issues with WLR mark as read and stop tracking buttons.</li></ul>',
         '2021.4.1': '<ul><li>Removes old Mark as Read method for Watched Threads. Integrated previous actions when hitting Mark as Read button into new method. Updates WLR go to end arrow button text so as not to replace existing Whirlpool tooltip. Adds tooltips for WLR read and unread colouring. Updates storage prefix for WLR Sync Data - if you are using multiple installations of Whirlpool Plus ensure they are all updated as this breaks backwards compatibility with previous versions.</li></ul>',
         '2021.4.0': '<ul><li>Updated WLR highlighting for compatibility with changes to how reply numbers are displayed on Whirlpool. Removed functionality to insert go to end arrow buttons on Watched Threads page as this functionality now exists by default.</li></ul>',
         '2021.3.0': '<ul><li>Adds new options for Watched Threads functionality changes in Whirlpool. Fix to Super Profile feature not working with some layouts. Whirlcode URL prompt now supports mailto and enforces https - credit to <a href="https://github.com/fowl2" target="_blank">fowl2 on Github</a></li></ul>',
@@ -1980,7 +1981,7 @@ WhirlpoolPlus.feat = {
     watchedThreadsOldMarkAsRead : function () {
         if (WhirlpoolPlus.util.get('watchedThreadsOldMarkAsRead')) {
             WhirlpoolPlus.util.css('#goto_watched {display:inherit !important;}');
-            /*new method*/
+            //new ajax method
             var currentPage = WhirlpoolPlus.util.getCurrentPageNumber();
             var totalPages = WhirlpoolPlus.util.getTotalPageNumber();
             var markreadButton = document.getElementById("read_button");
@@ -3549,7 +3550,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         //WLR data was previously stored without any prefix, check for pre-existing data and nullify it
         var oldDataExists = WhirlpoolPlus.util.sync.get(threadNumber);
         if (oldDataExists !== null) {
-            WhirlpoolPlus.util.sync.set(threadNumber, null);
+            WhirlpoolPlus.util.sync.remove(threadNumber);
             };
     },
 
@@ -3749,7 +3750,10 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
 
     stopTracking: function (threadNumber) {
+        //old method
         WhirlpoolPlus.util.sync.remove(threadNumber);
+        //new method
+        WhirlpoolPlus.util.sync.remove('wlr_' + threadNumber);
         WhirlpoolPlus.util.sync.run();
     },
 
@@ -3774,10 +3778,11 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
         }
 
         //now we need to get the number of the last read reply.
-        var numberOfReplies = parseInt(threadLink.closest('tr').find('.reps').text().split('S')[0]) + 1; //need to add one, as original post is not counted as a reply here
+        var replyCountsNew = (threadLink.closest('tr').find('td.reps').attr('title'));
+        var numberOfReplies = parseInt(replyCountsNew.replace(/,/g, '')) + 1; //need to add one, as original post is not counted as a reply here
 
         //write data
-        WhirlpoolPlus.util.sync.set(threadNumber, { t: numberOfReplies, p: pageNumber })
+        WhirlpoolPlus.util.sync.set('wlr_' + threadNumber, { t: numberOfReplies, p: pageNumber })
 
         //change the link
         var link = '/thread/' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;
