@@ -283,6 +283,10 @@ ul#tabs.profile li a:hover, ul#tabs.profile li a:active {
     color: #fff;
     text-decoration: none;
 }
+/*top thread sticky title colour*/
+#threads table tbody tr.sticky td.title a.title {
+    color: #8e8e8e !important;
+}
 #topbar #userbar #ub_settings > a:active, #topbar #userbar #ub_settings > a:hover {
 	background-color: #BCD4D6;
 }

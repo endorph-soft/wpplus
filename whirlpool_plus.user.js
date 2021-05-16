@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.4.2
+// @version         2021.5.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -45,6 +45,7 @@
 // @resource        blacktheme          https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/black.css
 // @resource        electrolizetheme    https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolize.css
 // @resource        tealtheme           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/teal.css
+// @resource        arcdarktheme        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/arcdark.css
 // @resource        oldfont             https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/css/wpoldfontfix.css
 // @resource        spinner_black       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_black.png
 // @resource        spinner_elec        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_elec.png
@@ -56,16 +57,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.4.2',
+    version: '2021.5.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 108,
+    storageVersion: 109,
 
     //Script changelog
     changelog: {
+        '2021.5.0': '<ul><li>Minor code tweaks and adds WP Arc Dark Theme</li></ul>',
         '2021.4.2': '<ul><li>Minor tweaks to fix two issues with WLR mark as read and stop tracking buttons.</li></ul>',
         '2021.4.1': '<ul><li>Removes old Mark as Read method for Watched Threads. Integrated previous actions when hitting Mark as Read button into new method. Updates WLR go to end arrow button text so as not to replace existing Whirlpool tooltip. Adds tooltips for WLR read and unread colouring. Updates storage prefix for WLR Sync Data - if you are using multiple installations of Whirlpool Plus ensure they are all updated as this breaks backwards compatibility with previous versions.</li></ul>',
         '2021.4.0': '<ul><li>Updated WLR highlighting for compatibility with changes to how reply numbers are displayed on Whirlpool. Removed functionality to insert go to end arrow buttons on Watched Threads page as this functionality now exists by default.</li></ul>',
@@ -936,6 +938,13 @@ WhirlpoolPlus.settings = {
                                 notifybackground = '#061E2B';
                                 break;
 
+                            case 'arcdark':
+                                newPostColour = '#424D72';
+                                noNewPostColour = '#2A2F42';
+                                postBackgroundColour = '#3C4257';
+                                notifybackground = '#424D72';
+                                break;
+
                             case 'userset':
                             userset:
                                 newPostColour = '#95B0CB';
@@ -1255,6 +1264,7 @@ WhirlpoolPlus.settings = {
                                 '<option value="classic">WP Classic (by Phyco)</option>' +
                                 '<option value="black">WP Black (by =CHRIS=)</option>' +
                                 '<option value="teal">WP Teal (by =CHRIS=)</option>' +
+                                '<option value="arcdark">WP Arc-Dark (by =CHRIS=)</option>' +
                                 '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
                                 '<option value="userset">User Set</option>' +
                             '</select>' +
@@ -2468,7 +2478,8 @@ WhirlpoolPlus.feat.display = {
         classic: await WhirlpoolPlus.util.resource('classictheme'),
         black: await WhirlpoolPlus.util.resource('blacktheme'),
         electrolize: await WhirlpoolPlus.util.resource('electrolizetheme'),
-        teal: await WhirlpoolPlus.util.resource('tealtheme')
+        teal: await WhirlpoolPlus.util.resource('tealtheme'),
+        arcdark: await WhirlpoolPlus.util.resource('arcdarktheme')
     }
         var currentTheme = WhirlpoolPlus.util.get('display_theme');
         if (currentTheme != 'default' && currentTheme in themelist) {
@@ -2478,6 +2489,7 @@ WhirlpoolPlus.feat.display = {
         let classiclogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewhead.png';
         let classicnews = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewsimage.gif';
         let teallogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/tealwpnewhead.png';
+        let arcdarklogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/arcdarkwpnewhead.png';
         let electrolizelogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolizewpnewhead.png';
         let electrolize_1 = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolize_1.png';
         let blacklogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/blackwpnewhead.png';
@@ -2506,6 +2518,9 @@ WhirlpoolPlus.feat.display = {
             case 'electrolize':
             styles += '#logo h1 {background: url("' + await electrolizelogo + '"); z-index:999;}';
             styles += '#content .bodytext a.internal {background: transparent url("' + await electrolize_1 + '")  no-repeat scroll right top;}';
+                break;
+            case 'arcdark':
+            styles += '#logo h1 {background-image: url("' + await arcdarklogo + '"); z-index:999;}';
                 break;
             case 'black':
             styles += '#logo h1 {background: url("' + await blacklogo + '"); z-index:999;}';
@@ -3386,6 +3401,9 @@ WhirlpoolPlus.feat.spinnerMenu = {
             case 'electrolize':
             spinnerimage = spinnerelec;
                 break;
+            case 'arcdark':
+            spinnerimage = spinnerdefault;
+                break;
             case 'black':
             spinnerimage = spinnerblack;
                 break;
@@ -3758,7 +3776,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
     },
 
     markAsRead: function (threadNumber) {
-        //only operates on forum replies page.
+        //only operates on forum replies & watched threads pages.
         //have to use legacy pagenumber method
 
         //go get the page number
@@ -3783,6 +3801,11 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
 
         //write data
         WhirlpoolPlus.util.sync.set('wlr_' + threadNumber, { t: numberOfReplies, p: pageNumber })
+        //WLR data was previously stored without any prefix, check for pre-existing data and nullify it
+        var oldDataExists = WhirlpoolPlus.util.sync.get(threadNumber);
+        if (oldDataExists !== null) {
+            WhirlpoolPlus.util.sync.remove(threadNumber);
+            };
 
         //change the link
         var link = '/thread/' + threadNumber + '&p=' + pageNumber + '#r' + numberOfReplies;

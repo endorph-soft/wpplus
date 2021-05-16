@@ -1,0 +1,572 @@
+/*This this Arc-Dark, a Whirlpool+ Theme for the Whirlpool Plus script. Please whim https://forums.whirlpool.net.au/user/226511 for feedback.*/
+
+/***************************front page******************************/
+
+/*topbar text colour*/
+#topbar #userbar a {
+    color: #111;
+}
+
+/*topbar text colour hover*/
+#topbar #userbar a:hover {
+    color: #ddd;
+}
+
+/*background gradient from-top*/
+#innershadow {
+	background: linear-gradient(to bottom, #282c34 -5px, #393d49 12px, #4f5565 100px);
+}
+
+/*forum background*/
+#page #innerpage {
+	background: #4f5565;
+}
+
+body {
+	background-color: #383C47;
+}
+
+/*forum index*/
+#forumindex h3 {
+    background-color: #4E7DB0;
+    color: #ddd;
+    box-shadow: 0 1px 10px rgba(0,0,0,0.9);
+    border-bottom: 3px solid #ddd;
+}
+
+/*forum table subtitle font colour*/
+#forumindex table td.title div.subtitle {
+    color: #abb3c7;
+}
+
+/*sidebar hyperlink style*/
+#left dl dd a {
+    color: #abb3c7;
+    border-bottom: 1px solid #5d6477;
+}
+
+/*forum sidebar colour*/
+#page {
+	background: #2F323E;
+	border-bottom: 0.5px solid #6e6e6e;
+}
+
+/*sidebar button highlight background colour*/
+#left ul#menu > li > a:hover {
+	background: #385e87;
+}
+
+/*breadcrumb >> colour*/
+ul.breadcrumb {
+    color: #4E7DB0;
+}
+
+/*Australian Discussion Forums text*/
+ul.breadcrumb li span {
+    color: #ddd;
+}
+
+/*forum index darker*/
+#forumindex table td.threads {
+    background: #2F323E;
+    color: #abb3c7;
+    text-shadow: none; /*0 1px 0 rgba(255,255,255,0.7);*/
+	border-bottom: 1px solid #111;
+}
+
+/*forum index lighter*/
+#forumindex table td.title {
+    background: #383C47;
+    text-shadow: none; /*0 1px 0 #fff;*/
+	border-bottom: 1px solid #111;
+}
+
+/*forum index darker link colour*/
+#forumindex table td.threads a {
+	color: #aaa;
+}
+
+#content a:link, #content a:visited {
+	color: #4E7DB0;
+}
+
+/*left menu indent background colour*/#left ul#menu > li.selected {
+    background: linear-gradient(to right, #4d5362 0%, #676b78 4%, #4f5565 100%);
+}
+
+/*sidebar discussion forum font colour*/
+#left ul#menu > li.selected > a {
+    color: #ddd !important;
+	text-shadow: none; /*0 1px 0 rgba(255,255,255,0.7);*/
+}
+	
+/*sidebar discussion forum sidebar font colour*/
+#left ul#menu > li.selected > ul > li > a {
+    color: #ddd;
+}	
+	
+/*left menu button darker*/
+#left ul#menu {	
+	background: #436b96;
+}
+
+/*left menu button lighter*/
+#left ul#menu > li.odd {
+    background: #4E7DB0;
+}
+	
+/*left menu hyperlink colour [Industry News, Discussion Forum, Knowledge Base, Private Messages]*/
+#left ul#menu > li > a {
+    color: #ddd;
+}
+	
+/*left sidebar misc links*/
+#left dl dt {
+    border-bottom: 1px solid #5d6477;
+    color: #4E7DB0;
+}
+
+/*left sidebar misc links*/
+#left dl dd {
+    color: #eee;
+}
+
+/*sidebar bullet points*/
+#left ul#menu > li.selected > ul > li {
+    color: #2F323E;
+}
+/***************************front page******************************/
+
+/***************************forum view******************************/
+/*thread bar colour*/
+#threads table tbody tr td {
+	background: #2f323e; /* linear-gradient(to bottom, #383c47 0, #31353e 25px); */
+	border-top: 1px solid #5d6477;
+}
+
+/*thread bar sticky background colour*/
+#threads table tbody tr.sticky td {
+    background: #4e7db0; /* #d8d8d8 linear-gradient(to bottom, #e3e3e3 0, #d8d8d8 25px); */
+}
+
+/*thread sticky title colour*/
+#threads table tbody tr.sticky td.title a.title {
+    color: #ccc;
+}
+
+/*a:visited title link*/
+#content .showvisited a:visited {
+    color: #1c63af;
+}
+
+/*moved thread title background colour*/
+#threads table tbody tr.pointer td.title a.title {
+    color: #ddd;
+}
+
+#content {
+    color: #ddd;
+}
+
+/*[closed] text colour*/
+#content .small {
+	color: #ddd !important;
+}
+
+/*replies / seen by box colour*/
+#threads table thead tr td.reps, #threads table thead tr td.reads, #threads table thead tr td.unread {
+	background-color: #2f323e;
+	color: #ddd;
+}
+
+/*moved / deleted thread bad font colour*/
+#threads table tbody tr td.point {
+    color: #ddd;
+}
+
+/*footbar colour*/
+#content .topbar, #content .footbar {
+    background-color: #383c47;
+	border-top: 2px solid #ddd;
+}
+
+#content ul.pagination li.current a {
+	background-color: #e6af6f !important;
+}
+
+/*public notebar colour*/
+#content div.notebar.public {
+    background: #e6af6f;
+}
+
+/*page number hover colour*/
+#content ul.pagination li a:active, #content ul.pagination li a:hover {
+    background-color: #ddd;
+    color: #1a1a1a;
+}
+
+/*page number border right colour*/#content ul.pagination li {
+    border-right: 1px solid #2f323e;
+}
+
+/*"Go" button background colour*/
+button, html input[type="button"], input[type="reset"], input[type="submit"] {
+    background-color: #4e7db0 !important;
+	color: #ddd;
+}
+
+/*New Thread button colour*/
+#content div.buttons a.breply:link {
+    background: #2f323e;
+    color: #ccc;
+}
+
+/*footer Forum Title colour*/
+#footer dl dt {
+	color: #4E7DB0;
+}
+
+/*footer forum title subheading colour*/
+#footer dl dd a {
+    color: #a1a1a1;
+}
+
+/*footer background colour*/
+#footer {
+    background: radial-gradient(ellipse farthest-side at 50% 0, #2a303f 10%, #323746 50%, #383c47 100%);
+}
+/***************************forum view******************************/
+
+
+/***************************thread view******************************/
+/*thread part box colour*/
+#content div.notebar.parts a {
+    color: #ddd;
+    background-color: #4E7DB0;
+}
+
+/*thread part box colour hover*/
+#content div.notebar.parts a:active, #content div.notebar.parts a:hover {
+	color: #ddd;
+    background-color: #6b9bcf;
+}
+
+/*thread part box colour current*/
+#content div.notebar.parts a.current {
+    color: #ddd;
+    background-color: #3b6899;
+}
+
+/* [Mark page as read] button colour*/
+#content div.buttons a:link, #content div.buttons a:visited {
+	background: #e6af6f;
+}
+
+/*reply box colouring*/
+#replylist div.reply {
+    background: #eee;
+    background: #2f323e;
+    border-top: 1px solid #111;
+    border-bottom: 1px solid #333;
+}
+
+#replylist div.reply div.replymeta div.replyuser, #replylist div.reply div.replymeta div.replytools{
+	background: #383c47;
+}
+
+/*replyTools [posted] text colour*/
+div.replymeta div.replytools div.replytools-inner div.date a {
+    color: #4e7db0 !important;
+}
+
+/*whrl.pl shortcode link colour*/
+#replylist div.reply div.replymeta div.replytools div.shortcode {
+    color: #4e7db0;
+}
+
+/*whirlpool user status text colour*/
+#replylist div.reply div.replymeta div.replyuser div.usergroup {
+    color: #aaa;
+}
+
+/*User Writes... text colour*/
+#content .bodytext p.reference a:link, #content .bodytext p.reference a {
+    color: #4e7db0 !important;
+}
+
+/*User Writes... text colour hover*/
+#content .bodytext p.reference a:hover {
+    color: #6e98c5 !important;
+}
+
+/*whirlcode quote text colour*/#content .wcrep1 {
+    color: #4e7db0;
+}
+
+/*page footer number I HAVE posted in*/
+#content ul.pagination li.user a:active, #content ul.pagination li.user a {
+    background-color: #345f8d;
+}
+
+/*page footer number I HAVE posted in hover colour*/
+#content ul.pagination li.user a:active, #content ul.pagination li.user a:hover {
+    background-color: #47719f;
+}
+
+/*page number expand button colour*/
+#content ul.pagination li.expand a:active, #content ul.pagination li.expand a {
+	background-color: #345f8d;
+	color: #47719f;
+}
+
+/*page number expand button colour hover*/
+#content ul.pagination li.expand a:active, #content ul.pagination li.expand a:hover {
+	background-color: #47719f;
+	color: #ddd;
+}
+
+/*Watching button colour*/
+#content div.buttons a.bactive:link, #content div.buttons a.bactive:visited {
+    background: #e6af6f;
+    color: #111;
+}
+
+/*aura vote smiley colour*/#replylist div.reply div.replymeta div.replyuser div.voteblock span.vote {
+    border: 1px solid #454953;
+    background-color: #41454f;
+    cursor: crosshair; /*pew pew*/
+    color: #aaa;
+}
+
+/* [Reps] [Mods] [OP] [Archive] button styles*/
+#content div.buttons a.blink:active, #content div.buttons a {
+    color: #ddd !important;
+    border-color: #4e7db0 !important;
+}
+
+/* [Reps] [Mods] [OP] [Archive] button styles hover*/
+#content div.buttons a.blink:active, #content div.buttons a:hover {
+    background: #4e7db0 !important;
+    color: #12141b !important;
+    border-color: #f8c78d !important;
+}
+
+/*reply button colour*/#content div.buttons a.breply:link {
+    color: #ddd !important;
+}
+
+/*username colour*/
+#content a.redlink:link, #content a.redlink:visited {
+    color: #e18f37; 
+}
+
+/*username colour hover*/
+#content a.redlink:link:hover, #content a.redlink:visited:hover {
+    color: #f3c89a !important;
+}
+
+/*Quick Reply box colour*/
+#replylist div.replyform {
+    padding: 15px;
+    border-left: 2px solid #4e7db0;
+    border-right: 2px solid #4e7db0;
+    border-top: 2px solid #4e7db0;
+	border-bottom: 2px solid #4e7db0;
+	background: #404551;
+}
+
+.wpp-edit {
+	color: #e18f37 !important;
+}
+
+/*quick reply preview darker*/
+#replylist div.reply.preview {
+background: #383c4b;
+}
+
+/*quick reply preview lighter*/
+#replylist div.reply.preview div.replymeta div.replyuser, #replylist div.reply.preview div.replymeta div.replytools {
+	background: #424758;
+}
+
+/*quick reply "reply" text h4 colour*/
+#replylist div.replyform div.title h4 {
+	color: #4e7db0;
+}
+
+/*quick reply box colour*/
+#replylist div.replyform div.editor div.textarea textarea {
+	background-color: #4f5565;
+	color: #ddd;
+}
+
+/*quick reply box colour*/
+#replylist div.replyform div.editor div.textarea {
+	background-color: #4f5565;
+}
+
+
+
+
+/***************************thread view******************************/
+
+
+/***************************watched threads******************************/
+/*[First Post] [Last Post] link colour*/
+#threads.boxed table thead tr td {
+	color: #ddd;
+}
+
+/*recent thread bar gradient colour*/
+#threads table tbody tr.recent td {
+    background: #3e4251; /*#bca78e linear-gradient(to bottom, #d3bca1 0, #bca78e 25px);*/
+}
+
+/*page number colour*/
+#threads table tbody tr td.title .pages a {
+    color: #ddd;
+}
+
+/*[Unread Only] [Open unread in tabs] buttons*/
+ul#tabs.box li.picked a {
+    color: #ddd;
+    background: #4E7DB0;
+}
+
+/*show all] [open all in tabs] buttons*/
+ul#tabs.box li a {
+    background-color: #4E7DB0;
+    color: #2f323e;
+}
+
+/*box under top button tabs colour*/
+#threads.boxed {
+    background: #4E7DB0;
+}
+
+/*Forum Heading bar*/
+#threads table tbody tr.section td {
+    background: #2f323e;
+    background: linear-gradient(to bottom, #656c81 0, #4f5565 25px);
+}
+
+/*forum heading bar title colour*/
+#threads table tbody tr.section td.title a.title {
+    color: #ccc;
+}
+
+/*Subforum button colour*/
+#threads table tbody tr td.title a.group:active, #threads table tbody tr td.title a.group {
+	border-color: #2f323e;
+	background-color: #4E7DB0;
+	color: #333;
+}
+
+/*Subforum button colour hover*/
+#threads table tbody tr td.title a.group:active, #threads table tbody tr td.title a.group:hover {
+	border-color: #239;
+	background-color: #6896c8;
+	color: #fff;
+}
+
+/*unread thread number colour*/
+#threads table tbody tr td.reads a, #threads table tbody tr td.unread a {
+	color: #ddd; !important;
+	/*text-shadow: 0 1px 0 #222;*/
+}
+
+/*user resplies on user page colour*/
+#threads table tbody tr td.reps a {
+	color: #333;
+}
+
+/*replies number colour #2
+#threads table tbody tr td.reps, #threads table tbody tr td.reps.one-k, #threads table tbody tr td.reps.ten-k {
+	color: #333 !important;*/
+}
+
+#threads table tbody tr td.title .pages {
+	color: #888 !important;
+}
+/***************************watched threads******************************/
+
+
+
+/***************************user profile*********************************/
+/*user profile table colour*/
+#userprofile div table {
+	background: #2f323e !important;
+	color: #ddd;
+}
+
+.wpp-whim {
+	color: #ddd !important;
+}
+
+.wpp-whim:hover {
+	color: #fff !important;
+}
+/***************************user profile*********************************/
+
+
+
+/***************************misc*********************************/
+/*knowledge base background*/
+#box {
+	background: #646a7c;
+}
+	
+/*Industry News article background*/
+#news .article {
+	background: #ddd;
+}
+
+/*news article heading text colour*/
+#leftcol #news .article h1 {
+	color: #4E7DB0;
+	border-bottom: solid 2px #2f323e;
+}
+
+/*discussion forum right column background colour*/
+#rightcol h2 {
+	background: #4E7DB0;
+}
+/***************************misc*********************************/
+
+
+/***************************thread gradient styles******************************/
+#threads table tbody tr td.tint0 { background: #f5c790; }
+#threads table tbody tr td.tint1 { background: #ebbe89; }
+#threads table tbody tr td.tint2 { background: #e5b986; }
+#threads table tbody tr td.tint3 { background: #ddb381; }
+#threads table tbody tr td.tint4 { background: #d4ab7b; }
+#threads table tbody tr td.tint5 { background: #cba476; }
+#threads table tbody tr td.tint6 { background: #c39e71; }
+#threads table tbody tr td.tint7 { background: #bc986c; }
+#threads table tbody tr td.tint8 { background: #b69369; }
+#threads table tbody tr td.tint9 { background: #af8d65; }
+
+
+#threads table tbody tr.sticky td.tint0 { background: #f8c78d; }
+#threads table tbody tr.sticky td.tint1 { background: #e8ba84; }
+#threads table tbody tr.sticky td.tint2 { background: #d9ae7b; }
+#threads table tbody tr.sticky td.tint3 { background: #c7a072; }
+#threads table tbody tr.sticky td.tint4 { background: #b9956b; }
+#threads table tbody tr.sticky td.tint5 { background: #ab8a63; }
+#threads table tbody tr.sticky td.tint6 { background: #9e7f5b; }
+#threads table tbody tr.sticky td.tint7 { background: #917554; }
+#threads table tbody tr.sticky td.tint8 { background: #896f50; }
+#threads table tbody tr.sticky td.tint9 { background: #7f674a; }
+
+
+#threads table tbody tr.recent td.tint0 { background: #6baef7; color: #ccc;}
+#threads table tbody tr.recent td.tint1 { background: #63a2e6; color: #ccc;}
+#threads table tbody tr.recent td.tint2 { background: #5d98d9; color: #ccc;}
+#threads table tbody tr.recent td.tint3 { background: #558cc8; color: #ccc;}
+#threads table tbody tr.recent td.tint4 { background: #4f82b9; color: #ccc;}
+#threads table tbody tr.recent td.tint5 { background: #4977aa; color: #ccc;}
+#threads table tbody tr.recent td.tint6 { background: #426c9a; color: #ccc;}
+#threads table tbody tr.recent td.tint7 { background: #3c628c; color: #ccc;}
+#threads table tbody tr.recent td.tint8 { background: #35587d; color: #ccc;}
+#threads table tbody tr.recent td.tint9 { background: #2f4d6e; color: #ccc;}
+/***************************thread gradient styles******************************/

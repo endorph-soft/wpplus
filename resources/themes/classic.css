@@ -267,6 +267,12 @@ body.webkit #content ul.pagination {
 	color: #dfdfdf !important;
 }
 
+#content ul.pagination li.marker a,
+#content div.footbar ul.pagination li.marker a {
+	background-color: rgb(63, 67, 94);
+	color: #dfdfdf !important;
+}
+
 #content ul.pagination li a {
 	color: #dfdfdf !important;
 }
@@ -287,6 +293,13 @@ body.webkit #content ul.pagination {
 #content ul.pagination li.current a:hover,
 #content div.footbar ul.pagination li.current a:hover {
 	background-color: #FF9922 !important;
+}
+
+#content ul.pagination li.marker a:hover,
+#content div.footbar ul.pagination li.marker a:hover {
+	text-decoration-style: solid !important;
+	text-decoration-color: #fff !important;
+	background-color: #828dbb;
 }
 
 #content ul.pagination li.first a,

@@ -289,6 +289,10 @@ div#userprofile div table tbody {
 #send {
 	background-color: #b2b2b2 !important;
 }
+/*beige title fix*/
+#threads table tbody tr.sticky td.title a.title {
+    color: #323232 !important;
+}
 #threads table tbody tr.recent td.tint0, #threads table tbody tr td.tint0 {
   background: #CECECE;
   background: -webkit-linear-gradient(top, #CECECE 0, #CECECE 25px);
