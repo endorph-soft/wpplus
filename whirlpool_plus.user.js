@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.5.0
+// @version         2021.6.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -57,16 +57,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.5.0',
+    version: '2021.6.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 109,
+    storageVersion: 110,
 
     //Script changelog
     changelog: {
+        '2021.6.0': '<ul><li>Removed redundant code. Reworked Google Cache feature for alert pages. Reworked widescreen display feature to allow any percentage of screen width to be specified.</li></ul>',
         '2021.5.0': '<ul><li>Minor code tweaks and adds WP Arc Dark Theme</li></ul>',
         '2021.4.2': '<ul><li>Minor tweaks to fix two issues with WLR mark as read and stop tracking buttons.</li></ul>',
         '2021.4.1': '<ul><li>Removes old Mark as Read method for Watched Threads. Integrated previous actions when hitting Mark as Read button into new method. Updates WLR go to end arrow button text so as not to replace existing Whirlpool tooltip. Adds tooltips for WLR read and unread colouring. Updates storage prefix for WLR Sync Data - if you are using multiple installations of Whirlpool Plus ensure they are all updated as this breaks backwards compatibility with previous versions.</li></ul>',
@@ -134,6 +135,7 @@ WhirlpoolPlus.install = {
         display_whimAlert: true,
         display_poweredby: true,
         display_widescreen: false,
+        display_width_percentage: '100',
         display_hideFooter: false,
         display_smallfont: false,
         display_oldfont: false,
@@ -220,6 +222,7 @@ WhirlpoolPlus.install = {
         'display_floatSidebar',
         'display_floatTopbar',
         'display_widescreen',
+        'display_width_percentage',
         'display_hideFooter',
         'display_customCSS',
         'display_oldfont',
@@ -357,7 +360,6 @@ WhirlpoolPlus.util = {
         'postsOld': 'forum-replies.cfm', // The old page where you view posts for backwards compatibility
         'threads': '/forum/',           // The page where you view threads
         'profile': '/user/',            // User profile page
-        'deletedThread': 'a=priv-deleted',    // Deleted thread alert
         'auraVotes': 'action=yourvotes',  // List of all aura votes
         'newThread': 'action=newthread',  // Creating a new thread
         'reply': 'action=reply',      // Posting a reply
@@ -979,7 +981,7 @@ WhirlpoolPlus.settings = {
 
         $('#wppSettings_reset').on("click", function () {
 
-            if (confirm('WP+: Do you really want to delete all data?')) {
+            if (confirm('WP+: Do you really want to delete all settings and data? Be sure to export a backup first if you wish to restore in future.')) {
                 unsafeWindow.localStorage.clear();
                 alert('WP+: Script data cleared');
                 window.location.reload();
@@ -1050,7 +1052,7 @@ WhirlpoolPlus.settings = {
                         $('#currentAvatar_removeStatic').prop('disabled', 'disabled');
                     }
                     if (url != '') {
-                    if(imgurhosted == false && postimg == false){
+                    if (imgurhosted == false && postimg == false){
                         alert("Your static avatar was setup on a non-working or unsupported host, please consider updating it");
                     }
                     };
@@ -1070,7 +1072,7 @@ WhirlpoolPlus.settings = {
                         $('#currentAvatar_removeAnimated').prop('disabled', 'disabled');
                     }
                     if (url != '') {
-                    if(imgurhosted == false && postimg == false){
+                    if (imgurhosted == false && postimg == false){
                         alert("Your animated avatar was setup on a non-working or unsupported host, please consider updating it");
                     }
                     };
@@ -1326,8 +1328,11 @@ WhirlpoolPlus.settings = {
 
                         '<p>' +
                             '<input class="wpp_setting" type="checkbox" id="display_widescreen">' +
-                            '<label for="display_widescreen">Widescreen Display</label>' +
-                            ' <span class="settingDesc">Stretch the website to fit the entire screen</span>' +
+                            '<label for="display_widescreen">Manual Display Width</label>' +
+                            ' <span class="settingDesc">Stretch the website to fit a larger or smaller portion of the screen</span><br>' +
+                            '<input class="wpp_setting" type="number" min="20" max="100" id="display_width_percentage">' +
+                            '<label for="display_width_percentage">Enter Percentage</label>' +
+                            ' <span class="settingDesc">Defaults to 100 for full widescreen view</span>' +
                         '</p>' +
 
                         '<p>' +
@@ -2387,13 +2392,6 @@ WhirlpoolPlus.feat = {
     },
 
     changeLinks: function () {
-        $('a[href*="whirlpool.net.au/whim"]').each(function () {
-            var link = $(this);
-            var parts = /whirlpool.net.au\/(whim)\/(.*)/.exec(link.prop('href'));
-
-            link.prop('href', '//forums.whirlpool.net.au/' + parts[1] + '/' + parts[2]);
-        });
-
         if (WhirlpoolPlus.util.get('defaultRecentActivityDays') != '7') {
             //have to do this twice, because there are two different ways to link to user pages used
             $('a[href*="forums.whirlpool.net.au/user/"]:not([href*="?"])').each(function () {
@@ -2532,7 +2530,8 @@ WhirlpoolPlus.feat.display = {
 
         //Widescreen
         if (WhirlpoolPlus.util.get('display_widescreen')) {
-            styles += '#root, #page, #footer { width: 99.9% !important; max-width: none !important; } #topbar { width: 94% !important; max-width: none !important; } body {overflow-x: hidden !important; overflow-y: scroll !important; }';
+            let width= WhirlpoolPlus.util.get('display_width_percentage');
+            styles += '#page, #footer { width: ' + width + '% !important; max-width: none !important; } #topbar { width: ' + width + '% !important; max-width: 94%; } body {overflow-x: hidden !important; overflow-y: scroll !important; }';
         }
 
         //Remove footer
@@ -3357,7 +3356,11 @@ WhirlpoolPlus.feat.spinnerMenu = {
         var sidebar = $('#left');
         var whereMenu
         if (WhirlpoolPlus.util.get('display_widescreen')) {
-            whereMenu = sidebar.width() - 4 + "px";
+            var width = WhirlpoolPlus.util.get('display_width_percentage');
+            var sidebaroffset = ((100 - width)/2); //get the offset from the side of the page by halving the gap in overall width percentage from 100
+            var sidebarwidth =  ($(sidebar).width() - 4) / $('body').width() * 100; //get the width of the sidebar as a percentage of the overall body
+            var actualoffset = sidebaroffset + sidebarwidth;
+            whereMenu = (actualoffset + "%").toString();
         } else {
             whereMenu = sidebar.offset().left + sidebar.width() - 4 + "px";
         }
@@ -4398,12 +4401,6 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.install.run();
     }
 
-    /** RUN: Deleted Thread Alert **/
-    if (WhirlpoolPlus.util.pageType.deletedThread) {
-        var deletedThreadNumber = document.location.href.split('thread/')[1].split('&')[0];
-        $('#alert').append('<br/><a href="//google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)</a>');
-    }
-
     //Dump CSS as early as possible
     WhirlpoolPlus.util.css(
         await WhirlpoolPlus.feat.display.css() +
@@ -4436,6 +4433,10 @@ WhirlpoolPlus.run = async function () {
 
     /** RUN: Posts Pages **/
     if (WhirlpoolPlus.util.pageType.posts || WhirlpoolPlus.util.pageType.postsOld) {
+        if ($('#alert').length) {
+            var deletedThreadNumber = document.location.href.split('thread/')[1];
+            $('#alert').append('<br/><a href="//google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)</a>');
+        };
         WhirlpoolPlus.feat.display.hidePosts();
         WhirlpoolPlus.feat.display.emoticons.init();
         WhirlpoolPlus.feat.embed();

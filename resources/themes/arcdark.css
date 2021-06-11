@@ -570,3 +570,43 @@ ul#tabs.box li a {
 #threads table tbody tr.recent td.tint8 { background: #35587d; color: #ccc;}
 #threads table tbody tr.recent td.tint9 { background: #2f4d6e; color: #ccc;}
 /***************************thread gradient styles******************************/
+
+/*****v1.0 fix*****/
+/* x days later notebar colour*/
+#content div.notebar.later {
+    border-bottom: 1px solid #4f5565;
+    background: linear-gradient(to bottom, #656c81 0, #4f5565 25px);
+    color: #ddd;
+}
+/*aura vote smiley fresh*/
+#replylist div.reply div.replymeta div.replyuser div.voteblock.voted1 span.vote1,
+#replylist div.reply div.replymeta div.replyuser div.voteblock.voted2 span.vote2,
+#replylist div.reply div.replymeta div.replyuser div.voteblock.voted4 span.vote4,
+#replylist div.reply div.replymeta div.replyuser div.voteblock.voted5 span.vote5 {
+    background-color: #959eb6;
+    border: 1px solid #aaa;
+}
+/*spoiler code*/
+#content .wcspoil {
+	color: #424758 !important;
+	background-color: #424758 !important;
+}
+/*spoiler code hover*/
+#content .wcspoil:hover {
+    color: #ddd !important;
+}
+/*preformatting "$ text" code background colour*/
+#content .bodytext pre {
+	background-color: #bbb;
+	border-left: 1px dashed #e6af6f;
+}
+/*"this post was hidden by a moderator" bar colour*/
+#replylist div.notice {
+    background: linear-gradient(to bottom, #656c81 0, #4f5565 25px);
+    border-bottom: 1px solid #4f5565;
+}
+/*quotify tool background colour*/
+#quotifytool {
+	background: #4f5565 !important;
+	color: #aaa !important;
+}
