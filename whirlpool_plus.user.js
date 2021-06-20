@@ -738,7 +738,7 @@ WhirlpoolPlus.settings = {
         var settingsLink = $('<li id="menu_wpp" class="odd"><a href="#"><span>WP+ Settings</span></a></li>');
         $('#menu_whim').after(settingsLink);
         var dbUpgrade = $('<li id="menu_dbUpgrade" style="background-color: #936328;"><a href="#"><span>WP+ Database Upgrade Required</span></a></li>');
-        if (WhirlpoolPlus.util.get('data_db_version') !== '2021.6') {
+        if (WhirlpoolPlus.util.get('data_db_version') !== '2021.6' && (window.location.href.indexOf('forums.whirlpool.net.au') > -1)) {
             $('#menu_wpp').after(dbUpgrade);
                                 };
 
