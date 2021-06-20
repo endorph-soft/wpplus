@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.6.0
+// @version         2021.6.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -57,16 +57,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.6.0',
+    version: '2021.6.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 110,
+    storageVersion: 111,
 
     //Script changelog
     changelog: {
+        '2021.6.1': '<ul><li><b>Note - </b>This is a major update, please read.<br />To perform a database upgrade, visit the Script Config tab in WP Plus Settings. This will complete changes to how data is stored for WLR and User Notes features and may be used for other feature changes in future updates.<br />User Notes feature is now compatible with sync functionality so your notes will be accessible across installations if the sync feature is enabled.<br />Fixes URL modifiers on Search pages<br />Whirlpool Last Read and Sync Settings sections have been moved in Settings<br />You can now view all currently tracked WLR threads in settings<br /></li></ul>',
         '2021.6.0': '<ul><li>Removed redundant code. Reworked Google Cache feature for alert pages. Reworked widescreen display feature to allow any percentage of screen width to be specified.</li></ul>',
         '2021.5.0': '<ul><li>Minor code tweaks and adds WP Arc Dark Theme</li></ul>',
         '2021.4.2': '<ul><li>Minor tweaks to fix two issues with WLR mark as read and stop tracking buttons.</li></ul>',
@@ -117,6 +118,7 @@ WhirlpoolPlus.install = {
     },
 
     _defaults: {
+        data_db_version: '',
         display_theme: 'default',
         display_usertheme_bgcolour: '',
         display_usertheme_fgcolour: '',
@@ -197,7 +199,7 @@ WhirlpoolPlus.install = {
         hideWhimActivity: false,
         numberPosts: false,
         userNotes_enabled: false,
-        userNotes: {},
+        userNotes: {}, //legacy
         watchedThreadsAlert: 'default',
         watchedthreadsextra: 'improved',
         watchedThreadsForumBarHide: false,
@@ -364,7 +366,7 @@ WhirlpoolPlus.util = {
         'newThread': 'action=newthread',  // Creating a new thread
         'reply': 'action=reply',      // Posting a reply
         'edit': 'action=edit',       // Editing a post
-        'search': 'action=search',     // Thread search
+        'search': 'search?q=',     // Thread search
         'forums': 'forums.whirlpool',  // forums.whirlpool.net.au
         'wiki': '.net.au/wiki/',     // Wiki
         'watchedThreads': 'action=watched',    // Watched threads page
@@ -735,8 +737,17 @@ WhirlpoolPlus.settings = {
         // Add settings link
         var settingsLink = $('<li id="menu_wpp" class="odd"><a href="#"><span>WP+ Settings</span></a></li>');
         $('#menu_whim').after(settingsLink);
+        var dbUpgrade = $('<li id="menu_dbUpgrade" style="background-color: #936328;"><a href="#"><span>WP+ Database Upgrade Required</span></a></li>');
+        if (WhirlpoolPlus.util.get('data_db_version') !== '2021.6') {
+            $('#menu_wpp').after(dbUpgrade);
+                                };
 
         settingsLink.on("click", function () {
+            WhirlpoolPlus.settings._launch();
+            return false;
+        });
+
+        dbUpgrade.on("click", function () {
             WhirlpoolPlus.settings._launch();
             return false;
         });
@@ -824,7 +835,20 @@ WhirlpoolPlus.settings = {
 
             });
 
-        //Set up Hidden Users section for settings menu
+        //Setup WLR Tracked threads section for settings menu
+            var currentWLRHTML = '';
+                let pattern = /^wpp_sync_wlr_(?=.*[a-z])(?=.*[0-9])[a-z0-9]*$/gm;
+                for (var i = 0; i <localStorage.length; i++) {
+                    if (pattern.exec(localStorage.key(i))) {
+                        let key = localStorage.key(i);
+                        let newkey = key.split('wpp_sync_wlr_').join('');
+                        let WLRURL = ("//forums.whirlpool.net.au/thread/" + newkey);
+                        currentWLRHTML += '<p>Thread URL <a href="' + WLRURL + '" target="_blank">' + WLRURL + '</a></p>';
+                    }
+                };
+            $('#currentWLR').append(currentWLRHTML);
+
+        //Setup Hidden Users section for settings menu
             var hiddenUsersHTML = '';
             var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
             for (i = 0; i < hiddenUsers.length; i++) {
@@ -849,7 +873,7 @@ WhirlpoolPlus.settings = {
 
         }
 
-        //Set up events
+        //Setup events
         $('#wppSettings .subSettings_heading').on("click", function () {
             var content = $(this).parent().children('.subSettings_content');
 
@@ -1023,11 +1047,40 @@ WhirlpoolPlus.settings = {
                 };
             }, false);
 
+            document.getElementById("wpp_upgradedb-btn").addEventListener("click", function(){
+                //Prior to June 2021 the userNotes feature stored data differently, this function upgrades any legacy data to the new storage method
+                let obj = WhirlpoolPlus.util.get('userNotes');
+                if (obj == null) {
+                    alert('WP+: You have no legacy user notes data to upgrade');
+                }
+                else {
+                    Object.keys(obj).forEach(function (data) {
+                        localStorage.setItem('wpp_sync_userNotes_' + data, '{"note":"' + obj[data] + '"}');
+                    });
+                    alert('WP+: Legacy user notes data migration completed. The stored value containing the old data is redundant and will now be removed however please be aware this breaks compatibility with previous versions.');
+                    WhirlpoolPlus.util.set('userNotes', null);
+                };
+                //Prior to April 2021 the Whirlpool Last Read feature stored data differently, this function upgrades any legacy data to the new storage method
+                let pattern = /^wpp_sync_(?=.*[a-z])(?=.*[0-9])[a-z0-9]*$/gm;
+                for (var i = 0; i <localStorage.length; i++) {
+                    if (pattern.exec(localStorage.key(i))) {
+                        let key = localStorage.key(i);
+                        let newkey = key.split('wpp_sync_').join('');
+                        localStorage.setItem('wpp_sync_wlr_' + newkey, localStorage[key]);
+                        localStorage.removeItem(key);
+                    }
+                };
+                alert('WP+: Legacy Whirlpool Last Read data migration completed. The stored values containing the old data are redundant and will now be removed however please be aware this breaks compatibility with previous versions.');
+                if (WhirlpoolPlus.util.get('data_db_version') == '') {
+                    WhirlpoolPlus.util.set('data_db_version', '2021.6')
+                                };
+            }, false);
+
         //Special events
 
 
         if (!minimalMode) {
-            //Sync Settings
+            //Sync Settings - Grey out secondary options when disabled
             $('#wppSettings #sync_enabled').change(function () {
                 if (this.checked) {
                     $('.syncSetting').prop('disabled', '');
@@ -1221,7 +1274,6 @@ WhirlpoolPlus.settings = {
                 '<li class="menuTab menuTab_active" data-menudiv="menuDiv_help">Script Info</li>' +
                 '<li class="menuTab" data-menudiv="menuDiv_display">Display</li>' +
                 '<li class="menuTab" data-menudiv="menuDiv_users">Users</li>' +
-                '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_wlr">WLR & Sync</li>' +
                 '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_posts">Threads & Posts</li>' +
                 '<li class="menuTab" data-menudiv="menuDiv_config">Script Config</li>' +
             '</ul>' +
@@ -1551,10 +1603,66 @@ WhirlpoolPlus.settings = {
 
             '</div>' +
 
-            '<div class="menuDiv wpp_hideNotForum" id="menuDiv_wlr">' +
+            '<div class="menuDiv wpp_hideNotForum" id="menuDiv_posts">' +
 
                 '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
 
+
+                '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Thread Settings</b></p>' +
+                    '<div class="subSettings_content">' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="text" id="display_hideTheseForums">' +
+                            ' <label for="display_hideTheseForums">Forums to hide (on main forums page) </label>' +
+                            ' <span class="settingDesc">Enter the ID\'s of the forums you want to hide (eg. "35 92 137")</span>' +
+                        '</p> ' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedThreads">' +
+                            '<label for="display_hideDeletedThreads">Hide Deleted Threads in forums</label>' +
+                            ' <span class="settingDesc">Prevents deleted threads from being seen</span>' +
+                        '</p>  ' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideMovedThreads">' +
+                            '<label for="display_hideMovedThreads">Hide Moved Threads in forums</label>' +
+                            ' <span class="settingDesc">Prevents moved threads from being seen</span>' +
+                        '</p> ' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_unanswered">' +
+                            ' <label for="links_unanswered">Link to Unanswered Threads</label>' +
+                            ' <span class="settingDesc">Adds a link to only display unanswered threads after the forum name</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="removeLinkToLastPage">' +
+                            '<label for="removeLinkToLastPage">Make the links on the main forums page go to the start of the thread</label>' +
+                            ' <span class="settingDesc">Links take you to the end by default</span>' +
+                        '</p>' +
+
+                        '<p class="description tabDescription">These settings add links to display only posts from certain users</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_originalPoster">' +
+                            ' <label for="links_originalPoster">OP posts</label>' +
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_mod">' +
+                            ' <label for="links_mod">Mod posts</label>' +
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_rep">' +
+                            ' <label for="links_rep">Rep posts</label>' +
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_archive">' +
+                            ' <label for="links_archive">Archive</label>' +
+
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_longThread">' +
+                            ' <label for="links_longThread">Single Page Version</label>' +
+                        '</p>' +
+
+                    '</div>' +
+                '</div>' +
                 '<div class="subSettings">' +
                     '<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
                     '<div class="subSettings_content">' +
@@ -1619,117 +1727,12 @@ WhirlpoolPlus.settings = {
                             ' <span class="settingDesc">When clicked it will disable the tracker until another thread is loaded</span>' +
                         '</p>' +
 
+                        '<p class="description">Currently Tracked Threads: </p>' +
+                        '<div id="currentWLR"></div>' +
 
                     '</div>' +
 
                 '</div>' +
-
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p class="description">WLR data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/" target="_blank">https://s.endorph.net/account/</a><br /><br /><b>Note: you must have entered your API key on the Info & Config tab for this feature to work</b></p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
-                            '<label for="sync_enabled">Activate Synchronisation</label>' +
-                        '</p>' +
-
-                        '<p>' +
-                            // No wpp_setting class intentional
-                            '<input class="syncSetting wpp_forumSetting" type="text" id="sync_server"> ' +
-                            '<label for="sync_server">Server Address</label>' +
-                            ' <span class="settingDesc">The address of the server that you are syncing your data with (must be a http<b>s</b> URL or your browser may block it)</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_user"> ' +
-                            '<label for="sync_user">Whirlpool User ID</label>' +
-                            ' <span class="settingDesc">Your User ID Number must be keyed in</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_key"> ' +
-                            '<label for="sync_key">Access Key</label>' +
-                            ' <span class="settingDesc">Your access key as provided by the sync server</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            // No wpp_setting class intentional
-                            '<input class="syncSetting wpp_forumSetting" type="password" id="sync_encryptionKey"> ' +
-                            '<button type="button" id="showEncKey" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button> ' +
-                            '<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
-                            '<label for="sync_encryptionKey">Encryption Password</label>' +
-                            ' <span class="settingDesc">Must be the same for all of your WP+ installs</span>' +
-                        '</p>' +
-
-                    '</div>' +
-
-                '</div>' +
-
-            '</div>' +
-
-            '<div class="menuDiv wpp_hideNotForum" id="menuDiv_posts">' +
-
-                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
-
-
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Thread Settings</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="display_hideTheseForums">' +
-                            ' <label for="display_hideTheseForums">Forums to hide (on main forums page) </label>' +
-                            ' <span class="settingDesc">Enter the ID\'s of the forums you want to hide (eg. "35 92 137")</span>' +
-                        '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedThreads">' +
-                            '<label for="display_hideDeletedThreads">Hide Deleted Threads in forums</label>' +
-                            ' <span class="settingDesc">Prevents deleted threads from being seen</span>' +
-                        '</p>  ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideMovedThreads">' +
-                            '<label for="display_hideMovedThreads">Hide Moved Threads in forums</label>' +
-                            ' <span class="settingDesc">Prevents moved threads from being seen</span>' +
-                        '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_unanswered">' +
-                            ' <label for="links_unanswered">Link to Unanswered Threads</label>' +
-                            ' <span class="settingDesc">Adds a link to only display unanswered threads after the forum name</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="removeLinkToLastPage">' +
-                            '<label for="removeLinkToLastPage">Make the links on the main forums page go to the start of the thread</label>' +
-                            ' <span class="settingDesc">Links take you to the end by default</span>' +
-                        '</p>' +
-
-                        '<p class="description tabDescription">These settings add links to display only posts from certain users</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_originalPoster">' +
-                            ' <label for="links_originalPoster">OP posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_mod">' +
-                            ' <label for="links_mod">Mod posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_rep">' +
-                            ' <label for="links_rep">Rep posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_archive">' +
-                            ' <label for="links_archive">Archive</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_longThread">' +
-                            ' <label for="links_longThread">Single Page Version</label>' +
-                        '</p>' +
-
-                    '</div>' +
-                '</div>' +
-
             '<div class="subSettings wpp_hideNotForum">' +
                     '<p class="subSettings_heading description"><b>Watched Threads</b></p>' +
                     '<div class="subSettings_content">' +
@@ -1930,6 +1933,7 @@ WhirlpoolPlus.settings = {
             '</div>' +
 
             '<div class="menuDiv" id="menuDiv_config">' +
+                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
                 '<div class="subSettings">' +
                     '<p class="subSettings_heading description"><b>Script Configuration</b></p>' +
                     '<div>' +
@@ -1944,7 +1948,49 @@ WhirlpoolPlus.settings = {
                             '<span>Data to Import</span>' +
                             ' <span class="settingDesc">Paste a valid JSON string or prior exported data here to import into your browser</span>' +
                             '<br /><textarea id="importWPPData" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
-                            '<br /><button id="wpp_dwn-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Export WP+ Config</button><button id="wpp_upl-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Import WP+ Config</button><br /><br />' +
+                            '<br /><button id="wpp_dwn-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Export WP+ Config</button><button id="wpp_upl-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Import WP+ Config</button><button id="wpp_upgradedb-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Upgrade Database</button><br /><br />' +
+                        '</p>' +
+
+                    '</div>' +
+
+                '</div>' +
+                '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
+                    '<div class="subSettings_content">' +
+
+                        '<p class="description">WLR and User Notes data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/" target="_blank">https://s.endorph.net/account/</a><br /><br /><b>Note: you must have entered your API key in script configuration for this feature to work</b></p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
+                            '<label for="sync_enabled">Activate Synchronisation</label>' +
+                        '</p>' +
+
+                        '<p>' +
+                            // No wpp_setting class intentional
+                            '<input class="syncSetting wpp_forumSetting" type="text" id="sync_server"> ' +
+                            '<label for="sync_server">Server Address</label>' +
+                            ' <span class="settingDesc">The address of the server that you are syncing your data with (must be a http<b>s</b> URL or your browser may block it)</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_user"> ' +
+                            '<label for="sync_user">Whirlpool User ID</label>' +
+                            ' <span class="settingDesc">Your User ID Number must be keyed in</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_key"> ' +
+                            '<label for="sync_key">Access Key</label>' +
+                            ' <span class="settingDesc">Your access key as provided by the sync server</span>' +
+                        '</p>' +
+
+                        '<p>' +
+                            // No wpp_setting class intentional
+                            '<input class="syncSetting wpp_forumSetting" type="password" id="sync_encryptionKey"> ' +
+                            '<button type="button" id="showEncKey" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button> ' +
+                            '<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
+                            '<label for="sync_encryptionKey">Encryption Password</label>' +
+                            ' <span class="settingDesc">Must be the same for all of your WP+ installs</span>' +
                         '</p>' +
 
                     '</div>' +
@@ -2451,6 +2497,17 @@ WhirlpoolPlus.feat = {
         }
     },
 
+    unansweredThreadsLink: function () {
+        if (WhirlpoolPlus.util.get('links_unanswered')) {
+            if (window.location.href.match('nr=1')) {
+                var old_url = window.location.href.replace('&nr=1', '');
+                $('#breadcrumb li:last').html('<a href="' + old_url + '">' + $('#breadcrumb li:last').text() + '</a>');
+            } else {
+                var new_url = window.location.href + (window.location.href.indexOf('?') > -1 ? '&nr=1' : '?&nr=1');
+                $('#breadcrumb li:last').append(' <a href="' + new_url + '"><small class="showunanswered">(show unanswered only)</small></a> ');
+            }
+        }
+    },
 
     editSearchLinks: function () {
 
@@ -2458,7 +2515,10 @@ WhirlpoolPlus.feat = {
             var link = $(this);
             link.prop('href', link.prop('href').replace('archive/', 'thread/'));
         });
-
+        $('.results .url a').each(function () {
+            var link = $(this);
+            link.prop('href', link.prop('href').replace('archive/', 'thread/'));
+        });
 
     }
 
@@ -2552,11 +2612,6 @@ WhirlpoolPlus.feat.display = {
         //OP & Edit Prominence
         if (WhirlpoolPlus.util.get('display_opeditlarge')) {
             styles += '#replylist div.reply div.replytext div.op {font-size:20px !important;font-weight:bold !important;color:#888 !important;width:initial !important;margin: auto !important;padding-left:5px !important;} #replylist div.reply div.replytext div.edited {font-size:19px !important;width:initial !important;padding-left:5px !important;}';
-        }
-
-        //Unanswered Threads Fix for Pages Where Not Applicable
-        if (WhirlpoolPlus.util.pageType.edit || WhirlpoolPlus.util.pageType.search || WhirlpoolPlus.util.pageType.reply || WhirlpoolPlus.util.pageType.watchedThreads || WhirlpoolPlus.util.pageType.newThread) {
-            styles += '.showunanswered {display:none;}';
         }
 
         return styles;
@@ -2706,18 +2761,6 @@ WhirlpoolPlus.feat.display = {
                     $(this).parents('tr').eq(0).css("display", "none");
                 }
             });
-        }
-    },
-
-    unansweredThreadsLink: function () {
-        if (WhirlpoolPlus.util.get('links_unanswered')) {
-            if (window.location.href.match('nr=1')) {
-                var old_url = window.location.href.replace('&nr=1', '');
-                $('#breadcrumb li:last').html('<a href="' + old_url + '">' + $('#breadcrumb li:last').text() + '</a>');
-            } else {
-                var new_url = window.location.href + (window.location.href.indexOf('?') > -1 ? '&nr=1' : '?&nr=1');
-                $('#breadcrumb li:last').append(' <a href="' + new_url + '"><small class="showunanswered">(show unanswered only)</small></a> ');
-            }
         }
     },
 
@@ -4258,16 +4301,18 @@ WhirlpoolPlus.feat.quickWhim = {
 
 WhirlpoolPlus.feat.userNotes = {
 
-    _notes: WhirlpoolPlus.util.get('userNotes'),
-
-    _setNotes: function (user, notes) {
-        if (notes == '') {
-            delete this._notes[user];
+    //new section begin
+    getUserNotes : function (userNumber) {
+        var rawdata = WhirlpoolPlus.util.sync.get('userNotes_' + userNumber);
+        if (rawdata !== null) {
+            return rawdata;
         } else {
-            this._notes[user] = notes;
+            return false;
         }
+    },
 
-        WhirlpoolPlus.util.set('userNotes', this._notes);
+    setUserNotes : function (userNumber, notesData) {
+        WhirlpoolPlus.util.sync.set('userNotes_' + userNumber, { note: notesData });
     },
 
     css: async function () {
@@ -4287,8 +4332,8 @@ WhirlpoolPlus.feat.userNotes = {
 
         var userNumber = WhirlpoolPlus.util.getReplyUserId(reply);
         var userNotesClass = 'userNotes_button_noNotes';
-
-        if (userNumber in this._notes) {
+        var notes = WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber);
+        if (WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']) {
             userNotesClass = 'userNotes_button_notes';
         }
 
@@ -4311,10 +4356,12 @@ WhirlpoolPlus.feat.userNotes = {
                     'padding': '20px',
                 },
                 onClose: function () {
-                    WhirlpoolPlus.feat.userNotes._setNotes(userNumber, notebox.val());
+                    var notesData = notebox.val();
+                    WhirlpoolPlus.feat.userNotes.setUserNotes(userNumber, notesData);
 
                     if (notebox.val() == '') {
                         userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
+                        WhirlpoolPlus.util.sync.remove('userNotes_' + userNumber);
                     } else {
                         userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
                     }
@@ -4322,10 +4369,7 @@ WhirlpoolPlus.feat.userNotes = {
                     $.modal.close();
                 }
             });
-
-            if (userNumber in WhirlpoolPlus.feat.userNotes._notes) {
-                notebox.val(WhirlpoolPlus.feat.userNotes._notes[userNumber]);
-            }
+                notebox.val(WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']);
         });
 
     },
@@ -4343,8 +4387,8 @@ WhirlpoolPlus.feat.userNotes = {
                 userNumber = WhirlpoolPlus.util.getUserId();
             };
         var userNotesClass = 'userNotes_button_noNotes';
-
-        if (userNumber in this._notes) {
+        var notes = WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber);
+        if (WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']) {
             userNotesClass = 'userNotes_button_notes';
         }
 
@@ -4367,10 +4411,12 @@ WhirlpoolPlus.feat.userNotes = {
                     'padding': '20px',
                 },
                 onClose: function () {
-                    WhirlpoolPlus.feat.userNotes._setNotes(userNumber, notebox.val());
+                    var notesData = notebox.val();
+                    WhirlpoolPlus.feat.userNotes.setUserNotes(userNumber, notesData);
 
                     if (notebox.val() == '') {
                         userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
+                        WhirlpoolPlus.util.sync.remove('userNotes_' + userNumber);
                     } else {
                         userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
                     }
@@ -4378,10 +4424,7 @@ WhirlpoolPlus.feat.userNotes = {
                     $.modal.close();
                 }
             });
-
-            if (userNumber in WhirlpoolPlus.feat.userNotes._notes) {
-                notebox.val(WhirlpoolPlus.feat.userNotes._notes[userNumber]);
-            }
+                notebox.val(WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']);
         });
 
     },
@@ -4471,9 +4514,9 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Threads Pages **/
-    if (WhirlpoolPlus.util.pageType.threads != WhirlpoolPlus.util.pageType.watchedThreads) {
+    if (WhirlpoolPlus.util.pageType.threads != WhirlpoolPlus.util.pageType.watchedThreads !=WhirlpoolPlus.util.pageType.newThread !=WhirlpoolPlus.util.pageType.reply !=WhirlpoolPlus.util.pageType.edit) {
         WhirlpoolPlus.feat.display.hideThreads();
-        WhirlpoolPlus.feat.display.unansweredThreadsLink();
+        WhirlpoolPlus.feat.unansweredThreadsLink();
         WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
     }
 
@@ -4531,7 +4574,6 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.feat.openWatchedThreadsInTabs();
         WhirlpoolPlus.feat.promoteWatchedForum();
         WhirlpoolPlus.feat.display.hideThreads();
-        WhirlpoolPlus.feat.display.unansweredThreadsLink();
         if (WhirlpoolPlus.util.get('wlr_enabled') == 'all' || WhirlpoolPlus.util.get('wlr_enabled') == 'watched') {
             WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
         }
