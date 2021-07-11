@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.6.1
+// @version         2021.7.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -46,6 +46,7 @@
 // @resource        electrolizetheme    https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/electrolize.css
 // @resource        tealtheme           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/teal.css
 // @resource        arcdarktheme        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/arcdark.css
+// @resource        darktheme           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/dark.css
 // @resource        oldfont             https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/css/wpoldfontfix.css
 // @resource        spinner_black       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_black.png
 // @resource        spinner_elec        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_elec.png
@@ -57,16 +58,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.6.1',
+    version: '2021.7.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 111,
+    storageVersion: 112,
 
     //Script changelog
     changelog: {
+        '2021.7.0': '<ul><li>Adds WP Dark Theme. Tweaks to border style of WP Plus notification bar. Adds Experimental Feature section in WP Plus Settings. Minor code tweaks.</li></ul>',
         '2021.6.1': '<ul><li><b>Note - </b>This is a major update, please read.<br />To perform a database upgrade, visit the Script Config tab in WP Plus Settings. This will complete changes to how data is stored for WLR and User Notes features and may be used for other feature changes in future updates. It is highly recommended to take a backup of your current config using the Export Config button when performing this action in case any issues arise.<br />User Notes feature is now compatible with sync functionality so your notes will be accessible across installations if the sync feature is enabled.<br />Fixes URL modifiers on Search pages<br />Whirlpool Last Read and Sync Settings sections have been moved in Settings<br />You can now view all currently tracked WLR threads in settings<br /></li></ul>',
         '2021.6.0': '<ul><li>Removed redundant code. Reworked Google Cache feature for alert pages. Reworked widescreen display feature to allow any percentage of screen width to be specified.</li></ul>',
         '2021.5.0': '<ul><li>Minor code tweaks and adds WP Arc Dark Theme</li></ul>',
@@ -389,7 +391,7 @@ WhirlpoolPlus.util = {
             var tb = $('#topbar');
             tb.addClass('notify');
 
-            WhirlpoolPlus.util.css('#topbar.notify { width: 100% !important; background-color: ' + background + ' !important; }');
+            WhirlpoolPlus.util.css('#topbar.notify { width: 100% !important;  border-radius: 15px; background-color: ' + background + ' !important; }');
             WhirlpoolPlus.util.css('#topbar.notifyfloat { width: 100% !important; max-width: none !important; position: fixed; top: 0px; z-index: 999; opacity: ' + opacity + '; }');
 
             var floatnotify = function () {
@@ -848,6 +850,21 @@ WhirlpoolPlus.settings = {
                 };
             $('#currentWLR').append(currentWLRHTML);
 
+        //Setup Experimental Section for settings menu
+            var experimentalHTML ='';
+            experimentalHTML += '<p><input type="text" placeholder="Enter User ID Here" title="Paste or enter the User ID you would like to view or delete user notes for" style="width: 125px;" id="NotesUser" /> <button type="button" id="NotesUser_view">View Note</button>   <button type="button" id="NotesUser_del">Delete Note</button></p>';
+            $('#experimentalsettings').append(experimentalHTML);
+                        $('#NotesUser_view').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            let UID = JSON.parse($('#NotesUser').val());
+                            alert(JSON.stringify(WhirlpoolPlus.util.sync.get('userNotes_' + UID)));
+                    });
+                        $('#NotesUser_del').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            let UID = JSON.parse($('#NotesUser').val());
+                            WhirlpoolPlus.util.sync.set('userNotes_' + UID, { note: null });
+                    });
+
         //Setup Hidden Users section for settings menu
             var hiddenUsersHTML = '';
             var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
@@ -962,6 +979,13 @@ WhirlpoolPlus.settings = {
                                 noNewPostColour = '#054C66';
                                 postBackgroundColour = '#0C3851';
                                 notifybackground = '#061E2B';
+                                break;
+
+                            case 'dark':
+                                newPostColour = '#8F6B3D';
+                                noNewPostColour = '#49549C';
+                                postBackgroundColour = '#49549C';
+                                notifybackground = '#323232';
                                 break;
 
                             case 'arcdark':
@@ -1286,7 +1310,7 @@ WhirlpoolPlus.settings = {
 
                 '<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
                 '<p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features. </p>' +
-                '<p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus" target="_blank">wiki article<a>.</p>' +
+                '<p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus" target="_blank">wiki article</a>.</p>' +
                 '<p class="description">The script is currently maintained by <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>, so you can also private message him.</p>' +
 
                 '<p class="description"><b>Privacy</b></p>' +
@@ -1319,6 +1343,7 @@ WhirlpoolPlus.settings = {
                                 '<option value="black">WP Black (by =CHRIS=)</option>' +
                                 '<option value="teal">WP Teal (by =CHRIS=)</option>' +
                                 '<option value="arcdark">WP Arc-Dark (by =CHRIS=)</option>' +
+                                '<option value="dark">WP Dark (by Nukkels)</option>' +
                                 '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
                                 '<option value="userset">User Set</option>' +
                             '</select>' +
@@ -1996,6 +2021,16 @@ WhirlpoolPlus.settings = {
                     '</div>' +
 
                 '</div>' +
+                '<div class="subSettings wpp_hideNotForum">' +
+                    '<p class="subSettings_heading description"><b>Experimental</b></p>' +
+                    '<div class="subSettings_content">' +
+                        '<p class="description"><b>Use of the below features is at your own risk. They are intended as a development tool only and may be added or removed at any time.</b></p>' +
+                        '<p class="wpp_hideNotForum">' +
+                            '<div id="experimentalsettings"></div>' +
+                        '</p>  ' +
+                    '</div>' +
+
+                '</div>' +
                 '</div>' +
 
             '<div class="bottomrow"><button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset WP+ Config</button><button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button><button id="wppSettings_cancel" class="simplemodal-close" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button><center>Installed Script Version: ' + WhirlpoolPlus.about.versionText() + ' | Database Version: ' + WhirlpoolPlus.util.get('data_db_version') + '</center></div>' +
@@ -2537,7 +2572,8 @@ WhirlpoolPlus.feat.display = {
         black: await WhirlpoolPlus.util.resource('blacktheme'),
         electrolize: await WhirlpoolPlus.util.resource('electrolizetheme'),
         teal: await WhirlpoolPlus.util.resource('tealtheme'),
-        arcdark: await WhirlpoolPlus.util.resource('arcdarktheme')
+        arcdark: await WhirlpoolPlus.util.resource('arcdarktheme'),
+        dark: await WhirlpoolPlus.util.resource('darktheme')
     }
         var currentTheme = WhirlpoolPlus.util.get('display_theme');
         if (currentTheme != 'default' && currentTheme in themelist) {
@@ -3448,6 +3484,9 @@ WhirlpoolPlus.feat.spinnerMenu = {
             spinnerimage = spinnerelec;
                 break;
             case 'arcdark':
+            spinnerimage = spinnerdefault;
+                break;
+            case 'dark':
             spinnerimage = spinnerdefault;
                 break;
             case 'black':
@@ -4514,7 +4553,7 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Threads Pages **/
-    if (WhirlpoolPlus.util.pageType.threads != WhirlpoolPlus.util.pageType.watchedThreads !=WhirlpoolPlus.util.pageType.newThread !=WhirlpoolPlus.util.pageType.reply !=WhirlpoolPlus.util.pageType.edit) {
+    if (WhirlpoolPlus.util.pageType.threads != WhirlpoolPlus.util.pageType.watchedThreads !=WhirlpoolPlus.util.pageType.reply !=WhirlpoolPlus.util.pageType.edit) {
         WhirlpoolPlus.feat.display.hideThreads();
         WhirlpoolPlus.feat.unansweredThreadsLink();
         WhirlpoolPlus.feat.whirlpoolLastRead.runThreads();
