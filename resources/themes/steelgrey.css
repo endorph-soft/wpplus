@@ -1,16 +1,19 @@
 /**
 Title: Whirlpool Forums Custom CSS Theme
 URL: http://forums.whirlpool.net.au/
-Theme: WP Classic (2015 Rewrite Rev 1.02 July 2021)
-Changes in this Revision: Fixes Thread Parts Colouring
+Theme: WP Steel Grey (Rev 1.0 July 2021)
+Changes in this Revision: New Release
 Author: Phyco (User #105852)
-Credits: Whirlpoolian, User #38161, User #44690, Foonly
 **/
 
 /**Body & Sitewide CSS Modifications**/
 
 body {
 	background-color: rgb(63, 67, 94);
+}
+
+#page {
+	background: none repeat scroll 0% 0% rgb(63, 67, 94);
 }
 
 #logo h1 {
@@ -22,7 +25,7 @@ body {
 }
 
 #footer {
-	background: none repeat scroll 0% 0% rgb(63, 67, 94);
+	background: #3f435e;
 }
 
 #footer dl dt {
@@ -53,27 +56,27 @@ body {
 }
 
 #topbar #userbar a {
-	color: rgb(178, 181, 204) !important;
+	color: #b2b5cc !important;
 }
 
 #topbar #userbar #ub_settings a:hover {
-	background-color: #525D94;
+	background-color: #666782;
 }
 
 #topbar #userbar #ub_settings.opened a {
-	background-color: #525D94;
+	background-color: #3f435e;
 }
 
 #topbar #userbar #ub_menu.opened {
-	background-color: #616CA3;
+	background-color: #666782;
 }
 
 #topbar #userbar #ub_menu.opened ul li a {
-	background-color: #525D94;
+	background-color: #3f435e;
 }
 
 #topbar #userbar #ub_menu.opened ul li a:hover {
-	background-color: #616CA3;
+	background-color: #666782;
 }
 
 #upperbar ul.breadcrumb li span {
@@ -100,8 +103,12 @@ body {
 	font: 12px/18px "Helvetica Neue",Arial,sans-serif !important;
 }
 
+#left ul#menu {
+	background: none !important;
+}
+
 #left ul#menu > li.odd {
-	background: transparent !important;
+	background: #363A4D !important;
 }
 
 #left ul#menu > li#menu_whim.unread {
@@ -109,15 +116,11 @@ body {
 }
 
 #left ul#menu > li.even {
-	background: #616CA3 !important;
-}
-
-#left ul#menu > li.even selected {
-	background: #616CA3;
+	background-color: #666782 !important;
 }
 
 #left ul#menu > li.selected {
-	background: #616CA3;
+	background: #8C92AC !important;
 }
 
 #left ul#menu > li.selected > a {
@@ -129,7 +132,7 @@ body {
 }
 
 #left ul#menu > li.selected > ul > li > a {
-	color: rgb(178, 181, 204) !important;
+	color: #b2b5cc !important;
 	text-decoration: none !important;
 }
 
@@ -144,7 +147,7 @@ body {
 }
 
 #left ul#menu > li > a:hover {
-	background-color: #2a3266;
+	background-color: #3f435e;
 }
 
 #content a.inter, #content a.internal {
@@ -174,40 +177,45 @@ body {
 /* forum index page & thread view */
 
 #innershadow {
-	background: none repeat scroll 0% 0% rgb(130, 141, 187);
+	background: #8C92AC;
 }
 
 #forumindex {
-	background: none repeat scroll 0% 0% rgb(130, 141, 187);
+	background: #8C92AC;
 }
 
 #forumindex h3 {
 	font: 1.2em "Lucida Grande",Verdana,Arial,Helvetica,trebuchet !important;
 	text-transform: uppercase !important;
+	background-color: #363A4D !important;
 }
 
 #innerpage {
-	background: none repeat scroll 0% 0% rgb(130, 141, 187) !important;
+	background-color: #8C92AC !important;
 }
 
 #watch_button.bactive {
-	background-color: #d87400 !important;
+	background-color: #363A4D !important;
 	background-image: none !important;
 }
 
+#content div.buttons a.breply:link, #content div.buttons a.breply:visited {
+	background: #666782 !important;
+}
+
 #content div.buttons a:link, #content div.buttons a:visited {
-	background-color: #525d94;
+	background-color: #666782;
 	background-image: none !important;
 }
 
 #content div.buttons a:active, #content div.buttons a:hover {
-	background-color: #525d94 !important;
+	background-color: #666782 !important;
 	background-image: none !important;
 }
 
 #content div.buttons a.blink {
 	border: 0px !important;
-	background-color: #525d94 !important;
+	background-color: #666782 !important;
 }
 
 #content div.buttons a.blink:link, #content div.buttons a.blink:visited {
@@ -229,6 +237,11 @@ body.webkit #content ul#breadcrumb_footer li {
 	font-size: 1.2em !important;
 }
 
+#content div.topbar,
+#content div.footbar {
+	background-color: #363A4D !important;
+}
+
 #threads table tbody tr td {
 	border-top: 0px !important;
 	border-bottom: 1px solid #cfcfcf !important;
@@ -239,7 +252,7 @@ body.webkit #content ul#breadcrumb_footer li {
 }
 
 #replies div.notebar.public {
-	background: none repeat scroll 0% 0% rgb(216, 116, 0) !important;
+	background: #666782 !important;
 	color: #fff !important;
 }
 
@@ -252,24 +265,23 @@ body.webkit #content ul.pagination {
 
 #content ul.pagination li,
 #content div.footbar ul.pagination li {
-	border-right-color: #6671AA !important;
+	border-right-color: #8C92AC !important;
 }
 
 #content ul.pagination li.user a,
 #content div.footbar ul.pagination li.user a {
-	background-color: #7882B4 !important;
-	color: #ff9105 !important;
+	background-color: #666782 !important;
+	color: #a4b4ff !important;
 }
 
 #content ul.pagination li.current a,
 #content div.footbar ul.pagination li.current a {
-	background-color: #D87400 !important;
+	background-color: #a4b4ff !important;
 	color: #dfdfdf !important;
 }
 
 #content ul.pagination li.marker a,
 #content div.footbar ul.pagination li.marker a {
-	background-color: rgb(63, 67, 94);
 	color: #dfdfdf !important;
 }
 
@@ -277,10 +289,15 @@ body.webkit #content ul.pagination {
 	color: #dfdfdf !important;
 }
 
+#content ul.pagination li.expand a {
+	background-color: #666782 !important;
+}
+
 #content ul.pagination li a:hover,
 #content div.footbar ul.pagination li a:hover {
 	text-decoration-style: solid !important;
 	text-decoration-color: #fff !important;
+	background-color: #828dbb !important;
 }
 
 #content ul.pagination li.user a:hover,
@@ -292,14 +309,14 @@ body.webkit #content ul.pagination {
 
 #content ul.pagination li.current a:hover,
 #content div.footbar ul.pagination li.current a:hover {
-	background-color: #FF9922 !important;
+	background-color: #828dbb !important;
 }
 
 #content ul.pagination li.marker a:hover,
 #content div.footbar ul.pagination li.marker a:hover {
 	text-decoration-style: solid !important;
 	text-decoration-color: #fff !important;
-	background-color: #828dbb;
+	background-color: #3f435e;
 }
 
 #content ul.pagination li.first a,
@@ -315,15 +332,15 @@ body.webkit #content ul.pagination {
 }
 
 #content div.notebar.parts {
-	color: #B7BCD7;
+	color: #fff;
 }
 
 #content div.notebar.parts a {
-	background-color: #525d94;
+	background-color: #666782;
 }
 
 #content div.notebar.parts a.current {
-	background-color: #D87400 !important;
+	background-color: #363A4D !important;
 }
 
 /* Replies & Reads Header CSS Fix */
@@ -334,7 +351,11 @@ body.webkit #content ul.pagination {
 #threads table thead tr td.newest,
 #threads table thead tr td.goend,
 #threads table thead tr td.unread {
-	background-color: #3a437b !important;
+	background-color: #363A4D !important;
+}
+
+#threads table tbody tr.watching td.goend {
+	background: #828dbb !important;
 }
 
 #threads table tbody tr.sticky td.reps,
@@ -415,18 +436,18 @@ body.webkit #content ul.pagination {
 }
 
 body.brown {
-	background: rgb(63, 67, 94) !important;
+	background: #3f435e !important;
 }
 
 body.error {
-	background: rgb(63, 67, 94) !important;
+	background: #3f435e !important;
 }
 
 /* User Profile Page Colour & Font Formatting */
 
 #userprofile h2 {
 	font: bold !important;
-	color: #FFFFFF !important;
+	color: #fff !important;
 	text-transform: capitalize !important;
 }
 
@@ -459,13 +480,22 @@ body.error {
 
 /* Preferences Page tab background & hover colour */
 
-#navlist a:link, #navlist a:visited  {
-  background-color: #616ca2 !important;
+#tabs.profile li a:visited {
+	background-color: #666782 !important;
+	color: #b2b5cc !important;
 }
 
-#navlist a:hover {
-  background-color: #3a437b !important;
+#tabs.profile li a:hover {
+	background-color: #363A4D !important;
+	color: #b2b5cc !important;
 }
+
+#tabs.profile li.picked a {
+	background-color: #363A4D !important;
+	border-top: 2px solid #363A4D !important;
+	padding-bottom: 0px !important;
+}
+
 
 /* Front News Page CSS & Background Image Fix */
 
@@ -531,9 +561,29 @@ body.error {
 
 #recentActivityHandle {
 	font-family: Trebuchet MS !important;
+	background-color: #363A4D !important;
 }
 
 /* Spinner Menu Colours */
 
-#pmenu>li>ul>li>a{background:#616ca3 !important;color:#fff !important;}
-#pmenu li:hover > a {background:#dfd7ca !important; color:#EAA53F !important;}
+#pmenu a {
+	background: #3f435e !important;
+	border: 1px solid #8C92AC !important;
+	color: #b2b5cc !important;
+}
+
+#pmenu>li>ul>li>a{
+	background: #666782 !important;
+	color: #b2b5cc !important;
+}
+
+#pmenu li:hover > a {
+	background: #666782 !important;
+	color: #fff !important;
+}
+
+/*WLR*/
+
+#wlr_disableTracker {
+	background-color: #363A4D !important;
+}

@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.7.0
+// @version         2021.7.1
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -47,6 +47,7 @@
 // @resource        tealtheme           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/teal.css
 // @resource        arcdarktheme        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/arcdark.css
 // @resource        darktheme           https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/dark.css
+// @resource        steelgreytheme      https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/steelgrey.css
 // @resource        oldfont             https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/css/wpoldfontfix.css
 // @resource        spinner_black       https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_black.png
 // @resource        spinner_elec        https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/spinner_elec.png
@@ -58,16 +59,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.7.0',
+    version: '2021.7.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 112,
+    storageVersion: 113,
 
     //Script changelog
     changelog: {
+        '2021.7.1': '<ul><li>Adds WP Steel Grey Theme. Fixes Database Version bug for new installs.</li></ul>',
         '2021.7.0': '<ul><li>Adds WP Dark Theme. Tweaks to border style of WP Plus notification bar. Adds Experimental Feature section in WP Plus Settings. Minor code tweaks.</li></ul>',
         '2021.6.1': '<ul><li><b>Note - </b>This is a major update, please read.<br />To perform a database upgrade, visit the Script Config tab in WP Plus Settings. This will complete changes to how data is stored for WLR and User Notes features and may be used for other feature changes in future updates. It is highly recommended to take a backup of your current config using the Export Config button when performing this action in case any issues arise.<br />User Notes feature is now compatible with sync functionality so your notes will be accessible across installations if the sync feature is enabled.<br />Fixes URL modifiers on Search pages<br />Whirlpool Last Read and Sync Settings sections have been moved in Settings<br />You can now view all currently tracked WLR threads in settings<br /></li></ul>',
         '2021.6.0': '<ul><li>Removed redundant code. Reworked Google Cache feature for alert pages. Reworked widescreen display feature to allow any percentage of screen width to be specified.</li></ul>',
@@ -100,9 +102,11 @@ WhirlpoolPlus.install = {
         this._setDefaults();
 
         var oldVersion = WhirlpoolPlus.util.get('storageVersion');
+        var defaultDB = '2021.6';
 
         if (oldVersion == null || oldVersion == false) {
             oldVersion = 0;
+            WhirlpoolPlus.util.set('data_db_version', defaultDB)
         }
 
         // No current update code
@@ -995,6 +999,13 @@ WhirlpoolPlus.settings = {
                                 notifybackground = '#424D72';
                                 break;
 
+                            case 'steelgrey':
+                                newPostColour = '#8088B7';
+                                noNewPostColour = '#B2B5CC';
+                                postBackgroundColour = '#D8DBF3';
+                                notifybackground = '#3F435E';
+                                break;
+
                             case 'userset':
                             userset:
                                 newPostColour = '#95B0CB';
@@ -1340,11 +1351,12 @@ WhirlpoolPlus.settings = {
                             '<select class="wpp_setting" id="display_theme">' +
                                 '<option value="default">Default (by Simon Wright)</option>' +
                                 '<option value="classic">WP Classic (by Phyco)</option>' +
+                                '<option value="steelgrey">WP Steel Grey (by Phyco)</option>' +
                                 '<option value="black">WP Black (by =CHRIS=)</option>' +
                                 '<option value="teal">WP Teal (by =CHRIS=)</option>' +
                                 '<option value="arcdark">WP Arc-Dark (by =CHRIS=)</option>' +
-                                '<option value="dark">WP Dark (by Nukkels)</option>' +
                                 '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
+                                '<option value="dark">WP Dark (by Nukkels)</option>' +
                                 '<option value="userset">User Set</option>' +
                             '</select>' +
                             ' <label for="display_theme">Custom Theme<br />To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a></label>' +
@@ -2573,7 +2585,8 @@ WhirlpoolPlus.feat.display = {
         electrolize: await WhirlpoolPlus.util.resource('electrolizetheme'),
         teal: await WhirlpoolPlus.util.resource('tealtheme'),
         arcdark: await WhirlpoolPlus.util.resource('arcdarktheme'),
-        dark: await WhirlpoolPlus.util.resource('darktheme')
+        dark: await WhirlpoolPlus.util.resource('darktheme'),
+        steelgrey: await WhirlpoolPlus.util.resource('steelgreytheme')
     }
         var currentTheme = WhirlpoolPlus.util.get('display_theme');
         if (currentTheme != 'default' && currentTheme in themelist) {
@@ -3487,6 +3500,9 @@ WhirlpoolPlus.feat.spinnerMenu = {
             spinnerimage = spinnerdefault;
                 break;
             case 'dark':
+            spinnerimage = spinnerdefault;
+                break;
+            case 'steelgrey':
             spinnerimage = spinnerdefault;
                 break;
             case 'black':
