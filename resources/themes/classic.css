@@ -1,8 +1,8 @@
 /**
 Title: Whirlpool Forums Custom CSS Theme
 URL: http://forums.whirlpool.net.au/
-Theme: WP Classic (2015 Rewrite Rev 1.01 22nd May 2019)
-Changes in this Revision: Adjustments to logos due to WP changes
+Theme: WP Classic (2015 Rewrite Rev 1.02 July 2021)
+Changes in this Revision: Fixes Thread Parts Colouring
 Author: Phyco (User #105852)
 Credits: Whirlpoolian, User #38161, User #44690, Foonly
 **/
@@ -314,15 +314,15 @@ body.webkit #content ul.pagination {
 	white-space: nowrap;
 }
 
-#replies div.notebar.parts {
+#content div.notebar.parts {
 	color: #B7BCD7;
 }
 
-#replies div.notebar.parts a {
+#content div.notebar.parts a {
 	background-color: #525d94;
 }
 
-#replies div.notebar.parts a.current {
+#content div.notebar.parts a.current {
 	background-color: #D87400 !important;
 }
 
