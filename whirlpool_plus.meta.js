@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.7.1
+// @version         2022.5.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -19,7 +19,7 @@
 // @exclude         *://whirlpool.net.au/blog/*
 // @exclude         *://whirlpool.net.au/api/*
 // @exclude         *://forums.whirlpool.net.au/api/*
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.6.0.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
