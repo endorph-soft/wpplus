@@ -2,7 +2,7 @@
 // @name            Whirlpool Plus
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2021.7.1
+// @version         2022.5.0
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
@@ -19,7 +19,7 @@
 // @exclude         *://whirlpool.net.au/blog/*
 // @exclude         *://whirlpool.net.au/api/*
 // @exclude         *://forums.whirlpool.net.au/api/*
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.6.0.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
@@ -59,16 +59,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2021.7.1',
+    version: '2022.5.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 113,
+    storageVersion: 114,
 
     //Script changelog
     changelog: {
+        '2022.5.0': '<ul><li>Mark as Read button will now redirect to user pages with custom recent post days set correctly<br />Updated to latest version of jQuery<br />Minor text fixes<br />Updated WP Arc Dark Theme</li></ul>',
         '2021.7.1': '<ul><li>Adds WP Steel Grey Theme. Fixes Database Version bug for new installs.</li></ul>',
         '2021.7.0': '<ul><li>Adds WP Dark Theme. Tweaks to border style of WP Plus notification bar. Adds Experimental Feature section in WP Plus Settings. Minor code tweaks.</li></ul>',
         '2021.6.1': '<ul><li><b>Note - </b>This is a major update, please read.<br />To perform a database upgrade, visit the Script Config tab in WP Plus Settings. This will complete changes to how data is stored for WLR and User Notes features and may be used for other feature changes in future updates. It is highly recommended to take a backup of your current config using the Export Config button when performing this action in case any issues arise.<br />User Notes feature is now compatible with sync functionality so your notes will be accessible across installations if the sync feature is enabled.<br />Fixes URL modifiers on Search pages<br />Whirlpool Last Read and Sync Settings sections have been moved in Settings<br />You can now view all currently tracked WLR threads in settings<br /></li></ul>',
@@ -2094,6 +2095,7 @@ WhirlpoolPlus.feat = {
             var totalPages = WhirlpoolPlus.util.getTotalPageNumber();
             var markreadButton = document.getElementById("read_button");
             var alerttype = WhirlpoolPlus.util.get('watchedThreadsAlert');
+            var recentdays = WhirlpoolPlus.util.get('defaultRecentActivityDays');
             if (currentPage == totalPages) {
                 markreadButton.addEventListener("click", function(){
                     setTimeout( function () {
@@ -2102,7 +2104,7 @@ WhirlpoolPlus.feat = {
                                 window.location.href = '//forums.whirlpool.net.au/forum/?action=watched';
                                 break;
                             case 'profile':
-                                window.location.href = '//forums.whirlpool.net.au/user';
+                                window.location.href = '//forums.whirlpool.net.au/user/?days=' + recentdays + '';
                                 break;
                             case 'forum':
                                 window.location.href = '//forums.whirlpool.net.au/';
@@ -3032,7 +3034,7 @@ WhirlpoolPlus.feat.avatar = {
             if (userNumber.indexOf('?days')) {
                 userNumber = userNumber.split('?')[0];
             };
-            if (window.location.href == 'https://forums.whirlpool.net.au/user/') {
+            if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf('/user/?days') > -1) {
                 userNumber = WhirlpoolPlus.util.getUserId();
             };
             var userName = document.querySelectorAll('span[itemprop="name"]')[1];
@@ -3341,7 +3343,7 @@ WhirlpoolPlus.feat.numberPosts = {
     NumberPost: function (reply) {
         if (WhirlpoolPlus.util.get('numberPosts')) {
             var postNumber = WhirlpoolPlus.util.getReplyNumber(reply);
-            reply.find('.tools').prepend($('<span class="postnumber" style="color:#99c;">Post <b>#' + postNumber + '</b> In This Thread</span>'));
+            reply.find('.tools').prepend($('<span class="postnumber" style="color:#99c;">Post <b>#' + postNumber + '</b> in this thread</span>'));
         }
     }
 },
@@ -4595,7 +4597,7 @@ WhirlpoolPlus.run = async function () {
 
     /** RUN: Own Profile **/
     let uNumber = WhirlpoolPlus.util.getUserId();
-    if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf(uNumber) >0) {
+    if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf('/user/?days') > -1 || window.location.href.indexOf(uNumber) >0) {
         WhirlpoolPlus.feat.display.superProfile();
         WhirlpoolPlus.feat.hideWhimActivity();
         $('.wpp-whim').css('display', 'none');

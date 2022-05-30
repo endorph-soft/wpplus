@@ -12,6 +12,11 @@
     color: #ddd;
 }
 
+/*whirlpool logo*/
+#logo h1 {
+    background-image: url("http://www.users.on.net/~chrispotter/wp-themes/arc-dark/whirlpool-2015-header.png");
+}
+
 /*background gradient from-top*/
 #innershadow {
 	background: linear-gradient(to bottom, #282c34 -5px, #393d49 12px, #4f5565 100px);
@@ -146,7 +151,9 @@ ul.breadcrumb li span {
 
 /*thread bar sticky background colour*/
 #threads table tbody tr.sticky td {
-    background: #4e7db0; /* #d8d8d8 linear-gradient(to bottom, #e3e3e3 0, #d8d8d8 25px); */
+    background: #2f323e;
+	/* old>>> background: #3e658f; */
+	/* #d8d8d8 linear-gradient(to bottom, #e3e3e3 0, #d8d8d8 25px); */
 }
 
 /*thread sticky title colour*/
@@ -405,7 +412,10 @@ background: #383c4b;
 	background-color: #4f5565;
 }
 
-
+/*Representative status colour*/
+#replylist div.reply div.replymeta div.replyuser span.reptag {
+    color: #ccc;
+}
 
 
 /***************************thread view******************************/
@@ -482,8 +492,8 @@ ul#tabs.box li a {
 
 /*replies number colour #2
 #threads table tbody tr td.reps, #threads table tbody tr td.reps.one-k, #threads table tbody tr td.reps.ten-k {
-	color: #333 !important;*/
-}
+	color: #333 !important;
+}*/
 
 #threads table tbody tr td.title .pages {
 	color: #888 !important;
@@ -573,7 +583,7 @@ ul#tabs.box li a {
 
 /*****v1.0 fix*****/
 /* x days later notebar colour*/
-#content div.notebar.later {
+#content div.notebar.later, #content div.notebar.much.later {
     border-bottom: 1px solid #4f5565;
     background: linear-gradient(to bottom, #656c81 0, #4f5565 25px);
     color: #ddd;
@@ -610,3 +620,56 @@ ul#tabs.box li a {
 	background: #4f5565 !important;
 	color: #aaa !important;
 }
+
+
+/*****v1.1 fix*****/
+/*herring page*/
+
+/* herringed post quote*/
+#content div[style="margin: 1em auto; width: 650px; background-color: #eee; padding: 1em 2em; "] {
+    background-color: #4f5565 !important;
+    border: 1px solid #aaa !important;
+}
+/*herringed post reason*/
+#content div[style="margin: 1em auto; width: 650px; background-color: #F2EBE5; padding: 2em 2em; border:1px solid #AD9E8D; "] {
+    background-color: #4f5565 !important;
+    border: 1px solid #aaa !important;
+}
+/*herringed user writes...*/
+#content a {
+color: #2f323e;
+}
+/*herringed user writes... a:hover*/
+#content a:hover {
+color: #6e98c5;
+}
+/*************/
+
+/*****v1.2 fix*/
+/*username settings icon colour*/
+#topbar #userbar #ub_settings > a:active, #topbar #userbar #ub_settings > a:hover {
+    background-color: #4E7DB0 !important;
+}
+
+/*username settings dropdown menu background colour*/
+#top #userbar #ub_Settings.opened a {
+	background-color: #4E7DB0 !important;
+}
+
+/*username dropdown menu border colour*/
+#topbar #userbar #ub_menu.opened {
+	background-color: #4f5565;
+}
+
+/*username settings dropdown menu text colour*/
+#topbar #userbar #ub_menu.opened ul li a {
+	background-color: #4E7DB0;
+}
+
+/*username settings dropdown menu hover text and background colour*/
+#topbar #userbar #ub_menu.opened ul li a:hover {
+	color: #ddd;
+	background: #2f323e;
+}
+
+/*************/

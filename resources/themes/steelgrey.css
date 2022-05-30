@@ -1,8 +1,8 @@
 /**
 Title: Whirlpool Forums Custom CSS Theme
 URL: http://forums.whirlpool.net.au/
-Theme: WP Steel Grey (Rev 1.0 July 2021)
-Changes in this Revision: New Release
+Theme: WP Steel Grey (Rev 1.01 August 2021)
+Changes in this Revision: Themed WP+ Settings Menu, Various Fixes
 Author: Phyco (User #105852)
 **/
 
@@ -89,11 +89,6 @@ body {
 	color: rgb(223, 223, 223);
 }
 
-#lowerbar ul.breadcrumb li a {
-	font: .65em "Lucida Grande",Verdana,Arial,Helvetica !important;
-	color: rgb(223, 223, 223);
-}
-
 #upperbar ul.breadcrumb li a {
 	font: normal 78%/78% "Lucida Grande",Verdana,Arial,Helvetica !important;
 	color: rgb(223, 223, 223);
@@ -132,12 +127,12 @@ body {
 }
 
 #left ul#menu > li.selected > ul > li > a {
-	color: #b2b5cc !important;
+	color: #dfdfdf !important;
 	text-decoration: none !important;
 }
 
 #left ul#menu > li.selected > ul > li > a:hover {
-	color: #dfdfdf !important;
+	color: #b2b5cc !important;
 }
 
 #left ul#menu > li > a {
@@ -283,6 +278,7 @@ body.webkit #content ul.pagination {
 #content ul.pagination li.marker a,
 #content div.footbar ul.pagination li.marker a {
 	color: #dfdfdf !important;
+	background-color: #666782 !important;
 }
 
 #content ul.pagination li a {
@@ -556,6 +552,20 @@ body.error {
 }
 
 /**WP Plus Modifications**/
+
+/* Settings Menu */
+
+#wppSettings {
+	background-color: #3F435E !important;
+}
+
+#wppSettings li.menuTab_active {
+	background-color: #363A4D !important;
+}
+
+#wppSettings div.menuDiv {
+	background-color: #8C92AC !important;
+}
 
 /* Recent Activity Overlay - Font Fix */
 
