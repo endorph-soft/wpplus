@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name            Whirlpool Plus
-// @namespace       WhirlpoolPlus
+// @namespace       https://github.com/phyco1991/wpplus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
-// @version         2022.5.0
+// @author          WP User 105852
+// @version         2023.5.0
+// @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
 // @grant           unsafeWindow
