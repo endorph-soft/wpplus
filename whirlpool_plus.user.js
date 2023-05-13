@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Whirlpool Plus
-// @namespace       https://github.com/phyco1991/wpplus
+// @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
 // @version         2023.5.0
