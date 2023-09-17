@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2023.5.0
+// @version         2023.9.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -61,16 +61,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2023.5.0',
+    version: '2023.9.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 115,
+    storageVersion: 116,
 
     //Script changelog
     changelog: {
+		'2023.9.0': '<ul><li>Add floating go to top of page button<br />Add persistent edit button<br />Add ReplyId utility function</li></ul>',
 		'2023.5.0': '<ul><li>Add Post Saving functionality - you can now save and unsave posts by clicking the button in the reply tools section on the right hand side<br />Additional context added to code<br />New utility function added<br />Tidied behaviour of showing saved posts and tracked WLR URLs in the settings menu</li></ul>',
         '2022.5.0': '<ul><li>Mark as Read button will now redirect to user pages with custom recent post days set correctly<br />Updated to latest version of jQuery<br />Minor text fixes<br />Updated WP Arc Dark Theme</li></ul>',
         '2021.7.1': '<ul><li>Adds WP Steel Grey Theme. Fixes Database Version bug for new installs.</li></ul>',
@@ -141,6 +142,7 @@ WhirlpoolPlus.install = {
         display_opeditlarge: false,
         display_floatSidebar: false,
         display_floatTopbar: false,
+        display_floatGoToTop: false,
         display_emoticons_enabled: false,
         display_hideTheseForums: '',
         display_hideClosedThreadsOnProfile: false,
@@ -207,6 +209,7 @@ WhirlpoolPlus.install = {
         compose_image_uploader: false,
         autoSubscribeToNewThread: false,
         whimLink: true,
+        persisentEditLink: false,
         hideWhimActivity: false,
         numberPosts: false,
         savePosts: false,
@@ -235,6 +238,7 @@ WhirlpoolPlus.install = {
         'display_theme',
         'display_floatSidebar',
         'display_floatTopbar',
+        'display_floatGoToTop',
         'display_widescreen',
         'display_width_percentage',
         'display_hideFooter',
@@ -426,6 +430,12 @@ WhirlpoolPlus.util = {
             tb.removeClass('notify');
             $(window).off("scroll", floatnotify);
         });
+    },
+
+    getReplyId: function (reply) {
+        var num = reply.find('a[href*="/forum/?action=reply"]').prop('href').split('r=')[1];
+        num = num.split('?');
+        return parseInt(num);
     },
 
     getReplyUserId: function (reply) {
@@ -1487,6 +1497,12 @@ WhirlpoolPlus.settings = {
                             ' <span class="settingDesc">Keeps the topbar visible when scrolling</span>' +
                         '</p>' +
 
+                        '<p>' +
+                            '<input class="wpp_setting" type="checkbox" id="display_floatGoToTop">' +
+                            '<label for="display_floatGoToTop">Floating Go To Top of Page Button</label>' +
+                            ' <span class="settingDesc">Adds a floating button to send your browser to the top of the current page</span>' +
+                        '</p>' +
+
             '<p>' +
                     '<input class="wpp_setting" type="checkbox" id="display_hideFooter">' +
                     '<label for="display_hideFooter">Hide the forum footer</label>' +
@@ -1955,6 +1971,12 @@ WhirlpoolPlus.settings = {
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="whimLink">' +
                             ' <label for="whimLink">Whim Links</label>' +
                             ' <span class="settingDesc">Adds a Whim link next to a users post count on each post</span>' +
+                        '</p> ' +
+
+                        '<p class="wpp_hideNotForum">' +
+                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="persistentEditLink">' +
+                            ' <label for="persistentEditLink">Persistent Post Edit Link</label>' +
+                            ' <span class="settingDesc">Persists the edit button next to your own posts, even after WP removes it</span>' +
                         '</p> ' +
 
                         '<p class="wpp_hideNotForum">' +
@@ -2775,6 +2797,19 @@ WhirlpoolPlus.feat.display = {
         };
 
     },
+    //Adds a floating button to go to the top of the current page
+    floatGoToTop: function () {
+        if (WhirlpoolPlus.util.get('display_floatGoToTop')) {
+            let uparrow = '\u25B2';
+            $('#page').append('<div id="topbutton"><span title="Go to Top" class="buttonText">'+ uparrow +'</span></div>');
+            WhirlpoolPlus.util.css('#topbutton { position: fixed; bottom: 20px; right: 20px; width: 3em; height: 3em; cursor: pointer; z-index: 999; opacity: 0.5; border-radius: 50%; background: #808080; }');
+            WhirlpoolPlus.util.css('.buttonText { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 2em; font-face: bold; color: white; }');
+            $('#topbutton').on("click", function () {
+                window.scrollTo(0, 0);
+            });
+        };
+
+    },
     //Adds an additional alert with the inbuilt notification system for new Private Messages
     whimAlert: function () {
         if (WhirlpoolPlus.util.get('display_whimAlert') && $('#menu_whim.unread').text()) {
@@ -3396,6 +3431,21 @@ WhirlpoolPlus.feat.whimLink = {
             reply.find('.actions').append($(' <span class="bar"> |</span> <a title="whim this user" href="//forums.whirlpool.net.au/forum/?action=newthread&u=' + userNumber + '" target="_blank">Whim user</a>'));
         }
     }
+},
+//Persists the edit link next to your posts, even after WP removes it
+WhirlpoolPlus.feat.persistentEditLink = {
+    PersistentEdit: function (reply) {
+    if (WhirlpoolPlus.util.get('persistentEditLink')) {
+        var replyUserID = WhirlpoolPlus.util.getReplyUserId(reply);
+        var userID = WhirlpoolPlus.util.getUserId();
+        var replyID = WhirlpoolPlus.util.getReplyId(reply);
+        $("a[href*='/forum/?action=edit&e=" + replyID + "']").replaceWith('<a class="origedit" title="edit this post" href="/forum/?action=edit&e=' + replyID + '"><b>Edit</b></a>');
+        if (replyUserID == userID) {
+            $('.origedit').hide();
+            reply.find('.actions').prepend($('<a title="edit this post" href="/forum/?action=edit&e=' + replyID + '"><b>Edit</b></a> <span class="bar">| </span>'));
+        }
+    }
+        }
 },
 //Adds numbering to posts in a thread
 WhirlpoolPlus.feat.numberPosts = {
@@ -4641,6 +4691,7 @@ WhirlpoolPlus.run = async function () {
         WhirlpoolPlus.settings.init();
         WhirlpoolPlus.feat.display.floatSidebar();
         WhirlpoolPlus.feat.display.floatTopbar();
+        WhirlpoolPlus.feat.display.floatGoToTop();
         WhirlpoolPlus.feat.display.whimAlert();
         WhirlpoolPlus.feat.display.wpPlusLogo();
         WhirlpoolPlus.feat.display.poweredby();
@@ -4678,6 +4729,7 @@ WhirlpoolPlus.run = async function () {
             WhirlpoolPlus.feat.ignoreUser.userIgnore($this);
             WhirlpoolPlus.feat.avatar.avatariseRow($this);
             WhirlpoolPlus.feat.whimLink.WhimUser($this);
+            WhirlpoolPlus.feat.persistentEditLink.PersistentEdit($this);
             WhirlpoolPlus.feat.numberPosts.NumberPost($this);
             WhirlpoolPlus.feat.savePosts.PostSave($this);
             WhirlpoolPlus.feat.userNotes.runOnReply($this);
