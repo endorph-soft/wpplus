@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2023.9.0
+// @version         2024.4.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -12,16 +12,18 @@
 // @grant           GM_getResourceURL
 // @grant           GM_getResourceText
 // @grant           GM_openInTab
+// @grant           GM_xmlhttpRequest
 // @grant           GM.addStyle
 // @grant           GM.getResourceUrl
 // @grant           GM.openInTab
+// @grant           GM.xmlHttpRequest
 // @match           *://forums.whirlpool.net.au/*
 // @match           *://bc.whirlpool.net.au/*
 // @match           *://whirlpool.net.au/*
 // @exclude         *://whirlpool.net.au/blog/*
 // @exclude         *://whirlpool.net.au/api/*
 // @exclude         *://forums.whirlpool.net.au/api/*
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.6.0.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.7.1.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js

@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2023.9.0
+// @version         2024.4.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -12,16 +12,20 @@
 // @grant           GM_getResourceURL
 // @grant           GM_getResourceText
 // @grant           GM_openInTab
+// @grant           GM_xmlhttpRequest
 // @grant           GM.addStyle
 // @grant           GM.getResourceUrl
 // @grant           GM.openInTab
+// @grant           GM.xmlHttpRequest
 // @match           *://forums.whirlpool.net.au/*
 // @match           *://bc.whirlpool.net.au/*
 // @match           *://whirlpool.net.au/*
 // @exclude         *://whirlpool.net.au/blog/*
 // @exclude         *://whirlpool.net.au/api/*
 // @exclude         *://forums.whirlpool.net.au/api/*
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.6.0.min.js
+// @connect         ibb.co
+// @connect         self
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.7.1.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.simplemodal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
@@ -61,16 +65,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2023.9.0',
+    version: '2024.4.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 116,
+    storageVersion: 117,
 
     //Script changelog
     changelog: {
+		'2024.4.0': '<ul><li><b>Chrome Users</b> - Due to upcoming changes by Google it is recommended to enable developer mode under extensions settings to ensure continued functionality of user scripts like WP Plus. See the Wiki article for more information.</li><li>Upgraded jQuery to latest stable release<br />Fix Whirlcode block not applying on TWAM pages<br />Unify polling of WP API to 1 minute intervals and remove redundant code<br />Added beta support for displaying images from imgbb.com URLs<br />Adjust image upload in posts tool to use imgbb instead of postimg for compatibility reasons<br />Update code comments to reduce future development overhead</li></ul>',
 		'2023.9.0': '<ul><li>Add floating go to top of page button<br />Add persistent edit button<br />Add ReplyId utility function</li></ul>',
 		'2023.5.0': '<ul><li>Add Post Saving functionality - you can now save and unsave posts by clicking the button in the reply tools section on the right hand side<br />Additional context added to code<br />New utility function added<br />Tidied behaviour of showing saved posts and tracked WLR URLs in the settings menu</li></ul>',
         '2022.5.0': '<ul><li>Mark as Read button will now redirect to user pages with custom recent post days set correctly<br />Updated to latest version of jQuery<br />Minor text fixes<br />Updated WP Arc Dark Theme</li></ul>',
@@ -129,21 +134,22 @@ WhirlpoolPlus.install = {
     },
     //Set Default Local Storage Values
     _defaults: {
-        data_db_version: '',
-        display_theme: 'default',
-        display_usertheme_bgcolour: '',
-        display_usertheme_fgcolour: '',
-        display_usertheme_fgcolour2: '',
-        display_usertheme_fgcolour3: '',
-        display_hideDeletedThreads: false,
-        display_hideMovedThreads: false,
-        display_hideDeletedPosts: false,
-        display_syntaxHighlight: true,
-        display_opeditlarge: false,
-        display_floatSidebar: false,
-        display_floatTopbar: false,
-        display_floatGoToTop: false,
-        display_emoticons_enabled: false,
+        data_db_version: '', //database versioning is only used when major updates are made to how variables are stored
+        data_API_globalUpdateInterval: '1', //the interval in minutes of how frequently the Whirlpool API is scraped for features that require it
+        display_theme: 'default', //the chosen theme
+        display_usertheme_bgcolour: '', //custom theme colouring
+        display_usertheme_fgcolour: '', //custom theme colouring
+        display_usertheme_fgcolour2: '', //custom theme colouring
+        display_usertheme_fgcolour3: '', //custom theme colouring
+        display_hideDeletedThreads: false, //when true, deleted threads will be hidden from view in forum pages
+        display_hideMovedThreads: false, //when true, moved thread pointers will be hidden from view in forum pages
+        display_hideDeletedPosts: false, //when true, deleted posts will be hidden from view in thread pages
+        display_syntaxHighlight: true, //when true, code syntax in posts will be styled
+        display_opeditlarge: false, //when true, the text indicating the original post and if the post has been edited will be increased in size
+        display_floatSidebar: false, //when true, the sidebar navigation will float with the scrolling page
+        display_floatTopbar: false, //when true, the top bar will float with the scrolling page
+        display_floatGoToTop: false, //when true, a floating arrow button will be added in the window bottom right to jump to the top of the page
+        display_emoticons_enabled: false, //when true, emoji will be visible in threads
         display_hideTheseForums: '',
         display_hideClosedThreadsOnProfile: false,
         display_whimAlert: true,
@@ -159,22 +165,20 @@ WhirlpoolPlus.install = {
         display_oldProfile: false,
         display_userPageInfoToggle: false,
         display_superProfile: 'default',
-        display_avatarsOnProfile: false,
-        display_notify_background: '#3a332a',
+        display_avatarsOnProfile: false, //when true, if avatars are turned on they will display on the user profile page
+        display_notify_background: '#3a332a', //the background colour of notification bar
         avatars_enabled: 'static',
-        stats_postsPerDay: true,
-        embed_videos: true,
-        embed_images: true,
-        hideembedurl: false,
+        stats_postsPerDay: true, //when true, a calculated statistic of posts per day will be displayed on the user profile page, based on the user creation date and total post count
+        embed_videos: true, //when true, video links from sites like YouTube or Vimeo will display embedded in threads
+        embed_images: true, //when true, direct image links or album links from sites like Imgur will display embedded in threads
+        hideembedurl: false, //when true, if an embedded image or video is displayed, the original link will be hidden from view in threads
         watchedAlert: false,
         watchedAlert_data: '',
-        watchedAlert_updateInterval: 5,
         watchedAlert_lastUpdated: 0,
         recentActivityOverlay: false,
         recentActivityOverlay_days: '7',
         recentActivityOverlay_data: '',
         recentActivityOverlay_html: '',
-        recentActivityOverlay_updateInterval: 15,
         recentActivityOverlay_lastUpdated: 0,
         whirlpoolAPIKey: '',
         customLinks: [],
@@ -235,6 +239,7 @@ WhirlpoolPlus.install = {
     //These values are used for the minimal install
     _notForumValues: [
         'whirlpoolAPIKey',
+        'data_API_globalUpdateInterval',
         'display_theme',
         'display_floatSidebar',
         'display_floatTopbar',
@@ -254,7 +259,6 @@ WhirlpoolPlus.install = {
         'recentActivityOverlay_days',
         'recentActivityOverlay_data',
         'recentActivityOverlay_html',
-        'recentActivityOverlay_updateInterval',
         'recentActivityOverlay_lastUpdated',
         'returnafterlogin',
     ],
@@ -380,6 +384,7 @@ WhirlpoolPlus.util = {
         'profile': '/user/',            // User profile page
         'auraVotes': 'action=yourvotes',  // List of all aura votes
         'newThread': 'action=newthread',  // Creating a new thread
+        'newTWAM': 'action=twam',  // Creating a new TWAM thread
         'reply': 'action=reply',      // Posting a reply
         'edit': 'action=edit',       // Editing a post
         'search': 'search?q=',     // Thread search
@@ -1938,8 +1943,8 @@ WhirlpoolPlus.settings = {
 
                         '<p>' +
                             '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_image_uploader">' +
-                            ' <label for="compose_image_uploader">Enable postimage uploader integration - <b>experimental</b></label>' +
-                            ' <span class="settingDesc">Adds integration with postimage.org for uploading images and including in posts</span>' +
+                            ' <label for="compose_image_uploader">Enable image uploader integration</label>' +
+                            ' <span class="settingDesc">Adds integration with imgbb.com for uploading images and inserting into posts</span>' +
                         '</p>' +
 
                         '<p>' +
@@ -2459,6 +2464,7 @@ WhirlpoolPlus.feat = {
 
         var imageMatchRegex = /(?:jpe?g|gif|bmp|png)$/;
         var imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
+        var imgbbRegex = /(https?:\/\/ibb\.co\/(.+)(?:[#\/].*|$))/i;
 
         var youtubeRegex = /http(s)?:\/\/(www.)?youtube\.com/i;
         var youtubeVidId = /v=([^&]*)/i;
@@ -2506,6 +2512,27 @@ WhirlpoolPlus.feat = {
                             linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
                         }
                     }
+                } else if (imageEnabled && imgbbRegex.test(link)) {
+                    //imgBB Embed
+                    var imgBB = imgbbRegex.exec(link);
+                    function getBBdata(callback) {
+                    GM.xmlHttpRequest({
+                        method: 'GET',
+                        url: 'https://ibb.co/' + imgBB[2] + '/oembed.json',
+                        onload: function (response) {
+                            if (response.status == 200) {
+                                var parsedOutput = JSON.parse(response.responseText);
+                                callback(parsedOutput.url);
+                            }
+                        }
+                        });
+                    }
+                        getBBdata(function(imgbbdirectlink) {
+                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + imagecontent + '" data-src="' + imgbbdirectlink + '" alt="WP Plus Embedded Image" class="wpp_img"></a></span><br />');
+                            var bLazy = new Blazy({
+                                selector: '.wpp_img'
+                            });
+                        });
                 } else if (videoEnabled && youtubeRegex.test(link)) {
                     // Youtube Embed (part 1 - full links)
                     var linkSegments = youtubeVidId.exec(link);
@@ -2660,7 +2687,6 @@ WhirlpoolPlus.feat.display = {
     //CSS that is included everywhere
     css: async function () {
         var styles = '';
-
         //Themes
                     const themelist = {
         classic: await WhirlpoolPlus.util.resource('classictheme'),
@@ -2671,10 +2697,12 @@ WhirlpoolPlus.feat.display = {
         dark: await WhirlpoolPlus.util.resource('darktheme'),
         steelgrey: await WhirlpoolPlus.util.resource('steelgreytheme')
     }
+
         var currentTheme = WhirlpoolPlus.util.get('display_theme');
         if (currentTheme != 'default' && currentTheme in themelist) {
             styles += themelist[currentTheme];
         }
+
         //Theme Images - Cannot use utility here due to Greasemonkey & Firefox
         let classiclogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewhead.png';
         let classicnews = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewsimage.gif';
@@ -3253,7 +3281,7 @@ WhirlpoolPlus.feat.watchedAlert = {
             },
 
         updateData: function (callback) {
-            var updateInterval = WhirlpoolPlus.util.get('watchedAlert_updateInterval');
+            var updateInterval = WhirlpoolPlus.util.get('data_API_globalUpdateInterval');
             var lastUpdate = WhirlpoolPlus.util.get('watchedAlert_lastUpdated');
             var currentTime = (new Date).getTime();
 
@@ -3403,7 +3431,7 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
     },
 
     updateData: function (callback, forceUpdate) {
-        var updateInterval = WhirlpoolPlus.util.get('recentActivityOverlay_updateInterval');
+        var updateInterval = WhirlpoolPlus.util.get('data_API_globalUpdateInterval');
         var lastUpdate = WhirlpoolPlus.util.get('recentActivityOverlay_lastUpdated');
         var currentTime = (new Date).getTime();
 
@@ -4144,7 +4172,8 @@ WhirlpoolPlus.feat.editor = {
     image_uploader: function () {
         if (WhirlpoolPlus.util.get('compose_image_uploader')) {
         var script = document.createElement("script");
-        script.src = "https://wpplus.phyco.name/postimgtest.js";
+        script.src = "https://imgbb.com/upload.js";
+        script.dataset.autoInsert = "viewer-links";
         document.getElementsByTagName("head")[0].appendChild(script);
         }
     },
@@ -4788,7 +4817,7 @@ WhirlpoolPlus.run = async function () {
     }
 
     /** RUN: Posting (new thread, reply) **/
-    if (WhirlpoolPlus.util.pageType.newThread || WhirlpoolPlus.util.pageType.reply) {
+    if (WhirlpoolPlus.util.pageType.newThread || WhirlpoolPlus.util.pageType.reply || WhirlpoolPlus.util.pageType.newTWAM) {
         WhirlpoolPlus.feat.editor.autoSubscribe();
         WhirlpoolPlus.feat.editor.image_uploader();
         WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #body');
