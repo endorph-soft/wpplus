@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2024.4.0
+// @version         2024.8.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -65,16 +65,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2024.4.0',
+    version: '2024.8.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 117,
+    storageVersion: 118,
 
     //Script changelog
     changelog: {
+		'2024.8.0': '<ul><li><b>Chrome Users</b> - Due to changes in Manifest v3 you may be required to enable developer mode under extensions settings to ensure continued functionality of user scripts like WP Plus. See the Wiki article for more information.</li><li>Updated dialog model to use relative sizing and not fixed values.<br />Refactored media embedding code to improve performance and fix issues with YouTube links not embedding due to changes in handling by Whirlpool<br />Added media embed support for YouTube Shorts</li></ul>',
 		'2024.4.0': '<ul><li><b>Chrome Users</b> - Due to upcoming changes by Google it is recommended to enable developer mode under extensions settings to ensure continued functionality of user scripts like WP Plus. See the Wiki article for more information.</li><li>Upgraded jQuery to latest stable release<br />Fix Whirlcode block not applying on TWAM pages<br />Unify polling of WP API to 1 minute intervals and remove redundant code<br />Added beta support for displaying images from imgbb.com URLs<br />Adjust image upload in posts tool to use imgbb instead of postimg for compatibility reasons<br />Update code comments to reduce future development overhead</li></ul>',
 		'2023.9.0': '<ul><li>Add floating go to top of page button<br />Add persistent edit button<br />Add ReplyId utility function</li></ul>',
 		'2023.5.0': '<ul><li>Add Post Saving functionality - you can now save and unsave posts by clicking the button in the reply tools section on the right hand side<br />Additional context added to code<br />New utility function added<br />Tidied behaviour of showing saved posts and tracked WLR URLs in the settings menu</li></ul>',
@@ -310,8 +311,8 @@ WhirlpoolPlus.install = {
                 'background-color': '#ddd',
                 'border': '1px solid #000',
                 'padding': '20px',
-                'height': '500px',
-                'width': '700px',
+                'height': '40%',
+                'width': '60%',
             },
             overlayCss: { backgroundColor: '#000' },
         });
@@ -2454,48 +2455,43 @@ WhirlpoolPlus.feat = {
 
         $('.grid').before(voteHtml);
     },
-    //Media Embed Codeblock
+    //Media Embed Codeblock V2
     embed: async function () {
-        var imageEnabled = WhirlpoolPlus.util.get('embed_images');
-        var videoEnabled = WhirlpoolPlus.util.get('embed_videos');
-        var maxContentWidth = $('.replytext').width();
-        var loading = await WhirlpoolPlus.util.image('loader');
-        var imagecontent = await WhirlpoolPlus.util.image('wppimage');
+    const imageEnabled = WhirlpoolPlus.util.get('embed_images');
+    const videoEnabled = WhirlpoolPlus.util.get('embed_videos');
+    const maxContentWidth = $('.replytext').width();
+    const loading = await WhirlpoolPlus.util.image('loader');
+    const imagecontent = await WhirlpoolPlus.util.image('wppimage');
+    const vidWidth = 640;
+    const vidHeight = 480;
+    const shortsVidWidth = 440;
+    const shortsVidHeight = 800;
+    const displayed = {};
 
-        var imageMatchRegex = /(?:jpe?g|gif|bmp|png)$/;
-        var imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
-        var imgbbRegex = /(https?:\/\/ibb\.co\/(.+)(?:[#\/].*|$))/i;
+    WhirlpoolPlus.util.css('.wpp_img { max-width: 100%; }');
 
-        var youtubeRegex = /http(s)?:\/\/(www.)?youtube\.com/i;
-        var youtubeVidId = /v=([^&]*)/i;
-        var youtubeShortRegex = /http(s)?:\/\/(www.)?youtu\.be/i;
-        var youtubeShortVidId = /\.be\/(.*)/i;
-        var vimeoRegex = /http(s)?:\/\/(www.)?vimeo.com\/([0-9]*)/i;
+    const embedLink = (linkObject, link) => {
+        if (displayed[link]) return;
 
-        WhirlpoolPlus.util.css('.wpp_img { max-width: 100%; }');
+        let hideEmbedUrlStyle = '';
 
-        var vidWidth = 640;
-        var vidHeight = 480;
+        const imageRegex = /\.(?:jpe?g|gif|bmp|png|webp|tiff)$/i;
+        const imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
+        const imgbbRegex = /(https?:\/\/ibb\.co\/(.+)(?:[#\/].*|$))/i;
+        const youtubeRegex = /(?:go\?)?(https(?:%3A|:)\/\/www\.youtube\.com\/watch\?v=([^&]+))/i;
+        const youtubeShortLinkRegex = /(?:go\?)?(https(?:%3A|:)%2F%2Fyoutu\.be%2F([^%\/]+))/i;
+        const youtubeShortsRegex = /(?:go\?)?(https(?:%3A|:)%2F%2Fyoutube\.com%2Fshorts%2F([^%\/]+))/i;
+        const vimeoRegex = /(?:go\?)?(https(?:%3A|:)(?:\/\/|%2F%2F)vimeo\.com(?:%2F|\/)([^\/]+))/i;
 
-        var displayed = {};
-
-        $('#replies .replytext a').not('.internal').each(function () {
-            var linkObject = $(this);
-            var link = linkObject.prop('href');
-
-            if (displayed[link] != true) {
-
-                // Note: the span class wcrep1 causes the images to be omitted from quotes
-
-                if (imageEnabled && imageMatchRegex.test(link)) {
-                    // Basic Image Match
-                    linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + imagecontent + '" data-src="' + link + '" alt="WP Plus Embedded Image" class="wpp_img"></a></span><br />');
-                    if (WhirlpoolPlus.util.get('hideembedurl')) {
-                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
-                    };
-                } else if (imageEnabled && imgurRegex.test(link)) {
-                    // Imgur Embed
-                    var linkSegments = imgurRegex.exec(link);
+        switch (true) {
+            case imageEnabled && imageRegex.test(link):
+                // Basic Image Match
+                linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + imagecontent + '" data-src="' + link + '" alt="WP Plus Embedded Image" class="wpp_img"></a></span><br />');
+                hideEmbedUrlStyle = 'color:#eee !important;cursor:default;background:none !important;';
+                break;
+            case imageEnabled && imgurRegex.test(link):
+                // Implement Imgur embedding logic
+                var linkSegments = imgurRegex.exec(link);
 
                     if (linkSegments[2]) {
                         linkSegments = linkSegments[2].split('/');
@@ -2512,9 +2508,10 @@ WhirlpoolPlus.feat = {
                             linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
                         }
                     }
-                } else if (imageEnabled && imgbbRegex.test(link)) {
-                    //imgBB Embed
-                    var imgBB = imgbbRegex.exec(link);
+                break;
+            case imageEnabled && imgbbRegex.test(link):
+                // Implement imgBB embedding logic
+                var imgBB = imgbbRegex.exec(link);
                     function getBBdata(callback) {
                     GM.xmlHttpRequest({
                         method: 'GET',
@@ -2533,45 +2530,69 @@ WhirlpoolPlus.feat = {
                                 selector: '.wpp_img'
                             });
                         });
-                } else if (videoEnabled && youtubeRegex.test(link)) {
-                    // Youtube Embed (part 1 - full links)
-                    var linkSegments = youtubeVidId.exec(link);
+                break;
+            case videoEnabled && youtubeRegex.test(link):
+                // Implement YouTube full link embedding logic
+                var linkSegments = youtubeRegex.exec(link);
 
                     if (linkSegments && linkSegments[1]) {
-                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[2] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
                     }
-                } else if (videoEnabled && youtubeShortRegex.test(link)) {
-                    // Youtube Embed (part 2 - short links)
-                    var linkSegments = youtubeShortVidId.exec(link);
+                break;
+            case videoEnabled && youtubeShortLinkRegex.test(link):
+                // Implement YouTube short link embedding logic
+                var linkSegments = youtubeShortLinkRegex.exec(link);
 
                     if (linkSegments && linkSegments[1]) {
-                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[1] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[2] + '" width="' + vidWidth + '" height="' + vidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
                     }
-                } else if (videoEnabled && vimeoRegex.test(link)) {
-                    // Vimeo Embed
-                    var linkSegments = vimeoRegex.exec(link);
+                break;
+            case videoEnabled && youtubeShortsRegex.test(link):
+                // Implement YouTube Shorts embedding logic
+                var linkSegments = youtubeShortsRegex.exec(link);
 
-                    if (linkSegments && linkSegments[3]) {
-                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://player.vimeo.com/video/' + linkSegments[3] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
+                    if (linkSegments && linkSegments[1]) {
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://www.youtube-nocookie.com/embed/' + linkSegments[2] + '" width="' + shortsVidWidth + '" height="' + shortsVidHeight + '" frameborder="0" allowfullscreen></iframe></span><br />');
                         if (WhirlpoolPlus.util.get('hideembedurl')) {
                             linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                         }
                     }
-                }
+                break;
+            case videoEnabled && vimeoRegex.test(link):
+                // Implement Vimeo embedding logic
+                var linkSegments = vimeoRegex.exec(link);
 
-                displayed[link] = true;
-            }
-        });
-            var bLazy = new Blazy({
-                selector: '.wpp_img'
-            });
-    },
+                    if (linkSegments && linkSegments[2]) {
+                        linkObject.before('<br /><span class="wcrep1"><iframe src="https://player.vimeo.com/video/' + linkSegments[2] + '" width="' + vidWidth + '" height="' + vidWidth + '" frameborder="0" allowfullscreen></iframe></span><br />');
+                        if (WhirlpoolPlus.util.get('hideembedurl')) {
+                            linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                        }
+                    }
+                break;
+        }
+
+        if (hideEmbedUrlStyle && WhirlpoolPlus.util.get('hideembedurl')) {
+            linkObject.attr("style", hideEmbedUrlStyle);
+        }
+
+        displayed[link] = true;
+    };
+
+    $('#replies .replytext a').not('.internal').each(function () {
+        const linkObject = $(this);
+        const link = linkObject.prop('href');
+        embedLink(linkObject, link);
+    });
+
+    const bLazy = new Blazy({ selector: '.wpp_img' });
+},
+
    //Adds gradient background to posts from users who are in the Penalty Box to make this more prominent
     penaltyBoxCss: async function () {
         let light_gradient = await WhirlpoolPlus.util.image('light_gradient');
@@ -4604,8 +4625,10 @@ WhirlpoolPlus.feat.userNotes = {
                 close: true,
                 closeHTML: '<div class="userNotes_close">Close</div>',
                 containerCss: {
-                    height: '240px',
-                    width: '280px',
+                    width: '20%',
+                    height: '20%',
+                    'min-height': '240px',
+                    'min-width': '280px',
                     'text-align': 'center',
                     'background-color': '#ddd',
                     'border': '1px solid #000',
@@ -4659,8 +4682,10 @@ WhirlpoolPlus.feat.userNotes = {
                 close: true,
                 closeHTML: '<div class="userNotes_close">Close</div>',
                 containerCss: {
-                    height: '240px',
-                    width: '280px',
+                    width: '20%',
+                    height: '20%',
+                    'min-height': '240px',
+                    'min-width': '280px',
                     'text-align': 'center',
                     'background-color': '#ddd',
                     'border': '1px solid #000',
