@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2024.8.0
+// @version         2025.1.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -26,13 +26,12 @@
 // @connect         ibb.co
 // @connect         self
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.7.1.min.js
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.simplemodal.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.modal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/sha.js
 // @require         https://raw.githubusercontent.com/greasemonkey/gm4-polyfill/master/gm4-polyfill.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/blazy.min.js
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.leanModal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jdenticon.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/poweredby.js
 // @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/loader.gif
@@ -65,16 +64,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2024.8.0',
+    version: '2025.1.0',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 118,
+    storageVersion: 119,
 
     //Script changelog
     changelog: {
+		'2025.1.0': '<ul><li>Re-wrote settings and settings menu code to improve codebase and reduce redundant overhead</li><li>Removed Google Cache functionality from deleted threads pages as the feature is retired by Google</li><li>Fixes to Avatars and User Notes on profile to handle certain edge cases where the features would not work</li><li>Updated all modal windows to a single framework</li><li>Updated Watched Threads Alert feature to display number of unread threads</li><li>Fixed Imgur embed functionality where images were not loading occasionally</li></ul>',
 		'2024.8.0': '<ul><li><b>Chrome Users</b> - Due to changes in Manifest v3 you may be required to enable developer mode under extensions settings to ensure continued functionality of user scripts like WP Plus. See the Wiki article for more information.</li><li>Updated dialog model to use relative sizing and not fixed values.<br />Refactored media embedding code to improve performance and fix issues with YouTube links not embedding due to changes in handling by Whirlpool<br />Added media embed support for YouTube Shorts</li></ul>',
 		'2024.4.0': '<ul><li><b>Chrome Users</b> - Due to upcoming changes by Google it is recommended to enable developer mode under extensions settings to ensure continued functionality of user scripts like WP Plus. See the Wiki article for more information.</li><li>Upgraded jQuery to latest stable release<br />Fix Whirlcode block not applying on TWAM pages<br />Unify polling of WP API to 1 minute intervals and remove redundant code<br />Added beta support for displaying images from imgbb.com URLs<br />Adjust image upload in posts tool to use imgbb instead of postimg for compatibility reasons<br />Update code comments to reduce future development overhead</li></ul>',
 		'2023.9.0': '<ul><li>Add floating go to top of page button<br />Add persistent edit button<br />Add ReplyId utility function</li></ul>',
@@ -105,6 +105,930 @@ WhirlpoolPlus.about = {
     },
 }
 
+    // Mapping object for settings items. Specify type value if anything other than text or boolean. If dropdown, specify options and optionsMap values. Specify relevance to either the whole site or just the forums subdomain. Specify hidden if the setting is not intended to be edited by the user.
+    const settingsMap = {
+    'wpp_data_db_version': {
+        relevance: 'forums',
+        hidden: true,
+        default: '',
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Database Version',
+        description: 'Database versioning is only used when major updates are made to how variables are stored'
+    },
+    'wpp_data_API_globalUpdateInterval': {
+        relevance: 'all',
+        hidden: true,
+        default: '1',
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'API Global Update Interval',
+        description: 'The interval in minutes of how frequently the Whirlpool API is scraped for features that require it'
+    },
+    'wpp_watchedAlert_data': {
+        relevance: 'all',
+        hidden: true,
+        default: '',
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Watched Threads Alert Data',
+        description: 'This field is used by the Watched Threads Alert feature to store data'
+    },
+    'wpp_watchedAlert_lastUpdated': {
+        relevance: 'all',
+        hidden: true,
+        default: 0,
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Watched Threads Alert Last Update Time',
+        description: 'This field is used by the Watched Threads Alert feature to store data'
+    },
+    'wpp_recentActivityOverlay_data': {
+        relevance: 'all',
+        hidden: true,
+        default: '',
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Recenty Activity Overlay Data',
+        description: 'This field is used by the Recent Activity Overlay feature to store data'
+    },
+    'wpp_recentActivityOverlay_html': {
+        relevance: 'all',
+        hidden: true,
+        default: '',
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Recenty Activity Overlay HTML',
+        description: 'This field is used by the Recent Activity Overlay feature to store data'
+    },
+    'wpp_recentActivityOverlay_lastUpdated': {
+        relevance: 'all',
+        hidden: true,
+        default: 0,
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Recenty Activity Overlay Last Update Time',
+        description: 'This field is used by the Recent Activity Overlay feature to store data'
+    },
+    'wpp_customLinks': {
+        relevance: 'all',
+        hidden: true,
+        default: [],
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Custom Links Data',
+        description: 'This field is used by the Custom Links feature to store data'
+    },
+    'wpp_savedPosts': {
+        relevance: 'all',
+        hidden: true,
+        default: [],
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Saved Posts Data',
+        description: 'This field is used by the Saved Posts feature to store data'
+    },
+    'wpp_hiddenUsers': {
+        relevance: 'all',
+        hidden: true,
+        default: [],
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Hidden Users Data',
+        description: 'This field is used by the Hidden Users feature to store data'
+    },
+    'wpp_sync_scriptId': {
+        relevance: 'all',
+        hidden: true,
+        default: Math.floor(Math.random() * 100000001),
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Script ID for Sync Function',
+        description: 'This field is used by the Synchronisation feature to store data'
+    },
+    'wpp_sync_times': {
+        relevance: 'all',
+        hidden: true,
+        default: {},
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Sync Times for Sync Function',
+        description: 'This field is used by the Synchronisation feature to store data'
+    },
+    'wpp_sync_mostUpToDate': {
+        relevance: 'all',
+        hidden: true,
+        default: 0,
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Source of truth for Sync Function',
+        description: 'This field is used by the Synchronisation feature to store data'
+    },
+    'wpp_sync_lastSync': {
+        relevance: 'all',
+        hidden: true,
+        default: 0,
+        category: 'config',
+        subcategory: '',
+        friendlyName: 'Last Update Time for Sync Function',
+        description: 'This field is used by the Synchronisation feature to store data'
+    },
+    'wpp_display_theme': {
+        relevance: 'all',
+        default: 'default',
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Custom Display Theme',
+        description: 'A collection of styles provided by members of Whirlpool, or the option to set your own theme colours below.<br />To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a>',
+        type: 'dropdown',
+        options: ['"default"', '"classic"', '"steelgrey"', '"black"', '"teal"', '"arcdark"', '"electrolize"', '"dark"', '"userset"'],
+        optionsMap: {
+            '"default"': 'Default (by Simon Wright)',
+            '"classic"': 'WP Classic (by Phyco)',
+            '"steelgrey"': 'WP Steel Grey (by Phyco)',
+            '"black"': 'WP Black (by =CHRIS=)',
+            '"teal"': 'WP Teal (by =CHRIS=)',
+            '"arcdark"': 'WP Arc-Dark (by =CHRIS=)',
+            '"electrolize"': 'WP Electrolize (by =CHRIS=)',
+            '"dark"': 'WP Dark (by Nukkels)',
+            '"userset"': 'User Set',
+        }
+    },
+    'wpp_display_usertheme_bgcolour': {
+        relevance: 'all',
+        default: '#000',
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Primary Background Colour - User Set Theme',
+        description: 'Sets the primary colour for the background',
+        type: 'color'
+    },
+    'wpp_display_usertheme_fgcolour': {
+        relevance: 'all',
+        default: '#000',
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Primary Foreground Colour - User Set Theme',
+        description: 'Sets the primary colour for the foreground',
+        type: 'color'
+    },
+    'wpp_display_usertheme_fgcolour2': {
+        relevance: 'all',
+        default: '#000',
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Secondary Foreground Colour - User Set Theme',
+        description: 'Sets the secondary colour for the foreground',
+        type: 'color'
+    },
+    'wpp_display_usertheme_fgcolour3': {
+        relevance: 'all',
+        default: '#000',
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Tertiary Foreground Colour - User Set Theme',
+        description: 'Sets the tertiary colour for the foreground',
+        type: 'color'
+    },
+    'wpp_whirlpoolAPIKey': {
+        relevance: 'all',
+        default: '',
+        category: 'config',
+        subcategory: 'scriptconfig',
+        friendlyName: 'API Key',
+        description: 'The key used for API authentication.'
+    },
+    'wpp_display_whimAlert': {
+        relevance: 'all',
+        default: true,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Whim Alert',
+        description: 'Display an alert for unread Private Messages received.'
+    },
+    'wpp_wlr_tempDisable': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Add a button to temporarily disable the WLR tracker (top right corner)',
+        description: 'When the button is clicked it will disable the thread tracker until another thread is loaded'
+    },
+    'wpp_watchedthreadsextra': {
+        relevance: 'forums',
+        default: 'improved',
+        category: 'posts',
+        subcategory: 'watchedthreads',
+        friendlyName: 'Improved Watched Threads Page',
+        description: 'Adds options such as "Open All Threads in Tabs" and other minor tweaks',
+        type: 'dropdown',
+        options: ['"default"', '"improved"', '"improvedswap"'],
+        optionsMap: {
+            '"default"': 'Disabled',
+            '"improved"': 'Enabled',
+            '"improvedswap"': 'Enabled with Reversed Button Layout',
+        }
+    },
+    'wpp_display_notify_background': {
+        relevance: 'all',
+        default: '#3a332a',
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Notification Bar Colour - All Themes',
+        description: 'Sets the notification strip background colour',
+        type: 'color'
+    },
+    'wpp_compose_enhancedEditorNew': {
+        relevance: 'forums',
+        default: 'default',
+        category: 'posts',
+        subcategory: 'posting',
+        friendlyName: 'Enhanced Editor and Emoji',
+        description: 'Appends the Whirlcode rows and emoji selector to new post, reply and wiki editors',
+        type: 'dropdown',
+        options: ['"default"', '"emojionly"', '"whirlonly"', '"disabled"'],
+        optionsMap: {
+            '"default"': 'Enabled (all)',
+            '"emojionly"': 'Emoji Selector Only',
+            '"whirlonly"': 'Whirlcode Only',
+            '"disabled"': 'Disabled',
+        }
+    },
+    'wpp_spinnerMenu': {
+        relevance: 'all',
+        default: 'none',
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Dynamic Menu System (select type)',
+        description: 'Display a dropdown navigation menu for the site',
+        type: 'dropdown',
+        options: ['"none"', '"rightClick"', '"spinner"'],
+        optionsMap: {
+            '"none"': 'None',
+            '"rightClick"': 'Right Click',
+            '"spinner"': 'Spinner',
+        }
+    },
+    'wpp_spinnerMenu_settingsLocation': {
+        relevance: 'all',
+        default: 'top',
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Location of settings link in dynamic menu',
+        description: 'Adjusts where this will appear',
+        type: 'dropdown',
+        options: ['"none"', '"top"', '"underuser"', '"bottom"'],
+        optionsMap: {
+            '"none"': 'None',
+            '"top"': 'Top',
+            '"underuser"': 'Under User',
+            '"bottom"': 'Bottom',
+        }
+    },
+    'wpp_avatars_enabled': {
+        relevance: 'all',
+        default: 'static',
+        category: 'users',
+        subcategory: 'avatars',
+        friendlyName: 'Toggle Avatar Display Modes',
+        description: 'Toggles the display mode for the avatar feature, to disable or enable additional functionality',
+        type: 'dropdown',
+        options: ['"none"', '"all"', '"both"', '"static"', '"animated"'],
+        optionsMap: {
+            '"none"': 'Disabled',
+            '"all"': 'User Set Avatars & Generated Identicons',
+            '"both"': 'User Set Avatars only',
+            '"static"': 'User Set Static Avatars only',
+            '"animated"': 'User Set Animated Avatars only',
+        }
+    },
+    'wpp_display_avatarsOnProfile': {
+        relevance: 'all',
+        default: false,
+        category: 'users',
+        subcategory: 'avatars',
+        friendlyName: 'Show Avatars on User Profile pages',
+        description: 'Shows avatars on User Profiles, and User Notes if enabled'
+    },
+    'wpp_display_superProfile': {
+        relevance: 'forums',
+        default: 'default',
+        category: 'posts',
+        subcategory: 'watchedthreads',
+        friendlyName: 'Super Profile Page',
+        description: 'Shows your Watched Threads on your User Profile page',
+        type: 'dropdown',
+        options: ['"default"', '"all"', '"unread"'],
+        optionsMap: {
+            '"default"': 'Disabled',
+            '"all"': 'Enabled',
+            '"unread"': 'Enabled (Unread Watched Threads Only)',
+        }
+    },
+    'wpp_watchedThreadsAlert': {
+        relevance: 'forums',
+        default: 'default',
+        category: 'posts',
+        subcategory: 'watchedthreads',
+        friendlyName: 'Mark as Read Button Actions',
+        description: 'Choose an action to occur when you click "mark page as read" on the last page of a thread',
+        type: 'dropdown',
+        options: ['"default"', '"profile"', '"watched"', '"forum"'],
+        optionsMap: {
+            '"default"': 'None',
+            '"profile"': 'Go to User Profile',
+            '"watched"': 'Go to Watched Threads',
+            '"forum"': 'Go to All Forums',
+        }
+    },
+    'wpp_wlr_enabled': {
+        relevance: 'forums',
+        default: 'all',
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Activate the WLR Tracker',
+        description: 'Tracks threads/posts on Whirlpool by highlighting their unread/read status',
+        type: 'dropdown',
+        options: ['"none"', '"all"', '"forums"', '"watched"', '"profile"'],
+        optionsMap: {
+            '"none"': 'Disabled',
+            '"all"': 'Enabled',
+            '"forums"': 'Enabled on Forums pages only',
+            '"watched"': 'Enabled on Forums & Watched Threads pages',
+            '"profile"': 'Enabled on Forums & User Profile pages',
+        }
+    },
+    'wpp_wlr_noTrackSticky': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Don\'t highlight sticky threads',
+        description: 'If the thread is a sticky, WLR will not highlight it'
+    },
+    'wpp_wlr_display_onlyEndSquare': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Colour end square',
+        description: 'Just highlight the end square of tracked threads'
+    },
+    'wpp_wlr_display_acrosscolumns': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Colour across Reps/Reads Columns',
+        description: 'Highlights the reps/reads columns as well'
+    },
+    'wpp_wlr_display_flipStyles': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Highlight unread posts instead of read posts (Posts Pages)',
+        description: 'Reverses the default highlighting'
+    },
+    'wpp_wlr_display_readThreadColour': {
+        relevance: 'forums',
+        default: '#CBC095',
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'No Unread Posts Colour',
+        description: 'Used to highlight threads containing no unread posts',
+        type: 'color'
+    },
+    'wpp_wlr_display_unreadThreadColour': {
+        relevance: 'forums',
+        default: '#95B0CB',
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Unread Posts Colour',
+        description: 'Used to highlight threads containing posts you haven\'t read',
+        type: 'color'
+    },
+    'wpp_wlr_display_unreadPostColour': {
+        relevance: 'forums',
+        default: '#CFCBBC',
+        category: 'posts',
+        subcategory: 'threadtracker',
+        friendlyName: 'Post Highlight Colour (Posts Pages)',
+        description: 'Used to highlight posts (right most column) on posts pages',
+        type: 'color'
+    },
+    'wpp_hiddenUsers_remove': {
+        relevance: 'forums',
+        default: false,
+        category: 'users',
+        subcategory: 'hiddenusers',
+        friendlyName: 'Remove any indication of ignored users',
+        description: 'Where posts would be shown as hidden, the indicator will be removed'
+    },
+    'wpp_embed_videos': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Inline Videos',
+        description: 'Displays videos inline in threads for WP+ users'
+    },
+    'wpp_display_syntaxHighlight': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Syntax Highlighting for code blocks',
+        description: '"Prettifies" data entered in "codeblock" Whirlcode'
+    },
+    'wpp_display_opeditlarge': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Increase Edited or OP Post Prominence',
+        description: 'Uses larger font to highlight edited or OP posts'
+    },
+    'wpp_removeLinkToLastPage': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Make the links on the main forums page go to the start of the thread',
+        description: 'Links take you to the end by default'
+    },
+    'wpp_links_longThread': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Single Page Version',
+        description: 'These settings add links to display only posts from certain users'
+    },
+    'wpp_links_archive': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Archive Version',
+        description: 'These settings add links to display only posts from certain users'
+    },
+    'wpp_links_mod': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Mod posts',
+        description: 'These settings add links to display only posts from certain users'
+    },
+    'wpp_links_originalPoster': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'OP posts',
+        description: 'These settings add links to display only posts from certain users'
+    },
+    'wpp_links_rep': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Rep posts',
+        description: 'These settings add links to display only posts from certain users'
+    },
+    'wpp_links_unanswered': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Link to Unanswered Threads',
+        description: 'Adds a link to only display unanswered threads after the forum name'
+    },
+    'wpp_sync_enabled': {
+        relevance: 'forums',
+        default: false,
+        category: 'config',
+        subcategory: 'sync',
+        friendlyName: 'Activate Synchronisation Functionality',
+        description: 'Enables the sync function'
+    },
+    'wpp_sync_encryptionKey': {
+        relevance: 'forums',
+        default: '',
+        category: 'config',
+        subcategory: 'sync',
+        friendlyName: 'Encryption Password',
+        description: 'Must be the same for all of your WP+ installs',
+        type: 'password'
+    },
+    'wpp_sync_key': {
+        relevance: 'forums',
+        default: '',
+        category: 'config',
+        subcategory: 'sync',
+        friendlyName: 'Access Key',
+        description: 'Your access key as provided by the sync server'
+    },
+    'wpp_sync_user': {
+        relevance: 'forums',
+        default: '',
+        category: 'config',
+        subcategory: 'sync',
+        friendlyName: 'Whirlpool User ID',
+        description: 'Your User ID Number must be keyed in'
+    },
+    'wpp_sync_server': {
+        relevance: 'forums',
+        default: '',
+        category: 'config',
+        subcategory: 'sync',
+        friendlyName: 'Server Address',
+        description: 'The address of the server that you are syncing your data with (must be a http<b>s</b> URL or your browser may block it)'
+    },
+    'wpp_autoSubscribeToNewThread': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'posting',
+        friendlyName: 'Automatically watch/mark as read when you post',
+        description: 'When you reply to a thread, it will automatically be added to your watched threads'
+    },
+    'wpp_compose_image_uploader': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'posting',
+        friendlyName: 'Enable image uploader integration',
+        description: 'Adds integration with imgbb.com for uploading images and inserting into posts'
+    },
+    'wpp_compose_movePreview': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'posting',
+        friendlyName: 'Move reply preview above inline reply box',
+        description: 'Shows the inline reply preview at the end of the thread rather than below the reply field'
+    },
+    'wpp_compose_quickReply': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'posting',
+        friendlyName: 'Quick Reply',
+        description: 'Automatically open the inline reply box at the end of every thread'
+    },
+    'wpp_defaultRecentActivityDays': {
+        relevance: 'all',
+        default: '7',
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Default amount of recent activity to display on a user page',
+        description: 'Adjusts the default variable',
+        type: 'dropdown',
+        options: ['"1"', '"3"', '"7"', '"14"', '"30"', '"60"', '"120"', '"240"', '"365"'],
+        optionsMap: {
+            '"1"': '1 Day',
+            '"3"': '3 Days',
+            '"7"': '7 Days',
+            '"14"': '14 Days',
+            '"30"': '30 Days',
+            '"60"': '60 Days',
+            '"120"': '120 Days',
+            '"240"': '240 Days',
+            '"365"': '365 Days',
+        }
+    },
+    'wpp_display_bannedPosts': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Hide any indication of posts from banned users',
+        description: 'Removes posts from view that were created by users who are currently banned'
+    },
+    'wpp_display_customCSS': {
+        relevance: 'forums',
+        default: '',
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Custom CSS',
+        description: 'Add custom styles to Whirlpool',
+        type: 'textarea'
+    },
+    'wpp_display_emoticons_enabled': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Display Image Emoticons (Smilies)',
+        description: 'Converts text smilies on Whirlpool into images'
+    },
+    'wpp_display_widescreen': {
+        relevance: 'forums',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Custom Display Width',
+        description: 'Adjust the website to fit a larger or smaller portion of the screen'
+    },
+    'wpp_display_width_percentage': {
+        relevance: 'forums',
+        default: '100',
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Enter Percentage',
+        description: 'Defaults to 100 for full widescreen view when this is enabled',
+        type: 'number'
+    },
+    'wpp_display_floatGoToTop': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Floating Go To Top of Page Button',
+        description: 'Adds a floating button to send your browser to the top of the current page'
+    },
+    'wpp_display_floatSidebar': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Float the sidebar',
+        description: 'Keeps the sidebar navigation visible when scrolling'
+    },
+    'wpp_display_floatTopbar': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Float the topbar',
+        description: 'Keeps the topbar visible when scrolling'
+    },
+    'wpp_display_hideClosedThreadsOnProfile': {
+        relevance: 'forums',
+        default: false,
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Hide closed threads on user profiles',
+        description: 'Prevents closed threads from appearing on user pages'
+    },
+    'wpp_display_hideDeletedPosts': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Hide deleted posts',
+        description: 'Hide any reference of deleted posts in threads'
+    },
+    'wpp_display_hideDeletedThreads': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Hide Deleted Threads in forums',
+        description: 'Prevents deleted threads from being seen'
+    },
+    'wpp_display_hideFooter': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Hide the forum footer',
+        description: 'Hides the footer navigation on each page'
+    },
+    'wpp_display_hideMovedThreads': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Hide Moved Threads in forums',
+        description: 'Prevents moved threads from being seen'
+    },
+    'wpp_display_hideTheseForums': {
+        relevance: 'forums',
+        default: '',
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Forums to hide (on main forums page)',
+        description: 'Enter the ID\'s of the forums you want to hide (eg. "35 92 137")'
+    },
+    'wpp_display_oldProfile': {
+        relevance: 'forums',
+        default: false,
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Use old User Profile page design',
+        description: 'Shows recent thread activity below user info as per the old site design'
+    },
+    'wpp_display_oldfont': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Use old Whirlpool fonts',
+        description: 'Switches to the pre-2015 re-design font styles (credit to =CHRIS=)'
+    },
+    'wpp_display_penaltyBox': {
+        relevance: 'forums',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Highlight when a user is in the penalty box',
+        description: 'Shows a more noticeable visual indicator on posts made by users currently in the penalty box or banned'
+    },
+    'wpp_display_poweredby': {
+        relevance: 'all',
+        default: true,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Display random "forums powered by" text',
+        description: 'An original Whirlpool feature resurrected, because why not?'
+    },
+    'wpp_display_smallfont': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'themesandfonts',
+        friendlyName: 'Use smaller font',
+        description: 'Displays a smaller font for posts, like Whirlpool did in the past'
+    },
+    'wpp_display_userPageInfoToggle': {
+        relevance: 'forums',
+        default: false,
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Toggle to show/hide user info on Profile pages',
+        description: 'Adds a toggle to show/hide the user info panel as required'
+    },
+    'wpp_embed_images': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Inline Images',
+        description: 'Displays images inline in threads for WP+ users'
+    },
+    'wpp_hiddenUsers_enabled': {
+        relevance: 'forums',
+        default: false,
+        category: 'users',
+        subcategory: 'hiddenusers',
+        friendlyName: 'Hide Posts',
+        description: 'Adds an option to hide posts from users (next to aura)'
+    },
+    'wpp_hideWhimActivity': {
+        relevance: 'forums',
+        default: false,
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Hide Whim Activity on User Profile page',
+        description: 'Hides your recent private messages from the User Profile page'
+    },
+    'wpp_hideembedurl': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Hide Embed URL',
+        description: 'Hides the URLs of inline image/video content'
+    },
+    'wpp_numberPosts': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Numbered Posts',
+        description: 'Displays the current post number in a thread on each post'
+    },
+    'wpp_persistentEditLink': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Persistent Post Edit Link',
+        description: 'Persists the edit button next to your own posts, even after WP removes it'
+    },
+    'wpp_promoteWatchedForum': {
+        relevance: 'forums',
+        default: '',
+        category: 'posts',
+        subcategory: 'watchedthreads',
+        friendlyName: 'Forum ID to move to the top of watched threads list',
+        description: 'Enter the ID of the forum you want to move to the top (eg. "35")'
+    },
+    'wpp_quickEdit': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'posting',
+        friendlyName: 'Quick Edit',
+        description: 'Allows inline editing of posts'
+    },
+    'wpp_quickWhim': {
+        relevance: 'forums',
+        default: true,
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Quick Whim',
+        description: 'Adds a Whim box to User Profile pages'
+    },
+    'wpp_recentActivityOverlay': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Recent Activity Overlay',
+        description: 'Shows your recent forum activity in an overlay panel for easy access (make sure you enter your API Key in the Script Configuration)'
+    },
+    'wpp_recentActivityOverlay_days': {
+        relevance: 'all',
+        default: '7',
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Recenty Activity Duration',
+        description: 'How much of your recent activity to use for the overlay',
+        type: 'dropdown',
+        options: ['"1"', '"3"', '"7"', '"14"', '"30"', '"60"', '"120"', '"240"', '"365"'],
+        optionsMap: {
+            '"1"': '1 Day',
+            '"3"': '3 Days',
+            '"7"': '7 Days',
+            '"14"': '14 Days',
+            '"30"': '30 Days',
+            '"60"': '60 Days',
+            '"120"': '120 Days',
+            '"240"': '240 Days',
+            '"365"': '365 Days',
+        }
+    },
+    'wpp_returnafterlogin': {
+        relevance: 'all',
+        default: false,
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Return to previous page after logging in',
+        description: 'Redirects you to the last thread viewed before login<br /><small>Must be enabled on both the whirlpool.net.au and forums.whirlpool.net.au domains to work correctly</small>'
+    },
+    'wpp_savePosts': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'threadsettings',
+        friendlyName: 'Save Posts',
+        description: 'Adds a button next to each post to save a link to refer back to it'
+    },
+    'wpp_stats_postsPerDay': {
+        relevance: 'forums',
+        default: true,
+        category: 'users',
+        subcategory: 'usersettings',
+        friendlyName: 'Enable "Posts per day" statistic',
+        description: 'Calculates a statistic on user pages'
+    },
+    'wpp_userNotes_enabled': {
+        relevance: 'forums',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'User Notes',
+        description: 'Keep notes on each user'
+    },
+    'wpp_watchedAlert': {
+        relevance: 'all',
+        default: false,
+        category: 'display',
+        subcategory: 'displaymodifications',
+        friendlyName: 'Watched Thread Alert',
+        description: 'Display a banner notification when you have unread Watched Threads (API Key required in Script Configuration)'
+    },
+    'wpp_watchedThreadsForumBarHide': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'watchedthreads',
+        friendlyName: 'Watched Thread Bar Hide',
+        description: 'Hide the horizontal alert bar that Whirlpool inserts to indicate which post you have read up to in a thread'
+    },
+    'wpp_watchedThreadsOldMarkAsRead': {
+        relevance: 'forums',
+        default: false,
+        category: 'posts',
+        subcategory: 'watchedthreads',
+        friendlyName: 'Mark as Read button enhancer',
+        description: 'Clicking the Mark as Read button at the bottom of a watched thread will complete an action of your choosing. Also permanently shows the Go to Watched Threads button'
+    },
+    'wpp_whimLink': {
+        relevance: 'forums',
+        default: true,
+        category: 'posts',
+        subcategory: 'displayoptions',
+        friendlyName: 'Whim Links',
+        description: 'Adds a Whim link next to a users post count on each post'
+    },
+        // Add other key mappings as needed
+    };
+
 WhirlpoolPlus.install = {
 
     run: function () {
@@ -133,191 +1057,68 @@ WhirlpoolPlus.install = {
         WhirlpoolPlus.util.set('prerelease', WhirlpoolPlus.about.prerelease);
 
     },
-    //Set Default Local Storage Values
-    _defaults: {
-        data_db_version: '', //database versioning is only used when major updates are made to how variables are stored
-        data_API_globalUpdateInterval: '1', //the interval in minutes of how frequently the Whirlpool API is scraped for features that require it
-        display_theme: 'default', //the chosen theme
-        display_usertheme_bgcolour: '', //custom theme colouring
-        display_usertheme_fgcolour: '', //custom theme colouring
-        display_usertheme_fgcolour2: '', //custom theme colouring
-        display_usertheme_fgcolour3: '', //custom theme colouring
-        display_hideDeletedThreads: false, //when true, deleted threads will be hidden from view in forum pages
-        display_hideMovedThreads: false, //when true, moved thread pointers will be hidden from view in forum pages
-        display_hideDeletedPosts: false, //when true, deleted posts will be hidden from view in thread pages
-        display_syntaxHighlight: true, //when true, code syntax in posts will be styled
-        display_opeditlarge: false, //when true, the text indicating the original post and if the post has been edited will be increased in size
-        display_floatSidebar: false, //when true, the sidebar navigation will float with the scrolling page
-        display_floatTopbar: false, //when true, the top bar will float with the scrolling page
-        display_floatGoToTop: false, //when true, a floating arrow button will be added in the window bottom right to jump to the top of the page
-        display_emoticons_enabled: false, //when true, emoji will be visible in threads
-        display_hideTheseForums: '',
-        display_hideClosedThreadsOnProfile: false,
-        display_whimAlert: true,
-        display_poweredby: true,
-        display_widescreen: false,
-        display_width_percentage: '100',
-        display_hideFooter: false,
-        display_smallfont: false,
-        display_oldfont: false,
-        display_customCSS: '',
-        display_penaltyBox: false,
-        display_bannedPosts: false,
-        display_oldProfile: false,
-        display_userPageInfoToggle: false,
-        display_superProfile: 'default',
-        display_avatarsOnProfile: false, //when true, if avatars are turned on they will display on the user profile page
-        display_notify_background: '#3a332a', //the background colour of notification bar
-        avatars_enabled: 'static',
-        stats_postsPerDay: true, //when true, a calculated statistic of posts per day will be displayed on the user profile page, based on the user creation date and total post count
-        embed_videos: true, //when true, video links from sites like YouTube or Vimeo will display embedded in threads
-        embed_images: true, //when true, direct image links or album links from sites like Imgur will display embedded in threads
-        hideembedurl: false, //when true, if an embedded image or video is displayed, the original link will be hidden from view in threads
-        watchedAlert: false,
-        watchedAlert_data: '',
-        watchedAlert_lastUpdated: 0,
-        recentActivityOverlay: false,
-        recentActivityOverlay_days: '7',
-        recentActivityOverlay_data: '',
-        recentActivityOverlay_html: '',
-        recentActivityOverlay_lastUpdated: 0,
-        whirlpoolAPIKey: '',
-        customLinks: [],
-        savedPosts: [],
-        hiddenUsers_enabled: false,
-        hiddenUsers: [],
-        hiddenUsers_remove: false,
-        removeLinkToLastPage: false,
-        links_archive: true,
-        links_longThread: true,
-        links_originalPoster: true,
-        links_mod: true,
-        links_rep: true,
-        links_unanswered: true,
-        spinnerMenu: 'none',
-        spinnerMenu_settingsLocation: 'top',
-        defaultRecentActivityDays: '7',
-        quickEdit: true,
-        quickWhim: true,
-        wlr_display_flipStyles: false,
-        wlr_display_unreadPostColour: '#CFCBBC',
-        wlr_tempDisable: true,
-        wlr_enabled: 'all',
-        wlr_noTrackSticky: false,
-        wlr_display_onlyEndSquare: false,
-        wlr_display_acrosscolumns: false,
-        wlr_display_unreadThreadColour: '#95B0CB',
-        wlr_display_readThreadColour: '#CBC095',
-        compose_quickReply: true,
-        compose_enhancedEditorNew: 'default',
-        compose_movePreview: true,
-        compose_image_uploader: false,
-        autoSubscribeToNewThread: false,
-        whimLink: true,
-        persisentEditLink: false,
-        hideWhimActivity: false,
-        numberPosts: false,
-        savePosts: false,
-        userNotes_enabled: false,
-        userNotes: {}, //legacy
-        watchedThreadsAlert: 'default',
-        watchedthreadsextra: 'improved',
-        watchedThreadsForumBarHide: false,
-        watchedThreadsOldMarkAsRead: false,
-        promoteWatchedForum: '',
-        returnafterlogin: false,
-        sync_server: '',
-        sync_key: '',
-        sync_user: '',
-        sync_scriptId: Math.floor(Math.random() * 100000001),
-        sync_encryptionKey: '',
-        sync_times: {},
-        sync_mostUpToDate: 0,
-        sync_lastSync: 0,
-        sync_enabled: false,
-    },
-
-    //These values are used for the minimal install
-    _notForumValues: [
-        'whirlpoolAPIKey',
-        'data_API_globalUpdateInterval',
-        'display_theme',
-        'display_floatSidebar',
-        'display_floatTopbar',
-        'display_floatGoToTop',
-        'display_widescreen',
-        'display_width_percentage',
-        'display_hideFooter',
-        'display_customCSS',
-        'display_oldfont',
-        'display_poweredby',
-        'avatars_enabled',
-        'spinnerMenu',
-        'spinnerMenu_settingsLocation',
-        'defaultRecentActivityDays',
-        'compose_enhancedEditorNew',
-        'recentActivityOverlay',
-        'recentActivityOverlay_days',
-        'recentActivityOverlay_data',
-        'recentActivityOverlay_html',
-        'recentActivityOverlay_lastUpdated',
-        'returnafterlogin',
-    ],
-
     //Set any undefined values to the default value
-    _setDefaults: function () {
+_setDefaults: function () {
+    const keys = Object.keys(settingsMap);
 
-        if (WhirlpoolPlus.util.pageType.forums) {
-            for (var key in this._defaults) {
-                if (!WhirlpoolPlus.util.exists(key)) {
-                    WhirlpoolPlus.util.set(key, this._defaults[key]);
-                }
-            }
-        } else {
-            for (var key in this._notForumValues) {
-                if (!WhirlpoolPlus.util.exists(this._notForumValues[key])) {
-                    WhirlpoolPlus.util.set(this._notForumValues[key], this._defaults[this._notForumValues[key]]);
-                }
-            }
+    keys.forEach(key => {
+        const mapping = settingsMap[key];
+
+        // Skip keys without a valid 'relevance' property
+        if (!mapping || !mapping.relevance) return;
+
+        // Handle forum-specific and global keys
+        const isForumPage = WhirlpoolPlus.util.pageType.forums;
+        const isRelevantForPage =
+            (mapping.relevance === 'forums' && isForumPage) || mapping.relevance === 'all';
+
+        if (isRelevantForPage && !WhirlpoolPlus.util.exists(key)) {
+            let valueToSet = mapping.default !== undefined ? mapping.default : '';
+
+            // Always store values as valid JSON
+            localStorage.setItem(key, JSON.stringify(valueToSet));
         }
-
-    },
+    });
+},
     //Upgrade Dialogue Box
     _upgradeDialog: function () {
-        var dialogHtml = '<h1>WP+</h1>' +
-            '<p>Version ' + WhirlpoolPlus.about.versionText() + '</p>';
+        var dialogHtml =
+        '<div id="upgradeDialog" style="display:none;">' + // Add a container for the modal
+        '<h1>WP+</h1>' +
+        '<p>Version ' + WhirlpoolPlus.about.versionText() + '</p>';
 
-        if (WhirlpoolPlus.about.prerelease > 0) {
-            dialogHtml += '<div><strong>This is a prerelease version. Please report any bugs to <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>.</strong></div>';
-        }
+    if (WhirlpoolPlus.about.prerelease > 0) {
+        dialogHtml += '<div><strong>This is a prerelease version. Please report any bugs to <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>.</strong></div>';
+    }
 
-        //Check for new installs
-        if (WhirlpoolPlus.util.get('scriptVersion') === false) {
-            dialogHtml += '<br /><div>It looks like this is the first time you have installed the script! You can access script settings and information from the "WP+ Settings" link in the sidebar.</div>';
-        }
+    // Check for new installs
+    if (WhirlpoolPlus.util.get('scriptVersion') === false) {
+        dialogHtml += '<br /><div>It looks like this is the first time you have installed the script! You can access script settings and information from the "WP+ Settings" link in the sidebar.</div>';
+    }
 
-        dialogHtml += '<br /><div style="text-align:left"><strong>New in this version: </strong>' + WhirlpoolPlus.about.changelog[WhirlpoolPlus.about.version] + '</div>';
+    dialogHtml += '<br /><div style="text-align:left"><strong>New in this version: </strong>' + WhirlpoolPlus.about.changelog[WhirlpoolPlus.about.version] + '</div>';
 
-        dialogHtml += '<br /><div>For an extended changelog, see WP+ Settings &gt; Info</div>';
+    dialogHtml += '<br /><div>For an extended changelog, see WP+ Settings &gt; Info</div>';
 
-        dialogHtml += '<br /><div>If you experience issues with this version of WP+ please check the latest WP+ thread under Feedback</div>';
+    dialogHtml += '<br /><div>If you experience issues with this version of WP+ please check the latest WP+ thread under Feedback</div>';
 
-        dialogHtml += '<br /><br /><button type="button" class="simplemodal-close">Close</button>';
+    dialogHtml += '<br /><br /><button type="button" class="close-modal" rel="modal:close">Close</button>';
+    dialogHtml += '</div>'; // Close the modal container
 
-        $(dialogHtml).modal({
-            close: true,
-            containerCss: {
-                'text-align': 'center',
-                'background-color': '#ddd',
-                'border': '1px solid #000',
-                'padding': '20px',
-                'height': '40%',
-                'width': '60%',
-            },
-            overlayCss: { backgroundColor: '#000' },
-        });
+    // Append the dialog to the body (jQuery Modal works on elements already in the DOM)
+    $('body').append(dialogHtml);
 
-    },
+    // Initialize the jQuery Modal
+    $('#upgradeDialog').modal({
+        fadeDuration: 250, // Optional: Fade-in duration
+        fadeDelay: 0.5     // Optional: Delay before fading starts
+    });
+
+    // Optional: Add a close button handler
+    $(document).on('click', '.close-modal', function () {
+        $.modal.close();
+    });
+},
 
 }
 //Setup utlity functions for the script
@@ -332,7 +1133,7 @@ WhirlpoolPlus.util = {
             try {
                 return JSON.parse(value);
             } catch (e) {
-                alert('Error loading setting: ' + key + ' = ' + value)
+                console.warn('Error loading Whirlpool Plus setting: ' + key + ' = ' + value)
             }
         }
     },
@@ -346,7 +1147,7 @@ WhirlpoolPlus.util = {
     },
 
     exists: function (key) {
-        return unsafeWindow.localStorage.getItem('wpp_' + key) != null;
+        return unsafeWindow.localStorage.getItem(key) != null;
     },
 
     css: async function (styles) {
@@ -733,7 +1534,8 @@ WhirlpoolPlus.util = {
 WhirlpoolPlus.settings = {
     //Setup CSS for the modal settings window
     css: function () {
-        var styles = '#wppSettings { background-color:#999; border:1px solid #000; color:#333; padding:0 12px; height: 60%; width: 50%; min-height: 580px; min-width: 900px; }' +
+        var styles = '#wppSettingsOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; }' +
+        '#wppSettings { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); overflow-y: auto; background-color:#999; border:1px solid #000; color:#333; padding:0 12px; height: 60%; width: 50%; min-height: 580px; min-width: 900px; }' +
         '#wppSettings #wppSettingsWrapper { overflow: hidden; width: 100%; height: 100%; }' +
         '#wppSettings #tabMenu { list-style:none; width:100%; margin: 10px 0px 0px 10px; }' +
         '#wppSettings .menuTab { border:3px solid #777; border-width:3px 3px 1px; float:left; height:20px; margin-right:10px; padding:5px; width:120px; text-align:center; color:white; }' +
@@ -756,6 +1558,7 @@ WhirlpoolPlus.settings = {
         '#wppSettings .avatarLabelIdent { font-weight: bold; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
         '#wppSettings .avatarLabelAnimated { font-weight: bold; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
         '#wppSettings .avatarRemove { font-weight: bold; margin: 0 auto; text-align: center; padding-bottom: 10px; }' +
+        '#wppSettings .identicon { height: 80px; width: 80px; margin: 0 auto; }' +
         '#savedPosts { display:none; }' +
         '#currentWLR { display:none; }' +
         '#wppSettings .bottomrow { width:98%;height:10px;bottom:4%;position:absolute;color:#fff;left:1%; }';
@@ -768,428 +1571,24 @@ WhirlpoolPlus.settings = {
 
         return styles;
     },
-
+    // Initialise Settings
     init: async function () {
-        this._buildHtml();
         let noavatar = await WhirlpoolPlus.util.image('noavatar');
         WhirlpoolPlus.util.css('#wppSettings .avatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 80px; width: 80px; margin: 0 auto; }' +
-        '#currentUserAvatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 80px; width: 80px; margin: 0 auto; }' +
-        '#wppSettings .identicon { height: 80px; width: 80px; margin: 0 auto; }');
-        // Add settings link
-        var settingsLink = $('<li id="menu_wpp" class="odd"><a href="#"><span>WP+ Settings</span></a></li>');
-        $('#menu_whim').after(settingsLink);
+        '#currentUserAvatar { background-image: url("' + noavatar + '"); background-repeat: no-repeat; height: 80px; width: 80px; margin: 0 auto; }');
         var dbUpgrade = $('<li id="menu_dbUpgrade" style="background-color: #936328;"><a href="#"><span>WP+ Database Upgrade Required</span></a></li>');
         if (WhirlpoolPlus.util.get('data_db_version') !== '2021.6' && (window.location.href.indexOf('forums.whirlpool.net.au') > -1)) {
             $('#menu_wpp').after(dbUpgrade);
                                 };
 
-        settingsLink.on("click", function () {
-            WhirlpoolPlus.settings._launch();
-            return false;
-        });
-
         dbUpgrade.on("click", function () {
-            WhirlpoolPlus.settings._launch();
+            $('#wppSettings, #wppSettingsOverlay').fadeIn();
             return false;
         });
-    },
 
-    _launch: function () {
-        //If the settings box is in minimal mode, it will show far less settings
-        var minimalMode = !WhirlpoolPlus.util.pageType.forums;
-
-        var dialog = $(this._html);
-
-        var currentTheme = WhirlpoolPlus.util.get('display_theme');
-        var currentSyncServer = WhirlpoolPlus.util.get('sync_server');
-        var currentSyncEncryptionKey = WhirlpoolPlus.util.get('sync_encryptionKey');
-
-        dialog.modal({
-            close: true,
-            containerId: 'wppSettings',
-            overlayCss: { backgroundColor: '#000' },
-            onShow: function () {
-                var settings = WhirlpoolPlus.util.pageType.forums ? $('.wpp_setting') : $('.wpp_setting').not('.wpp_forumSetting');
-
-                settings.each(function () {
-                    var setting = $(this);
-                    var settingValue = WhirlpoolPlus.util.get(setting.prop('id'));
-
-                    if (setting.is('input[type="checkbox"]')) {
-                        setting.prop('checked', settingValue);
-                    } else {
-                        setting.val(settingValue);
-                    }
-                });
-            },
-        });
-
-
+            // If the settings menu is in minimal mode, it will show far less settings
+        const minimalMode = !WhirlpoolPlus.util.pageType.forums;
         if (!minimalMode) {
-            $('#sync_server').val(currentSyncServer);
-            $('#sync_encryptionKey').val(currentSyncEncryptionKey);
-
-        //Set up Custom Links section for settings menu
-
-            var customLinksHTML = '';
-            var customLinks = WhirlpoolPlus.util.get('customLinks');
-            for (i = 0; i <customLinks.length; i++) {
-                customLinksHTML += '<p>URL <a href="' + customLinks[i] + '">' + customLinks[i] + '</a> <button type="button" class="removeLink" data-customlink="' + customLinks[i] + '">Remove</button></p>';
-            };
-
-            customLinksHTML += '<p><input type="text" placeholder="Enter Custom Link Here" title="Paste or enter the Custom Link you would like to add here." style="width: 125px;" id="customLinkText" /> <button type="button" id="customLinkText_add">Add</button></p>';
-            $('#customLinks').append(customLinksHTML);
-                        $('#customLinkText_add').on("click", function () {
-                            $(this).prop('disabled', 'disabled');
-                            var Link = $('#customLinkText').val();
-                if (Link.match(/^(http|https):\/\//)) {
-                                alert("Adding Custom Link");
-                                customLinks.push(Link);
-                                WhirlpoolPlus.util.set('customLinks', customLinks);
-                                $('#customLinkText').val('');
-			}
-                            else {
-                                alert("Your link is missing required elements, please ensure it includes the http or https prefix");
-                            }
-                    });
-
-            $('.removeLink').on("click", function () {
-                var theButton = $(this);
-                var linkID = theButton.data('customlink');
-                var customLinks = WhirlpoolPlus.util.get('customLinks');
-                var linkToDelete = -1;
-
-                for (i = 0; i < customLinks.length; i++) {
-                    if (customLinks[i] == linkID) {
-                        linkToDelete = i;
-                        break;
-                    }
-                }
-
-                if (linkToDelete >= 0) {
-                    customLinks.splice(linkToDelete, 1);
-                }
-
-                WhirlpoolPlus.util.set('customLinks', customLinks);
-
-                theButton.parent().remove();
-
-            });
-
-        //Setup WLR Tracked threads section for settings menu
-            var currentWLRHTML = '';
-                let pattern = /^wpp_sync_wlr_(?=.*[a-z])(?=.*[0-9])[a-z0-9]*$/gm;
-                for (var i = 0; i <localStorage.length; i++) {
-                    if (pattern.exec(localStorage.key(i))) {
-                        let key = localStorage.key(i);
-                        let newkey = key.split('wpp_sync_wlr_').join('');
-                        let WLRURL = ("//forums.whirlpool.net.au/thread/" + newkey);
-                        currentWLRHTML += '<p>Thread URL <a href="' + WLRURL + '" target="_blank">' + WLRURL + '</a></p>';
-                    }
-                };
-            $('#currentWLR').append(currentWLRHTML);
-            let revealButtonWLR = $('#wlrList');
-            let wlrList = $('#currentWLR');
-            revealButtonWLR.on("click", function () {
-                wlrList.toggle();
-            })
-
-        //Setup Experimental Section for settings menu
-            var experimentalHTML ='';
-            experimentalHTML += '<p><input type="text" placeholder="Enter User ID Here" title="Paste or enter the User ID you would like to view or delete user notes for" style="width: 125px;" id="NotesUser" /> <button type="button" id="NotesUser_view">View Note</button>   <button type="button" id="NotesUser_del">Delete Note</button></p>';
-            $('#experimentalsettings').append(experimentalHTML);
-                        $('#NotesUser_view').on("click", function () {
-                            $(this).prop('disabled', 'disabled');
-                            let UID = JSON.parse($('#NotesUser').val());
-                            alert(JSON.stringify(WhirlpoolPlus.util.sync.get('userNotes_' + UID)));
-                    });
-                        $('#NotesUser_del').on("click", function () {
-                            $(this).prop('disabled', 'disabled');
-                            let UID = JSON.parse($('#NotesUser').val());
-                            WhirlpoolPlus.util.sync.set('userNotes_' + UID, { note: null });
-                    });
-
-        //Setup Hidden Users section for settings menu
-            var hiddenUsersHTML = '';
-            var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
-            for (i = 0; i < hiddenUsers.length; i++) {
-                var hurl = ("//forums.whirlpool.net.au/user/" + hiddenUsers[i]);
-                hiddenUsersHTML += '<p>User <a href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
-            };
-
-            hiddenUsersHTML += '<p><input type="text" placeholder="Enter User ID Here" title="Paste or enter the User ID you would like to block here." style="width: 125px;" id="UIDHide" /> <button type="button" id="UIDHide_add">Add</button></p>';
-            $('#hiddenUsers').append(hiddenUsersHTML);
-                        $('#UIDHide_add').on("click", function () {
-                            $(this).prop('disabled', 'disabled');
-                            var UID = JSON.parse($('#UIDHide').val());
-                            var UID2 = 'WP User';
-                if ($.inArray(UID,WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
-                    //Not currently in array
-                                alert("Blocking User");
-                                hiddenUsers.push([UID, UID2]);
-                                WhirlpoolPlus.util.set('hiddenUsers', hiddenUsers);
-                                $('#UIDHide').val('');
-			}
-                    });
-
-        //Setup Saved Posts section for settings menu
-            let savedPostsHTML = '';
-            let savedPosts = WhirlpoolPlus.util.get('savedPosts');
-            for (i = 0; i < savedPosts.length; i++) {
-                let page = savedPosts[i];
-                savedPostsHTML += '<p><a href="https://forums.whirlpool.net.au/thread/' + page.url + '" target="_blank">' + page.name + '</a>&nbsp;<button type="button" class="unsavePost" data-object="' + page.url + '">Remove</button></p>';
-            }
-            $('#savedPosts').append(savedPostsHTML);
-            $('.unsavePost').on("click", function () {
-                let removeButton = $(this);
-                let removePost = $(this).data('object').toString();
-                if (savedPosts.map(x => x.url).indexOf(removePost) !== -1) {
-                for (let i = 0; i < savedPosts.length; i++) {
-                    if (savedPosts[i].url === removePost) {
-                        savedPosts.splice(i, 1);
-                        break;
-                    }
-                }
-                WhirlpoolPlus.util.set('savedPosts', savedPosts);
-                removeButton.parent().remove();
-            }
-            });
-            let revealButton = $('#showSavedPosts');
-            let postList = $('#savedPosts');
-            revealButton.on("click", function () {
-                postList.toggle();
-            });
-        }
-
-        //Setup events
-        $('#wppSettings .subSettings_heading').on("click", function () {
-            var content = $(this).parent().children('.subSettings_content');
-
-            if (content.is(':visible')) {
-                $('.subSettings_content').hide();
-            } else {
-                $('.subSettings_content').hide();
-                content.show();
-            }
-        });
-
-        $('#wppSettings .menuTab').on("click", function () {
-            var theTab = $(this);
-
-            $('.menuDiv').removeClass('menuDiv_active');
-            $('.menuTab').removeClass('menuTab_active');
-
-            theTab.addClass('menuTab_active');
-            $('#' + theTab.data('menudiv')).addClass('menuDiv_active');
-        });
-
-        $('#wppSettings_save').on("click", function () {
-
-            var settings = WhirlpoolPlus.util.pageType.forums ? $('.wpp_setting') : $('.wpp_setting').not('.wpp_forumSetting');
-
-            settings.each(function () {
-                var setting = $(this);
-                var settingKey = setting.prop('id');
-                var settingValue;
-
-                if (setting.is('input[type="checkbox"]')) {
-                    settingValue = setting.prop('checked');
-                } else {
-                    settingValue = setting.val();
-                }
-
-                WhirlpoolPlus.util.set(settingKey, settingValue);
-            });
-
-            if (!minimalMode) {
-                var newSyncServer = $('#sync_server').val();
-                var newSyncEncryptionKey = $('#sync_encryptionKey').val();
-
-                if (newSyncServer != currentSyncServer) {
-                    WhirlpoolPlus.util.set('sync_server', newSyncServer);
-                    WhirlpoolPlus.util.set('sync_lastSync', 0);
-                }
-
-                if (newSyncEncryptionKey != currentSyncEncryptionKey) {
-                    if (confirm('You\'ve changed your encryption password. For this to work, make sure that no other password has been used with this account. For more information, see the wiki article.')) {
-                        WhirlpoolPlus.util.set('sync_encryptionKey', newSyncEncryptionKey);
-                    } else {
-                        alert('Encryption Password reverted');
-                    }
-                }
-                //Cell highlighting and notification bar colours for each theme
-                var newTheme = WhirlpoolPlus.util.get('display_theme');
-                if (newTheme != currentTheme) {
-                    if (confirm('Would you like to load the suggested WLR highlight & Notification bar colours for your theme?')) {
-                        var newPostColour, noNewPostColour, postBackgroundColour, notifybackground;
-
-                        switch (newTheme) {
-                            case 'classic':
-                                newPostColour = '#79A1FC';
-                                noNewPostColour = '#EAA53F';
-                                postBackgroundColour = '#DEE6FA';
-                                notifybackground = '#3F435E';
-                                break;
-
-                            case 'black':
-                                newPostColour = '#FFFFFF';
-                                noNewPostColour = '#555555';
-                                postBackgroundColour = '#A1A1A1';
-                                notifybackground = '#323232';
-                                break;
-
-                            case 'teal':
-                                newPostColour = '#B2F8F8';
-                                noNewPostColour = '#99C5CB';
-                                postBackgroundColour = '#D2E5E2';
-                                notifybackground = '#567377';
-                                break;
-
-                            case 'electrolize':
-                                newPostColour = '#002F58';
-                                noNewPostColour = '#054C66';
-                                postBackgroundColour = '#0C3851';
-                                notifybackground = '#061E2B';
-                                break;
-
-                            case 'dark':
-                                newPostColour = '#8F6B3D';
-                                noNewPostColour = '#49549C';
-                                postBackgroundColour = '#49549C';
-                                notifybackground = '#323232';
-                                break;
-
-                            case 'arcdark':
-                                newPostColour = '#424D72';
-                                noNewPostColour = '#2A2F42';
-                                postBackgroundColour = '#3C4257';
-                                notifybackground = '#424D72';
-                                break;
-
-                            case 'steelgrey':
-                                newPostColour = '#8088B7';
-                                noNewPostColour = '#B2B5CC';
-                                postBackgroundColour = '#D8DBF3';
-                                notifybackground = '#3F435E';
-                                break;
-
-                            case 'userset':
-                            userset:
-                                newPostColour = '#95B0CB';
-                                noNewPostColour = '#CBC095';
-                                postBackgroundColour = '#CFCBBC';
-                                notifybackground = '#000';
-                                break;
-
-                            case 'default':
-                            default:
-                                newPostColour = '#95B0CB';
-                                noNewPostColour = '#CBC095';
-                                postBackgroundColour = '#CFCBBC';
-                                notifybackground = '#3a332a';
-                                break;
-                        }
-
-                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', newPostColour);
-                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', noNewPostColour);
-                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', postBackgroundColour);
-                        WhirlpoolPlus.util.set('display_notify_background', notifybackground);
-                    }
-                }
-
-                $.modal.close();
-                document.location.reload();
-            } else {
-                $.modal.close();
-                document.location.reload();
-            }
-        });
-
-        $('#wppSettings_reset').on("click", function () {
-
-            if (confirm('WP+: Do you really want to delete all settings and data? Be sure to export a backup first if you wish to restore in future.')) {
-                unsafeWindow.localStorage.clear();
-                alert('WP+: Script data cleared');
-                window.location.reload();
-            } else {
-                alert('WP+: No data cleared');
-            }
-
-        });
-
-            function download(filename, output) {
-                var element = document.createElement('a');
-                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
-                element.setAttribute('download', filename);
-                element.style.display = 'none';
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
-            }
-
-            document.getElementById("wpp_dwn-btn").addEventListener("click", function(){
-                var output = JSON.stringify(localStorage);
-                var filename = "WP-Plus-Data.txt";
-                download(filename, output);
-            }, false);
-
-            document.getElementById("wpp_upl-btn").addEventListener("click", function(){
-            var input = document.getElementById('importWPPData').value;
-            var wppdata = '';
-            if (input == '') {
-                alert('WP+: Enter a valid JSON String');
-                }
-                else {
-                    wppdata = JSON.parse(input);
-                Object.keys(wppdata).forEach(function (k) {
-                    localStorage.setItem(k, wppdata[k]);
-                });
-                alert('WP+: Script data imported');
-                window.location.reload();
-                };
-            }, false);
-
-            document.getElementById("wpp_upgradedb-btn").addEventListener("click", function(){
-                //Prior to June 2021 the userNotes feature stored data differently, this function migrates any legacy data to the new storage method
-                let obj = WhirlpoolPlus.util.get('userNotes');
-                if (obj == null) {
-                    alert('WP+: You have no legacy user notes data to upgrade');
-                }
-                else {
-                    Object.keys(obj).forEach(function (data) {
-                        localStorage.setItem('wpp_sync_userNotes_' + data, '{"note":"' + obj[data] + '"}');
-                    });
-                    alert('WP+: Legacy user notes data migration completed. The stored value containing the old data is redundant and will now be removed however please be aware this breaks compatibility with previous versions.');
-                    WhirlpoolPlus.util.set('userNotes', null);
-                };
-                //Prior to April 2021 the Whirlpool Last Read feature stored data differently, this function migrates any legacy data to the new storage method
-                let pattern = /^wpp_sync_(?=.*[a-z])(?=.*[0-9])[a-z0-9]*$/gm;
-                for (var i = 0; i <localStorage.length; i++) {
-                    if (pattern.exec(localStorage.key(i))) {
-                        let key = localStorage.key(i);
-                        let newkey = key.split('wpp_sync_').join('');
-                        localStorage.setItem('wpp_sync_wlr_' + newkey, localStorage[key]);
-                        localStorage.removeItem(key);
-                    }
-                };
-                alert('WP+: Legacy Whirlpool Last Read data migration completed. The stored values containing the old data are redundant and will now be removed however please be aware this breaks compatibility with previous versions.');
-                if (WhirlpoolPlus.util.get('data_db_version') == '') {
-                    WhirlpoolPlus.util.set('data_db_version', '2021.6')
-                                };
-            }, false);
-
-        //Special events
-
-
-        if (!minimalMode) {
-            //Sync Settings - Grey out secondary options when disabled
-            $('#wppSettings #sync_enabled').change(function () {
-                if (this.checked) {
-                    $('.syncSetting').prop('disabled', '');
-                } else {
-                    $('.syncSetting').prop('disabled', 'disabled');
-                }
-            }).change();
 
             function refreshAvatars() {
                 //Load the avatars & check them for bad links
@@ -1366,778 +1765,799 @@ WhirlpoolPlus.settings = {
 
             });
         }
+
     },
-    //Builds HTML for the settings modal window
-    _html: '',
 
-    _buildHtml: function () {
-        this._html = '<div id="wppSettingsWrapper">' +
-            '<ul id="tabMenu">' +
-                '<li class="menuTab menuTab_active" data-menudiv="menuDiv_help">Script Info</li>' +
-                '<li class="menuTab" data-menudiv="menuDiv_display">Display</li>' +
-                '<li class="menuTab" data-menudiv="menuDiv_users">Users</li>' +
-                '<li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_posts">Threads & Posts</li>' +
-                '<li class="menuTab" data-menudiv="menuDiv_config">Script Config</li>' +
-            '</ul>' +
+    // WPP Settings Menu
+    settingsMenu: async function () {
+    'use strict';
+    const WPPSettingsMenu = {
 
-            '<div class="menuDiv menuDiv_active" id="menuDiv_help">' +
+        // Create the modal structure
+        createModal() {
 
-                '<p class="description"><center><h1>Whirlpool Plus</h1></center></p>' +
+            const overlay = $('<div id="wppSettingsOverlay"></div>');
+            const modal = $(`
+                <div id="wppSettings">
+                    <div id="wppSettingsWrapper">
+                    <ul id="tabMenu">
+                    <li class="menuTab menuTab_active" data-menudiv="menuDiv_info">Script Info</li>
+                    <li class="menuTab" data-menudiv="menuDiv_display">Display</li>
+                    <li class="menuTab" data-menudiv="menuDiv_users">Users</li>
+                    <li class="menuTab wpp_hideNotForum" data-menudiv="menuDiv_posts">Threads & Posts</li>
+                    <li class="menuTab" data-menudiv="menuDiv_config">Script Config</li>
+                    </ul>
+                    <div class="menuDiv menuDiv_active" id="menuDiv_info">
+                    <p class="description"><center><h1>Whirlpool Plus</h1></center></p>
+                    <p class="description"><b>Where can I get help, or report an issue?</b></p>
+                    <p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features.</p>
+                    <p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus" target="_blank">wiki article</a>.</p>
+                    <p class="description">The script is currently maintained by <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>, so you can also private message him.</p>
 
-                '<div class="wpp_showNotForum wpp_settingsMessage">Settings made here will not apply to the forums.whirlpool.net.au subdomain</div>' +
+                    <p class="description"><b>Privacy</b></p>
+                    <p class="description">As stated in the wiki article, a user script like Whirlpool Plus could possibly be used to steal user information.  To our knowledge, there is no such code in this script. </p>
+                    <p class="description">The script relies on an external server to run the avatars and synchronisation. This server (endorph.net) is operated by <a href="//forums.whirlpool.net.au/user/272563">tbwd</a>. Both these services use your API key to validate your identity, but do not store this key.</p>
 
-                '<p class="description"><b>Where can I get help, or report an issue?</b></p>' +
-                '<p class="description">The best way to get help is to post in the Whirlpool Plus thread in Feedback. This is also a good place to request new features. </p>' +
-                '<p class="description">Another good source of information is the <a href="//whirlpool.net.au/wiki/whirlpool_plus" target="_blank">wiki article</a>.</p>' +
-                '<p class="description">The script is currently maintained by <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>, so you can also private message him.</p>' +
+                    <p class="description"><b>About Whirlpool Plus</b></p>
+                    <p class="description">Whirlpool Plus was created by various members of the Whirlpool community to add extra features to the Whirlpool Forums. Many people have contributed to the script- see the wiki article for credits.</p>
+                    <!-- Changelog will be inserted here dynamically -->
+                    <p class="description"><b>Changelog</b></p>
+                    <div id="changelog"></div>
+                    <p class="description">Further changelogs can be viewed in the source of previous versions</p>
+                    </div>
+                <div class="menuDiv" id="menuDiv_all"><div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div><div class="subSettings"><p class="subSettings_heading description"><b>All Uncategorised Settings</b></p><div class="subSettings_content"></div></div></div>
+                <div class="menuDiv" id="menuDiv_display">
+                <div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Themes & Fonts</b></p>
+                <div class="subSettings_content" data-subcategory="themesandfonts"></div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Display Modifications</b></p>
+                <div class="subSettings_content" data-subcategory="displaymodifications"><p class="description">You can use this feature to store custom links (i.e. bookmarks) that are accessible in the settings and spinner menu. <br />Custom Links: </p><div id="customLinks"></div></div>
+                </div>
+                </div>
+                <div class="menuDiv" id="menuDiv_users">
+                <div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>User Settings</b></p>
+                <div class="subSettings_content" data-subcategory="usersettings"></div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Avatars</b></p>
+                <div class="subSettings_content" data-subcategory="avatars">
+                <p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a> or <a href="//postimages.org">postimage</a>, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below.<br /><br />If you see the X image but have previously uploaded an avatar, it may be prevented from working due to WP site changes.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.</p>
+                <div id="currentAvatars" class="wpp_hideNotForum">
+                <div>
+                <div class="avatarLabelIdent">Identicon (Auto Generated)</div>
+                <div id="currentAvatar_identicon" class="identicon wpp_hideNotForum"></div>
+                </div>
+                <div>
+                <div class="avatarLabelStatic">Static</div>
+                <div id="currentAvatar_static" class="avatar wpp_hideNotForum"></div>
+                <div class="avatarRemove"><button type="button" id="currentAvatar_removeStatic">Remove</button></div>
+                </div>
+                <div>
+                <div class="avatarLabelAnimated">Animated</div>
+                <div id="currentAvatar_animated" class="avatar wpp_hideNotForum"></div>
+                <div class="avatarRemove"><button type="button" id="currentAvatar_removeAnimated">Remove</button></div>
+                </div>
+                </div>
+                <p class="description wpp_hideNotForum" style="text-align: center; border: none;"><input type="url" placeholder="Enter Direct Image URL Here" title="Paste or enter your avatar URL here. HTTPS URL Required" style="width: 250px;" id="currentAvatar_addUrl" /> <button type="button" id="currentAvatar_add">Add</button></p>
+                </div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Hidden Users</b></p>
+                <div id="hiddenUsers" class="subSettings_content" data-subcategory="hiddenusers"></div>
+                </div>
+                </div>
+                <div class="menuDiv" id="menuDiv_posts">
+                <div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Thread Settings</b></p>
+                <div class="subSettings_content" data-subcategory="threadsettings"><p class="description"><button id="showSavedPosts">Reveal Currently Saved Posts</button></p><div id="savedPosts"></div></div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>
+                <div class="subSettings_content" data-subcategory="threadtracker"><p class="description"><button id="wlrList">Reveal Currently Tracked Threads</button></p><div id="currentWLR"></div></div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Watched Threads</b></p>
+                <div class="subSettings_content" data-subcategory="watchedthreads"></div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Posting Tools</b></p>
+                <div class="subSettings_content" data-subcategory="posting"></div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Display and Formatting Options</b></p>
+                <div class="subSettings_content" data-subcategory="displayoptions"></div>
+                </div>
+                </div>
+                <div class="menuDiv" id="menuDiv_config">
+                <div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>
+                <div class="subSettings"><p class="subSettings_heading description"><b>Script Configuration</b></p><div class="subSettings_content" data-subcategory="scriptconfig">
+                <p>
+                <span>Data to Import</span>
+                <span class="settingDesc">Paste a valid JSON string or prior exported data here to import into your browser</span>
+                <br /><textarea id="importWPPData" style="width: 100%; height: 100px; margin:0 auto;"></textarea>
+                <br /><button id="wpp_dwn-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Export WP+ Config</button><button id="wpp_upl-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Import WP+ Config</button><button id="wpp_upgradedb-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Upgrade Database</button><br /><br /></p>
+                </div>
+                </div>
+                <div class="subSettings">
+                <p class="subSettings_heading description"><b>Synchronisation</b></p>
+                <div class="subSettings_content" data-subcategory="sync"><p class="description">WLR and User Notes data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/" target="_blank">https://s.endorph.net/account/</a><br /><br /><b>Note: you must have entered your API key in script configuration for this feature to work</b></p></div>
+                </div>
+                <div class="subSettings wpp_hideNotForum">
+                <p class="subSettings_heading description"><b>Experimental</b></p>
+                <div class="subSettings_content">
+                <p class="description"><b>Use of the below features is at your own risk. They are intended as a development tool only and may be added or removed at any time.</b></p>
+                <p class="wpp_hideNotForum">
+                <div id="experimentalsettings"></div>
+                </p>
+                </div>
+                </div>
+                </div>
+                <div class="bottomrow">
+                <button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset WP+ Config</button><button id="wppSettings_cancel" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Close</button><center>Installed Script Version: ${WhirlpoolPlus.about.versionText()} | Database Version: ${WhirlpoolPlus.util.get('data_db_version')}</center>
+                </div>
+                </div>
+                </div>
+            `);
 
-                '<p class="description"><b>Privacy</b></p>' +
-                '<p class="description">As stated in the wiki article, a user script like Whirlpool Plus could possibly be used to steal user information.  To our knowledge, there is no such code in this script. </p>' +
-                '<p class="description">The script relies on an external server to run the avatars and synchronisation. This server (endorph.net) is operated by <a href="//forums.whirlpool.net.au/user/272563">tbwd</a>. Both these services use your API key to validate your identity, but do not store this key.</p>' +
+            $('body').append(overlay).append(modal);
 
-                '<p class="description"><b>About Whirlpool Plus</b></p>' +
-                '<p class="description">Whirlpool Plus was created by various members of the Whirlpool community to add extra features to the Whirlpool Forums. Many people have contributed to the script- see the wiki article for credits.</p>' +
+            // Dynamically generate and insert changelog entries
+            const changelogContainer = $('#changelog');
+            for (const key in WhirlpoolPlus.about.changelog) {
+                if (WhirlpoolPlus.about.changelog.hasOwnProperty(key)) {
+                    changelogContainer.append(`<p class="description">Version ${key}: ${WhirlpoolPlus.about.changelog[key]}</p>`);
+                }
+            }
 
-                '<p class="description"><b>Changelog</b></p>';
+            // Set up Custom Links section for settings menu
 
-        for (key in WhirlpoolPlus.about.changelog) {
-            WhirlpoolPlus.settings._html += '<p class="description">Version ' + key + WhirlpoolPlus.about.changelog[key] + '</p>';
+            var customLinksHTML = '';
+            var customLinks = WhirlpoolPlus.util.get('customLinks');
+            for (i = 0; i <customLinks.length; i++) {
+                customLinksHTML += '<p>URL <a href="' + customLinks[i] + '">' + customLinks[i] + '</a> <button type="button" class="removeLink" data-customlink="' + customLinks[i] + '">Remove</button></p>';
+            };
+
+            customLinksHTML += '<p><input type="text" placeholder="Enter Custom Link Here" title="Paste or enter the Custom Link you would like to add here." style="width: 125px;" id="customLinkText" /> <button type="button" id="customLinkText_add">Add</button></p>';
+            $('#customLinks').append(customLinksHTML);
+                        $('#customLinkText_add').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            var Link = $('#customLinkText').val();
+                if (Link.match(/^(http|https):\/\//)) {
+                                alert("Adding Custom Link");
+                                customLinks.push(Link);
+                                WhirlpoolPlus.util.set('customLinks', customLinks);
+                                $('#customLinkText').val('');
+			}
+                            else {
+                                alert("Your link is missing required elements, please ensure it includes the http or https prefix");
+                            }
+                    });
+
+            $('.removeLink').on("click", function () {
+                var theButton = $(this);
+                var linkID = theButton.data('customlink');
+                var customLinks = WhirlpoolPlus.util.get('customLinks');
+                var linkToDelete = -1;
+
+                for (i = 0; i < customLinks.length; i++) {
+                    if (customLinks[i] == linkID) {
+                        linkToDelete = i;
+                        break;
+                    }
+                }
+
+                if (linkToDelete >= 0) {
+                    customLinks.splice(linkToDelete, 1);
+                }
+
+                WhirlpoolPlus.util.set('customLinks', customLinks);
+
+                theButton.parent().remove();
+
+            });
+
+        // Setup WLR Tracked threads section for settings menu
+            var currentWLRHTML = '';
+                let pattern = /^wpp_sync_wlr_(?=.*[a-z])(?=.*[0-9])[a-z0-9]*$/gm;
+                for (var i = 0; i <localStorage.length; i++) {
+                    if (pattern.exec(localStorage.key(i))) {
+                        let key = localStorage.key(i);
+                        let newkey = key.split('wpp_sync_wlr_').join('');
+                        let WLRURL = ("//forums.whirlpool.net.au/thread/" + newkey);
+                        currentWLRHTML += '<p>Thread URL <a href="' + WLRURL + '" target="_blank">' + WLRURL + '</a></p>';
+                    }
+                };
+            $('#currentWLR').append(currentWLRHTML);
+            let revealButtonWLR = $('#wlrList');
+            let wlrList = $('#currentWLR');
+            revealButtonWLR.on("click", function () {
+                wlrList.toggle();
+            })
+
+        // Setup Experimental Section for settings menu
+            var experimentalHTML ='';
+            experimentalHTML += '<p><input type="text" placeholder="Enter User ID Here" title="Paste or enter the User ID you would like to view or delete user notes for" style="width: 125px;" id="NotesUser" /> <button type="button" id="NotesUser_view">View Note</button>   <button type="button" id="NotesUser_del">Delete Note</button></p>';
+            $('#experimentalsettings').append(experimentalHTML);
+                        $('#NotesUser_view').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            let UID = JSON.parse($('#NotesUser').val());
+                            alert(JSON.stringify(WhirlpoolPlus.util.sync.get('userNotes_' + UID)));
+                    });
+                        $('#NotesUser_del').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            let UID = JSON.parse($('#NotesUser').val());
+                            WhirlpoolPlus.util.sync.set('userNotes_' + UID, { note: null });
+                    });
+
+        // Setup Hidden Users section for settings menu
+            var hiddenUsersHTML = '';
+            var hiddenUsers = WhirlpoolPlus.util.get('hiddenUsers');
+            for (i = 0; i < hiddenUsers.length; i++) {
+                var hurl = ("//forums.whirlpool.net.au/user/" + hiddenUsers[i]);
+                hiddenUsersHTML += '<p>User <a href="' + hurl + '" target="_blank">' + hiddenUsers[i] + '</a> <button type="button" class="unhideUser" data-userid="' + hiddenUsers[i] + '">Unhide</button></p>';
+            };
+
+            hiddenUsersHTML += 'Currently Hidden Users: <p><input type="text" placeholder="Enter User ID Here" title="Paste or enter the User ID you would like to block here." style="width: 125px;" id="UIDHide" /> <button type="button" id="UIDHide_add">Add</button></p>';
+            $('#hiddenUsers').append(hiddenUsersHTML);
+                        $('#UIDHide_add').on("click", function () {
+                            $(this).prop('disabled', 'disabled');
+                            var UID = JSON.parse($('#UIDHide').val());
+                            var UID2 = 'WP User';
+                if ($.inArray(UID,WhirlpoolPlus.util.get('hiddenUsers')) == -1) {
+                    //Not currently in array
+                                alert("Blocking User");
+                                hiddenUsers.push([UID, UID2]);
+                                WhirlpoolPlus.util.set('hiddenUsers', hiddenUsers);
+                                $('#UIDHide').val('');
+			}
+                    });
+
+        // Setup Saved Posts section for settings menu
+            let savedPostsHTML = '';
+            let savedPosts = WhirlpoolPlus.util.get('savedPosts');
+            for (i = 0; i < savedPosts.length; i++) {
+                let page = savedPosts[i];
+                savedPostsHTML += '<p><a href="https://forums.whirlpool.net.au/thread/' + page.url + '" target="_blank">' + page.name + '</a>&nbsp;<button type="button" class="unsavePost" data-object="' + page.url + '">Remove</button></p>';
+            }
+            $('#savedPosts').append(savedPostsHTML);
+            $('.unsavePost').on("click", function () {
+                let removeButton = $(this);
+                let removePost = $(this).data('object').toString();
+                if (savedPosts.map(x => x.url).indexOf(removePost) !== -1) {
+                for (let i = 0; i < savedPosts.length; i++) {
+                    if (savedPosts[i].url === removePost) {
+                        savedPosts.splice(i, 1);
+                        break;
+                    }
+                }
+                WhirlpoolPlus.util.set('savedPosts', savedPosts);
+                removeButton.parent().remove();
+            }
+            });
+            let revealButton = $('#showSavedPosts');
+            let postList = $('#savedPosts');
+            revealButton.on("click", function () {
+                postList.toggle();
+            });
+        $('#wppSettings .subSettings_heading').on("click", function () {
+            var content = $(this).parent().children('.subSettings_content');
+
+            if (content.is(':visible')) {
+                $('.subSettings_content').hide();
+            } else {
+                $('.subSettings_content').hide();
+                content.show();
+            }
+        });
+
+            // Setup events
+            // Disable sync related settings if sync is not enabled
+            $(document).on('change', 'select[data-key="wpp_sync_enabled"], input[data-key="wpp_sync_enabled"]', function () {
+                const isSyncEnabled = $(this).is(':checked'); // For checkboxes, use `:checked`
+                // Find all settings related to sync except wpp_sync_enabled itself
+                $('[data-key^="wpp_sync_"]').each(function () {
+                    const key = $(this).attr('data-key');
+                    if (key !== 'wpp_sync_enabled') {
+                        $(this).prop('disabled', !isSyncEnabled); // Disable if sync is not enabled
+                    }
+                });
+            });
+
+            // Trigger the change event when the page loads to ensure settings are in the correct state
+            $('[data-key="wpp_sync_enabled"]').trigger('change');
+
+            // Cell highlighting and notification bar colours for each theme
+            // Event listener for the theme selector
+            $(document).on('change', 'select[data-key="wpp_display_theme"]', function () {
+                const newTheme = $(this).val();
+                // Prompt the user to confirm applying theme-specific colours
+                if (confirm('WP+: Would you like to load the suggested WLR highlight & Notification bar colours for your theme?')) {
+                    handleThemeChange(newTheme); // Apply changes if confirmed
+                } else {
+                    console.log('User declined to apply theme-specific colours.');
+                }
+            });
+
+            // Function to handle theme changes
+            function handleThemeChange(newTheme) {
+                console.log(`Applying changes for theme: ${newTheme}`);
+                switch (newTheme) {
+                    case 'classic':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#79A1FC');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#EAA53F');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#DEE6FA');
+                        WhirlpoolPlus.util.set('display_notify_background', '#3F435E');
+                        break;
+
+                    case 'black':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#FFFFFF');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#555555');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#A1A1A1');
+                        WhirlpoolPlus.util.set('display_notify_background', '#323232');
+                        break;
+
+                    case 'teal':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#B2F8F8');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#99C5CB');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#D2E5E2');
+                        WhirlpoolPlus.util.set('display_notify_background', '#567377');
+                        break;
+
+                    case 'electrolize':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#002F58');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#054C66');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#0C3851');
+                        WhirlpoolPlus.util.set('display_notify_background', '#061E2B');
+                        break;
+
+                    case 'dark':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#8F6B3D');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#49549C');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#49549C');
+                        WhirlpoolPlus.util.set('display_notify_background', '#323232');
+                        break;
+
+                    case 'arcdark':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#424D72');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#2A2F42');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#3C4257');
+                        WhirlpoolPlus.util.set('display_notify_background', '#424D72');
+                        break;
+
+                    case 'steelgrey':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#8088B7');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#B2B5CC');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#D8DBF3');
+                        WhirlpoolPlus.util.set('display_notify_background', '#3F435E');
+                        break;
+
+                    case 'userset':
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#95B0CB');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#CBC095');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#CFCBBC');
+                        WhirlpoolPlus.util.set('display_notify_background', '#000');
+                        break;
+
+                    default:
+                        WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#95B0CB');
+                        WhirlpoolPlus.util.set('wlr_display_readThreadColour', '#CBC095');
+                        WhirlpoolPlus.util.set('wlr_display_unreadPostColour', '#CFCBBC');
+                        WhirlpoolPlus.util.set('display_notify_background', '#3a332a');
+                        break;
+                }
+
+}
+
+            function download(filename, output) {
+                var element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+
+            document.getElementById("wpp_dwn-btn").addEventListener("click", function(){
+                var output = JSON.stringify(localStorage);
+                var filename = "WP-Plus-Data.txt";
+                download(filename, output);
+            }, false);
+
+            document.getElementById("wpp_upl-btn").addEventListener("click", function(){
+            var input = document.getElementById('importWPPData').value;
+            var wppdata = '';
+            if (input == '') {
+                alert('WP+: Enter a valid JSON String');
+                }
+                else {
+                    wppdata = JSON.parse(input);
+                Object.keys(wppdata).forEach(function (k) {
+                    localStorage.setItem(k, wppdata[k]);
+                });
+                alert('WP+: Script data imported');
+                window.location.reload();
+                };
+            }, false);
+
+            document.getElementById("wpp_upgradedb-btn").addEventListener("click", function(){
+                //Prior to June 2021 the userNotes feature stored data differently, this function migrates any legacy data to the new storage method
+                let obj = WhirlpoolPlus.util.get('userNotes');
+                if (obj == null) {
+                    alert('WP+: You have no legacy user notes data to upgrade');
+                }
+                else {
+                    Object.keys(obj).forEach(function (data) {
+                        localStorage.setItem('wpp_sync_userNotes_' + data, '{"note":"' + obj[data] + '"}');
+                    });
+                    alert('WP+: Legacy user notes data migration completed. The stored value containing the old data is redundant and will now be removed however please be aware this breaks compatibility with previous versions.');
+                    WhirlpoolPlus.util.set('userNotes', null);
+                };
+                //Prior to April 2021 the Whirlpool Last Read feature stored data differently, this function migrates any legacy data to the new storage method
+                let pattern = /^wpp_sync_(?=.*[a-z])(?=.*[0-9])[a-z0-9]*$/gm;
+                for (var i = 0; i <localStorage.length; i++) {
+                    if (pattern.exec(localStorage.key(i))) {
+                        let key = localStorage.key(i);
+                        let newkey = key.split('wpp_sync_').join('');
+                        localStorage.setItem('wpp_sync_wlr_' + newkey, localStorage[key]);
+                        localStorage.removeItem(key);
+                    }
+                };
+                alert('WP+: Legacy Whirlpool Last Read data migration completed. The stored values containing the old data are redundant and will now be removed however please be aware this breaks compatibility with previous versions.');
+                if (WhirlpoolPlus.util.get('data_db_version') == '') {
+                    WhirlpoolPlus.util.set('data_db_version', '2021.6')
+                                };
+            }, false);
+
+        $('#wppSettings .menuTab').on("click", function () {
+            var theTab = $(this);
+
+            $('.menuDiv').removeClass('menuDiv_active');
+            $('.menuTab').removeClass('menuTab_active');
+
+            theTab.addClass('menuTab_active');
+            $('#' + theTab.data('menudiv')).addClass('menuDiv_active');
+        });
+
+            // Close modal on overlay or button click
+            $('#wppSettingsOverlay, #wppSettings_cancel').on('click', () => {
+                $('#wppSettings, #wppSettingsOverlay').fadeOut();
+            });
+
+            // Reset settings
+            $('#wppSettings_reset').on("click", function () {
+
+            if (confirm('WP+: Do you really want to delete all settings and data? Be sure to export a backup first if you wish to restore in future.')) {
+                unsafeWindow.localStorage.clear();
+                alert('WP+: Script data cleared');
+                window.location.reload();
+            } else {
+                alert('WP+: No data cleared');
+            }
+
+        });
+        },
+
+        // Populate the modal with relevant localStorage items
+        populateModal() {
+            const content = $('#menuDiv_info');
+            // Ensure dynamically generated content is cleared while keeping static content
+            $('#menuDiv_display .dynamic-content').remove();
+            $('#menuDiv_posts .dynamic-content').remove();
+            $('#menuDiv_config .dynamic-content').remove();
+            $('#menuDiv_users .dynamic-content').remove();
+            // Clear subcategory containers
+            let subcategoryContainers = {};
+            Object.keys(subcategoryContainers).forEach(category => {
+                Object.keys(subcategoryContainers[category]).forEach(subcategory => {
+                    subcategoryContainers[category][subcategory].remove();
+                });
+            });
+            subcategoryContainers = {};
+
+    // Exclude non-setting values and old entries that have been superseded but may still be present in localStorage
+    const excludedKeys = [
+        'wpp_watchedAlert_updateInterval',
+        'wpp_prerelease',
+        'wpp_scriptVersion',
+        'wpp_storageVersion',
+        'wpp_recentActivityOverlay_updateInterval',
+        'wpp_userNotes',
+        'wpp_embed_tweets',
+        'wpp_persisentEditLink',
+        'wpp_whimArchiveSort'
+    ];
+
+            const excludeSyncPattern = /^wpp_sync_[a-zA-Z0-9]+$/;
+            const allowedSyncKeys = [
+    'wpp_sync_scriptId',
+    'wpp_sync_times',
+    'wpp_sync_mostUpToDate',
+    'wpp_sync_lastSync',
+    'wpp_sync_enabled',
+    'wpp_sync_encryptionKey',
+    'wpp_sync_key',
+    'wpp_sync_user',
+    'wpp_sync_server'
+];
+
+    // Reference category containers
+    const categoryContainers = {
+        display: $('#menuDiv_display'),
+        posts: $('#menuDiv_posts'),
+        config: $('#menuDiv_config'),
+        users: $('#menuDiv_users'),
+        info: $('#menuDiv_info'), // Default container for keys with no category
+    };
+
+    const inputElements = [];
+
+     // Collect the localStorage keys and sort them alphabetically
+     const keys = [];
+     for (let i = 0; i < localStorage.length; i++) {
+         const key = localStorage.key(i);
+         if (
+             key.startsWith('wpp') &&
+             !key.includes('wpp_sync_wlr') &&
+             !key.includes('wpp_sync_userNotes') &&
+             !excludedKeys.includes(key) &&
+             (!excludeSyncPattern.test(key) || allowedSyncKeys.includes(key)) // Include allowed keys even if they match the dynamic pattern
+         ) {
+             keys.push(key);
+         }
+     }
+     keys.sort();
+
+     // Process the sorted keys
+     keys.forEach(key => {
+         const value = localStorage.getItem(key);
+         const mapping = settingsMap[key] || { friendlyName: key, description: 'No description available.', relevance: 'all', category: 'info', relevance: 'all', subcategory: null };
+         const itemContainer = $('<p class="dynamic-content"></p');
+         const labelAndInput = $('<span></span>');
+         const label = $(`<label style="margin-left: 5px;">${mapping.friendlyName}</label>`);
+
+         // Utility function to sanitise the value from localStorage
+         function sanitiseValue(value) {
+             // Remove any wrapping quotes (single or double)
+             return value.replace(/""/g, '').replace(/"/g, '').trim();
+         }
+
+        if (mapping.type === 'dropdown') {
+            const select = $(`<select data-key="${key}" data-changed="false"></select>`);
+            const optionsMap = mapping.optionsMap || {};
+
+            mapping.options.forEach(option => {
+                const normalizedOption = option.replace(/"/g, '');
+                const friendlyName = optionsMap[option] || normalizedOption;
+                const isSelected = normalizedOption === sanitiseValue(value); // Sanitise value before comparison
+                const optionElement = $(`<option data-key="${key}" value="${normalizedOption}" ${isSelected ? 'selected' : ''}>${friendlyName}</option>`);
+                select.append(optionElement);
+            });
+
+            labelAndInput.append(select);
+
+            select.on('change', function () {
+                $(this).attr('data-changed', 'true');
+            });
+
+            inputElements.push({ key, element: select, type: 'dropdown' });
+        } else if (sanitiseValue(value) === 'true' || sanitiseValue(value) === 'false') {
+            const isChecked = sanitiseValue(value) === 'true'; // Sanitise value for comparison
+            const checkbox = $(`<input type="checkbox" data-key="${key}" data-changed="false" ${isChecked ? 'checked' : ''} />`);
+            labelAndInput.append(checkbox);
+
+            checkbox.on('change', function () {
+                $(this).attr('data-changed', 'true');
+            });
+
+            inputElements.push({ key, element: checkbox, type: 'checkbox' });
+        } else if (mapping.type === 'color') {
+            const sanitisedValue = sanitiseValue(value) || '#000000'; // Default to black if no value is set
+            const colorInput = $(`<input type="color" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 50px;" maxlength="7" />`);
+            labelAndInput.append(colorInput);
+
+            colorInput.on('input', function () {
+                $(this).attr('data-changed', 'true');
+            });
+
+            inputElements.push({ key, element: colorInput, type: 'color' });
+        } else if (mapping.type === 'password') {
+            const sanitisedValue = sanitiseValue(value); // Sanitise the value for text input
+            const pwField = $(`<input type="password" id="passwordField" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 200px;" /><button type="button" id="showEncKey" onclick="$(\'#passwordField\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button><button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#passwordField\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button>`);
+            labelAndInput.append(pwField);
+
+            pwField.on('input', function () {
+                $(this).attr('data-changed', 'true');
+            });
+
+            inputElements.push({ key, element: pwField, type: 'password' });
+        } else if (mapping.type === 'number') {
+            const sanitisedValue = sanitiseValue(value); // Sanitise the value for input
+            const numField = $(`<input type="number" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 50px;" />`);
+            labelAndInput.append(numField);
+
+            numField.on('input', function () {
+                $(this).attr('data-changed', 'true');
+            });
+
+            inputElements.push({ key, element: numField, type: 'number' });
+        } else if (mapping.type === 'textarea') {
+            const sanitisedValue = sanitiseValue(value); // Sanitise the value for input
+            const textareaField = $(`<br /><textarea data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 100%;" />`);
+            labelAndInput.append(textareaField);
+
+            textareaField.on('input', function () {
+                $(this).attr('data-changed', 'true');
+            });
+
+            inputElements.push({ key, element: textareaField, type: 'textarea' });
+        } else {
+            const sanitisedValue = sanitiseValue(value); // Sanitise the value for text input
+            const textField = $(`<input type="text" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 200px;" />`);
+            labelAndInput.append(textField);
+
+            textField.on('input', function () {
+                $(this).attr('data-changed', 'true');
+            });
+
+            inputElements.push({ key, element: textField, type: 'text' });
         }
 
-        this._html += '<p class="description">Further changelogs can be viewed in the source of previous versions</p></div>' +
-
-            '<div class="menuDiv" id="menuDiv_display">' +
-
-'<div class="subSettings">' +
-                    '<p class="subSettings_heading description">' +
-                        '<b>Themes & Fonts</b>' +
-                    '</p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<select class="wpp_setting" id="display_theme">' +
-                                '<option value="default">Default (by Simon Wright)</option>' +
-                                '<option value="classic">WP Classic (by Phyco)</option>' +
-                                '<option value="steelgrey">WP Steel Grey (by Phyco)</option>' +
-                                '<option value="black">WP Black (by =CHRIS=)</option>' +
-                                '<option value="teal">WP Teal (by =CHRIS=)</option>' +
-                                '<option value="arcdark">WP Arc-Dark (by =CHRIS=)</option>' +
-                                '<option value="electrolize">WP Electrolize (by =CHRIS=)</option>' +
-                                '<option value="dark">WP Dark (by Nukkels)</option>' +
-                                '<option value="userset">User Set</option>' +
-                            '</select>' +
-                            ' <label for="display_theme">Custom Theme<br />To design and submit your own theme, follow the instructions on <a href="https://whirlpool.net.au/wiki/make_wpplus_theme" target="_blank"><b>this page</b></a></label>' +
-                            ' <span class="settingDesc">A collection of styles provided by members of Whirlpool, or the option to set your own theme colours below</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="color" id="display_notify_background" placeholder="Enter HTML Colour Code" maxlength="7">' +
-                            ' <label for="display_notify_background">Notification Bar Colour - All Themes</label>' +
-                            ' <span class="settingDesc">Sets the notification strip background colour</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="color" id="display_usertheme_bgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
-                            ' <label for="display_usertheme_bgcolour">Primary Background Colour - User Set Theme</label>' +
-                            ' <span class="settingDesc">Sets the primary colour for the background</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="color" id="display_usertheme_fgcolour" placeholder="Enter HTML Colour Code" maxlength="7">' +
-                            ' <label for="display_usertheme_fgcolour">Primary Foreground Colour - User Set Theme</label>' +
-                            ' <span class="settingDesc">Sets the primary colour for the foreground</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="color" id="display_usertheme_fgcolour2" placeholder="Enter HTML Colour Code" maxlength="7">' +
-                            ' <label for="display_usertheme_fgcolour2">Secondary Foreground Colour - User Set Theme</label>' +
-                            ' <span class="settingDesc">Sets the secondary colour for the foreground</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="color" id="display_usertheme_fgcolour3" placeholder="Enter HTML Colour Code" maxlength="7">' +
-                            ' <label for="display_usertheme_fgcolour3">Third Foreground Colour - User Set Theme</label>' +
-                            ' <span class="settingDesc">Sets the third colour for the foreground</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_oldfont">' +
-                            ' <label for="display_oldfont">Use old Whirlpool fonts</label>' +
-                            ' <span class="settingDesc">Switches to the pre-2015 re-design font styles (credit to =CHRIS=)</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<span>Custom CSS</span>' +
-                            ' <span class="settingDesc">Add custom styles to Whirlpool</span>' +
-                            '<br /><textarea class="wpp_setting" id="display_customCSS" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
-                        '</p>' +
-
-                    '</div>' +
-
-                '</div>' +
-
-'<div class="subSettings">' +
-                    '<p class="subSettings_heading description">' +
-                        '<b>Display Modifications</b>' +
-                    '</p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_widescreen">' +
-                            '<label for="display_widescreen">Manual Display Width</label>' +
-                            ' <span class="settingDesc">Stretch the website to fit a larger or smaller portion of the screen</span><br>' +
-                            '<input class="wpp_setting" type="number" min="20" max="100" id="display_width_percentage">' +
-                            '<label for="display_width_percentage">Enter Percentage</label>' +
-                            ' <span class="settingDesc">Defaults to 100 for full widescreen view</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_floatSidebar">' +
-                            '<label for="display_floatSidebar">Float the sidebar</label>' +
-                            ' <span class="settingDesc">Keeps the sidebar navigation visible when scrolling</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_floatTopbar">' +
-                            '<label for="display_floatTopbar">Float the topbar</label>' +
-                            ' <span class="settingDesc">Keeps the topbar visible when scrolling</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_floatGoToTop">' +
-                            '<label for="display_floatGoToTop">Floating Go To Top of Page Button</label>' +
-                            ' <span class="settingDesc">Adds a floating button to send your browser to the top of the current page</span>' +
-                        '</p>' +
-
-            '<p>' +
-                    '<input class="wpp_setting" type="checkbox" id="display_hideFooter">' +
-                    '<label for="display_hideFooter">Hide the forum footer</label>' +
-                    ' <span class="settingDesc">Hides the footer navigation on each page</span>' +
-                '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="display_poweredby">' +
-                            '<label for="display_poweredby">Display random "forums powered by" text</label>' +
-                            ' <span class="settingDesc">An original Whirlpool feature resurrected, because why not?</span>' +
-                        '</p>' +
-
-            '<p>' +
-                    '<input class="wpp_setting" type="checkbox" id="display_whimAlert">' +
-                    '<label for="display_whimAlert">Whim Notification</label>' +
-                    ' <span class="settingDesc">Display a banner notification when you receive a new private message (WHIM), in addition to Whirlpool\'s inbuilt notification</span>' +
-'</p> ' +
-
-                                    '<p>' +
-                            '<input class="wpp_setting " type="checkbox" id="recentActivityOverlay">' +
-                            '<label for="recentActivityOverlay">Recent Activity Overlay</label>' +
-                            ' <span class="settingDesc">Shows your recent forum activity in an overlay panel for easy access (make sure you enter your API Key in the Script Configuration)</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<select class="wpp_setting" id="recentActivityOverlay_days">' +
-                                '<option value="1">1 Day</option>' +
-                                '<option value="3">3 Days</option>' +
-                                '<option value="7">7 Days</option>' +
-                                '<option value="14">14 Days</option>' +
-                                '<option value="30">30 Days</option>' +
-                                '<option value="60">60 Days</option>' +
-                                '<option value="120">120 Days</option>' +
-                                '<option value="240">240 Days</option>' +
-                                '<option value="365">365 Days</option>' +
-                            '</select>' +
-                            ' <label for="recentActivityOverlay_days">Recent Activity Duration</label>' +
-                            ' <span class="settingDesc">How much of your recent activity to use for the overlay</span>' +
-                        '</p>' +
-
-                '<p>' +
-                    '<select class="wpp_setting" id="spinnerMenu">' +
-                        '<option value="none">none</option>' +
-                        '<option value="rightClick">Right Click</option>' +
-                        '<option value="spinner">Spinner</option>' +
-                    '</select>' +
-                    ' <label for="spinnerMenu">Dynamic Menu System (select type)</label>' +
-                    ' <span class="settingDesc">Display a dropdown navigation menu for the site</span>' +
-                '</p>' +
-
-                '<p>' +
-                    '<select class="wpp_setting" id="spinnerMenu_settingsLocation">' +
-                        '<option value="none">none</option>' +
-                        '<option value="top">Top</option>' +
-                        '<option value="underuser">Under User</option>' +
-                        '<option value="bottom">Bottom</option>' +
-                    '</select>' +
-                    ' <label for="spinnerMenu_settingsLocation">Location of settings link in dynamic menu</label>' +
-                            ' <span class="settingDesc">Adjusts where this will appear</span>' +
-                '</p>' +
-                        '<p class="description">Custom Links: </p>' +
-                        '<div id="customLinks"></div>' +
-
-                    '</div>' +
-
-                '</div>' +
-
-            '</div>' +
-
-            '<div class="menuDiv" id="menuDiv_users">' +
-
-                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
-
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>User Settings</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="returnafterlogin">' +
-                            '<label for="returnafterlogin">Return to previous page after logging in<br /><b>Must be enabled on both the whirlpool.net.au and forums.whirlpool.net.au domains to work correctly</b></label>' +
-                            '<span class="settingDesc">Redirects you to the last thread viewed before login</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideClosedThreadsOnProfile">' +
-                            '<label for="display_hideClosedThreadsOnProfile">Hide closed threads on user profiles</label>' +
-                            '<span class="settingDesc">Prevents closed threads from appearing on user pages</span>' +
-                        '</p>' +
-
-                            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="stats_postsPerDay">' +
-                    '<label for="stats_postsPerDay">Enable "Posts per day" statistic</label>' +
-                            '<span class="settingDesc">Calculates a statistic on user pages</span>' +
-                '</p>' +
-
-                            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_oldProfile">' +
-                    '<label for="display_oldProfile">Use old User Profile page design</label>' +
-                    '<span class="settingDesc">Shows recent thread activity below user info as per the old site design</span>' +
-                '</p> ' +
-
-                            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickWhim">' +
-                    '<label for="quickWhim">Quick Whim</label>' +
-                    '<span class="settingDesc">Adds a Whim box to User Profile pages</span>' +
-                '</p> ' +
-
-                            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hideWhimActivity">' +
-                    '<label for="hideWhimActivity">Hide Whim Activity on User Profile page</label>' +
-                    '<span class="settingDesc">Hides your recent private messages from the User Profile page</span>' +
-                '</p> ' +
-
-                            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_userPageInfoToggle">' +
-                    '<label for="display_userPageInfoToggle">Toggle to show/hide user info on Profile pages</label>' +
-                    '<span class="settingDesc">Adds a toggle to show/hide the user info panel as required</span>' +
-                '</p> ' +
-
-                            '<p>' +
-                            '<select class="wpp_setting" id="defaultRecentActivityDays">' +
-                                '<option value="1">1 Day</option>' +
-                                '<option value="3">3 Days</option>' +
-                                '<option value="7">7 Days</option>' +
-                                '<option value="14">14 Days</option>' +
-                                '<option value="30">30 Days</option>' +
-                                '<option value="60">60 Days</option>' +
-                                '<option value="120">120 Days</option>' +
-                                '<option value="240">240 Days</option>' +
-                                '<option value="365">365 Days</option>' +
-                            '</select>' +
-                            ' <label for="defaultRecentActivityDays">Default amount of recent activity to display on a user page</label>' +
-                            ' <span class="settingDesc">Adjusts the default variable</span>' +
-                        '</p>' +
-
-                    '</div>' +
-                '</div>' +
-
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Avatars</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p class="tabDescription wpp_hideNotForum">To add an avatar, upload it to <a href="//imgur.com" target="_blank">Imgur</a> or <a href="//postimages.org">postimage</a>, then paste the <b>direct url</b> (ending in .jpg or similar) in the field below.<br /><br />If you see the X image but have previously uploaded an avatar, it may be prevented from working due to WP site changes.<br /><br />Your avatar <b>must</b> be 80x80 pixels or it will not work correctly.' +
-
-                        '<div id="currentAvatars" class="wpp_hideNotForum">' +
-                            '<div>' +
-                                '<div class="avatarLabelIdent">Identicon (Auto Generated)</div>' +
-                                '<div id="currentAvatar_identicon" class="identicon wpp_hideNotForum"></div>' +
-                            '</div>' +
-                            '<div>' +
-                                '<div class="avatarLabelStatic">Static</div>' +
-                                '<div id="currentAvatar_static" class="avatar wpp_hideNotForum"></div>' +
-                                '<div class="avatarRemove"><button type="button" id="currentAvatar_removeStatic">Remove</button></div>' +
-                            '</div>' +
-                            '<div>' +
-                                '<div class="avatarLabelAnimated">Animated</div>' +
-                                '<div id="currentAvatar_animated" class="avatar wpp_hideNotForum"></div>' +
-                                '<div class="avatarRemove"><button type="button" id="currentAvatar_removeAnimated">Remove</button></div>' +
-                            '</div>' +
-                        '</div>' +
-
-                        '<p class="description wpp_hideNotForum" style="text-align: center; border: none;"><input type="url" placeholder="Enter Direct Image URL Here" title="Paste or enter your avatar URL here. HTTPS URL Required" style="width: 250px;" id="currentAvatar_addUrl" /> <button type="button" id="currentAvatar_add">Add</button></p>' +
-
-                        '<p style="border:none; padding:0;">' +
-                    '<select class="wpp_setting" id="avatars_enabled">' +
-                    '<option value="none">Disabled</option>' +
-                    '<option value="all">User Set Avatars & Generated Identicons</option>' +
-                    '<option value="both">User Set Avatars only</option>' +
-                    '<option value="static">User Set Static Avatars only</option>' +
-                    '<option value="animated">User Set Animated Avatars only</option>' +
-                            '</select>' +
-                            ' <label for="avatars_enabled">Toggle Avatar Display Modes</label>' +
-                        '</p>' +
-                        '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting" type="checkbox" id="display_avatarsOnProfile">' +
-                    '<label for="display_avatarsOnProfile">Show Avatars on User Profile pages</label>' +
-                    ' <span class="settingDesc">Shows avatars on User Profiles, and User Notes if enabled</span>' +
-                '</p>' +
-
-                    '</div>' +
-                '</div>' +
-
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Hidden Users</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hiddenUsers_enabled">' +
-                            '<label for="hiddenUsers_enabled">Adds an option to hide posts from users (next to aura)</label>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hiddenUsers_remove">' +
-                            '<label for="hiddenUsers_remove">Remove any indication of ignored users</label>' +
-                        '</p>' +
-
-                        '<p class="description">Currently Hidden Users: </p>' +
-                        '<div id="hiddenUsers"></div>' +
-
-                    '</div>' +
-                '</div>' +
-
-            '</div>' +
-
-            '<div class="menuDiv wpp_hideNotForum" id="menuDiv_posts">' +
-
-                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
-
-
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Thread Settings</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="display_hideTheseForums">' +
-                            ' <label for="display_hideTheseForums">Forums to hide (on main forums page) </label>' +
-                            ' <span class="settingDesc">Enter the ID\'s of the forums you want to hide (eg. "35 92 137")</span>' +
-                        '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="savePosts">' +
-                            ' <label for="savePosts">Save Posts</label>' +
-                            ' <span class="settingDesc">Adds a button next to each post to save a link to refer back to it</span>' +
-                                    '<p class="description"><button id="showSavedPosts">Reveal Currently Saved Posts</button></p>' +
-                        '<div id="savedPosts"></div>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedThreads">' +
-                            '<label for="display_hideDeletedThreads">Hide Deleted Threads in forums</label>' +
-                            ' <span class="settingDesc">Prevents deleted threads from being seen</span>' +
-                        '</p>  ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideMovedThreads">' +
-                            '<label for="display_hideMovedThreads">Hide Moved Threads in forums</label>' +
-                            ' <span class="settingDesc">Prevents moved threads from being seen</span>' +
-                        '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_unanswered">' +
-                            ' <label for="links_unanswered">Link to Unanswered Threads</label>' +
-                            ' <span class="settingDesc">Adds a link to only display unanswered threads after the forum name</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="removeLinkToLastPage">' +
-                            '<label for="removeLinkToLastPage">Make the links on the main forums page go to the start of the thread</label>' +
-                            ' <span class="settingDesc">Links take you to the end by default</span>' +
-                        '</p>' +
-
-                        '<p class="description tabDescription">These settings add links to display only posts from certain users</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_originalPoster">' +
-                            ' <label for="links_originalPoster">OP posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_mod">' +
-                            ' <label for="links_mod">Mod posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_rep">' +
-                            ' <label for="links_rep">Rep posts</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_archive">' +
-                            ' <label for="links_archive">Archive</label>' +
-
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="links_longThread">' +
-                            ' <label for="links_longThread">Single Page Version</label>' +
-                        '</p>' +
-
-                    '</div>' +
-                '</div>' +
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Thread Tracker (WLR)</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<select class="wpp_setting wpp_forumSetting" id="wlr_enabled">' +
-                    '<option value="none">Disabled</option>' +
-                    '<option value="all">Enabled Everywhere</option>' +
-                    '<option value="forums">Enabled on Forums pages only</option>' +
-                    '<option value="watched">Enabled on Forums & Watched Threads pages</option>' +
-                    '<option value="profile">Enabled on Forums & User Profile pages</option>' +
-                            '</select>' +
-                            ' <label for="wlr_enabled">Activate the WLR tracker</label>' +
-                            ' <span class="settingDesc">Tracks threads/posts on Whirlpool by highlighting their unread/read status</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="color" id="wlr_display_unreadThreadColour">' +
-                            ' <label for="wlr_display_unreadThreadColour">Unread Posts Colour</label>' +
-                            ' <span class="settingDesc">Used to highlight threads containing posts you haven\'t read</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="color" id="wlr_display_readThreadColour">' +
-                            ' <label for="wlr_display_readThreadColour">No Unread Posts Colour</label>' +
-                            ' <span class="settingDesc">Used to highlight threads containing no unread posts</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="color" id="wlr_display_unreadPostColour">' +
-                            ' <label for="wlr_display_unreadPostColour">Post Highlight Colour (Posts Pages)</label>' +
-                            ' <span class="settingDesc">Used to highlight posts (right most column) on posts pages</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_onlyEndSquare">' +
-                            ' <label for="wlr_display_onlyEndSquare">Colour end square </label>' +
-                            ' <span class="settingDesc">Just highlight the end square of tracked threads</span>' +
-                        '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_acrosscolumns">' +
-                            ' <label for="wlr_display_acrosscolumns">Colour across Reps/Reads Columns </label>' +
-                            ' <span class="settingDesc">Highlights the reps/reads columns as well</span>' +
-                        '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_noTrackSticky">' +
-                            ' <label for="wlr_noTrackSticky">Don\'t highlight sticky threads</label>' +
-                            ' <span class="settingDesc">If the thread is a sticky, WLR will not highlight it</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_display_flipStyles">' +
-                            ' <label for="wlr_display_flipStyles">Highlight unread posts instead of read posts (Posts Pages)</label>' +
-                            ' <span class="settingDesc">Reverses the default highlighting</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="wlr_tempDisable">' +
-                            ' <label for="wlr_tempDisable">Add a button to temporarily disable the tracker (top right corner)</label>' +
-                            ' <span class="settingDesc">When clicked it will disable the tracker until another thread is loaded</span>' +
-                        '</p>' +
-
-                        '<p class="description"><button id="wlrList">Reveal Currently Tracked Threads</button></p>' +
-                        '<div id="currentWLR"></div>' +
-
-                    '</div>' +
-
-                '</div>' +
-            '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Watched Threads</b></p>' +
-                    '<div class="subSettings_content">' +
-
-            '<p class="wpp_hideNotForum">' +
-                    '<select class="wpp_setting wpp_forumSetting" id="display_superProfile">' +
-                    '<option value="default">Disabled</option>' +
-                    '<option value="all">Enabled</option>' +
-                    '<option value="unread">Enabled (Unread Watched Threads Only)</option>' +
-                    '</select>' +
-                    ' <label for="display_superProfile">Super Profile Page</label>' +
-                    ' <span class="settingDesc">Shows your Watched Threads on your User Profile page</span><br>' +
-
-                '</p> ' +
-
-            '<p class="wpp_hideNotForum">' +
-                            '<select class="wpp_setting wpp_forumSetting" id="watchedthreadsextra">' +
-                                '<option value="default">Disabled</option>' +
-                                '<option value="improved">Enabled</option>' +
-                                '<option value="improvedswap">Enabled with Reversed Button Layout</option>' +
-            '</select>' +
-                            ' <label for="watchedthreadsextra">Improved Watched Threads Page</label>' +
-                            ' <span class="settingDesc">Adds options such as "Open All Threads in Tabs" and other minor tweaks</span><br>' +
-
-                        '</p>  ' +
-
-                                    '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="text" id="promoteWatchedForum">' +
-                            ' <label for="promoteWatchedForum">Forum ID to move to the top of watched threads list</label>' +
-                            ' <span class="settingDesc">Enter the ID of the forum you want to move to the top (eg. "35")</span>' +
-                        '</p> ' +
-
-            '<p>' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedAlert">' +
-                    '<label for="watchedAlert">Watched Thread Alert</label>' +
-                    ' <span class="settingDesc">Display a banner notification when you have unread Watched Threads (API Key required in Script Configuration)</span>'+
-            '</p> ' +
-
-            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedThreadsForumBarHide">' +
-                    '<label for="watchedThreadsForumBarHide">Watched Thread Bar Hide</label>' +
-                    ' <span class="settingDesc">Hide the horizontal alert bar that Whirlpool inserts to indicate which post you have read up to in a thread</span>'+
-            '</p> ' +
-
-            '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="watchedThreadsOldMarkAsRead">' +
-                    '<label for="watchedThreadsOldMarkAsRead">Mark as Read button enhancer</label>' +
-                    ' <span class="settingDesc">Clicking the Mark as Read button at the bottom of a watched thread will complete an action of your choosing. Also permanently shows the Go to Watched Threads button</span><br /><br />'+
-
-                            '<select class="wpp_setting wpp_forumSetting" id="watchedThreadsAlert">' +
-                                '<option value="default">None</option>' +
-                                '<option value="profile">Go to User Profile</option>' +
-                                '<option value="watched">Go to Watched Threads</option>' +
-                                '<option value="forum">Go to All Forums</option>' +
-                            '</select>' +
-
-                            ' <label for="watchedThreadsAlert">Mark as Read Button Actions</label>' +
-                            ' <span class="settingDesc">Choose an action to occur when you click "mark page as read" on the last page of a thread</span><br>' +
-                        '</p> ' +
-
-                    '</div>' +
-                '</div>' +
-
-            '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Posting Tools</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_quickReply">' +
-                            ' <label for="compose_quickReply">Quick Reply</label>' +
-                            ' <span class="settingDesc">Automatically open the inline reply box at the end of every thread</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="quickEdit">' +
-                            ' <label for="quickEdit">Quick Edit</label>' +
-                            ' <span class="settingDesc">Allows inline editing of posts</span>' +
-                        '</p>' +
-
-            '<p class="wpp_hideNotForum">' +
-                    '<select class="wpp_setting wpp_forumSetting" id="compose_enhancedEditorNew">' +
-                    '<option value="default">Enabled (all)</option>' +
-                    '<option value="emojionly">Emoji Selector Only</option>' +
-                    '<option value="whirlonly">Whirlcode Only</option>' +
-                    '<option value="disabled">Disabled</option>' +
-                    '</select>' +
-                    ' <label for="compose_enhancedEditorNew">Enhanced Editor and Emoji</label>' +
-                    ' <span class="settingDesc">Appends the Whirlcode rows and emoji selector to new post, reply and wiki editors</span><br>' +
-
-                '</p> ' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="compose_image_uploader">' +
-                            ' <label for="compose_image_uploader">Enable image uploader integration</label>' +
-                            ' <span class="settingDesc">Adds integration with imgbb.com for uploading images and inserting into posts</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="autoSubscribeToNewThread">' +
-                            ' <label for="autoSubscribeToNewThread">Automatically watch/mark as read when you post</label>' +
-                            ' <span class="settingDesc">When you reply to a thread, it will automatically be added to your watched threads</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="checkbox" id="compose_movePreview">' +
-                            ' <label for="compose_movePreview">Move reply preview above inline reply box</label>' +
-                            ' <span class="settingDesc">Shows the inline reply preview at the end of the thread rather than below the reply field</span>' +
-                        '</p>' +
-
-                    '</div>' +
-                '</div>' +
-
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Display and Formatting Options</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="userNotes_enabled">' +
-                            ' <label for="userNotes_enabled">User Notes</label>' +
-                            ' <span class="settingDesc">Keep notes on each user</span>' +
-                        '</p> ' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="whimLink">' +
-                            ' <label for="whimLink">Whim Links</label>' +
-                            ' <span class="settingDesc">Adds a Whim link next to a users post count on each post</span>' +
-                        '</p> ' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="persistentEditLink">' +
-                            ' <label for="persistentEditLink">Persistent Post Edit Link</label>' +
-                            ' <span class="settingDesc">Persists the edit button next to your own posts, even after WP removes it</span>' +
-                        '</p> ' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_penaltyBox">' +
-                            ' <label for="display_penaltyBox">Highlight when a user is in the penalty box</label>' +
-                            ' <span class="settingDesc">Shows a more noticeable visual indicator on posts made by users currently in the penalty box or banned</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_bannedPosts">' +
-                            ' <label for="display_bannedPosts">Hide any indication of posts from banned users</label>' +
-                            ' <span class="settingDesc">Removes posts from view that were created by users who are currently banned</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_smallfont">' +
-                            ' <label for="display_smallfont">Use smaller font</label>' +
-                            ' <span class="settingDesc">Displays a smaller font for posts, like Whirlpool did in the past</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_opeditlarge">' +
-                            ' <label for="display_opeditlarge">Increase Edited or OP Post Prominence</label>' +
-                            ' <span class="settingDesc">Uses larger font to indicate edited or OP posts</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="numberPosts">' +
-                            ' <label for="numberPosts">Numbered Posts</label>' +
-                            ' <span class="settingDesc">Displays the current post number in a thread on each post</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_emoticons_enabled">' +
-                            ' <label for="display_emoticons_enabled">Display Image Emoticons (Smilies)</label>' +
-                            ' <span class="settingDesc">Converts text smilies on Whirlpool into images</span>' +
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_images">' +
-                            ' <label for="embed_images">Inline Images</label>' +
-                            ' <span class="settingDesc">Displays images inline in threads for WP+ users</span>' +
-
-                        '</p>' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="embed_videos">' +
-                            ' <label for="embed_videos">Inline Videos</label>' +
-                            ' <span class="settingDesc">Displays videos inline in threads for WP+ users</span>' +
-                        '</p>  ' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="hideembedurl">' +
-                            ' <label for="hideembedurl">Hide Embed URL</label>' +
-                            ' <span class="settingDesc">Hides the URLs of embedded content</span>' +
-                        '</p>  ' +
-
-                           '<p class="wpp_hideNotForum">' +
-                    '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_syntaxHighlight">' +
-                    ' <label for="display_syntaxHighlight">Syntax Highlighting for code blocks</label>' +
-                            ' <span class="settingDesc">"Prettifies" data entered in "codeblock" Whirlcode</span>' +
-                '</p> ' +
-
-                        '<p class="wpp_hideNotForum">' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="display_hideDeletedPosts">' +
-                            ' <label for="display_hideDeletedPosts">Hide deleted posts</label>' +
-                            ' <span class="settingDesc">Hide any reference of deleted posts in threads</span>' +
-                        '</p>  ' +
-
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-
-            '<div class="menuDiv" id="menuDiv_config">' +
-                '<div class="wpp_showNotForum wpp_settingsMessage">Only a limited subset of features are available outside the forums.whirlpool.net.au subdomain</div>' +
-                '<div class="subSettings">' +
-                    '<p class="subSettings_heading description"><b>Script Configuration</b></p>' +
-                    '<div>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting" type="text" id="whirlpoolAPIKey">' +
-                            ' <label for="whirlpoolAPIKey">Whirlpool API Key</label>' +
-                            ' <span class="settingDesc">Required for features like the Recent Activity Overlay, Avatars and WLR Synchronisation</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<span>Data to Import</span>' +
-                            ' <span class="settingDesc">Paste a valid JSON string or prior exported data here to import into your browser</span>' +
-                            '<br /><textarea id="importWPPData" style="width: 100%; height: 100px; margin:0 auto;"></textarea>' +
-                            '<br /><button id="wpp_dwn-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Export WP+ Config</button><button id="wpp_upl-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Import WP+ Config</button><button id="wpp_upgradedb-btn" style="margin-left:6px;float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Upgrade Database</button><br /><br />' +
-                        '</p>' +
-
-                    '</div>' +
-
-                '</div>' +
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Synchronisation</b></p>' +
-                    '<div class="subSettings_content">' +
-
-                        '<p class="description">WLR and User Notes data can be synchronised between script installs through the use of a sync server. You can create an account at the default server at <a href="https://s.endorph.net/account/" target="_blank">https://s.endorph.net/account/</a><br /><br /><b>Note: you must have entered your API key in script configuration for this feature to work</b></p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting wpp_forumSetting" type="checkbox" id="sync_enabled">' +
-                            '<label for="sync_enabled">Activate Synchronisation</label>' +
-                        '</p>' +
-
-                        '<p>' +
-                            // No wpp_setting class intentional
-                            '<input class="syncSetting wpp_forumSetting" type="text" id="sync_server"> ' +
-                            '<label for="sync_server">Server Address</label>' +
-                            ' <span class="settingDesc">The address of the server that you are syncing your data with (must be a http<b>s</b> URL or your browser may block it)</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_user"> ' +
-                            '<label for="sync_user">Whirlpool User ID</label>' +
-                            ' <span class="settingDesc">Your User ID Number must be keyed in</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            '<input class="wpp_setting syncSetting wpp_forumSetting" type="text" id="sync_key"> ' +
-                            '<label for="sync_key">Access Key</label>' +
-                            ' <span class="settingDesc">Your access key as provided by the sync server</span>' +
-                        '</p>' +
-
-                        '<p>' +
-                            // No wpp_setting class intentional
-                            '<input class="syncSetting wpp_forumSetting" type="password" id="sync_encryptionKey"> ' +
-                            '<button type="button" id="showEncKey" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button> ' +
-                            '<button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#sync_encryptionKey\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button> ' +
-                            '<label for="sync_encryptionKey">Encryption Password</label>' +
-                            ' <span class="settingDesc">Must be the same for all of your WP+ installs</span>' +
-                        '</p>' +
-
-                    '</div>' +
-
-                '</div>' +
-                '<div class="subSettings wpp_hideNotForum">' +
-                    '<p class="subSettings_heading description"><b>Experimental</b></p>' +
-                    '<div class="subSettings_content">' +
-                        '<p class="description"><b>Use of the below features is at your own risk. They are intended as a development tool only and may be added or removed at any time.</b></p>' +
-                        '<p class="wpp_hideNotForum">' +
-                            '<div id="experimentalsettings"></div>' +
-                        '</p>  ' +
-                    '</div>' +
-
-                '</div>' +
-                '</div>' +
-
-            '<div class="bottomrow"><button id="wppSettings_reset" style="float: left;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Reset WP+ Config</button><button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button><button id="wppSettings_cancel" class="simplemodal-close" style="float:right;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Cancel</button><center>Installed Script Version: ' + WhirlpoolPlus.about.versionText() + ' | Database Version: ' + WhirlpoolPlus.util.get('data_db_version') + '</center></div>' +
-
-            '<br />' +
-
-        '</div>';
-    }
+        itemContainer.append(labelAndInput);
+        labelAndInput.append(label);
+        const description = $(`<span class="settingDesc">${mapping.description}</span>`);
+        itemContainer.append(description);
+
+        // Skip keys that are marked as hidden
+        if (mapping.hidden) return;
+        // Determine category and subcategory
+         const category = mapping.category || 'info';
+         const subcategory = mapping.subcategory;
+
+        let targetContainer;
+        if (subcategory) {
+            targetContainer = $(`#menuDiv_${category} [data-subcategory="${subcategory}"]`);
+        } else {
+            targetContainer = categoryContainers[category];
+        }
+
+        // If the container exists, append the item
+        if (targetContainer && targetContainer.length) {
+            targetContainer.append(itemContainer);
+        } else {
+            console.warn(`No container found for category "${category}" and subcategory "${subcategory}".`);
+        }
+
+         // Add relevance-based class
+         const relevanceClassMap = {
+             all: "wpp_setting",
+             forums: "wpp_forumSetting",
+         };
+         const className = relevanceClassMap[mapping.relevance] || "wpp_setting";
+         itemContainer.addClass(className);
+
+     });
+
+            const saveButton = $('<button id="wppSettings_save" style="float:right;margin-left:6px;line-height: 1.5em;padding: 5px;border: 1px solid #CDCDCD;border-radius: 2px;">Save</button>');
+            if ($('#wppSettings_save').length === 0) { // Check if the Save button already exists
+                $('#wppSettings_cancel').before(saveButton);
+            }
+
+            saveButton.on('click', function () {
+                let changesSummary = '';
+                let syncServerChanged = false;
+                let encryptionKeyChanged = false;
+
+                inputElements.forEach(item => {
+                    const { key, element, type } = item;
+
+                    if (element.attr('data-changed') === 'true' || element.data('changed') === true) {
+                        let newValue;
+
+                        // Handle input types
+                        if (type === 'dropdown') {
+                            newValue = element.val().trim();
+                        } else if (type === 'checkbox') {
+                            newValue = element.is(':checked'); // Boolean value
+                        } else if (type === 'color') {
+                            newValue = element.val();
+                        } else if (type === 'text' || type === 'password' || type === 'number' || type === 'textarea') {
+                            newValue = element.val().trim();
+                        }
+
+                        // Get the current value from localStorage
+                        let currentValue = localStorage.getItem(key);
+                        if (type === 'checkbox') {
+                            currentValue = currentValue === 'true'; // Convert currentValue to a boolean
+                        } else if (currentValue === null) {
+                            currentValue = ''; // Default for unset values
+                        }
+
+                        // Compare the current value with the new value
+                        if (newValue !== currentValue) {
+                            // Set the value in localStorage
+                            if (type === 'checkbox') {
+                                // Store pure boolean values for checkboxes
+                                localStorage.setItem(key, newValue);
+                            } else {
+                                // Store non-boolean values as strings
+                                localStorage.setItem(key, `"${newValue}"`);
+                            }
+
+                            // Fetch the friendlyName for changesSummary
+                            const friendlyName = settingsMap[key]?.friendlyName || key;
+                            changesSummary += `${friendlyName}: ${newValue}\n`;
+
+                            // Check for specific keys and set flags
+                            if (key === 'wpp_sync_server') {
+                                syncServerChanged = true;
+                            } else if (key === 'wpp_sync_encryptionKey') {
+                                encryptionKeyChanged = true;
+                            }
+                        }
+
+                        // Reset the data-changed attribute
+                        element.removeAttr('data-changed');
+                    }
+                });
+
+                // Handle syncServerChanged and encryptionKeyChanged logic
+                if (syncServerChanged) {
+                    localStorage.setItem('wpp_sync_lastSync', '0');
+                }
+
+                if (encryptionKeyChanged) {
+                    if (confirm('You\'ve changed your encryption password. For this to work, make sure that no other password has been used with this account. For more information, see the wiki article.')) {
+                        alert('Encryption key saved successfully.');
+                    } else {
+                        alert('Encryption Password reverted.');
+                        const previousValue = WhirlpoolPlus.util.get('sync_encryptionKey');
+                        const encryptionKeyElement = inputElements.find(item => item.key === 'wpp_sync_encryptionKey')?.element;
+                        encryptionKeyElement.val(previousValue?.replace(/"/g, '') || '');
+                    }
+                }
+
+                // Display the changesSummary or show "No changes" alert
+                if (changesSummary) {
+                    alert(`The following changes were saved:\n\n${changesSummary}`);
+                    $('#wppSettings, #wppSettingsOverlay').fadeOut();
+                    window.location.reload();
+                } else {
+                    alert('No changes were made.');
+                }
+            });
+
+        },
+
+        // Open the modal
+        openModal() {
+            this.populateModal();
+            $('#wppSettings, #wppSettingsOverlay').fadeIn();
+        },
+
+        // Add the button to open the modal
+        addOpenButton() {
+            const openButton = $('<li id="menu_wpp" class="odd"><a href="#"><span>WP+ Settings</span></a></li>');
+            openButton.on('click', () => this.openModal());
+            $('#menu_whim').after(openButton);
+        },
+
+        // Initialise the editor
+        initialize() {
+                this.createModal();
+                this.addOpenButton();
+        },
+    };
+
+    // Initialise the settings menu
+    WPPSettingsMenu.initialize();
+}()
 
 };
 
@@ -2265,7 +2685,7 @@ WhirlpoolPlus.feat = {
                 return false;
             })
 
-            /**Fixes spacing of buttons**/
+            //Fixes spacing of buttons
             $("button[onclick*='selectread']").before("&nbsp;&nbsp;&nbsp;");
             $("button[onclick*='selectold']").before("&nbsp;&nbsp;&nbsp;");
             $("button[onclick*='selectall']").before("&nbsp;&nbsp;&nbsp;");
@@ -2476,7 +2896,7 @@ WhirlpoolPlus.feat = {
         let hideEmbedUrlStyle = '';
 
         const imageRegex = /\.(?:jpe?g|gif|bmp|png|webp|tiff)$/i;
-        const imgurRegex = /(https?:\/\/imgur\.com\/(.+)(?:[#\/].*|$))/i;
+        const imgurRegex = /https?:\/\/imgur\.com\/a\/([a-zA-Z0-9\-]+)-([a-zA-Z0-9]+)/i;
         const imgbbRegex = /(https?:\/\/ibb\.co\/(.+)(?:[#\/].*|$))/i;
         const youtubeRegex = /(?:go\?)?(https(?:%3A|:)\/\/www\.youtube\.com\/watch\?v=([^&]+))/i;
         const youtubeShortLinkRegex = /(?:go\?)?(https(?:%3A|:)%2F%2Fyoutu\.be%2F([^%\/]+))/i;
@@ -2493,19 +2913,18 @@ WhirlpoolPlus.feat = {
                 // Implement Imgur embedding logic
                 var linkSegments = imgurRegex.exec(link);
 
-                    if (linkSegments[2]) {
-                        linkSegments = linkSegments[2].split('/');
+                    if (linkSegments) {
+                        const imageName = linkSegments[1]; // Captures the image name
+                        const uid = linkSegments[2]; // Captures the UID
 
                         //Check for album embeds
-                        if ((linkSegments[0] != 'gallery') && (linkSegments[0] != 'a')) {
-                            linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + imagecontent + '" data-src="https://i.imgur.com/' + linkSegments[linkSegments.length - 1] + '.jpg" alt="WP Plus Embedded Imgur Image" class="wpp_img"></a></span><br />');
+                        if (imageName && uid) {
+                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + uid + '"></blockquote><script async src="//s.imgur.com/min/embed.js"></script></span><br />');
                             if (WhirlpoolPlus.util.get('hideembedurl')) {
                                 linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
                             }
-                        } else if (linkSegments[0] == 'a') {
-                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
-                        } else if (linkSegments[0] == 'gallery') {
-                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + linkSegments[linkSegments.length - 1] + '"></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script></span><br />');
+                        } else if (imageName === 'a' || imageName === 'gallery') {
+                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + uid + '"></blockquote><script async src="//s.imgur.com/min/embed.js"></script></span><br />');
                         }
                     }
                 break;
@@ -2724,7 +3143,7 @@ WhirlpoolPlus.feat.display = {
             styles += themelist[currentTheme];
         }
 
-        //Theme Images - Cannot use utility here due to Greasemonkey & Firefox
+        //Theme Images - Cannot use utility function here due to Greasemonkey & Firefox
         let classiclogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewhead.png';
         let classicnews = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/classicwpnewsimage.gif';
         let teallogo = 'https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/themes/tealwpnewhead.png';
@@ -2862,7 +3281,7 @@ WhirlpoolPlus.feat.display = {
     //Adds an additional alert with the inbuilt notification system for new Private Messages
     whimAlert: function () {
         if (WhirlpoolPlus.util.get('display_whimAlert') && $('#menu_whim.unread').text()) {
-            WhirlpoolPlus.util.notify('You have an unread <a href="//forums.whirlpool.net.au/forum/1">private message</a>', true);
+            WhirlpoolPlus.util.notify('You have unread <a href="//forums.whirlpool.net.au/forum/1">private message(s)</a>', true);
         }
     },
     //Adds Whirlpool Plus logo and script version in the forum footer
@@ -3173,10 +3592,7 @@ WhirlpoolPlus.feat.avatar = {
     //Inserts avatars on user profile pages
     avatariseProfile: function () {
         if (WhirlpoolPlus.util.get('avatars_enabled') != 'none' && WhirlpoolPlus.util.get('display_avatarsOnProfile')) {
-            var userNumber = document.location.href.split('user/')[1];
-            if (userNumber.indexOf('?days')) {
-                userNumber = userNumber.split('?')[0];
-            };
+            var userNumber = document.location.href.split('user/')[1]?.match(/^\d+/)?.[0];
             if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf('/user/?days') > -1) {
                 userNumber = WhirlpoolPlus.util.getUserId();
             };
@@ -3258,7 +3674,8 @@ WhirlpoolPlus.feat.watchedAlert = {
 
     alertDisplay: function () {
         if (WhirlpoolPlus.util.get('watchedAlert_data').length > 0) {
-            WhirlpoolPlus.util.notify('You have unread <a href="//forums.whirlpool.net.au/forum/?action=watched">watched threads</a> (<a class="clear">clear</a>)', false);
+            let watchedThreadsCount = WhirlpoolPlus.util.get('watchedAlert_data').length;
+            WhirlpoolPlus.util.notify('You have ' + watchedThreadsCount + ' unread <a href="//forums.whirlpool.net.au/forum/?action=watched">watched threads</a> (<a class="clear">clear</a>)', false);
             $('.clear').on("click", function (e) {
                 var tb = $('#topbar');
                 $('.wpplus_notify').fadeOut();
@@ -3273,7 +3690,7 @@ WhirlpoolPlus.feat.watchedAlert = {
         getData: function (callback) {
 
         if (WhirlpoolPlus.util.get('whirlpoolAPIKey') == '') {
-            alert('WP+ Unread Watched Threads Alert\n You don\'t seem to have entered your API key in the setting dialog');
+            alert('WP+: Unread Watched Threads Alert\n You don\'t seem to have entered your API key in the setting dialog');
             return;
         }
 
@@ -4308,37 +4725,72 @@ WhirlpoolPlus.feat.editor = {
 
         controls += '<br/>';
 
-        //Generate second row - advanced controls
+        // Generate second row - advanced controls
         for (i in this._advancedWhirlcode) {
             var code = this._advancedWhirlcode[i];
             controls += '<button type="button" data-type="advanced" data-code="' + i + '" class="wpp_whirlcodeButton" title="' + code.name + '">' + code.name + '</button>';
         }
         }
 
-        //Generate third row - emoji picker
-        if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.get('compose_enhancedEditorNew') !='whirlonly') {
-            controls += '<br/>';
-            WhirlpoolPlus.util.css('.quickReply_whirlcodeButton_emoticon img{width:1.8em;height:1.8em;display:inline-block;background-size:contain}');
-            WhirlpoolPlus.util.css('#lean_overlay {position:fixed;z-index:100;top:0px;left:0px;height:100%;width:100%;background:#000;display:none;}');
-            WhirlpoolPlus.util.css('.modal_close {position:absolute;top:12px;right:30px;display:block;width:14px;height:14px;z-index:2;}');
-            WhirlpoolPlus.util.css('#dialog {display:none;background:#FFF;width:20%;padding:30px;}');
+        // Generate third row - emoji picker
+if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.get('compose_enhancedEditorNew') !== 'whirlonly') {
+    controls += '<br/>';
 
-            $(function() {
-            $("#opener").leanModal({ top : 200, overlay : 0.1, closeButton: ".modal_close" });
-                });
-            controls += '<div id="dialog" title="Emoji Selector"><div id="selector_header"><h3>Emoji Selector</h3><p>Select emoji to be added to your post.<br /><i>These will only be displayed as an image for other users with WP Plus installed.</i></p></div>';
-            icons = WhirlpoolPlus.feat.display.emoticons.getIconSet(false);
-            for (icon in icons) {
-                controls += '<button type="button" data-type="emoticon" data-code="' + icon.replace('\\\\', '\\') + '" title="' + icon.replace('\\\\', '\\') + '" class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"><span>' + icons[icon] + '</span></button>';
-            }
-            controls += '<a class="modal_close"><b>Close</b></a></div><button type="button" title="Open Emoji Selector" class="wpp_whirlcodeButton" id="opener" href="#dialog">\uD83D\uDE42</button>';
-        }
+    // Add styles for the emoji picker
+    WhirlpoolPlus.util.css('.quickReply_whirlcodeButton_emoticon img {width: 1.8em; height: 1.8em; display: inline-block; background-size: contain;}');
+    WhirlpoolPlus.util.css('#emojiSelectorModal {background: #FFF; width: 300px; max-width: 90%; padding: 20px; border-radius: 8px; text-align: center;}');
+    WhirlpoolPlus.util.css('#emojiSelectorModal h3 {margin-bottom: 10px;}');
+    WhirlpoolPlus.util.css('.modal_close {margin-top: 10px; display: inline-block; cursor: pointer; color: #007BFF; text-decoration: underline;}');
+
+    // Add the modal structure for the emoji picker
+    controls += `
+        <div id="emojiSelectorModal" class="modal" style="display: none;">
+            <div id="selector_header">
+                <h3>Emoji Selector</h3>
+                <p>Select emoji to be added to your post.<br/><i>These will only be displayed as an image for other users with WP Plus installed.</i></p>
+            </div>
+            <div id="emojiButtons">
+                <!-- Buttons will be populated dynamically -->
+            </div>
+            <a class="modal_close" rel="modal:close"><b>Close</b></a>
+        </div>
+        <button type="button" title="Open Emoji Selector" class="wpp_whirlcodeButton" id="opener">\uD83D\uDE42</button>
+    `;
+
+    // Populate the emoji buttons and bind modal functionality
+    $(function () {
+        // Get the icon set
+        const icons = WhirlpoolPlus.feat.display.emoticons.getIconSet(false);
+
+        // Populate the emoji buttons dynamically
+        const emojiButtons = Object.keys(icons).map(icon => `
+            <button
+                type="button"
+                data-type="emoticon"
+                data-code="${icon.replace('\\\\', '\\')}"
+                title="${icon.replace('\\\\', '\\')}"
+                class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"
+            >
+                <span>${icons[icon]}</span>
+            </button>
+        `).join('');
+
+        $('#emojiButtons').html(emojiButtons);
+
+        // Bind the modal opener
+        $('#opener').on('click', function () {
+            $('#emojiSelectorModal').modal({
+                fadeDuration: 200, // Optional fade-in duration
+            });
+        });
+    });
+}
 
         $(locationID).append(controls);
 
-        //Set up the event callback
-        $('.wpp_whirlcodeButton').mouseup(function () {
-            //Information about the event
+        // Set up the event callback
+        $(document).on('mouseup', '.wpp_whirlcodeButton', function () {
+            // Information about the event
             var theButton = $(this);
             var type = theButton.data('type');
             var code = theButton.data('code');
@@ -4420,7 +4872,7 @@ WhirlpoolPlus.feat.quickEdit = {
     },
 
     css: function () {
-        //Everyone loves CSS hackery, right?
+        // Everyone loves CSS hackery, right?
         return '.wpp-edit, .wpp-c-edit { cursor: pointer; }' +
             '.quickEdit > table > tbody > tr:nth-child(1), .quickEdit #reply > table > tbody > tr:nth-child(2), .quickEdit #reply tbody th, .quickEdit #reply tbody .right { display: none; }' +
             '.quickEdit > table > tbody > tr:nth-child(4) table > tbody > tr:nth-child(1) td { width: 50%; text-align: center; }' +
@@ -4443,34 +4895,34 @@ WhirlpoolPlus.feat.quickEdit = {
         var replyHTML = $('#rr' + replyID + ' .replytext'); //Body of the post
         var original = replyHTML.html().toString(); //Original HTML
 
-        //Activate the CSS hacks
+        // Activate the CSS hacks
         replyHTML.addClass('quickEdit');
 
-        //Load the contents of the edit form into replyHTML
+        // Load the contents of the edit form into replyHTML
         replyHTML.load(editUrl + ' #replyformBlock', function () {
 
-            //Prevent errors from this undefined function
+            // Prevent errors from this undefined function
             $('#fm').removeAttr('onkeypress');
             $('#replyoptions').attr("style", "display:none");
             $('#replyformBlock').attr("style", "display:block");
 
-            //Prevent quick reply post double-up and setup for Whirlcode
+            // Prevent quick reply post double-up and setup for Whirlcode
             $('#body').prop('id', 'quickeditbody');
 
-            //Add Whirlcode Block
+            // Add Whirlcode Block
             WhirlpoolPlus.feat.editor.whirlcodify('#replyformBlock #quickeditbody');
 
-            //Add Cancel Button
+            // Add Cancel Button
             $('#postbutton').after('<input type="button" name="wpp-c-edit" class="wpp-c-edit" value="Cancel" style="width:10em;font-size:14px;">');
 
-            //On cancel
+            // On cancel
             $('.wpp-c-edit').on('click', function (e) {
                 replyHTML.html(original);
                 $('.wpp-c-edit').remove();
                 $('.wpp-edit').show();
             });
 
-            //On save
+            // On save
             $('input').on('click', function (e) {
                 $('input[id=postbutton]').value('Edit My Post');
                 var data = $('#fm').serialize();
@@ -4618,38 +5070,52 @@ WhirlpoolPlus.feat.userNotes = {
         reply.find('.userstats').append(userNotesButton);
 
         userNotesButton.on("click", function () {
-            var notebox = $('<textarea id="userNotes_notes">');
-            var dialog = $('<div class="userNotes_dialog">').append(notebox);
+            // Create the modal content dynamically
+            var modalHTML = `
+            <div id="userNotesModal" class="modal">
+            <h4>User Notes</h4>
+            <textarea id="userNotes_notes" style="width:100%; height:150px;"></textarea>
+            <div style="margin-top: 10px; text-align: right;">
+                <button id="saveUserNotes" class="btn-save">Save</button>
+            </div>
+        </div>
+    `;
 
-            dialog.modal({
-                close: true,
-                closeHTML: '<div class="userNotes_close">Close</div>',
-                containerCss: {
-                    width: '20%',
-                    height: '20%',
-                    'min-height': '240px',
-                    'min-width': '280px',
-                    'text-align': 'center',
-                    'background-color': '#ddd',
-                    'border': '1px solid #000',
-                    'padding': '20px',
-                },
-                onClose: function () {
-                    var notesData = notebox.val();
-                    WhirlpoolPlus.feat.userNotes.setUserNotes(userNumber, notesData);
+    // Append the modal to the body
+    $('body').append(modalHTML);
 
-                    if (notebox.val() == '') {
-                        userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
-                        WhirlpoolPlus.util.sync.remove('userNotes_' + userNumber);
-                    } else {
-                        userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
-                    }
+    // Set the initial value of the textarea
+    $('#userNotes_notes').val(WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']);
 
-                    $.modal.close();
-                }
-            });
-                notebox.val(WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']);
-        });
+    // Open the modal
+    $('#userNotesModal').modal({
+        fadeDuration: 200, // Optional: fade-in effect duration
+        fadeDelay: 0.5,    // Optional: fade delay
+    });
+
+    // Handle Save button click
+    $('#saveUserNotes').on('click', function () {
+        var notesData = $('#userNotes_notes').val();
+
+        // Save the notes data
+        WhirlpoolPlus.feat.userNotes.setUserNotes(userNumber, notesData);
+
+        if (notesData === '') {
+            userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
+            WhirlpoolPlus.util.sync.remove('userNotes_' + userNumber);
+        } else {
+            userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
+        }
+
+        // Close the modal
+        $.modal.close();
+    });
+
+    // Cleanup the modal after it is closed
+    $(document).on('modal:close', '#userNotesModal', function () {
+        $('#userNotesModal').remove();
+    });
+});
 
     },
 
@@ -4658,11 +5124,8 @@ WhirlpoolPlus.feat.userNotes = {
             return;
         }
 
-        var userNumber = document.location.href.split('user/')[1];
-            if (userNumber.indexOf('?days')) {
-                userNumber = userNumber.split('?')[0];
-            };
-            if (window.location.href == 'https://forums.whirlpool.net.au/user/') {
+        var userNumber = document.location.href.split('user/')[1]?.match(/^\d+/)?.[0];
+            if (window.location.href == 'https://forums.whirlpool.net.au/user/' || window.location.href.indexOf('/user/?days') > -1) {
                 userNumber = WhirlpoolPlus.util.getUserId();
             };
         var userNotesClass = 'userNotes_button_noNotes';
@@ -4674,39 +5137,55 @@ WhirlpoolPlus.feat.userNotes = {
         var userNotesButton = $('<span class="userNotes_button ' + userNotesClass + '" data-userNumber="' + userNumber + '"></div>');
         $('#avusername').after(userNotesButton);
 
-        userNotesButton.on("click", function () {
-            var notebox = $('<textarea id="userNotes_notes">');
-            var dialog = $('<div class="userNotes_dialog">').append(notebox);
 
-            dialog.modal({
-                close: true,
-                closeHTML: '<div class="userNotes_close">Close</div>',
-                containerCss: {
-                    width: '20%',
-                    height: '20%',
-                    'min-height': '240px',
-                    'min-width': '280px',
-                    'text-align': 'center',
-                    'background-color': '#ddd',
-                    'border': '1px solid #000',
-                    'padding': '20px',
-                },
-                onClose: function () {
-                    var notesData = notebox.val();
-                    WhirlpoolPlus.feat.userNotes.setUserNotes(userNumber, notesData);
+userNotesButton.on("click", function () {
+    // Create the modal content dynamically
+    var modalHTML = `
+        <div id="userNotesModal" class="modal">
+            <h4>User Notes</h4>
+            <textarea id="userNotes_notes" style="width:100%; height:150px;"></textarea>
+            <div style="margin-top: 10px; text-align: right;">
+                <button id="saveUserNotes" class="btn-save">Save</button>
+            </div>
+        </div>
+    `;
 
-                    if (notebox.val() == '') {
-                        userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
-                        WhirlpoolPlus.util.sync.remove('userNotes_' + userNumber);
-                    } else {
-                        userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
-                    }
+    // Append the modal to the body
+    $('body').append(modalHTML);
 
-                    $.modal.close();
-                }
-            });
-                notebox.val(WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']);
-        });
+    // Set the initial value of the textarea
+    $('#userNotes_notes').val(WhirlpoolPlus.feat.userNotes.getUserNotes(userNumber)['note']);
+
+    // Open the modal
+    $('#userNotesModal').modal({
+        fadeDuration: 200, // Optional: fade-in effect duration
+        fadeDelay: 0.5,    // Optional: fade delay
+    });
+
+    // Handle Save button click
+    $('#saveUserNotes').on('click', function () {
+        var notesData = $('#userNotes_notes').val();
+
+        // Save the notes data
+        WhirlpoolPlus.feat.userNotes.setUserNotes(userNumber, notesData);
+
+        if (notesData === '') {
+            userNotesButton.removeClass('userNotes_button_notes').addClass('userNotes_button_noNotes');
+            WhirlpoolPlus.util.sync.remove('userNotes_' + userNumber);
+        } else {
+            userNotesButton.removeClass('userNotes_button_noNotes').addClass('userNotes_button_notes');
+        }
+
+        // Close the modal
+        $.modal.close();
+    });
+
+    // Cleanup the modal after it is closed
+    $(document).on('modal:close', '#userNotesModal', function () {
+        $('#userNotesModal').remove();
+    });
+});
+
 
     },
 
@@ -4714,18 +5193,16 @@ WhirlpoolPlus.feat.userNotes = {
 
 WhirlpoolPlus.run = async function () {
     //Run Everywhere
-    WhirlpoolPlus.util.bypassCSP();
-    WhirlpoolPlus.feat.returnafterlogin();
-
-    //Set up pageType
-    WhirlpoolPlus.util.initPageType();
+    WhirlpoolPlus.util.bypassCSP(); //sets the cookie to bypass the Whirlpool Content Security Policy
+    WhirlpoolPlus.feat.returnafterlogin(); //runs the return to previous page after login feature if enabled
+    WhirlpoolPlus.util.initPageType(); //initialises the page type value
 
     //Upgrade the script if necessary
-    if (!WhirlpoolPlus.util.exists('storageVersion') || WhirlpoolPlus.about.storageVersion > WhirlpoolPlus.util.get('storageVersion')) {
+    if (!WhirlpoolPlus.util.exists('wpp_storageVersion') || WhirlpoolPlus.about.storageVersion > WhirlpoolPlus.util.get('storageVersion')) {
         WhirlpoolPlus.install.run();
     }
 
-    //Dump CSS as early as possible
+    //Dump CSS as early as possible to style the pages
     WhirlpoolPlus.util.css(
         await WhirlpoolPlus.feat.display.css() +
         WhirlpoolPlus.settings.css() +
@@ -4758,10 +5235,6 @@ WhirlpoolPlus.run = async function () {
 
     /** RUN: Posts Pages **/
     if (WhirlpoolPlus.util.pageType.posts || WhirlpoolPlus.util.pageType.postsOld) {
-        if ($('#alert').length) {
-            var deletedThreadNumber = document.location.href.split('thread/')[1];
-            $('#alert').append('<br/><a href="//google.com/search?q=cache:forums.whirlpool.net.au/archive/' + deletedThreadNumber + '">(Google Cache)</a>');
-        };
         WhirlpoolPlus.feat.display.hidePosts();
         WhirlpoolPlus.feat.display.emoticons.init();
         WhirlpoolPlus.feat.embed();
@@ -4877,12 +5350,7 @@ WhirlpoolPlus.run = async function () {
 
 //Run the script
 try {
-
-    // This needs to be late loaded, otherwise Tampermonkey gets upset
-    loadSimpleModal($);
-
     WhirlpoolPlus.run();
-
 } catch (e) {
     if (typeof console != 'undefined') {
         console.error(e);
