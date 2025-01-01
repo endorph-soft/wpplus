@@ -2080,13 +2080,13 @@ WhirlpoolPlus.settings = {
                 if (confirm('WP+: Would you like to load the suggested WLR highlight & Notification bar colours for your theme?')) {
                     handleThemeChange(newTheme); // Apply changes if confirmed
                 } else {
-                    console.log('User declined to apply theme-specific colours.');
+                    console.log('WP+: User declined to apply theme-specific colours.');
                 }
             });
 
             // Function to handle theme changes
             function handleThemeChange(newTheme) {
-                console.log(`Applying changes for theme: ${newTheme}`);
+                console.log(`WP+: Applying changes for theme: ${newTheme}`);
                 switch (newTheme) {
                     case 'classic':
                         WhirlpoolPlus.util.set('wlr_display_unreadThreadColour', '#79A1FC');
@@ -2225,10 +2225,6 @@ WhirlpoolPlus.settings = {
             $('#' + theTab.data('menudiv')).addClass('menuDiv_active');
         });
 
-            // Close modal on overlay or button click
-            $('#wppSettingsOverlay, #wppSettings_cancel').on('click', () => {
-                $('#wppSettings, #wppSettingsOverlay').fadeOut();
-            });
 
             // Reset settings
             $('#wppSettings_reset').on("click", function () {
@@ -2342,19 +2338,11 @@ WhirlpoolPlus.settings = {
 
             labelAndInput.append(select);
 
-            select.on('change', function () {
-                $(this).attr('data-changed', 'true');
-            });
-
             inputElements.push({ key, element: select, type: 'dropdown' });
         } else if (sanitiseValue(value) === 'true' || sanitiseValue(value) === 'false') {
             const isChecked = sanitiseValue(value) === 'true'; // Sanitise value for comparison
             const checkbox = $(`<input type="checkbox" data-key="${key}" data-changed="false" ${isChecked ? 'checked' : ''} />`);
             labelAndInput.append(checkbox);
-
-            checkbox.on('change', function () {
-                $(this).attr('data-changed', 'true');
-            });
 
             inputElements.push({ key, element: checkbox, type: 'checkbox' });
         } else if (mapping.type === 'color') {
@@ -2362,19 +2350,11 @@ WhirlpoolPlus.settings = {
             const colorInput = $(`<input type="color" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 50px;" maxlength="7" />`);
             labelAndInput.append(colorInput);
 
-            colorInput.on('input', function () {
-                $(this).attr('data-changed', 'true');
-            });
-
             inputElements.push({ key, element: colorInput, type: 'color' });
         } else if (mapping.type === 'password') {
             const sanitisedValue = sanitiseValue(value); // Sanitise the value for text input
             const pwField = $(`<input type="password" id="passwordField" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 200px;" /><button type="button" id="showEncKey" onclick="$(\'#passwordField\').prop(\'type\',\'text\'); $(\'#hideEncKey\').show(); $(\'#showEncKey\').hide();">Show</button><button type="button" id="hideEncKey" style="display:none;" onclick="$(\'#passwordField\').prop(\'type\',\'password\'); $(\'#hideEncKey\').hide(); $(\'#showEncKey\').show();">Hide</button>`);
             labelAndInput.append(pwField);
-
-            pwField.on('input', function () {
-                $(this).attr('data-changed', 'true');
-            });
 
             inputElements.push({ key, element: pwField, type: 'password' });
         } else if (mapping.type === 'number') {
@@ -2382,18 +2362,14 @@ WhirlpoolPlus.settings = {
             const numField = $(`<input type="number" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 50px;" />`);
             labelAndInput.append(numField);
 
-            numField.on('input', function () {
-                $(this).attr('data-changed', 'true');
-            });
-
             inputElements.push({ key, element: numField, type: 'number' });
         } else if (mapping.type === 'textarea') {
-            const sanitisedValue = sanitiseValue(value); // Sanitise the value for input
-            const textareaField = $(`<br /><textarea data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 100%;" />`);
+            const sanitisedValue = sanitiseValue(value) || ''; // Default to empty string if no value is set
+            const textareaField = $(`<br /><textarea data-key="${key}" data-changed="false" style="width: 100%; height: 100px; margin:0 auto;">${sanitisedValue}</textarea>`);
             labelAndInput.append(textareaField);
 
             textareaField.on('input', function () {
-                $(this).attr('data-changed', 'true');
+                textareaField.data('changed', true);
             });
 
             inputElements.push({ key, element: textareaField, type: 'textarea' });
@@ -2402,12 +2378,18 @@ WhirlpoolPlus.settings = {
             const textField = $(`<input type="text" data-key="${key}" data-changed="false" value="${sanitisedValue}" style="width: 200px;" />`);
             labelAndInput.append(textField);
 
-            textField.on('input', function () {
-                $(this).attr('data-changed', 'true');
-            });
-
             inputElements.push({ key, element: textField, type: 'text' });
         }
+
+         //Detect changes and update the data-changed attribute
+         $('input[data-key]').on('input', function () {
+             const key = $(this).data('key');  // Get the key from the data-key attribute
+             const element = $(this); // The input element
+
+             // Set the data-changed property for this specific element based on data-key
+             element.attr('data-changed', 'true');
+             element.data('changed', true); // Update internal data cache
+         });
 
         itemContainer.append(labelAndInput);
         labelAndInput.append(label);
@@ -2431,7 +2413,7 @@ WhirlpoolPlus.settings = {
         if (targetContainer && targetContainer.length) {
             targetContainer.append(itemContainer);
         } else {
-            console.warn(`No container found for category "${category}" and subcategory "${subcategory}".`);
+            console.warn(`WP+: No container found for category "${category}" and subcategory "${subcategory}".`);
         }
 
          // Add relevance-based class
@@ -2450,6 +2432,7 @@ WhirlpoolPlus.settings = {
             }
 
             saveButton.on('click', function () {
+
                 let changesSummary = '';
                 let syncServerChanged = false;
                 let encryptionKeyChanged = false;
@@ -2457,19 +2440,24 @@ WhirlpoolPlus.settings = {
                 inputElements.forEach(item => {
                     const { key, element, type } = item;
 
-                    if (element.attr('data-changed') === 'true' || element.data('changed') === true) {
+                    if (element.data('changed') === true) {
                         let newValue;
 
                         // Handle input types
-                        if (type === 'dropdown') {
-                            newValue = element.val().trim();
-                        } else if (type === 'checkbox') {
+                        if (type === 'checkbox') {
                             newValue = element.is(':checked'); // Boolean value
                         } else if (type === 'color') {
                             newValue = element.val();
-                        } else if (type === 'text' || type === 'password' || type === 'number' || type === 'textarea') {
-                            newValue = element.val().trim();
+
+                        } else {
+                            newValue = element.val()?.trim(); // Default handling for text, password, etc.
+                                // Fallback for textarea fields
+                            const textarea = $(`textarea[data-key="${key}"]`);
+                            newValue = textarea.val();
                         }
+
+                        console.log(`WP+: Key: ${key}, New Value: ${newValue}`);
+
 
                         // Get the current value from localStorage
                         let currentValue = localStorage.getItem(key);
@@ -2477,6 +2465,8 @@ WhirlpoolPlus.settings = {
                             currentValue = currentValue === 'true'; // Convert currentValue to a boolean
                         } else if (currentValue === null) {
                             currentValue = ''; // Default for unset values
+                        } else {
+                            currentValue = JSON.parse(currentValue); // Parse stored JSON strings
                         }
 
                         // Compare the current value with the new value
@@ -2487,12 +2477,12 @@ WhirlpoolPlus.settings = {
                                 localStorage.setItem(key, newValue);
                             } else {
                                 // Store non-boolean values as strings
-                                localStorage.setItem(key, `"${newValue}"`);
+                                localStorage.setItem(key, JSON.stringify(newValue));
                             }
 
                             // Fetch the friendlyName for changesSummary
                             const friendlyName = settingsMap[key]?.friendlyName || key;
-                            changesSummary += `${friendlyName}: ${newValue}\n`;
+                            changesSummary += `${friendlyName}: ${JSON.stringify(newValue)}\n`;
 
                             // Check for specific keys and set flags
                             if (key === 'wpp_sync_server') {
@@ -2533,6 +2523,11 @@ WhirlpoolPlus.settings = {
                 }
             });
 
+            // Close modal on overlay or button click
+            $(document).on('click', '#wppSettingsOverlay, #wppSettings_cancel', function () {
+                $('#wppSettings, #wppSettingsOverlay').fadeOut();
+                console.log('WP+: Before closing modal, data-changed:', $('input[data-key="wpp_display_hideClosedThreadsOnProfile"]').data('changed'));
+            });
         },
 
         // Open the modal
