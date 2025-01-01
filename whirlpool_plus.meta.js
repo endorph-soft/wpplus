@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2024.8.0
+// @version         2025.1.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -26,13 +26,12 @@
 // @connect         ibb.co
 // @connect         self
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery-3.7.1.min.js
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.simplemodal.min.js
+// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.modal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/prettify.js
 // @require         https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/js/tea.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/sha.js
 // @require         https://raw.githubusercontent.com/greasemonkey/gm4-polyfill/master/gm4-polyfill.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/blazy.min.js
-// @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jquery.leanModal.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/jdenticon.min.js
 // @require         https://raw.githubusercontent.com/phyco1991/wpplus/master/resources/js/poweredby.js
 // @resource        loader              https://raw.githubusercontent.com/endorph-soft/wpplus/master/resources/gif/loader.gif
