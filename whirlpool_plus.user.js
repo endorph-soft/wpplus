@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2025.1.0
+// @version         2025.1.1
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -64,16 +64,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2025.1.0',
+    version: '2025.1.1',
 
     //Prerelease version- 0 for a standard release
     prerelease: 0,
 
     //Meaningless value to force the script to upgrade
-    storageVersion: 119,
+    storageVersion: 120,
 
     //Script changelog
     changelog: {
+		'2025.1.1': '<ul><li>Fixed bug where the WP+ settings menu unintentionally displayed in certain scenarios</li><li>Fixed issues with dropdown menus in settings not detecting changes in values</li><li>Fixed certain Imgur links not embedding correctly</li></ul>',
 		'2025.1.0': '<ul><li>Re-wrote settings and settings menu code to improve codebase and reduce redundant overhead</li><li>Removed Google Cache functionality from deleted threads pages as the feature is retired by Google</li><li>Fixes to Avatars and User Notes on profile to handle certain edge cases where the features would not work</li><li>Updated all modal windows to a single framework</li><li>Updated Watched Threads Alert feature to display number of unread threads</li><li>Fixed Imgur embed functionality where images were not loading occasionally</li></ul>',
 		'2024.8.0': '<ul><li><b>Chrome Users</b> - Due to changes in Manifest v3 you may be required to enable developer mode under extensions settings to ensure continued functionality of user scripts like WP Plus. See the Wiki article for more information.</li><li>Updated dialog model to use relative sizing and not fixed values.<br />Refactored media embedding code to improve performance and fix issues with YouTube links not embedding due to changes in handling by Whirlpool<br />Added media embed support for YouTube Shorts</li></ul>',
 		'2024.4.0': '<ul><li><b>Chrome Users</b> - Due to upcoming changes by Google it is recommended to enable developer mode under extensions settings to ensure continued functionality of user scripts like WP Plus. See the Wiki article for more information.</li><li>Upgraded jQuery to latest stable release<br />Fix Whirlcode block not applying on TWAM pages<br />Unify polling of WP API to 1 minute intervals and remove redundant code<br />Added beta support for displaying images from imgbb.com URLs<br />Adjust image upload in posts tool to use imgbb instead of postimg for compatibility reasons<br />Update code comments to reduce future development overhead</li></ul>',
@@ -1776,9 +1777,9 @@ WhirlpoolPlus.settings = {
         // Create the modal structure
         createModal() {
 
-            const overlay = $('<div id="wppSettingsOverlay"></div>');
+            const overlay = $('<div id="wppSettingsOverlay" style="display:none;"></div>');
             const modal = $(`
-                <div id="wppSettings">
+                <div id="wppSettings" style="display:none;">
                     <div id="wppSettingsWrapper">
                     <ul id="tabMenu">
                     <li class="menuTab menuTab_active" data-menudiv="menuDiv_info">Script Info</li>
@@ -2382,7 +2383,7 @@ WhirlpoolPlus.settings = {
         }
 
          //Detect changes and update the data-changed attribute
-         $('input[data-key]').on('input', function () {
+         $('input[data-key], select[data-key]').on('input', function () {
              const key = $(this).data('key');  // Get the key from the data-key attribute
              const element = $(this); // The input element
 
@@ -2446,7 +2447,7 @@ WhirlpoolPlus.settings = {
                         // Handle input types
                         if (type === 'checkbox') {
                             newValue = element.is(':checked'); // Boolean value
-                        } else if (type === 'color') {
+                        } else if (type === 'color' || 'dropdown') {
                             newValue = element.val();
 
                         } else {
@@ -2891,7 +2892,7 @@ WhirlpoolPlus.feat = {
         let hideEmbedUrlStyle = '';
 
         const imageRegex = /\.(?:jpe?g|gif|bmp|png|webp|tiff)$/i;
-        const imgurRegex = /https?:\/\/imgur\.com\/a\/([a-zA-Z0-9\-]+)-([a-zA-Z0-9]+)/i;
+        const imgurRegex = /(https?):\/\/(imgur\.com)\/(?:([a-zA-Z0-9]+)\/)?([a-zA-Z0-9]+)/i;
         const imgbbRegex = /(https?:\/\/ibb\.co\/(.+)(?:[#\/].*|$))/i;
         const youtubeRegex = /(?:go\?)?(https(?:%3A|:)\/\/www\.youtube\.com\/watch\?v=([^&]+))/i;
         const youtubeShortLinkRegex = /(?:go\?)?(https(?:%3A|:)%2F%2Fyoutu\.be%2F([^%\/]+))/i;
@@ -2904,24 +2905,29 @@ WhirlpoolPlus.feat = {
                 linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src ="' + imagecontent + '" data-src="' + link + '" alt="WP Plus Embedded Image" class="wpp_img"></a></span><br />');
                 hideEmbedUrlStyle = 'color:#eee !important;cursor:default;background:none !important;';
                 break;
+
             case imageEnabled && imgurRegex.test(link):
                 // Implement Imgur embedding logic
                 var linkSegments = imgurRegex.exec(link);
 
-                    if (linkSegments) {
-                        const imageName = linkSegments[1]; // Captures the image name
-                        const uid = linkSegments[2]; // Captures the UID
+                if (linkSegments) {
+                    const protocol = linkSegments[1]; // Captures the protocol (http or https)
+                    const domain = linkSegments[2];   // Captures the domain (imgur.com)
+                    const subPath = linkSegments[3];  // Captures the sub-path (e.g., "a" for albums)
+                    const uid = linkSegments[4];      // Captures the unique identifier (e.g., "kzVUl8n" or "mnSArC5")
 
-                        //Check for album embeds
-                        if (imageName && uid) {
-                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + uid + '"></blockquote><script async src="//s.imgur.com/min/embed.js"></script></span><br />');
-                            if (WhirlpoolPlus.util.get('hideembedurl')) {
-                                linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
-                            }
-                        } else if (imageName === 'a' || imageName === 'gallery') {
-                            linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + uid + '"></blockquote><script async src="//s.imgur.com/min/embed.js"></script></span><br />');
-                        }
+                    if (subPath === 'a' || subPath === 'gallery') {
+                        // Handle albums or galleries
+                        linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + uid + '"></blockquote><script async src="//s.imgur.com/min/embed.js"></script></span><br />');
+                    } else {
+                        // Handle direct links (non-album Imgur links)
+                        linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="https://i.imgur.com/' + uid + '.jpg" alt="Imgur Image" class="wpp_img"></a></span><br />');
                     }
+
+                    if (WhirlpoolPlus.util.get('hideembedurl')) {
+                        linkObject.attr("style", "color:#eee !important;cursor:default;background:none !important;");
+                    }
+                }
                 break;
             case imageEnabled && imgbbRegex.test(link):
                 // Implement imgBB embedding logic
