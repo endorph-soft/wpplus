@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2025.2.0
+// @version         2026.2.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -71,16 +71,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2025.2.0',
+    version: '2026.2.0',
 
     // Defines a rerelease version (0 for a standard release)
     prerelease: 0,
 
     // Increasing value to force the script to upgrade
-    storageVersion: 121,
+    storageVersion: 122,
 
     // Script Changelog
     changelog: {
+        '2026.2.0': '<ul><li>Re-factored avatar code to be more efficient</li><li>Fixed issues with Imgur album and gallery embeds</li><li>Various code tidying</li></ul>',
 		'2025.2.0': '<ul><li>Fixed bug where the WP+ settings menu would not open from the spinner or right click menus</li><li>Added basic support for Flickr to image embed functionality</li><li>Added feature to hide selected threads from the Recent Activity section</li><li>Added feature to hide watched threads where the latest reply is not from the OP</li><li>Added new emoji options</li><li>Updated code comments</li><li>Updated theme code image loading</li></ul>',
 		'2025.1.1': '<ul><li>Fixed bug where the WP+ settings menu unintentionally displayed in certain scenarios</li><li>Fixed issues with dropdown menus in settings not detecting changes in values</li><li>Fixed certain Imgur links not embedding correctly</li></ul>',
 		'2025.1.0': '<ul><li>Re-wrote settings and settings menu code to improve codebase and reduce redundant overhead</li><li>Removed Google Cache functionality from deleted threads pages as the feature is retired by Google</li><li>Fixes to Avatars and User Notes on profile to handle certain edge cases where the features would not work</li><li>Updated all modal windows to a single framework</li><li>Updated Watched Threads Alert feature to display number of unread threads</li><li>Fixed Imgur embed functionality where images were not loading occasionally</li></ul>',
@@ -1118,7 +1119,7 @@ WhirlpoolPlus.install = {
         '<p>Version ' + WhirlpoolPlus.about.versionText() + '</p>';
 
     if (WhirlpoolPlus.about.prerelease > 0) {
-        dialogHtml += '<div><strong>This is a prerelease version. Please report any bugs to <a href="//forums.whirlpool.net.au/user/105852">Phyco</a>.</strong></div>';
+        dialogHtml += '<div><strong>This is a prerelease version. Please report any bugs to <a href="https://forums.whirlpool.net.au/user/105852">Phyco</a>.</strong></div>';
     }
 
     // Check for new installs
@@ -1636,134 +1637,143 @@ WhirlpoolPlus.settings = {
         const minimalMode = !WhirlpoolPlus.util.pageType.forums;
         if (!minimalMode) {
 
-            function refreshAvatars() {
-                // Load the avatars & check them for bad links
-                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'static', function (data, textStatus, r) {
-                    var url = r.responseText;
-                    var imgurhosted = url.indexOf('imgur') >=0;
-                    var postimg = url.indexOf('postimg.cc') >=0;
+            (function () {
+                const ALLOWED_HOSTS = ['imgur.com', 'postimg.cc', 'imgbb.com', 'ibb.co'];
 
-                    if (url != '') {
-                        $('#currentAvatar_static').css('background-image', 'url("' + url + '")');
-                        $('#currentAvatar_removeStatic').prop('disabled', null);
-                        $('#currentAvatar_static').after('<span>Link: ' + url + '</span>');
+                function isSupportedHost(urlStr) {
+                    try {
+                        const u = new URL(urlStr);
+                        return ALLOWED_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h));
+                    } catch {
+                        return false;
+                    }
+                }
+
+                function isDirectImage(urlStr) {
+                    try {
+                        const u = new URL(urlStr);
+                        return /\.(png|jpe?g|gif)$/i.test(u.pathname);
+                    } catch {
+                        return false;
+                    }
+                }
+
+                function setAvatarUI(kind, url) {
+                    const $box = kind === 'static' ? $('#currentAvatar_static') : $('#currentAvatar_animated');
+                    const $btn = kind === 'static' ? $('#currentAvatar_removeStatic') : $('#currentAvatar_removeAnimated');
+
+                    if (url) {
+                        $box.css('background-image', 'url("' + url + '")');
+                        $btn.prop('disabled', null);
+
+            // Replace any existing link span (avoid duplicates)
+                        $box.next('.avatar-link.' + kind).remove();
+                        $box.after('<span class="avatar-link ' + kind + '">Link: ' + url + '</span>');
+
+                        if (!isSupportedHost(url)) {
+                            alert(`Your ${kind} avatar was set up on a non-working or unsupported host, please consider updating it`);
+                        }
                     } else {
-                        $('#currentAvatar_static').css('background-image', '');
-                        $('#currentAvatar_removeStatic').prop('disabled', 'disabled');
+                        $box.css('background-image', '');
+                        $btn.prop('disabled', 'disabled');
+                        $box.next('.avatar-link.' + kind).remove();
                     }
-                    if (url != '') {
-                    if (imgurhosted == false && postimg == false){
-                        alert("Your static avatar was setup on a non-working or unsupported host, please consider updating it");
+                }
+
+                function refreshSingle(kind) {
+                    WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), kind, function (data, textStatus, r) {
+                        const url = r.responseText || '';
+                        setAvatarUI(kind, url);
+                    });
+                }
+
+                function refreshAvatars() {
+                    // Load the avatars & check them for bad links
+                    refreshSingle('static');
+                    refreshSingle('animated');
+                }
+
+                // Identicon
+                var userNumber = WhirlpoolPlus.util.getUserId();
+                var shaObj = new jsSHA("SHA-512", "TEXT");
+                shaObj.update("'" + userNumber + "'");
+                var hash = shaObj.getHash("HEX");
+                $('#currentAvatar_identicon').html('<canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas>');
+                jdenticon();
+
+                refreshAvatars();
+
+                // Avatar controls
+                $('#currentAvatar_removeStatic').on("click", function () {
+                    $(this).prop('disabled', 'disabled');
+
+                    var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
+                    if (apiKey === '') {
+                        apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
                     }
-                    };
+
+                    if (apiKey != null) {
+                        WhirlpoolPlus.util.notify('Removing Avatar', true);
+                        WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'static', function (data, statusText, r) {
+                            if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
+                                alert('WP+: ' + r.responseText);
+                            } else {
+                                alert('WP+: Avatar Update Failed: ' + r.responseText);
+                            }
+                            refreshAvatars(); // Will re-enable button
+                        });
+                    } else {
+                        $(this).prop('disabled', null);
+                        alert('WP+: Avatar not removed');
+                    }
                 });
 
-                WhirlpoolPlus.feat.avatar.getUserAvatar(WhirlpoolPlus.util.getUserId(), 'animated', function (data, textStatus, r) {
-                    var url = r.responseText;
-                    var imgurhosted = url.indexOf('imgur') >=0;
-                    var postimg = url.indexOf('postimg.cc') >=0;
+                $('#currentAvatar_removeAnimated').on("click", function () {
+                    $(this).prop('disabled', 'disabled');
 
-                    if (url != '') {
-                        $('#currentAvatar_animated').css('background-image', 'url("' + url + '")');
-                        $('#currentAvatar_removeAnimated').prop('disabled', null);
-                        $('#currentAvatar_animated').after('<span>Link: ' + url + '</span>');
+                    var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
+                    if (apiKey === '') {
+                        apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
+                    }
+
+                    if (apiKey != null) {
+                        WhirlpoolPlus.util.notify('Removing Avatar', true);
+                        WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'animated', function (data, statusText, r) {
+                            if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
+                                alert('WP+: ' + r.responseText);
+                            } else {
+                                alert('WP+: Avatar Update Failed: ' + r.responseText);
+                            }
+                            refreshAvatars(); // Will re-enable button
+                        });
                     } else {
-                        $('#currentAvatar_animated').css('background-image', '');
-                        $('#currentAvatar_removeAnimated').prop('disabled', 'disabled');
+                        $(this).prop('disabled', null);
+                        alert('WP+: Avatar not removed');
                     }
-                    if (url != '') {
-                    if (imgurhosted == false && postimg == false){
-                        alert("Your animated avatar was setup on a non-working or unsupported host, please consider updating it");
-                    }
-                    };
                 });
-            }
 
-            var userNumber = WhirlpoolPlus.util.getUserId();
-            var shaObj = new jsSHA("SHA-512", "TEXT");
-            shaObj.update("'" + userNumber + "'");
-            var hash = shaObj.getHash("HEX");
-            $('#currentAvatar_identicon').html('<canvas width="80" height="80" data-jdenticon-hash="' + hash + '" /></canvas>');
-            jdenticon();
+                $('#currentAvatar_add').on("click", function () {
+                    $(this).prop('disabled', 'disabled');
 
-            refreshAvatars();
-
-            // Avatar controls
-            $('#currentAvatar_removeStatic').on("click", function () {
-                $(this).prop('disabled', 'disabled');
-
-                var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
-
-                if (apiKey == '') {
-                    apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
-                }
-
-                if (apiKey != null) {
-                    WhirlpoolPlus.util.notify('Removing Avatar', true);
-                    WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'static', function (data, statusText, r) {
-                        if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
-                            alert('WP+: ' + r.responseText);
-                        } else {
-                            alert('WP+: Avatar Update Failed: ' + r.responseText)
-                        }
-
-                        // Will re-enable button
-                        refreshAvatars();
-                    });
-                } else {
-                    $(this).prop('disabled', null);
-                    alert('WP+: Avatar not removed');
-                }
-            });
-
-            $('#currentAvatar_removeAnimated').on("click", function () {
-                $(this).prop('disabled', 'disabled');
-
-                var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
-
-                if (apiKey == '') {
-                    apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
-                }
-
-                if (apiKey != null) {
-                    WhirlpoolPlus.util.notify('Removing Avatar', true);
-                    WhirlpoolPlus.feat.avatar.removeAvatar(apiKey, 'animated', function (data, statusText, r) {
-                        if (r.status == 200 && (r.responseText == 'Avatar Removed')) {
-                            alert('WP+: ' + r.responseText);
-                        } else {
-                            alert('WP+: Avatar Update Failed: ' + r.responseText)
-                        }
-
-                        // Will re-enable button
-                        refreshAvatars();
-                    });
-                } else {
-                    $(this).prop('disabled', null);
-                    alert('WP+: Avatar not removed');
-                }
-            });
-
-            $('#currentAvatar_add').on("click", function () {
-                $(this).prop('disabled', 'disabled');
-
-                var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
-
-                if (apiKey == '') {
-                    apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
-                }
-
-                if (apiKey != null) {
-                    url = $('#currentAvatar_addUrl').val();
-
-                    if (url == '') {
-                        alert('WP+: Enter a valid url to add');
+                    var apiKey = WhirlpoolPlus.util.get('whirlpoolAPIKey');
+                    if (apiKey === '') {
+                        apiKey = prompt('As you haven\'t saved your API key in the settings dialog, you\'ll need to provide one to update your avatar. It will not be stored.');
                     }
 
-                    else if (!url.match(/(?:https:\/\/)?(\w+\.)(imgur\.com\/)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/) && !url.match(/(?:https:\/\/)?(\w+\.)(postimg\.cc\/)+[\w\-\._~:\/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpe?g|gif)$/)) {
-                        alert('WP+: Enter a valid https direct image URL to add');
-                    }
+                    if (apiKey != null) {
+                        const url = $('#currentAvatar_addUrl').val();
 
-                    else {
+                        if (!url) {
+                            alert('WP+: Enter a valid url to add');
+                            $(this).prop('disabled', null);
+                            return;
+                        }
+
+                        if (!isSupportedHost(url) || !isDirectImage(url)) {
+                            alert('WP+: Enter a valid HTTPS direct image URL (jpg, jpeg, png, gif) hosted on imgur/postimg/imgbb');
+                            $(this).prop('disabled', null);
+                            return;
+                        }
 
                         WhirlpoolPlus.util.notify('Adding Avatar', true);
 
@@ -1771,22 +1781,20 @@ WhirlpoolPlus.settings = {
                             if (r.status == 200 && (r.responseText == 'Avatar created/updated')) {
                                 alert('WP+: ' + r.responseText);
                             } else {
-                                alert('WP+: Avatar Update Failed: ' + r.responseText)
+                                alert('WP+: Avatar Update Failed: ' + r.responseText);
                             }
 
                             $('#currentAvatar_addUrl').val('');
                             refreshAvatars();
-
                             $('#currentAvatar_add').prop('disabled', null);
                         });
 
+                    } else {
+                        $(this).prop('disabled', null);
+                        alert('WP+: Avatar not updated');
                     }
-                } else {
-                    $(this).prop('disabled', null);
-                    alert('WP+: Avatar not updated');
-                }
-            });
-
+                });
+            })();
 
             $('.unhideUser').on("click", function () {
                 var theButton = $(this);
@@ -2874,8 +2882,10 @@ WhirlpoolPlus.feat = {
                 // Set initial button text based on thread visibility
                 if (hiddenThreads.includes(strippedId)) {
                     hideButton.textContent = "WP+: Unhide"; // Thread is hidden, so show 'Unhide'
+                    hideButton.title = "Show This Thread";
                 } else {
                     hideButton.textContent = "WP+: Hide"; // Thread is visible, show 'Hide'
+                    hideButton.title = "Hide This Thread";
                 }
 
                 // Append the button to the first column of the row
@@ -3131,7 +3141,7 @@ WhirlpoolPlus.feat = {
         let hideEmbedUrlStyle = '';
 
         const imageRegex = /\.(?:jpe?g|gif|bmp|png|webp|tiff)$/i; // Matches general direct image links
-        const imgurRegex = /(https?):\/\/(imgur\.com)\/(?:([a-zA-Z0-9]+)\/)?([a-zA-Z0-9]+)/i; // Matches Imgur links
+        const imgurRegex = /(https?):\/\/(imgur\.com)\/(?:([a-zA-Z0-9_-]+)\/)?([a-zA-Z0-9_-]+)/i; // Matches Imgur links
         const imgbbRegex = /(https?:\/\/ibb\.co\/(.+)(?:[#\/].*|$))/i; // Matches imgBB links
         const youtubeRegex = /(?:go\?)?(https(?:%3A|:)\/\/www\.youtube\.com\/watch\?v=([^&]+))/i; // Matches YouTube links
         const youtubeShortLinkRegex = /(?:go\?)?(https(?:%3A|:)%2F%2Fyoutu\.be%2F([^%\/]+))/i; // Matches YouTube shortened links
@@ -3179,11 +3189,27 @@ WhirlpoolPlus.feat = {
                     const uid = linkSegments[4];      // Captures the unique identifier
 
                     if (subPath === 'a' || subPath === 'gallery') {
-                        // Handle albums or galleries
-                        linkObject.before('<br /><span class="wcrep1"><blockquote class="imgur-embed-pub" lang="en" data-id="a/' + uid + '"></blockquote><script async src="//s.imgur.com/min/embed.js"></script></span><br />');
+                        // Imgur albums sometimes have slugged IDs like "some-text-guid"
+                        const cleanId = uid.split('-').pop();              // "guid"
+                        const dataId  = subPath + '/' + cleanId;           // "a/guid" or "gallery/guid"
+                        const href    = 'https://imgur.com/' + dataId;
+                        // Insert the embed markup
+                        linkObject.before(
+                            '<br /><span class="wcrep1">' +
+                            '<blockquote class="imgur-embed-pub" lang="en" data-id="' + dataId + '">' +
+                            '<a href="' + href + '">' + (linkObject.text() || 'Imgur') + '</a>' +
+                            '</blockquote>' +
+                            '</span><br />'
+                        );
+                        // Mark that we added at least one Imgur embed this run
+                        window.__wpplus_imgur_embeds_added = true;
                     } else {
                         // Handle direct links (non-album Imgur links)
-                        linkObject.before('<br /><span class="wcrep1"><a href="' + link + '" target="_blank"><img src="https://i.imgur.com/' + uid + '.jpg" alt="Imgur Image" class="wpp_img"></a></span><br />');
+                        linkObject.before(
+                            '<br /><span class="wcrep1"><a href="' + link + '" target="_blank" rel="noopener noreferrer">' +
+                            '<img src="https://i.imgur.com/' + uid + '.jpg" alt="Imgur Image" class="wpp_img">' +
+                            '</a></span><br />'
+                        );
                     }
 
                     if (WhirlpoolPlus.util.get('hideembedurl')) {
@@ -3298,6 +3324,34 @@ WhirlpoolPlus.feat = {
         const link = linkObject.prop('href');
         embedLink(linkObject, link);
     });
+        // ---- Imgur finaliser (runs once after all links are processed) ----
+        (function wpplusFinaliseImgurEmbeds() {
+            if (!window.__wpplus_imgur_embeds_added) return;
+            const w = (typeof unsafeWindow !== 'undefined') ? unsafeWindow : window;
+            function callCreateIframe() {
+                try {
+                    if (w.imgurEmbed && typeof w.imgurEmbed.createIframe === 'function') {
+                        w.imgurEmbed.createIframe();
+                    }
+                } catch (e) { /* ignore */ }
+            }
+            function loadEmbedJsOnceAndRun() {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(callCreateIframe, i * 150);
+                }
+            }
+            if (!w.__wpplus_imgur_embed_loaded) {
+                w.__wpplus_imgur_embed_loaded = true;
+                const s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://s.imgur.com/min/embed.js';
+                s.charset = 'utf-8';
+                s.onload = loadEmbedJsOnceAndRun;
+                document.head.appendChild(s);
+            } else {
+                loadEmbedJsOnceAndRun();
+            }
+        })();
 
     const bLazy = new Blazy({ selector: '.wpp_img' });
 },
@@ -5053,7 +5107,7 @@ if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.ge
 
     // Add the modal structure for the emoji picker
     controls += `
-        <div id="emojiSelectorModal" class="modal" style="display: none;">
+        <div id="emojiSelectorModal" class="modal" style="display: none;background: #e6e6e6;width: 30%;">
             <div id="selector_header">
                 <h3>Emoji Selector</h3>
                 <p>Select emoji to be added to your post.<br/><i>These will only be displayed as an image for other users with WP Plus installed.</i></p>
@@ -5061,7 +5115,7 @@ if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.ge
             <div id="emojiButtons">
                 <!-- Buttons will be populated dynamically -->
             </div>
-            <a class="modal_close" rel="modal:close"><b>Close</b></a>
+            <a class="modal_close" style="color: #000;" rel="modal:close"><b>Close</b></a>
         </div>
         <button type="button" title="Open Emoji Selector" class="wpp_whirlcodeButton" id="opener">\uD83D\uDE42</button>
     `;
@@ -5078,6 +5132,7 @@ if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.ge
                 data-type="emoticon"
                 data-code="${icon.replace('\\\\', '\\')}"
                 title="${icon.replace('\\\\', '\\')}"
+                style="transform: scale(1); transition: transform 0.2s ease;"
                 class="wpp_whirlcodeButton quickReply_whirlcodeButton_emoticon"
             >
                 <span>${icons[icon]}</span>
@@ -5085,6 +5140,12 @@ if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.ge
         `).join('');
 
         $('#emojiButtons').html(emojiButtons);
+            // Add hover effect inline
+        $('#emojiButtons button').on('mouseenter', function () {
+        this.style.transform = 'scale(1.5)';
+        }).on('mouseleave', function () {
+        this.style.transform = 'scale(1)';
+        });
 
         // Bind the modal opener
         $('#opener').on('click', function () {
