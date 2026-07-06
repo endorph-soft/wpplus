@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2026.2.0
+// @version         2026.7.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -71,16 +71,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2026.2.0',
+    version: '2026.7.0',
 
     // Defines a rerelease version (0 for a standard release)
     prerelease: 0,
 
     // Increasing value to force the script to upgrade
-    storageVersion: 122,
+    storageVersion: 123,
 
     // Script Changelog
     changelog: {
+        '2026.7.0': '<ul><li>Fix error in links to last read posts - thanks to those in the feedback thread for the details to narrow this down</li><li>Attempted fix for scrollback caused by embedded images and videos loading</li></ul>',
         '2026.2.0': '<ul><li>Re-factored avatar code to be more efficient</li><li>Fixed issues with Imgur album and gallery embeds</li><li>Various code tidying</li></ul>',
 		'2025.2.0': '<ul><li>Fixed bug where the WP+ settings menu would not open from the spinner or right click menus</li><li>Added basic support for Flickr to image embed functionality</li><li>Added feature to hide selected threads from the Recent Activity section</li><li>Added feature to hide watched threads where the latest reply is not from the OP</li><li>Added new emoji options</li><li>Updated code comments</li><li>Updated theme code image loading</li></ul>',
 		'2025.1.1': '<ul><li>Fixed bug where the WP+ settings menu unintentionally displayed in certain scenarios</li><li>Fixed issues with dropdown menus in settings not detecting changes in values</li><li>Fixed certain Imgur links not embedding correctly</li></ul>',
@@ -3120,6 +3121,80 @@ WhirlpoolPlus.feat = {
 
         $('.grid').before(voteHtml);
     },
+
+    // Keeps direct reply links stable while WP+ embeds images/videos after page load
+    createReplyPositionRestorer: function () {
+        const params = new URLSearchParams(window.location.search);
+        let replyId = params.get('r');
+
+        // Fallback for links that only contain #r123456
+        if (!replyId) {
+            const hashMatch = window.location.hash.match(/^#r(\d+)$/);
+            replyId = hashMatch ? hashMatch[1] : null;
+        }
+
+        if (!replyId) return null;
+
+        let userHasInteracted = false;
+
+        const markUserInteracted = function () {
+            userHasInteracted = true;
+        };
+
+        [
+            'wheel',
+            'touchstart',
+            'keydown',
+            'mousedown',
+            'pointerdown'
+        ].forEach(function (eventName) {
+            window.addEventListener(eventName, markUserInteracted, {
+                once: true,
+                passive: true
+            });
+        });
+
+        const findReplyElement = function () {
+            return (
+                document.getElementById('r' + replyId) ||
+                document.querySelector('a[name="r' + replyId + '"]') ||
+                document.querySelector('[name="r' + replyId + '"]')
+            );
+        };
+
+        const restore = function () {
+            if (userHasInteracted) return;
+
+            const replyElement = findReplyElement();
+            if (!replyElement) return;
+
+            replyElement.scrollIntoView({
+                block: 'start',
+                inline: 'nearest',
+                behavior: 'auto'
+            });
+        };
+
+        const run = function () {
+            // Timed corrections for delayed image/video layout shifts
+            [0, 250, 750, 1500, 2500].forEach(function (delay) {
+                setTimeout(restore, delay);
+            });
+
+            // Also correct when known WP+ images finish loading
+            document.querySelectorAll('.wpp_img, .wcrep1 img, .wcrep1 iframe').forEach(function (el) {
+                if (el.tagName === 'IMG' && el.complete) return;
+
+                el.addEventListener('load', restore, { once: true });
+                el.addEventListener('error', restore, { once: true });
+            });
+        };
+
+        return {
+            run: run
+        };
+    },
+
     // Media Embed Codeblock V2
     embed: async function () {
     const imageEnabled = WhirlpoolPlus.util.get('embed_images');
@@ -4166,8 +4241,9 @@ WhirlpoolPlus.feat.recentActivityOverlay = {
                         unread = true;
                     }
 
+                    // new or legacy method
                     if (threadData['o']) {
-                        link = '/thread/' + threads[i].ID + '?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
+                        link ='/forum/?action=replies' + '&r=' + threadData['o'];
                     } else {
                         link = '/thread/' + threads[i].ID + '&p=' + threadData['p'] + '#r' + threadData['t'];
                     }
@@ -4800,15 +4876,15 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
                     // build the link
                     var link;
 
-                    // do we have the new reply method?
+                    // new or legacy reply method
                     if (threadData['o']) {
-                        link = '/thread/' + threadNumber + '?r=' + threadData['o'] + '#r' + threadData['o']; //used by Simon's jumpToReplyId method, so preferred
+                         link ='/forum/?action=replies' + '&r=' + threadData['o'];
                     } else {
-                        // use the old page number method
+                        // WLR data is old - use the legacy page number method
                         link = '/thread/' + threadNumber + '&p=' + threadData['p'] + '#r' + threadData['t'];
                     }
 
-                    // change the go to end link
+                    // change the 'go to end' link
                     var threadURL = thread.find('.goend > a').prop('href', link);
                     threadURL.attr('title', threadURL.attr('title') + ' WLR Enabled - Jumps to last marker');
 
@@ -5607,7 +5683,11 @@ WhirlpoolPlus.run = async function () {
     if (WhirlpoolPlus.util.pageType.posts || WhirlpoolPlus.util.pageType.postsOld) {
         WhirlpoolPlus.feat.display.hidePosts();
         WhirlpoolPlus.feat.display.emoticons.init();
-        WhirlpoolPlus.feat.embed();
+        const replyPositionRestorer = WhirlpoolPlus.feat.createReplyPositionRestorer();
+        await WhirlpoolPlus.feat.embed();
+        if (replyPositionRestorer) {
+            replyPositionRestorer.run();
+        }
         WhirlpoolPlus.feat.display.syntaxHighlight();
         WhirlpoolPlus.feat.quickEdit.run();
         WhirlpoolPlus.feat.whirlpoolLastRead.runPosts();
