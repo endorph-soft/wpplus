@@ -71,16 +71,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2026.7.0',
+    version: '2026.7.1',
 
     // Defines a rerelease version (0 for a standard release)
     prerelease: 0,
 
     // Increasing value to force the script to upgrade
-    storageVersion: 123,
+    storageVersion: 124,
 
     // Script Changelog
     changelog: {
+        '2026.7.1': '<ul><li>Fix for broken WLR functionality experienced by some users due to Chromium deprecation of support for the JavaScript unload event</li></ul>',
         '2026.7.0': '<ul><li>Fix error in links to last read posts - thanks to those in the feedback thread for the details to narrow this down</li><li>Attempted fix for scrollback caused by embedded images and videos loading</li></ul>',
         '2026.2.0': '<ul><li>Re-factored avatar code to be more efficient</li><li>Fixed issues with Imgur album and gallery embeds</li><li>Various code tidying</li></ul>',
 		'2025.2.0': '<ul><li>Fixed bug where the WP+ settings menu would not open from the spinner or right click menus</li><li>Added basic support for Flickr to image embed functionality</li><li>Added feature to hide selected threads from the Recent Activity section</li><li>Added feature to hide watched threads where the latest reply is not from the OP</li><li>Added new emoji options</li><li>Updated code comments</li><li>Updated theme code image loading</li></ul>',
@@ -4810,7 +4811,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
 
 
 
-        $(window).on('unload', function () {
+        $(window).on('pagehide', function () {
 
             if (WhirlpoolPlus.feat.whirlpoolLastRead.trackThisThread == false) {
                 return;
@@ -4821,7 +4822,7 @@ WhirlpoolPlus.feat.whirlpoolLastRead = {
             var lastReadReply;
 
             replies.each(function () {
-                reply = $(this);
+                var reply = $(this);
 
                 var positionOfBottom = reply.offset().top + reply.height();
                 if (positionOfBottom < lowestViewHeight) {
