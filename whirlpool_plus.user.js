@@ -3,7 +3,7 @@
 // @namespace       WhirlpoolPlus
 // @description     Adds a suite of extra optional features to the Whirlpool forums.
 // @author          WP User 105852
-// @version         2026.7.0
+// @version         2026.8.0
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=whirlpool.net.au
 // @updateURL       https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/endorph-soft/wpplus/master/whirlpool_plus.user.js
@@ -71,16 +71,17 @@ var WhirlpoolPlus = {};
 
 WhirlpoolPlus.about = {
     // Script Version
-    version: '2026.7.1',
+    version: '2026.8.0',
 
     // Defines a rerelease version (0 for a standard release)
     prerelease: 0,
 
     // Increasing value to force the script to upgrade
-    storageVersion: 124,
+    storageVersion: 125,
 
     // Script Changelog
     changelog: {
+        '2026.8.0': '<ul><li>Fix for Whirlcode emoji selector modal placement and duplication of close button</li></ul>',
         '2026.7.1': '<ul><li>Fix for broken WLR functionality experienced by some users due to Chromium deprecation of support for the JavaScript unload event</li></ul>',
         '2026.7.0': '<ul><li>Fix error in links to last read posts - thanks to those in the feedback thread for the details to narrow this down</li><li>Attempted fix for scrollback caused by embedded images and videos loading</li></ul>',
         '2026.2.0': '<ul><li>Re-factored avatar code to be more efficient</li><li>Fixed issues with Imgur album and gallery embeds</li><li>Various code tidying</li></ul>',
@@ -1132,7 +1133,7 @@ WhirlpoolPlus.install = {
     dialogHtml += '<br /><div style="text-align:left"><strong>New in this version: </strong>' + WhirlpoolPlus.about.changelog[WhirlpoolPlus.about.version] + '</div>';
     dialogHtml += '<br /><div>For an extended changelog, see WP+ Settings &gt; Info</div>';
     dialogHtml += '<br /><div>If you experience issues with this version of WP+ please check the Whirlpool Plus Script thread under Feedback</div>';
-    dialogHtml += '<br /><br /><button type="button" class="close-modal" rel="modal:close">Close</button>';
+    dialogHtml += '<br /><br /><button type="button" class="close-upgrademodal" rel="modal:close">Close</button>';
     dialogHtml += '</div>'; // Close the modal container
 
     // Append the dialog to the body
@@ -1145,7 +1146,7 @@ WhirlpoolPlus.install = {
     });
 
     // Close the modal container
-    $(document).on('click', '.close-modal', function () {
+    $(document).on('click', '.close-upgrademodal', function () {
         $.modal.close();
     });
 },
@@ -5180,19 +5181,20 @@ if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.ge
     WhirlpoolPlus.util.css('.quickReply_whirlcodeButton_emoticon img {width: 1.8em; height: 1.8em; display: inline-block; background-size: contain;}');
     WhirlpoolPlus.util.css('#emojiSelectorModal {background: #FFF; width: 300px; max-width: 90%; padding: 20px; border-radius: 8px; text-align: center;}');
     WhirlpoolPlus.util.css('#emojiSelectorModal h3 {margin-bottom: 10px;}');
-    WhirlpoolPlus.util.css('.modal_close {margin-top: 10px; display: inline-block; cursor: pointer; color: #007BFF; text-decoration: underline;}');
+    WhirlpoolPlus.util.css('.overlay-emojimodal {position:relative;display:flex;justify-content:center;bottom:1000px;}'); // Need to fix this at some point to not use a page bottom offset
+    WhirlpoolPlus.util.css('.close-emojimodal {margin-top: 10px; display: inline-block; cursor: pointer; color: #007BFF; text-decoration: underline;}');
 
     // Add the modal structure for the emoji picker
     controls += `
         <div id="emojiSelectorModal" class="modal" style="display: none;background: #e6e6e6;width: 30%;">
             <div id="selector_header">
                 <h3>Emoji Selector</h3>
-                <p>Select emoji to be added to your post.<br/><i>These will only be displayed as an image for other users with WP Plus installed.</i></p>
+                <p>Select emoji to be added to your post.<br/><i>These will only be displayed as an image for other users running Whirlpool Plus.</i></p>
             </div>
             <div id="emojiButtons">
                 <!-- Buttons will be populated dynamically -->
             </div>
-            <a class="modal_close" style="color: #000;" rel="modal:close"><b>Close</b></a>
+            <a class="close-emojimodal" style="color: #000;" rel="modal:close"><b>Close</b></a>
         </div>
         <button type="button" title="Open Emoji Selector" class="wpp_whirlcodeButton" id="opener">\uD83D\uDE42</button>
     `;
@@ -5228,6 +5230,8 @@ if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.ge
         $('#opener').on('click', function () {
             $('#emojiSelectorModal').modal({
                 fadeDuration: 200, // Optional fade-in duration
+                showClose: false,
+                blockerClass: "overlay-emojimodal",
             });
         });
     });
