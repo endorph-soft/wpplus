@@ -5181,7 +5181,7 @@ if (WhirlpoolPlus.util.get('display_emoticons_enabled') && WhirlpoolPlus.util.ge
     WhirlpoolPlus.util.css('.quickReply_whirlcodeButton_emoticon img {width: 1.8em; height: 1.8em; display: inline-block; background-size: contain;}');
     WhirlpoolPlus.util.css('#emojiSelectorModal {background: #FFF; width: 300px; max-width: 90%; padding: 20px; border-radius: 8px; text-align: center;}');
     WhirlpoolPlus.util.css('#emojiSelectorModal h3 {margin-bottom: 10px;}');
-    WhirlpoolPlus.util.css('.overlay-emojimodal {position:relative;display:flex;justify-content:center;bottom:1000px;}'); // Need to fix this at some point to not use a page bottom offset
+    WhirlpoolPlus.util.css('.overlay-emojimodal {position:relative;display:flex;justify-content:center;bottom:1000px;z-index:999999}'); // Need to fix this at some point to not use a page bottom offset
     WhirlpoolPlus.util.css('.close-emojimodal {margin-top: 10px; display: inline-block; cursor: pointer; color: #007BFF; text-decoration: underline;}');
 
     // Add the modal structure for the emoji picker
