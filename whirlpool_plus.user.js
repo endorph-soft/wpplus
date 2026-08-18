@@ -81,7 +81,7 @@ WhirlpoolPlus.about = {
 
     // Script Changelog
     changelog: {
-        '2026.8.0': '<ul><li>Fix for Whirlcode emoji selector modal placement and duplication of close button</li></ul>',
+        '2026.8.0': '<ul><li>Basic fix for Whirlcode emoji selector modal placement and duplication of close button</li><li>Fixes for custom themes after changes to WP default theme</li></ul>',
         '2026.7.1': '<ul><li>Fix for broken WLR functionality experienced by some users due to Chromium deprecation of support for the JavaScript unload event</li></ul>',
         '2026.7.0': '<ul><li>Fix error in links to last read posts - thanks to those in the feedback thread for the details to narrow this down</li><li>Attempted fix for scrollback caused by embedded images and videos loading</li></ul>',
         '2026.2.0': '<ul><li>Re-factored avatar code to be more efficient</li><li>Fixed issues with Imgur album and gallery embeds</li><li>Various code tidying</li></ul>',

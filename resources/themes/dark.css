@@ -1,5 +1,16 @@
 /*This this WP-Dark, a Whirlpool+ Theme for the Whirlpool Plus script. Please whim https://forums.whirlpool.net.au/user/124700 for feedback.*/
 
+:root {
+  --page-gradient: none !important;
+  --page-flat-gradient: none !important;
+  --inner-gradient: none !important;
+  --inner-flat-gradient: none !important;
+}
+
+#innerpage {
+	padding: 20px !important;
+}
+
 /***************************front forum page************************/
 
 /*topbar background colour*/
