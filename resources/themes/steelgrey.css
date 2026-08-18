@@ -8,12 +8,20 @@ Author: Phyco (User #105852)
 
 /**Body & Sitewide CSS Modifications**/
 
+:root {
+  --page-gradient: none !important;
+  --page-flat-gradient: none !important;
+  --inner-gradient: none !important;
+  --inner-flat-gradient: none !important;
+}
+
 body {
 	background-color: rgb(63, 67, 94);
 }
 
 #page {
 	background: none repeat scroll 0% 0% rgb(63, 67, 94);
+	border-radius: 0px;
 }
 
 #logo h1 {
@@ -187,6 +195,7 @@ body {
 
 #innerpage {
 	background-color: #8C92AC !important;
+	padding: 20px !important;
 }
 
 #watch_button.bactive {

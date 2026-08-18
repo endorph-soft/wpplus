@@ -1,3 +1,14 @@
+:root {
+  --page-gradient: none !important;
+  --page-flat-gradient: none !important;
+  --inner-gradient: none !important;
+  --inner-flat-gradient: none !important;
+}
+
+#innerpage {
+	padding: 20px !important;
+}
+
 /*menu+spinner*/
 #pmenu > li > ul > li > a {
     background: #4f4f4f!important;

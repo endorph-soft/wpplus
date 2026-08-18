@@ -9,6 +9,13 @@ Credits: Whirlpoolian, User #38161, User #44690, Foonly
 
 /**Body & Sitewide CSS Modifications**/
 
+:root {
+  --page-gradient: none !important;
+  --page-flat-gradient: none !important;
+  --inner-gradient: none !important;
+  --inner-flat-gradient: none !important;
+}
+
 body {
 	background-color: rgb(63, 67, 94);
 }
@@ -188,6 +195,7 @@ body {
 
 #innerpage {
 	background: none repeat scroll 0% 0% rgb(130, 141, 187) !important;
+	padding: 20px !important;
 }
 
 #watch_button.bactive {

@@ -1,5 +1,16 @@
 /*This this Arc-Dark, a Whirlpool+ Theme for the Whirlpool Plus script. Please whim https://forums.whirlpool.net.au/user/226511 for feedback.*/
 
+:root {
+  --page-gradient: none !important;
+  --page-flat-gradient: none !important;
+  --inner-gradient: none !important;
+  --inner-flat-gradient: none !important;
+}
+
+#innerpage {
+	padding: 20px !important;
+}
+
 /***************************front page******************************/
 
 /*topbar text colour*/
